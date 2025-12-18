@@ -1,0 +1,21 @@
+{
+  inputs,
+  ...
+}:
+{
+  imports = [
+    inputs.zen-browser.homeModules.twilight
+  ];
+
+  programs.zen-browser = {
+    enable = true;
+
+    policies = {
+      DisableAppUpdate = true;
+      DisableTelemetry = true;
+      DisablePocket = true;
+      DontCheckDefaultBrowser = true;
+      OfferToSaveLogins = false;
+    };
+  };
+}

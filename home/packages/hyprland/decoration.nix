@@ -1,0 +1,5 @@
+{
+  decoration = {
+    rounding = 2;
+  };
+}

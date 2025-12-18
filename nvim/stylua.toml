@@ -1,0 +1,14 @@
+# Use spaces instead of tabs.
+indent_type = "Spaces"
+
+# Number of spaces for indentation.
+indent_width = 2
+
+# Column width for line wrapping.
+column_width = 120
+
+# Quote style for strings.
+quote_style = "AutoPreferDouble"
+
+# Whether to collapse simple statements onto a single line.
+collapse_simple_statement = "Never"
