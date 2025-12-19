@@ -8,11 +8,13 @@
     ./packages.nix
 
     # Packages installed configuration will be placed here.
+    ./packages/btop.nix
     ./packages/git.nix
     ./packages/hyprland/default.nix
     ./packages/kitty/default.nix
     ./packages/nvim.nix
     ./packages/tmux.nix
+    ./packages/waybar/default.nix
     ./packages/yazi.nix
     ./packages/zen-browser.nix
     ./packages/zsh/default.nix

@@ -23,6 +23,10 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    awww = {
+      url = "git+https://codeberg.org/LGFae/awww.git";
+    };
   };
 
   outputs =
@@ -39,7 +43,7 @@
         system = "x86_64-linux";
 
         specialArgs = {
-          inherit nixpkgs;
+          inherit inputs;
         };
 
         modules = [
@@ -61,7 +65,7 @@
             };
 
             # Enables the nix-ld program, which allows running dynamically linked binaries that are
-            # not built with Nix by providing a compatible dynamic linker and libraries. This was 
+            # not built with Nix by providing a compatible dynamic linker and libraries. This was
             # used for Visual Studio Code to open correctly while on SSH.
             programs.nix-ld.enable = true;
           }

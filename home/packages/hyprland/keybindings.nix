@@ -33,6 +33,9 @@
     "$mod SHIFT, 3, movetoworkspace, 3"
     "$mod SHIFT, 4, movetoworkspace, 4"
     "$mod SHIFT, 5, movetoworkspace, 5"
+
+    # awww wallpaper switch
+    "$mod SHIFT, W, exec, bash $HOME/.config/hypr/scripts/awww-wallpaper-switch.sh"
   ];
 
   bindm = [

@@ -11,6 +11,8 @@ _: {
       cursor_shape = "beam";
       window_margin_width = "4";
       confirm_os_window_close = 0;
+      background_opacity = "0.90";
+      dynamic_background_opacity = true;
     };
   }
   // import ./keybindings.nix;

@@ -1,14 +1,15 @@
 # This file manages all of the user's packages.
 {
   pkgs,
+  inputs,
   ...
 }:
 {
   # Install all of the user packages in here.
   home.packages = with pkgs; [
+    inputs.awww.packages.${pkgs.system}.default
     bat
     bluetui
-    btop
     bun
     cargo
     clang-tools
@@ -25,6 +26,7 @@
     gnumake
     google-chrome
     jq
+    killall
     kitty
     lazygit
     neovim
@@ -40,6 +42,7 @@
     rofi
     statix
     tree
+    unzip
     uv
     valgrind
     wget
