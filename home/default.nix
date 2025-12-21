@@ -12,6 +12,7 @@
     ./packages/git.nix
     ./packages/hyprland/default.nix
     ./packages/kitty/default.nix
+    ./packages/matugen/default.nix
     ./packages/nvim.nix
     ./packages/tmux.nix
     ./packages/waybar/default.nix

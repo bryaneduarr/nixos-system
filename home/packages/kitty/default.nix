@@ -13,6 +13,8 @@ _: {
       confirm_os_window_close = 0;
       background_opacity = "0.90";
       dynamic_background_opacity = true;
+      allow_remote_control = "socket-only";
+      listen_on = "unix:/tmp/kitty";
     };
   }
   // import ./keybindings.nix;

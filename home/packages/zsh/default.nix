@@ -7,6 +7,7 @@
     ./environment.nix
     ./functions.nix
     ./fzf.nix
+    ./matugen.nix
   ];
 
   programs.zsh.enable = true;
@@ -14,5 +15,4 @@
   home.packages = [ pkgs.zsh-powerlevel10k ];
 
   home.file.".p10k.zsh".source = ./../../.p10k.zsh;
-
 }

@@ -29,6 +29,7 @@
     killall
     kitty
     lazygit
+    matugen
     neovim
     nil
     nixfmt-rfc-style

@@ -21,3 +21,10 @@ awww img "$WALLPAPER" \
     --transition-type "$RANDOM_TRANSITION" \
     --transition-fps 280 \
     --transition-step 90
+
+matugen image "$WALLPAPER"
+
+# Reload colors in all open kitty instances
+for socket in /tmp/kitty-*; do
+    [ -S "$socket" ] && kitty @ --to "unix:$socket" set-colors -a -c ~/.config/kitty/matugen.conf 2>/dev/null
+done
