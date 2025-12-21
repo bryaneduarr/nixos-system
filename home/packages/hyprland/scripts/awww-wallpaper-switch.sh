@@ -13,18 +13,19 @@ fi
 WALLPAPER=$(find "$WALLPAPER_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" \) | shuf -n 1)
 
 # Random transition effects.
-TRANSITIONS=("simple" "fade" "wipe" "grow" "center" "any" "outer" "wave")
+TRANSITIONS=("grow" "center" "any" "outer" "wave")
 RANDOM_TRANSITION=${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}
 
 # Set wallpaper with random transition.
 awww img "$WALLPAPER" \
     --transition-type "$RANDOM_TRANSITION" \
     --transition-fps 280 \
-    --transition-step 90
+    --transition-step 255 \
+    --transition-duration 1
 
 matugen image "$WALLPAPER"
 
-# Reload colors in all open kitty instances
+# Reload colors in all open kitty instances.
 for socket in /tmp/kitty-*; do
     [ -S "$socket" ] && kitty @ --to "unix:$socket" set-colors -a -c ~/.config/kitty/matugen.conf 2>/dev/null
 done
