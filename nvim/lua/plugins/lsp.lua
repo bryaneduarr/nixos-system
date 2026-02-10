@@ -38,7 +38,7 @@ return {
         update_in_insert = false, -- Don't update diagnostics in insert mode.
         severity_sort = true, -- Sort diagnostics by severity.
         float = {
-          border = "rounded",
+          border = "single",
         },
       })
 

@@ -1,6 +1,4 @@
 -- Inspiration from: https://github.com/MariaSolOs/dotfiles/blob/main/.config/nvim/lua/winbar.lua
-local folder_icon = require("config.icons").symbol_kinds.Folder
-
 local M = {}
 
 --- Window bar that shows the current file path (in a fancy way).
@@ -41,7 +39,7 @@ function M.render()
     end
     if prefix ~= "" then
       path = path:gsub("^" .. prefix_path, "")
-      prefix = string.format("%%#WinBarDir#%s %s%s", folder_icon, prefix, separator)
+      prefix = string.format("%%#WinBarDir#%s%s", prefix, separator)
     end
   end
 

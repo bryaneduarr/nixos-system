@@ -9,17 +9,11 @@ return {
       global_resume = true,
       global_resume_query = true,
       winopts = {
-        height = 0.85,
-        width = 0.80,
-        row = 0.35,
-        col = 0.55,
-        border = "rounded",
+        border = "single",
         preview = {
-          border = "border",
+          border = "single",
           wrap = "nowrap",
           hidden = "nohidden",
-          vertical = "down:45%",
-          horizontal = "right:60%",
         },
       },
       keymap = {

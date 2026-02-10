@@ -69,3 +69,37 @@ vim.api.nvim_create_autocmd("CursorMoved", {
     end
   end,
 })
+
+-- Treesitter
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function(args)
+    local buf = args.buf
+    local ft = args.match
+
+    -- Skip special plugins buffers early.
+    if vim.bo[buf].buftype ~= "" then
+      return
+    end
+
+    -- Only continue if a treesitter language exists.
+    local lang = vim.treesitter.language.get_lang(ft)
+    if not lang then
+      return
+    end
+
+    -- Start treesitter safely.
+    pcall(vim.treesitter.start, buf)
+
+    -- Indentation buffer-local.
+    vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+    -- Folding window-local, must validate window.
+    local win = vim.fn.bufwinid(buf)
+    if win ~= -1 and vim.api.nvim_win_is_valid(win) then
+      vim.api.nvim_win_call(win, function()
+        vim.wo.foldmethod = "expr"
+        vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+      end)
+    end
+  end,
+})

@@ -20,7 +20,7 @@ vim.opt.shiftwidth = 2
 vim.opt.shiftround = true
 
 -- Show whitespace characters
--- vim.opt.list = true
+vim.opt.list = true
 
 -- Characters used when making spaces or tabs
 -- vim.opt.listchars = { space = "⋅", trail = "⋅", tab = "  ↦" }
@@ -56,13 +56,18 @@ vim.opt.termguicolors = true
 vim.opt.spell = true
 
 -- Set spell checking languages to Spanish and English, Neovim will use dictionaries for both languages to check spelling.
-vim.opt.spelllang = { "en" }
+vim.opt.spelllang = { "en_us", "es" }
+
+vim.opt.spellfile = {
+  vim.fn.stdpath("config") .. "/spell/en.utf-8.add",
+  vim.fn.stdpath("config") .. "/spell/es.utf-8.add",
+}
 
 -- Options for completion menu
 vim.opt.completeopt = { "menuone", "popup", "noinsert" }
 
 -- Use rounded borders for windows
-vim.opt.winborder = "rounded"
+vim.opt.winborder = "single"
 
 -- Enable filetype detection, plugins, and indentation
 vim.cmd.filetype("plugin indent on")

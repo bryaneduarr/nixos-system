@@ -8,9 +8,6 @@ local spinner_index = 1
 -- Timer for spinner animation.
 local spinner_timer = nil
 
--- Get icons from config.
-local icons = require("config.icons")
-
 -- Get mini.icons for file type icons.
 local mini_icons = require("mini.icons")
 
@@ -197,22 +194,22 @@ _G.diagnostics_component = function()
 
   -- Add errors
   if counts.ERROR > 0 then
-    table.insert(parts, string.format("%%#StatuslineDiagnosticError#%s %d%%*", icons.diagnostics.ERROR, counts.ERROR))
+    table.insert(parts, string.format("%%#StatuslineDiagnosticError#E:%d%%*", counts.ERROR))
   end
 
   -- Add warnings
   if counts.WARN > 0 then
-    table.insert(parts, string.format("%%#StatuslineDiagnosticWarn#%s %d%%*", icons.diagnostics.WARN, counts.WARN))
+    table.insert(parts, string.format("%%#StatuslineDiagnosticWarn#W:%d%%*", counts.WARN))
   end
 
   -- Add info
   if counts.INFO > 0 then
-    table.insert(parts, string.format("%%#StatuslineDiagnosticInfo#%s %d%%*", icons.diagnostics.INFO, counts.INFO))
+    table.insert(parts, string.format("%%#StatuslineDiagnosticInfo#I:%d%%*", counts.INFO))
   end
 
   -- Add hints
   if counts.HINT > 0 then
-    table.insert(parts, string.format("%%#StatuslineDiagnosticHint#%s %d%%*", icons.diagnostics.HINT, counts.HINT))
+    table.insert(parts, string.format("%%#StatuslineDiagnosticHint#H:%d%%*", counts.HINT))
   end
 
   last_diagnostic_component = table.concat(parts, " ")
