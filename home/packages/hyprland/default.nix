@@ -3,7 +3,7 @@ _: {
     enable = true;
 
     settings = {
-      monitor = "DP-3,1920x1080@280,0x0,1";
+      monitor = "DP-3,1920x1080@280,0x0,1.25";
 
       # Autostart programs
       exec-once = [
@@ -11,8 +11,8 @@ _: {
         "awww-daemon"
       ];
 
-      windowrulev2 = [
-        "opacity 0.85 override 0.95 override,class:^(kitty)$"
+      windowrule = [
+        "opacity 0.85 override 0.95 override, match:class ^(kitty)$"
       ];
     }
     // import ./animations.nix
