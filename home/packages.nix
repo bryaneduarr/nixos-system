@@ -7,7 +7,8 @@
 {
   # Install all of the user packages in here.
   home.packages = with pkgs; [
-    inputs.awww.packages.${pkgs.system}.default
+    inputs.awww.packages.${pkgs.stdenv.hostPlatform.system}.default
+    awscli2
     bat
     bluetui
     bun
@@ -41,13 +42,16 @@
     redis
     ripgrep
     rofi
+    ssm-session-manager-plugin
     statix
     tree
+    tree-sitter
     unzip
     uv
     valgrind
+    vscode
     wget
-    xclip
+    wl-clipboard
     yazi
     tmux
   ];

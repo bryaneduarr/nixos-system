@@ -17,8 +17,6 @@
     ./system-services/ly.nix
   ];
 
-  nixpkgs.config.allowUnfree = true;
-
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
@@ -43,6 +41,8 @@
       nerd-fonts.jetbrains-mono
     ];
   };
+
+  time.hardwareClockInLocalTime = true;
 
   system.stateVersion = "25.05";
 }

@@ -15,6 +15,7 @@
     ./packages/matugen/default.nix
     ./packages/nvim.nix
     ./packages/tmux.nix
+    ./packages/vscode.nix
     ./packages/waybar/default.nix
     ./packages/yazi.nix
     ./packages/zen-browser.nix

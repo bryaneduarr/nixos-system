@@ -47,6 +47,28 @@
         };
 
         modules = [
+          {
+            nixpkgs = {
+              config.allowUnfree = true;
+              overlays = [
+                (_: prev: {
+                  ly = prev.ly.overrideAttrs (oldAttrs: {
+                    # Remove postPatch since ZIG_GLOBAL_CACHE_DIR isn't available yet.
+                    postPatch = "";
+                    # Move the zig-packages symlink to preBuild where ZIG_GLOBAL_CACHE_DIR is set.
+                    preBuild = ''
+                      # Create the zig cache directory
+                      mkdir -p $ZIG_GLOBAL_CACHE_DIR
+                      # Link the zig packages - recompute the deps path at build time
+                      ln -s ${prev.callPackage (prev.path + "/pkgs/by-name/ly/ly/deps.nix") { }} $ZIG_GLOBAL_CACHE_DIR/p
+                    ''
+                    + (oldAttrs.preBuild or "");
+                  });
+                })
+              ];
+            };
+          }
+
           ./hosts/configuration.nix # General system configuration for NixOS.
 
           home-manager.nixosModules.home-manager # Import the home-manager configuration to manage user-specific configurations.
