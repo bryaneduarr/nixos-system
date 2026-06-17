@@ -1,7 +1,7 @@
 # Central point file for the home-manager for the user.
 { ... }:
 {
-  home.stateVersion = "25.05";
+  home.stateVersion = "26.05";
 
   imports = [
     # Here is where we will install nix packages.
