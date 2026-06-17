@@ -31,4 +31,24 @@ _: {
     source = ./scripts/awww-wallpaper-switch.sh;
     executable = true;
   };
+
+  home.file.".config/hypr/scripts/right-alt-trigger.sh" = {
+    source = ./scripts/right-alt-trigger.sh;
+    executable = true;
+  };
+
+  systemd.user.services.awww-daemon = {
+    Unit = {
+      Description = "awww wallpaper daemon";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${inputs.awww.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/awww-daemon";
+      Restart = "on-failure";
+    };
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
 }

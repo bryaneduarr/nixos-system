@@ -15,6 +15,7 @@
 
     ./system-services/default.nix
     ./system-services/ly.nix
+    ./system-services/keyd.nix
   ];
 
   nix.settings.experimental-features = [
