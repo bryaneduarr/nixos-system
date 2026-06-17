@@ -3,7 +3,12 @@
   programs.zsh.initContent = ''
     # Function to update and rebuild the system using flakes
     nrs() {
-      sudo nixos-rebuild switch --flake ~/dot-files.nix/#nixos "$@"
+      sudo nixos-rebuild switch --flake ~/nixos-system/#nixos "$@"
+    }
+
+    # Function that comes from the scripts/ folder to update all the system
+    nfu() {
+      $HOME/nixos-system/scripts/update-all.sh "$@"
     }
 
     # Yazi function to stay in the directory and activate with 'y'

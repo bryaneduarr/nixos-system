@@ -11,7 +11,6 @@ let
       kitty = {
         input_path = "~/.config/matugen/templates/kitty.conf";
         output_path = "~/.config/kitty/matugen.conf";
-        post_hook = "killall -SIGUSR1 kitty";
       };
 
       zsh = {
