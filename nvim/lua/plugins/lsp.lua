@@ -7,24 +7,55 @@ return {
       "saghen/blink.cmp",
     },
     config = function()
-      vim.lsp.config.clangd = {
+      -- Configure clangd
+      vim.lsp.config("clangd", {
         cmd = {
           "clangd",
           "--query-driver=/etc/profiles/per-user/bryaneduarr/bin/gcc",
           "--background-index",
         },
-      }
+      })
 
-      -- Enable LSP servers using the new built-in method.
+      -- Configure nil_ls for Nix
+      vim.lsp.config("nil_ls", {
+        settings = {
+          ["nil"] = {
+            formatting = {
+              command = { "nixfmt" },
+            },
+          },
+        },
+      })
+
+      -- Configure other LSP servers using vim.lsp.config
+      vim.lsp.config("ts_ls", {})
+      vim.lsp.config("html", {})
+      vim.lsp.config("cssls", {})
+      vim.lsp.config("tailwindcss", {})
+      vim.lsp.config("lua_ls", {
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = { "vim" },
+            },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file("", true),
+            },
+          },
+        },
+      })
+      vim.lsp.config("emmet_ls", {})
+
+      -- Enable all configured servers
       vim.lsp.enable({
+        "clangd",
+        "nil_ls",
         "ts_ls",
         "html",
         "cssls",
         "tailwindcss",
         "lua_ls",
         "emmet_ls",
-        "clangd",
-        "nil_ls",
       })
 
       -- Keyboard mapping utility.
@@ -67,7 +98,7 @@ return {
           keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- smart rename
 
           opts.desc = "Show buffer diagnostics"
-          keymap.set("n", "<leader>D", "<cmd>FzfLua diagnostics_document<CR>", opts) -- show  diagnostics for file
+          keymap.set("n", "<leader>D", "<cmd>FzfLua diagnostics_document<CR>", opts) -- show diagnostics for file
 
           opts.desc = "Show line diagnostics"
           keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
