@@ -2,8 +2,25 @@
 {
   pkgs,
   inputs,
+  lib,
   ...
 }:
+let
+  activationPath = lib.makeBinPath [
+    pkgs.bun
+    pkgs.nodejs_latest
+    pkgs.coreutils
+    pkgs.bash
+    pkgs.git
+  ];
+
+  bunGlobalInstall = packages: ''
+    export PATH="${activationPath}:$PATH"
+    export BUN_INSTALL="$HOME/.bun"
+
+    ${lib.concatMapStringsSep "\n" (pkg: ''${pkgs.bun}/bin/bun install -g "${pkg}"'') packages}
+  '';
+in
 {
   # Install all of the user packages in here.
   home.packages = with pkgs; [
@@ -12,6 +29,7 @@
     bat
     bluetui
     bun
+    bubblewrap
     cargo
     clang-tools
     cmake
@@ -35,8 +53,7 @@
     neovim
     nil
     nixfmt-rfc-style
-    nodejs_24
-    nodePackages.npm-check-updates
+    nodejs_latest
     pnpm
     posting
     python3
@@ -53,11 +70,25 @@
     vscode
     wget
     wl-clipboard
+    wtype
+    wev
     yazi
     tmux
+    tree
   ];
 
   home = {
+    activation = {
+      installBunGlobalPackages = lib.hm.dag.entryAfter [ "linkGeneration" ] (bunGlobalInstall [
+        "opencode-ai@latest"
+        "@openai/codex"
+        "tree-sitter-cli"
+        "npm-check-updates"
+        "agent-browser"
+        "skills"
+      ]);
+    };
+
     # Neovim specific spell spanish files with hashes and URL using Nix derivation.
     file.".config/nvim/spell/es.utf-8.spl".source = builtins.fetchurl {
       url = "https://ftp.nluug.nl/vim/runtime/spell/es.utf-8.spl";
