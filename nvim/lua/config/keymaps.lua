@@ -5,7 +5,7 @@ vim.g.mapleader = " "
 vim.keymap.set("n", "<leader>q", ":q<CR>", { desc = "Close the current buffer, if none present, then exit Neovim." })
 
 -- Close the current buffer.
-vim.keymap.set("n", "<leader>bq", ":bp<bar>sp<bar>bn<bar>bd<CR>", { desc = "Close the current buffer." })
+vim.keymap.set("n", "<C-w>", ":bp<bar>sp<bar>bn<bar>bd<CR>", { nowait = true, desc = "Close the current buffer." })
 
 -- Close all buffers.
 vim.keymap.set("n", "<leader>baq", ":w | %bd | e# | bd#<CR>", { desc = "Close all active buffers." })
@@ -67,3 +67,13 @@ vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open Oil.nvim buffer." })
 
 -- Open Neogit
 vim.keymap.set("n", "<leader>gg", "<CMD>Neogit<CR>", { desc = "Open Neogit plugin." })
+
+-- Toggle or focus nvim-tree sidebar.
+vim.keymap.set("n", "<leader>e", function()
+  local api = require("nvim-tree.api")
+  if vim.bo.filetype == "NvimTree" then
+    api.tree.toggle()
+  else
+    api.tree.focus()
+  end
+end, { desc = "Toggle or focus nvim-tree sidebar." })

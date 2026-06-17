@@ -55,13 +55,15 @@ vim.opt.termguicolors = true
 -- Enable spell checking functionality, automatically underlines misspelled words as you type.
 vim.opt.spell = true
 
--- Set spell checking languages to Spanish and English, Neovim will use dictionaries for both languages to check spelling.
-vim.opt.spelllang = { "en_us", "es" }
+vim.opt.spelllang = { "en_us" }
 
-vim.opt.spellfile = {
-  vim.fn.stdpath("config") .. "/spell/en.utf-8.add",
-  vim.fn.stdpath("config") .. "/spell/es.utf-8.add",
-}
+if vim.fn.filereadable(vim.fn.stdpath("config") .. "/spell/es.utf-8.spl") == 1 then
+  vim.opt.spelllang = { "en_us", "es" }
+  vim.opt.spellfile = {
+    vim.fn.stdpath("config") .. "/spell/en.utf-8.add",
+    vim.fn.stdpath("config") .. "/spell/es.utf-8.add",
+  }
+end
 
 -- Options for completion menu
 vim.opt.completeopt = { "menuone", "popup", "noinsert" }
@@ -92,3 +94,10 @@ vim.o.foldcolumn = "1"
 vim.o.foldlevel = 99
 vim.o.foldlevelstart = 99
 vim.wo.foldtext = ""
+
+
+-- Diagonal lines in diff view for deleted hunks.
+vim.opt.fillchars:append { diff = "╱" }
+
+-- Never show the native tabline (avoids the bufferline appearing in diffview/neogit).
+vim.opt.showtabline = 0
