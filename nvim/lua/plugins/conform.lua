@@ -6,10 +6,10 @@ return {
 
     conform.setup({
       formatters_by_ft = {
-        javascript = { "prettierd", "eslint_d" },
-        typescript = { "prettierd", "eslint_d" },
-        javascriptreact = { "prettierd", "eslint_d" },
-        typescriptreact = { "prettierd", "eslint_d" },
+        javascript = { "biome", "prettierd", "eslint_d" },
+        typescript = { "biome", "prettierd", "eslint_d" },
+        javascriptreact = { "biome", "prettierd", "eslint_d" },
+        typescriptreact = { "biome", "prettierd", "eslint_d" },
         css = { "prettierd" },
         html = { "prettierd" },
         json = { "prettierd" },
@@ -23,6 +23,14 @@ return {
         ["_"] = { "trim_whitespace", "trim_newlines" },
       },
       formatters = {
+        biome = {
+          command = "biome",
+          args = { "format", "--stdin-file-path", "$FILENAME" },
+          stdin = true,
+          condition = function(ctx)
+            return vim.fs.find({ "biome.json", "biome.jsonc" }, { path = ctx.filename, upward = true })[1]
+          end,
+        },
         stylua = {
           args = { "--config-path", vim.fn.stdpath("config") .. "/stylua.toml", "-" },
         },
