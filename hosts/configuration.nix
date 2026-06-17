@@ -32,9 +32,24 @@
 
   programs.zsh.enable = true;
 
-  security.sudo.enable = true;
-  security.sudo.wheelNeedsPassword = true;
+  security.sudo =
+    {
+      enable = true;
+      wheelNeedsPassword = true;
 
+      extraRules = [
+        {
+          groups = [ "wheel" ];
+          commands = [
+            {
+              command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild";
+              options = [ "NOPASSWD" ];
+            }
+          ];
+        }
+      ];
+
+    };
   time.timeZone = "America/El_Salvador";
 
   fonts = {

@@ -26,4 +26,17 @@
       bryaneduarr = { };
     };
   };
+
+  security.sudo.extraRules = [
+    {
+      users = [ "bryaneduarr" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/nixos-rebuild *";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+
 }
