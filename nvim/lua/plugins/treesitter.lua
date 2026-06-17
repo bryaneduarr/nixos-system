@@ -4,7 +4,7 @@ return {
     lazy = false,
     build = ":TSUpdate",
     config = function()
-      -- Install parsers (async)
+      -- Install parsers
       require("nvim-treesitter").install({
         "json",
         "javascript",
@@ -18,11 +18,14 @@ return {
         "bash",
         "lua",
         "vim",
+        "vimdoc",
+        "query",
         "dockerfile",
         "gitignore",
         "c",
         "cpp",
         "cmake",
+        "nix",
       })
     end,
   },
@@ -32,6 +35,6 @@ return {
     "nvim-treesitter/nvim-treesitter-textobjects",
     branch = "main",
     lazy = false,
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
   },
 }
-

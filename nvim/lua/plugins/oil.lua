@@ -1,9 +1,9 @@
 return {
   "stevearc/oil.nvim",
-  -- dependencies = { { "echasnovski/mini.icons", opts = {} } },
+  dependencies = { { "echasnovski/mini.icons", opts = {} } },
   opts = {
     columns = {
-      -- "icon",
+      "icon",
       -- "permissions",
       -- "size",
       -- "mtime",
@@ -12,7 +12,7 @@ return {
     view_options = {
       show_hidden = true,
       -- This function defines what is considered a "hidden" file
-      is_hidden_file = function(name, bufnr)
+      is_hidden_file = function(name, _)
         return vim.startswith(name, ".")
       end,
     },

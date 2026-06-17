@@ -5,5 +5,7 @@ return {
     "sindrets/diffview.nvim", -- Diff integration
     "ibhagwan/fzf-lua", -- optional
   },
-  config = true,
+  opts = {
+    disable_hint = true,
+  },
 }
