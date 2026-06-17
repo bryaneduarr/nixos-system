@@ -1,15 +1,12 @@
-_: {
+{ pkgs, inputs, ... }: {
   wayland.windowManager.hyprland = {
     enable = true;
+    configType = "hyprlang";
 
     settings = {
-      monitor = "DP-3,1920x1080@280,0x0,1.25";
+      animations.enabled = true;
 
-      # Autostart programs
-      exec-once = [
-        "waybar"
-        "awww-daemon"
-      ];
+      monitor = "DP-3,1920x1080@280,0x0,1.25";
 
       windowrule = [
         "opacity 0.85 override 0.95 override, match:class ^(kitty)$"
