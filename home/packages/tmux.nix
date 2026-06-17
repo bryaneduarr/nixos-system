@@ -13,6 +13,7 @@
 
       # Enable true color support
       set -g default-terminal "tmux-256color"
+      set -as terminal-features ",xterm-256color:RGB"
 
       # Enable mouse.
       set -g mouse on
@@ -34,8 +35,14 @@
       bind-key -T copy-mode-vi C-v send-keys -X rectangle-toggle
       bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
 
-      # Set colors for the bottom bar to transparent.
-      set -g status-style bg=default
+      # Better copy-mode appearance
+      set -g mode-style "bg=#313244,fg=#cdd6f4"
+      set -g message-style "bg=default,fg=#cdd6f4"
+      set -g pane-active-border-style "fg=#89b4fa"
+      set -g pane-border-style "fg=#585b70"
+
+      # Optional: hide the status bar entirely while scrolling feels cleaner
+      # set -g status off
 
       # Status bar right side only show hour.
       # set-option -g status-right "%H:%M %d-%b-%y"
@@ -48,14 +55,20 @@
       # Tmux dotbar background colorscheme style of the custom tmux bar theme.
       set -g @tmux-dotbar-bg "default"
 
-      # Tmux dotbar prefix colorscheme.
-      set -g @tmux-dotbar-fg-prefix "#cba6f7"
+      # Tmux dotbar prefix highlight in orange pastel
+      set -g @tmux-dotbar-fg-prefix "#FAB387"
 
       # Tmux dotbar activate right side.
       set -g @tmux-dotbar-right true
 
       # Tmux dotbar time, this is why the initial is commented.
-      set -g @tmux-dotbar-status-right "%H:%M %d-%b-%y"
+      set -g @tmux-dotbar-status-right "%H:%M"
+
+      # Windows next to session with | separator
+      set -g @tmux-dotbar-window-status-separator "|"
+      set -g @tmux-dotbar-left true
+      set -g @tmux-dotbar-justify "left"
+      set -g window-status-separator ""
 
       # Resurrect settings.
       set -g @continuum-restore 'on'
