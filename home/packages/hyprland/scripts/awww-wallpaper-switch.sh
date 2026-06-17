@@ -23,7 +23,7 @@ awww img "$WALLPAPER" \
     --transition-step 255 \
     --transition-duration 1
 
-matugen image "$WALLPAPER"
+matugen image "$WALLPAPER" --source-color-index 0
 
 # Reload colors in all open kitty instances.
 for socket in /tmp/kitty-*; do

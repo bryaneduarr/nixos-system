@@ -1,45 +1,44 @@
 {
-  "$mod" = "SUPER";
-
   bind = [
-    "$mod, T, exec, kitty"
-    "$mod, Q, killactive"
-    "$mod, M, exit"
-    "$mod, V, togglefloating"
-    "$mod, R, exec, rofi -show drun"
-    "$mod, P, pseudo"
-    "$mod, J, togglesplit"
+    "SUPER, T, exec, kitty"
+    "SUPER, Q, killactive"
+    "SUPER, M, exit"
+    "SUPER, V, togglefloating"
+    "SUPER, R, exec, rofi -show drun"
+    "SUPER, P, pseudo"
+    "SUPER, B, exec, zen-twilight"
+    "SUPER, J, layoutmsg, togglesplit"
 
     # Move focus
-    "$mod, left, movefocus, l"
-    "$mod, right, movefocus, r"
-    "$mod, up, movefocus, u"
-    "$mod, down, movefocus, d"
-    "$mod, l, movefocus, l"
-    "$mod, h, movefocus, r"
-    "$mod, k, movefocus, u"
-    "$mod, j, movefocus, d"
+    "SUPER, left, movefocus, l"
+    "SUPER, right, movefocus, r"
+    "SUPER, up, movefocus, u"
+    "SUPER, down, movefocus, d"
+    "SUPER, l, movefocus, l"
+    "SUPER, h, movefocus, r"
+    "SUPER, k, movefocus, u"
+    "SUPER, j, movefocus, d"
 
     # Switch workspaces
-    "$mod, 1, workspace, 1"
-    "$mod, 2, workspace, 2"
-    "$mod, 3, workspace, 3"
-    "$mod, 4, workspace, 4"
-    "$mod, 5, workspace, 5"
+    "SUPER, 1, workspace, 1"
+    "SUPER, 2, workspace, 2"
+    "SUPER, 3, workspace, 3"
+    "SUPER, 4, workspace, 4"
+    "SUPER, 5, workspace, 5"
 
     # Move active window to workspace
-    "$mod SHIFT, 1, movetoworkspace, 1"
-    "$mod SHIFT, 2, movetoworkspace, 2"
-    "$mod SHIFT, 3, movetoworkspace, 3"
-    "$mod SHIFT, 4, movetoworkspace, 4"
-    "$mod SHIFT, 5, movetoworkspace, 5"
+    "SUPER SHIFT, 1, movetoworkspace, 1"
+    "SUPER SHIFT, 2, movetoworkspace, 2"
+    "SUPER SHIFT, 3, movetoworkspace, 3"
+    "SUPER SHIFT, 4, movetoworkspace, 4"
+    "SUPER SHIFT, 5, movetoworkspace, 5"
 
     # awww wallpaper switch
-    "$mod SHIFT, W, exec, bash $HOME/.config/hypr/scripts/awww-wallpaper-switch.sh"
+    "SUPER SHIFT, W, exec, bash $HOME/.config/hypr/scripts/awww-wallpaper-switch.sh"
   ];
 
   bindm = [
-    "$mod, mouse:272, movewindow"
-    "$mod, mouse:273, resizewindow"
+    "SUPER, mouse:272, movewindow"
+    "SUPER, mouse:273, resizewindow"
   ];
 }
