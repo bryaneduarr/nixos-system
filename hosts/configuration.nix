@@ -12,6 +12,7 @@
 
     ./system-packages/hyprland.nix
     ./system-packages/postgresql.nix
+    ./system-packages/docker.nix
 
     ./system-services/default.nix
     ./system-services/ly.nix

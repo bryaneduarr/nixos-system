@@ -16,6 +16,7 @@
     clang-tools
     cmake
     curl
+    docker
     deadnix
     eza
     fastfetch
