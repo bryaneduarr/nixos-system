@@ -93,5 +93,26 @@
           }
         ];
       };
+
+      # Development shell for brain documentation pipeline tools, for opencode ignore/remove if not needed.
+      devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
+        name = "nixos-system-brain";
+
+        packages = with nixpkgs.legacyPackages.x86_64-linux; [
+          pandoc
+        ];
+
+        shellHook = ''
+          export BRAIN_ROOT="$HOME/knowledge/nixos-system"
+          export PATH="$BRAIN_ROOT/bin:$PATH"
+          echo "nixos-system brain devShell loaded"
+          echo "  - pandoc: available"
+          echo "  - Python deps (install if needed):"
+          echo "    pip install sentence-transformers trafilatura"
+          echo "  - Or use uv: uv pip install sentence-transformers trafilatura"
+        '';
+      };
+
+      packages.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.hello;
     };
-}
+  }

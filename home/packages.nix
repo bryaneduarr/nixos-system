@@ -57,10 +57,12 @@ in
     nodejs_latest
     pnpm
     posting
-    python3
+    (python3.withPackages (ps: with ps; [ sentence-transformers trafilatura ]))
+    sqlite-vec
     redis
     ripgrep
     rofi
+    sqlite
     ssm-session-manager-plugin
     statix
     tree

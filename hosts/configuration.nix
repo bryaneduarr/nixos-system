@@ -19,10 +19,13 @@
     ./system-services/keyd.nix
   ];
 
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    extra-sandbox-paths = [ "/etc/resolv.conf" ];
+  };
 
   hardware.bluetooth.enable = true;
 
