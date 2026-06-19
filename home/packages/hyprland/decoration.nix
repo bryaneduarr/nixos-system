@@ -1,6 +1,7 @@
 {
   decoration = {
-    rounding = 2;
+    rounding = 6;
+    rounding_power = 2.5;
 
     blur = {
       enabled = true;

@@ -27,10 +27,12 @@
       "fadeLayersIn, 1, 0.5, menu_decel"
       "fadeLayersOut, 1, 2.7, stall"
 
-      "workspaces, 1, 1, menu_decel, slide"
+      "workspaces, 1, 7, menu_decel, slide"
 
       "specialWorkspaceIn, 1, 2.8, emphasizedDecel, slidevert"
       "specialWorkspaceOut, 1, 1.2, emphasizedAccel, slidevert"
+
+      "zoomFactor, 1, 3, standardDecel"
     ];
   };
 }
