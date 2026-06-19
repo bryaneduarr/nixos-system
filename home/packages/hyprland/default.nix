@@ -39,6 +39,21 @@
     executable = true;
   };
 
+  home.file.".config/hypr/scripts/awww-matugen-init.sh" = {
+    source = ./scripts/awww-matugen-init.sh;
+    executable = true;
+  };
+
+  home.file.".config/hypr/scripts/diagnose-colors.sh" = {
+    source = ./scripts/diagnose-colors.sh;
+    executable = true;
+  };
+
+  home.file.".config/hypr/scripts/diagnose-awww.sh" = {
+    source = ./scripts/diagnose-awww.sh;
+    executable = true;
+  };
+
   systemd.user.services.awww-daemon = {
     Unit = {
       Description = "awww wallpaper daemon";
@@ -48,6 +63,8 @@
     Service = {
       ExecStart = "${inputs.awww.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/awww-daemon";
       Restart = "on-failure";
+      RestartSec = 0;
+      StartLimitIntervalSec = 0;
     };
     Install = {
       WantedBy = [ "graphical-session.target" ];
