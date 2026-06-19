@@ -25,6 +25,7 @@ in
   # Install all of the user packages in here.
   home.packages = with pkgs; [
     inputs.awww.packages.${pkgs.stdenv.hostPlatform.system}.default
+    bibata-cursors
     awscli2
     bat
     bluetui

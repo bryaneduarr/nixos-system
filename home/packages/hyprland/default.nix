@@ -8,13 +8,18 @@
 
       monitor = "DP-3,1920x1080@280,0x0,1.25";
 
-      windowrule = [
-        "opacity 0.85 override 0.95 override, match:class ^(kitty)$"
+      windowrule = [ ];
+
+      exec-once = [
+        "hyprctl setcursor Bibata-Modern-Classic 24"
+        "systemctl --user import-environment WAYLAND_DISPLAY"
+        "bash $HOME/.config/hypr/scripts/awww-matugen-init.sh"
       ];
     }
     // import ./animations.nix
     // import ./decoration.nix
     // import ./general.nix
+    // import ./cursor.nix
     // import ./input.nix
     // import ./keybindings.nix
     // import ./miscellaneous.nix;

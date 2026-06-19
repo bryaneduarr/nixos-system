@@ -1,7 +1,13 @@
 # Central point file for the home-manager for the user.
-{ ... }:
+{ pkgs, ... }:
 {
   home.stateVersion = "26.05";
+
+  home.pointerCursor = {
+    package = pkgs.bibata-cursors;
+    name = "Bibata-Modern-Classic";
+    size = 24;
+  };
 
   imports = [
     # Here is where we will install nix packages.
