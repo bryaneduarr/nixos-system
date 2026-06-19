@@ -1,4 +1,9 @@
 _: {
+  imports = [
+    ./keybindings.nix
+    ./matugen.nix
+  ];
+
   programs.kitty = {
     enable = true;
 
@@ -16,6 +21,5 @@ _: {
       allow_remote_control = "socket-only";
       listen_on = "unix:/tmp/kitty";
     };
-  }
-  // import ./keybindings.nix;
+  };
 }

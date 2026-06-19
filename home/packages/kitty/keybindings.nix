@@ -1,5 +1,5 @@
 {
-  keybindings = {
+  programs.kitty.keybindings = {
     # Copy and paste
     "ctrl+c" = "copy_or_interrupt";
     "ctrl+v" = "paste_from_clipboard";
