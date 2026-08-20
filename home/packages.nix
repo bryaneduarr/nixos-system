@@ -18,7 +18,7 @@ let
     export PATH="${activationPath}:$PATH"
     export BUN_INSTALL="$HOME/.bun"
 
-    ${lib.concatMapStringsSep "\n" (pkg: ''${pkgs.bun}/bin/bun install -g "${pkg}"'') packages}
+    ${lib.concatMapStringsSep "\n" (pkg: ''${pkgs.bun}/bin/bun install -g "${pkg}" || true'') packages}
   '';
 in
 {
