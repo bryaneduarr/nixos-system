@@ -1,5 +1,7 @@
 _: {
   home.file.".config/herdr/config.toml".text = ''
+    onboarding = false
+
     [experimental]
     pane_history = true
 

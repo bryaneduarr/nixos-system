@@ -55,7 +55,7 @@ in
     matugen
     neovim
     nil
-    nixfmt-rfc-style
+    nixfmt
     nodejs_latest
     pnpm
     posting

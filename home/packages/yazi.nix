@@ -9,13 +9,13 @@
       plugin = {
         prepend_fetchers = [
           {
-            id = "git";
-            name = "*";
+            url = "*";
+            group = "git";
             run = "git";
           } # Register git fetchers ahead of defaults. This is for the plugin git to work correctly.
           {
-            id = "git";
-            name = "*/";
+            url = "*/";
+            group = "git";
             run = "git";
           } # Default git fetcher.
         ];
