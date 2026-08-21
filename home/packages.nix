@@ -28,9 +28,10 @@ in
     bibata-cursors
     awscli2
     bat
+    biome
     bluetui
-    bun
     bubblewrap
+    bun
     cargo
     clang-tools
     cmake
@@ -45,6 +46,7 @@ in
     gcc
     git
     gnumake
+    herdr
     google-chrome
     jq
     killall
@@ -65,6 +67,7 @@ in
     sqlite
     ssm-session-manager-plugin
     statix
+    tailscale
     tree
     tree-sitter
     unzip
@@ -85,6 +88,7 @@ in
       installBunGlobalPackages = lib.hm.dag.entryAfter [ "linkGeneration" ] (bunGlobalInstall [
         "opencode-ai@latest"
         "@openai/codex"
+        "@earendil-works/pi-coding-agent"
         "tree-sitter-cli"
         "npm-check-updates"
         "agent-browser"
