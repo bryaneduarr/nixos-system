@@ -1,10 +1,11 @@
-{ lib, pkgs, ... }:
+{ lib, ... }:
 let
   nvimSrc = builtins.path {
     path = ./../../nvim;
     name = "nvim-config";
   };
-in {
+in
+{
   home.activation.copyNvim = lib.hm.dag.entryBefore [ "linkGeneration" ] ''
     echo "Copying nvim configuration..."
     rm -rf "$HOME/.config/nvim"

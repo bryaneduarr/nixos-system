@@ -29,29 +29,21 @@
     NIXOS_OZONE_WL = "1"; # Hint Electron apps to use Wayland.
   };
 
-  home.file.".config/hypr/scripts/awww-wallpaper-switch.sh" = {
-    source = ./scripts/awww-wallpaper-switch.sh;
-    executable = true;
-  };
+  home.file = {
+    ".config/hypr/scripts/awww-wallpaper-switch.sh" = {
+      source = ./scripts/awww-wallpaper-switch.sh;
+      executable = true;
+    };
 
-  home.file.".config/hypr/scripts/right-alt-trigger.sh" = {
-    source = ./scripts/right-alt-trigger.sh;
-    executable = true;
-  };
+    ".config/hypr/scripts/right-alt-trigger.sh" = {
+      source = ./scripts/right-alt-trigger.sh;
+      executable = true;
+    };
 
-  home.file.".config/hypr/scripts/awww-matugen-init.sh" = {
-    source = ./scripts/awww-matugen-init.sh;
-    executable = true;
-  };
-
-  home.file.".config/hypr/scripts/diagnose-colors.sh" = {
-    source = ./scripts/diagnose-colors.sh;
-    executable = true;
-  };
-
-  home.file.".config/hypr/scripts/diagnose-awww.sh" = {
-    source = ./scripts/diagnose-awww.sh;
-    executable = true;
+    ".config/hypr/scripts/awww-matugen-init.sh" = {
+      source = ./scripts/awww-matugen-init.sh;
+      executable = true;
+    };
   };
 
   systemd.user.services.awww-daemon = {
