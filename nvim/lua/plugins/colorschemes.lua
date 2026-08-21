@@ -1,5 +1,4 @@
 return {
-  "nyoom-engineering/oxocarbon.nvim",
   "sainnhe/everforest",
   "Mofiqul/vscode.nvim",
   "Yazeed1s/oh-lucy.nvim",
