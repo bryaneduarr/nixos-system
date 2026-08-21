@@ -4,6 +4,7 @@
   home.stateVersion = "26.05";
 
   home.pointerCursor = {
+    enable = true;
     package = pkgs.bibata-cursors;
     name = "Bibata-Modern-Classic";
     size = 24;
@@ -22,6 +23,7 @@
     ./packages/kitty/default.nix
     ./packages/matugen/default.nix
     ./packages/nvim.nix
+    ./packages/onedrive/default.nix
     ./packages/starship/default.nix
     ./packages/tmux.nix
     ./packages/vscode.nix
