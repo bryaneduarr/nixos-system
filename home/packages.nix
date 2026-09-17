@@ -68,6 +68,7 @@ in
     ssm-session-manager-plugin
     statix
     tailscale
+    t3code
     tree
     tree-sitter
     unzip

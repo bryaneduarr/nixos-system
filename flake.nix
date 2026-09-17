@@ -52,6 +52,7 @@
               config.allowUnfree = true;
               overlays = [
                 (_: prev: {
+                  t3code = prev.callPackage ./home/packages/t3-code { };
                 })
               ];
             };
@@ -101,6 +102,18 @@
         '';
       };
 
-      packages.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.hello;
+      packages.x86_64-linux =
+        let
+          pkgs = import nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+        in
+        {
+          default = pkgs.hello;
+
+          t3code = pkgs.callPackage ./home/packages/t3-code { };
+
+        };
     };
-  }
+}
