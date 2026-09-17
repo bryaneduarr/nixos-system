@@ -21,7 +21,7 @@
     // import ./general.nix
     // import ./cursor.nix
     // import ./input.nix
-    // import ./keybindings.nix
+    // import ./keybindings.nix { inherit pkgs; }
     // import ./miscellaneous.nix;
   };
 
