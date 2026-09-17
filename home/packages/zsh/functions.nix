@@ -8,7 +8,7 @@
 
     # Function that comes from the scripts/ folder to update all the system
     nfu() {
-      $HOME/nixos-system/scripts/update-all.sh "$@"
+      $HOME/nixos-system/scripts/update-all-packages/update-all-packages.sh "$@"
     }
 
     # Yazi function to stay in the directory and activate with 'y'

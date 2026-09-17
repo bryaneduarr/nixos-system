@@ -51,7 +51,7 @@
       '';
 
       nfu = ''
-        $HOME/dot-files.nix/scripts/update-all.sh $argv
+        $HOME/dot-files.nix/scripts/update-all-packages/update-all-packages.sh $argv
       '';
     };
   };
