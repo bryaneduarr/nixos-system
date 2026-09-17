@@ -15,6 +15,7 @@
     ./system-packages/docker.nix
 
     ./system-services/default.nix
+    ./system-services/tailscale.nix
     ./system-services/ly.nix
     ./system-services/keyd.nix
   ];
