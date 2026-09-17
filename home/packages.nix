@@ -92,6 +92,7 @@ in
         "tree-sitter-cli"
         "npm-check-updates"
         "agent-browser"
+        "chrome-devtools-mcp@latest"
         "skills"
       ]);
     };
