@@ -44,6 +44,7 @@ in
     fzf
     gdb
     gcc
+    gh
     git
     gnumake
     herdr
