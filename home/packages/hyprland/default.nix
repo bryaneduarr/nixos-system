@@ -6,7 +6,7 @@
     settings = {
       animations.enabled = true;
 
-      monitor = "DP-3,1920x1080@280,0x0,1.25";
+      monitor = "DP-3,1920x1080@280,0x0,1";
 
       windowrule = [ ];
 
