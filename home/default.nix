@@ -24,6 +24,7 @@
     ./packages/matugen/default.nix
     ./packages/nvim.nix
     ./packages/onedrive/default.nix
+    ./packages/pi/default.nix
     ./packages/starship/default.nix
     ./packages/tmux.nix
     ./packages/vscode.nix

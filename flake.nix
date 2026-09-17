@@ -114,6 +114,7 @@
 
           t3code = pkgs.callPackage ./home/packages/t3-code { };
 
+          pi-tools = pkgs.callPackage ./home/packages/pi/pi-tools { };
         };
     };
 }

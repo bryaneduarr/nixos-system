@@ -20,3 +20,9 @@ Thumbs.db
 # Sensitive or local secrets.
 secret.nix
 local-config.nix
+
+# Pi project runtime state; keep the declarative project settings tracked.
+.pi/*
+.pi/
+!.pi/settings.json
+.pi/tool-output/
