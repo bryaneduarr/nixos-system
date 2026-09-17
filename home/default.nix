@@ -14,6 +14,9 @@
     # Here is where we will install nix packages.
     ./packages.nix
 
+    # Commands and scripts configuration will be placed here.
+    ./commands/worktree-dev.nix
+
     # Packages installed configuration will be placed here.
     ./packages/btop.nix
     ./packages/git.nix
