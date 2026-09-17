@@ -60,7 +60,12 @@ in
     nodejs_latest
     pnpm
     posting
-    (python3.withPackages (ps: with ps; [ sentence-transformers trafilatura ]))
+    (python3.withPackages (
+      ps: with ps; [
+        sentence-transformers
+        trafilatura
+      ]
+    ))
     sqlite-vec
     redis
     ripgrep
