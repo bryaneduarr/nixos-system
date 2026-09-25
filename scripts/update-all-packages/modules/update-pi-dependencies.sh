@@ -1,5 +1,4 @@
-update_pi_dependencies() {
-  echo "  -> Updating Pi packages and lockfile..."
+_update_pi_dependencies() {
   run_quietly bun add \
     --cwd "$repo_root/home/packages/pi" \
     --lockfile-only \
@@ -17,7 +16,8 @@ update_pi_dependencies() {
     '@juvio15/pi-ast-grep@latest' \
     'pi-tree-sitter@latest' \
     'pi-mcp-adapter@latest' \
-    'pi-subagents@latest' \
+    'pi-powerline-footer@latest' \
+    'pi-web-access@latest' \
     'knip@latest'
 
   # Nix's reproducible node dependency builder currently consumes package-lock.json.
@@ -28,4 +28,11 @@ update_pi_dependencies() {
     --legacy-peer-deps \
     --ignore-scripts \
     --save-exact
+}
+
+update_pi_dependencies() {
+  run_with_status \
+    "Updating Pi packages and lockfiles" \
+    "Updated Pi packages and lockfiles" \
+    _update_pi_dependencies
 }

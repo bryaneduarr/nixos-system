@@ -1,17 +1,17 @@
 {
   lib,
   buildNpmPackage,
-  nodejs_latest,
+  nodejs_24,
 }:
 let
   packageDefinition = import ./package-definition.nix {
-    inherit lib nodejs_latest;
+    inherit lib nodejs_24;
   };
 in
 buildNpmPackage (
   packageDefinition
   // {
-    npmDepsHash = "sha256-2sfTau1YzDfSPHN7e1aP2iBaXQips+KhuevNdP3U0Kk=";
+    npmDepsHash = "sha256-HY52mJ/BAE5EZmZXZlxNK/Qi62GRYAcZizejb4ji3+o=";
     npmDepsFetcherVersion = 2;
 
     installPhase = builtins.readFile ./install-pinned-npm-packages.sh;
