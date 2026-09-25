@@ -13,5 +13,7 @@ source "$script_directory/modules/verify-pi.sh"
 
 update_pi_dependencies
 update_flake_inputs
+run_with_status "Syncing upstream Pi skills" "Synced upstream Pi skills" \
+  bash "$script_directory/modules/sync-pi-skills.sh"
 rebuild_system "$@"
 verify_pi
