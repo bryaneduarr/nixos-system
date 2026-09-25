@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   programs.fish = {
     enable = true;
@@ -51,7 +51,7 @@
       '';
 
       nfu = ''
-        $HOME/dot-files.nix/scripts/update-all-packages/update-all-packages.sh $argv
+        ${config.home.homeDirectory}/nixos-system/scripts/update-all-packages/update-all-packages.sh $argv
       '';
     };
   };
