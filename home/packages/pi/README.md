@@ -1,13 +1,12 @@
-# Configuración de Pi
+# Pi configuration
 
-- `agent-configuration/extensions/` contiene las extensiones pequeñas. Cada archivo registra una función independiente de Pi.
-- `agent-configuration/harness/tools/` implementa las herramientas. `tools/search/` separa la búsqueda de coincidencias y el formato de resultados.
-- `agent-configuration/harness/activity/` guarda el estado y valida los datos recibidos de Pi.
-- `agent-configuration/harness/ui/activity/` registra eventos, reconstruye sesiones y presenta el resumen.
-- `agent-configuration/harness/ui/inspector/` separa la navegación, la entrada, el diseño de pantalla, las listas y el detalle de cada llamada.
-- `agent-configuration/settings/` define la configuración que Home Manager instala como archivos JSON.
-- `agent-configuration/themes/` contiene los temas.
-- `agent-configuration/skills/` contiene las instrucciones instaladas como skills.
-- `home-manager/` instala los archivos y configura Pi. `pi-tools/` empaqueta sus dependencias. `tests/` contiene las pruebas de las extensiones.
+- `agent-configuration/extensions/` contains independent Pi extensions.
+- `agent-configuration/harness/tools/` implements repository tools.
+- `agent-configuration/harness/activity/` stores activity state.
+- `agent-configuration/harness/ui/` renders activity and tool details.
+- `agent-configuration/settings/` defines JSON settings installed by Home Manager.
+- `agent-configuration/themes/` contains themes.
+- `agent-configuration/skills/` contains installed skills.
+- `home-manager/` installs files and configures Pi. `pi-tools/` packages dependencies. `tests/` contains extension tests.
 
-`home-manager/managed-files.nix` conecta los archivos fuente con sus destinos en el directorio personal. Para ejecutar las pruebas, usa `bun test` desde `home/packages/pi/`.
+`home-manager/managed-files.nix` maps source files to `~/.pi/agent/`. Pi runs with the harness tools and configured web tools. The repository's root `AGENTS.md` points to `repo-dictionary/` for project facts. Run extension tests with `bun test` from this directory.
