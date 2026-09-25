@@ -5,5 +5,8 @@ _: {
     PI_FFF_MODE = "override";
     FFF_ENABLE_ROOT_SCAN = "0";
     FFF_ENABLE_HOME_SCAN = "0";
+    # Force pi-powerline-footer's ASCII preset even on Nerd Font terminals so
+    # the footer renders identically over SSH, tmux, and basic terminals.
+    POWERLINE_NERD_FONTS = "0";
   };
 }

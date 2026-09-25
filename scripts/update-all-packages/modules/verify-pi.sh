@@ -1,4 +1,4 @@
-verify_pi() {
+_verify_pi() {
   local verify_log
   verify_log="$(mktemp)"
 
@@ -7,31 +7,63 @@ verify_pi() {
   # failure.
   if ! (
     set -e
-    local rpc_output command_name typecheck_smoke_file
+    local rpc_output typecheck_smoke_file
 
     command -v pi >/dev/null
     pi --version >/dev/null
-    grep -q 'registerCommand("clear"' "$repo_root/home/packages/pi/agent-configuration/clear-session-extension.ts"
-    rpc_output="$(printf '%s\n' \
+    grep -q 'registerCommand("clear"' "$repo_root/home/packages/pi/agent-configuration/extensions/clear-session.ts"
+
+    for rpc_check in \
       '{"id":"lsp-status","type":"prompt","message":"/lsp status"}' \
-      '{"id":"ast-grep-check","type":"prompt","message":"/ast-grep-check"}' \
-      '{"id":"clear","type":"prompt","message":"/clear"}' \
-      '{"type":"get_state"}' \
-      | timeout 45 pi --offline --no-session --mode rpc 2>&1)"
-
-    if printf '%s\n' "$rpc_output" | grep -Eiq 'failed to load extension|cannot find module|extension error'; then
-      printf '%s\n' "$rpc_output"
-      echo "  !! Pi reported an extension loading error."
-      exit 1
-    fi
-
-    for command_name in lsp-status ast-grep-check; do
-      if ! printf '%s\n' "$rpc_output" | grep -Fq "\"id\":\"$command_name\""; then
+      '{"id":"ast-grep-check","type":"prompt","message":"/ast-grep-check"}'; do
+      if ! rpc_output="$(printf '%s\n' "$rpc_check" | timeout 15 pi --offline --no-session --mode rpc 2>&1)"; then
         printf '%s\n' "$rpc_output"
-        echo "  !! Pi did not answer the $command_name check."
+        echo "!! Pi extension command failed or timed out."
+        exit 1
+      fi
+
+      if printf '%s\n' "$rpc_output" | grep -Eiq 'failed to load extension|cannot find module|extension[_ ]error'; then
+        printf '%s\n' "$rpc_output"
+        echo "!! Pi reported an extension loading error."
+        exit 1
+      fi
+
+      if ! printf '%s\n' "$rpc_output" | grep -Fq '"type":"response","command":"prompt","success":true'; then
+        printf '%s\n' "$rpc_output"
+        echo "!! Pi did not answer an extension command."
         exit 1
       fi
     done
+
+    if ! rpc_output="$(printf '%s\n' '{"id":"clear","type":"prompt","message":"/clear"}' | timeout 15 pi --offline --no-session --mode rpc 2>&1)"; then
+      printf '%s\n' "$rpc_output"
+      echo "!! Pi clear command failed or timed out."
+      exit 1
+    fi
+
+    if printf '%s\n' "$rpc_output" | grep -Eiq 'failed to load extension|cannot find module|extension[_ ]error'; then
+      printf '%s\n' "$rpc_output"
+      echo "!! Pi reported an extension loading error."
+      exit 1
+    fi
+
+    if ! rpc_output="$(printf '%s\n' '{"id":"harness-status","type":"prompt","message":"/harness-status"}' | timeout 15 pi --offline --no-session --mode rpc 2>&1)"; then
+      printf '%s\n' "$rpc_output"
+      echo "!! Pi harness status command failed or timed out."
+      exit 1
+    fi
+
+    if printf '%s\n' "$rpc_output" | grep -Eiq 'failed to load extension|cannot find module|extension[_ ]error'; then
+      printf '%s\n' "$rpc_output"
+      echo "!! Pi reported an extension loading error."
+      exit 1
+    fi
+
+    if ! printf '%s\n' "$rpc_output" | grep -Fq 'active: search, read, edit, run'; then
+      printf '%s\n' "$rpc_output"
+      echo "!! Pi harness did not expose the four harness tools."
+      exit 1
+    fi
 
     ast-grep --version >/dev/null
     knip --version >/dev/null
@@ -53,4 +85,8 @@ verify_pi() {
   fi
 
   rm -f "$verify_log"
+}
+
+verify_pi() {
+  run_with_status "Verifying Pi" "Pi checks passed" _verify_pi
 }

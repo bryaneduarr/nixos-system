@@ -1,0 +1,24 @@
+{
+  "icons": {
+    "pi": "pi",
+    "model": "",
+    "folder": "",
+    "branch": "",
+    "git": "git",
+    "github": "",
+    "gitlab": "",
+    "bitbucket": "",
+    "tokens": "tok",
+    "context": "ctx",
+    "cost": "$",
+    "time": "time",
+    "agents": "ag",
+    "cache": "cache",
+    "input": "in",
+    "output": "out",
+    "host": "host",
+    "session": "sess",
+    "auto": "",
+    "warning": "!"
+  }
+}
