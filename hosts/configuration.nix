@@ -14,6 +14,8 @@
     ./system-packages/postgresql.nix
     ./system-packages/docker.nix
 
+    ./system-services/web-research.nix
+
     ./system-services/default.nix
     ./system-services/tailscale.nix
     ./system-services/ly.nix
