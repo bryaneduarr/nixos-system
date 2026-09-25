@@ -1,0 +1,58 @@
+import type { SearchMatch } from "./matches.ts";
+
+function formatLocations(matches: SearchMatch[], limit: number): string {
+  return matches.slice(0, limit).map((match) => `${match.file}:${match.line}`).join("\n");
+}
+
+export function formatSearchResult(
+  query: string,
+  kind: string,
+  files: string[],
+  tests: SearchMatch[],
+  references: SearchMatch[],
+  limit: number,
+  definitions: SearchMatch[] = [],
+): string {
+  const sections: string[] = [];
+  const shownIds = new Set<string>();
+
+  const push = (title: string, body: string) => {
+    if (body) sections.push(`${title}:\n${body}`);
+  };
+
+  if (definitions.length > 0) {
+    const shown = definitions.slice(0, limit);
+    for (const match of shown) shownIds.add(`${match.file}:${match.line}`);
+    push("Definition", formatLocations(shown, limit));
+  }
+
+  if (files.length > 0) {
+    const shown = files.slice(0, limit);
+    for (const file of shown) shownIds.add(file);
+    push("Files", shown.join("\n"));
+  }
+
+  if (tests.length > 0) {
+    const shown = tests.slice(0, limit);
+    for (const match of shown) shownIds.add(`${match.file}:${match.line}`);
+    const testFiles = [...new Set(shown.map((match) => match.file))];
+    push("Tests", testFiles.join("\n"));
+  }
+
+  const uniqueReferences = references.filter(
+    (match) => !shownIds.has(`${match.file}:${match.line}`),
+  );
+  if (uniqueReferences.length > 0) {
+    push("References", formatLocations(uniqueReferences, limit));
+  }
+
+  if (sections.length === 0) return `No matches for: ${query}`;
+
+  const shownCount = Math.min(definitions.length, limit) + Math.min(files.length, limit) +
+    Math.min(tests.length, limit) + Math.min(uniqueReferences.length, limit);
+  const totalCount = definitions.length + files.length + tests.length + uniqueReferences.length;
+  const omitted = Math.max(0, totalCount - shownCount);
+  if (omitted > 0) sections.push(`Additional matches omitted: ${omitted}`);
+
+  return `search "${query}" (${kind})\n\n${sections.join("\n\n")}`;
+}

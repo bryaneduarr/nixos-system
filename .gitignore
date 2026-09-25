@@ -26,3 +26,6 @@ local-config.nix
 .pi/
 !.pi/settings.json
 .pi/tool-output/
+
+# Pi harness working state (large command output, task reports, evidence).
+.agent/
