@@ -50,11 +50,6 @@
           {
             nixpkgs = {
               config.allowUnfree = true;
-              overlays = [
-                (_: prev: {
-                  t3code = prev.callPackage ./home/packages/t3-code { };
-                })
-              ];
             };
           }
 
@@ -111,8 +106,6 @@
         in
         {
           default = pkgs.hello;
-
-          t3code = pkgs.callPackage ./home/packages/t3-code { };
 
           pi-tools = pkgs.callPackage ./home/packages/pi/pi-tools { };
         };
