@@ -25,7 +25,14 @@
       "nix-command"
       "flakes"
     ];
+    auto-optimise-store = true;
     extra-sandbox-paths = [ "/etc/resolv.conf" ];
+  };
+
+  nix.gc = {
+    automatic = true;
+    dates = "daily";
+    options = "--delete-older-than 14d";
   };
 
   hardware.bluetooth.enable = true;

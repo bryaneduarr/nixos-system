@@ -17,11 +17,50 @@ let
   bunGlobalInstall = packages: ''
     export PATH="${activationPath}:$PATH"
     export BUN_INSTALL="$HOME/.bun"
+    install -d -m 700 "$HOME/.cache"
+    exec 9>"$HOME/.cache/bun-maintenance.lock"
+    ${pkgs.util-linux}/bin/flock 9
 
     ${lib.concatMapStringsSep "\n" (pkg: ''${pkgs.bun}/bin/bun install -g "${pkg}" || true'') packages}
   '';
 in
 {
+  systemd.user.services.bun-cache-cleanup = {
+    Unit = {
+      Description = "Prune Bun's download cache";
+    };
+
+    Service = {
+      Type = "oneshot";
+      ExecStart = pkgs.writeShellScript "bun-cache-cleanup" ''
+        set -euo pipefail
+
+        install -d -m 700 "$HOME/.cache"
+        exec 9>"$HOME/.cache/bun-maintenance.lock"
+        ${pkgs.util-linux}/bin/flock 9
+
+        export BUN_INSTALL="$HOME/.bun"
+        ${pkgs.bun}/bin/bun pm cache rm
+      '';
+    };
+  };
+
+  systemd.user.timers.bun-cache-cleanup = {
+    Unit = {
+      Description = "Daily Bun cache cleanup";
+    };
+
+    Timer = {
+      OnCalendar = "daily";
+      Persistent = true;
+      RandomizedDelaySec = "1h";
+    };
+
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
+  };
+
   # Install all of the user packages in here.
   home.packages = with pkgs; [
     inputs.awww.packages.${pkgs.stdenv.hostPlatform.system}.default
