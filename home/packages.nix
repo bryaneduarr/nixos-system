@@ -77,9 +77,11 @@ in
     curl
     docker
     deadnix
+    difftastic
     eza
     fastfetch
     fd
+    ffmpeg
     fzf
     gdb
     gcc
@@ -88,6 +90,7 @@ in
     gnumake
     herdr
     google-chrome
+    hyperfine
     jq
     killall
     kitty
@@ -115,6 +118,7 @@ in
     tailscale
     tree
     tree-sitter
+    typescript-language-server
     unzip
     uv
     valgrind
@@ -124,6 +128,7 @@ in
     wtype
     wev
     yazi
+    yq-go
     tmux
     tree
   ];
