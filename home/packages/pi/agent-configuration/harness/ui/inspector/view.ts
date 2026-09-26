@@ -40,14 +40,19 @@ export interface InspectorViewResult {
 }
 
 export function bodyHeight(terminalRows: number): number {
-  return Math.max(6, Math.min(48, Math.floor(terminalRows * 0.8) - 6));
+  const scaledHeight = Math.floor(terminalRows * 0.8) - 6;
+  return Math.max(6, Math.min(48, scaledHeight));
 }
 
 export function detailWidth(width: number): number {
-  const content = Math.max(8, width - 4);
-  if (width < MIN_TWO_PANE_WIDTH) return content;
-  const left = Math.max(MIN_LEFT_WIDTH, Math.min(MAX_LEFT_WIDTH, Math.round(content * 0.34)));
-  return Math.max(1, content - left - 3);
+  const contentWidth = Math.max(8, width - 4);
+  if (width < MIN_TWO_PANE_WIDTH) return contentWidth;
+
+  const leftWidth = Math.max(
+    MIN_LEFT_WIDTH,
+    Math.min(MAX_LEFT_WIDTH, Math.round(contentWidth * 0.34)),
+  );
+  return Math.max(1, contentWidth - leftWidth - 3);
 }
 
 export function wrappedDetail(
@@ -55,33 +60,65 @@ export function wrappedDetail(
   width: number,
   theme: Theme,
   artifactText: string | undefined,
-  expandedTasks: ReadonlySet<string>,
 ): string[] {
   if (!row) return [];
+
   const lines: string[] = [];
-  for (const line of buildDetail({
-    row, width, artifactText, taskExpanded: expandedTasks.has(row.entry.id),
-  })) {
-    if (line.text === "") {
+  const details = buildDetail({ row, width, artifactText });
+
+  for (const detail of details) {
+    if (detail.text === "") {
       lines.push("");
       continue;
     }
-    let styled = line.color ? theme.fg(line.color, line.text) : line.text;
-    if (line.bold) styled = theme.bold(styled);
-    const pieces = wrapTextWithAnsi(styled, width);
-    lines.push(...(pieces.length > 0 ? pieces : [""]));
+
+    let styledText = detail.color
+      ? theme.fg(detail.color, detail.text)
+      : detail.text;
+    if (detail.bold) styledText = theme.bold(styledText);
+
+    const wrappedLines = wrapTextWithAnsi(styledText, width);
+    lines.push(...(wrappedLines.length > 0 ? wrappedLines : [""]));
   }
+
   return lines;
 }
 
 export function computeListScroll(
-  previous: number, length: number, height: number, selected: number,
+  previous: number,
+  length: number,
+  height: number,
+  selected: number,
 ): number {
   const maxScroll = Math.max(0, length - height);
   let scroll = Math.min(previous, maxScroll);
-  if (selected < scroll) scroll = selected;
-  else if (selected >= scroll + height) scroll = selected - height + 1;
+
+  if (selected < scroll) {
+    scroll = selected;
+  } else if (selected >= scroll + height) {
+    scroll = selected - height + 1;
+  }
+
   return Math.max(0, Math.min(maxScroll, scroll));
+}
+
+function activityHeader(theme: Theme, width: number, totalCalls: number, active: boolean): string[] {
+  const activityGlyph = active ? "●" : "○";
+  const activityColor = active ? "accent" : "muted";
+  const indicator = theme.fg(activityColor, activityGlyph);
+  const callLabel = `${totalCalls} call${totalCalls === 1 ? "" : "s"}`;
+  const header = `${indicator} ${theme.fg("muted", callLabel)}`;
+  const border = theme.fg("borderMuted", "─".repeat(width));
+
+  return [truncateToWidth(header, width, "", true), border];
+}
+
+function idlePrompt(width: number, theme: Theme): string[] {
+  const prompt = "Initialize with a task to visualize tools.";
+  const padding = Math.max(0, Math.floor((width - visibleWidth(prompt)) / 2));
+  const centeredPrompt = `${" ".repeat(padding)}${prompt}`;
+
+  return ["", theme.fg("muted", centeredPrompt), ""];
 }
 
 export function renderInspector(state: InspectorViewState): InspectorViewResult {
@@ -98,78 +135,126 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
   let { detailScroll, subagentScroll, subagentSelectedId } = state;
   let listScroll = state.listScroll;
   let layout: InspectorLayout | undefined;
-  const totalCalls = activityStore.all().filter(
-    (entry) => entry.toolName !== "thinking" && entry.toolName !== "message" && entry.toolName !== "update",
+
+  const activityEntries = activityStore.all();
+  const totalCalls = activityEntries.filter(
+    (entry) => entry.toolName !== "thinking" &&
+      entry.toolName !== "message" &&
+      entry.toolName !== "update",
   ).length;
   const phase = activityStore.currentAgent().phase;
   const active = phase === "thinking" || phase === "working" || phase === "responding";
-  const header = `${theme.fg(active ? "accent" : "muted", active ? "●" : "○")} ${theme.fg(
-    "muted", `${totalCalls} call${totalCalls === 1 ? "" : "s"}`,
-  )}`;
-  const lines = [truncateToWidth(header, contentWidth, "", true), theme.fg("borderMuted", "─".repeat(contentWidth))];
+  const lines = activityHeader(theme, contentWidth, totalCalls, active);
 
-  if (activityStore.all().length === 0 && phase === "idle") {
-    const prompt = "Initialize with a task to visualize tools.";
-    const padding = Math.max(0, Math.floor((contentWidth - visibleWidth(prompt)) / 2));
-    lines.push("", theme.fg("muted", `${" ".repeat(padding)}${prompt}`), "");
+  if (activityEntries.length === 0 && phase === "idle") {
+    lines.push(...idlePrompt(contentWidth, theme));
   } else if (page === "subagents") {
-    lines.push(theme.bold(theme.fg("accent", "◆ Subagents")));
+    const title = theme.bold(theme.fg("accent", "◆ Subagents"));
+    lines.push(title);
+
     const subagents = state.subagents;
     if (subagents.length === 0) {
       lines.push(theme.fg("dim", "  No subagents have been spawned yet."));
     } else {
-      if (!subagentSelectedId || !subagents.some((row) => row.id === subagentSelectedId)) {
+      const selectionIsAvailable = subagentSelectedId &&
+        subagents.some((row) => row.id === subagentSelectedId);
+      if (!selectionIsAvailable) {
         subagentSelectedId = subagents[subagents.length - 1]?.id;
       }
-      const selected = subagents.findIndex((row) => row.id === subagentSelectedId);
-      const available = Math.max(1, height - 1);
-      const maxScroll = Math.max(0, subagents.length - available);
-      subagentScroll = Math.max(0, Math.min(maxScroll, Math.min(subagentScroll, Math.max(0, selected))));
-      if (selected >= subagentScroll + available) subagentScroll = selected - available + 1;
-      lines.push(...renderSubagentList({
-        rows: subagents, width: contentWidth, height: available,
-        scroll: subagentScroll, selectedId: subagentSelectedId ?? "", theme,
-      }));
+
+      const selectedIndex = subagents.findIndex((row) => row.id === subagentSelectedId);
+      const availableRows = Math.max(1, height - 1);
+      const maxScroll = Math.max(0, subagents.length - availableRows);
+      const preferredScroll = Math.min(subagentScroll, Math.max(0, selectedIndex));
+      subagentScroll = Math.max(0, Math.min(maxScroll, preferredScroll));
+      if (selectedIndex >= subagentScroll + availableRows) {
+        subagentScroll = selectedIndex - availableRows + 1;
+      }
+
+      const subagentLines = renderSubagentList({
+        rows: subagents,
+        width: contentWidth,
+        height: availableRows,
+        scroll: subagentScroll,
+        selectedId: subagentSelectedId ?? "",
+        theme,
+      });
+      lines.push(...subagentLines);
     }
   } else {
-    lines.push(theme.bold(theme.fg("accent", page === "tools" ? "◆ Tool calls" : "◆ User messages")));
+    const pageTitle = page === "tools" ? "◆ Tool calls" : "◆ User messages";
+    lines.push(theme.bold(theme.fg("accent", pageTitle)));
+
     if (rows.length === 0) {
-      lines.push(theme.fg("dim", page === "tools" ? "  No tool calls yet." : "  No user messages yet."));
+      const emptyText = page === "tools" ? "  No tool calls yet." : "  No user messages yet.";
+      lines.push(theme.fg("dim", emptyText));
     } else {
       listScroll = computeListScroll(listScroll, rows.length, listHeight, state.selected);
+
       const listLines = renderToolList({
-        rows, width: leftWidth, height: listHeight, scroll: listScroll,
-        selected: state.selected, expandedTasks: state.expandedTasks, theme,
+        rows,
+        width: leftWidth,
+        height: listHeight,
+        scroll: listScroll,
+        selected: state.selected,
+        expandedTasks: state.expandedTasks,
+        theme,
       });
+      const selectedRow = rows[state.selected];
       const detail = wrappedDetail(
-        rows[state.selected], Math.max(1, rightWidth), theme, state.artifactText, state.expandedTasks,
+        selectedRow,
+        Math.max(1, rightWidth),
+        theme,
+        state.artifactText,
       );
-      detailScroll = Math.max(0, Math.min(detailScroll, Math.max(0, detail.length - detailHeight)));
-      const detailLines = detail.slice(detailScroll, detailScroll + detailHeight)
-        .map((line) => truncateToWidth(line, rightWidth, "", true));
+      const maxDetailScroll = Math.max(0, detail.length - detailHeight);
+      detailScroll = Math.max(0, Math.min(detailScroll, maxDetailScroll));
+
+      const visibleDetail = detail.slice(detailScroll, detailScroll + detailHeight);
+      const detailLines = visibleDetail.map((line) =>
+        truncateToWidth(line, rightWidth, "", true),
+      );
+
       if (twoPane) {
-        for (let index = 0; index < height; index++) {
+        for (let index = 0; index < height; index += 1) {
           const left = listLines[index] ?? padCell("", leftWidth);
-          const divider = theme.fg(focus === "detail" ? "accent" : "borderMuted", "│");
-          lines.push(`${padCell(left, leftWidth)} ${divider} ${detailLines[index] ?? ""}`);
+          const dividerColor = focus === "detail" ? "accent" : "borderMuted";
+          const divider = theme.fg(dividerColor, "│");
+          const right = detailLines[index] ?? "";
+          lines.push(`${padCell(left, leftWidth)} ${divider} ${right}`);
         }
       } else {
         lines.push(...listLines);
-        lines.push(theme.bold(theme.fg(focus === "detail" ? "accent" : "muted", "DETAIL")));
+        const detailTitle = theme.bold(theme.fg(
+          focus === "detail" ? "accent" : "muted",
+          "DETAIL",
+        ));
+        lines.push(detailTitle);
         lines.push(...detailLines);
       }
+
       layout = {
-        leftWidth, bodyTop: 4, bodyHeight: twoPane ? height : listHeight + 1 + detailHeight,
-        listHeight, twoPane, rows,
+        leftWidth,
+        bodyTop: 4,
+        bodyHeight: twoPane ? height : listHeight + 1 + detailHeight,
+        listHeight,
+        twoPane,
+        rows,
       };
     }
   }
 
   const footerY = lines.length + 1;
   lines.push(footer(page, state.status, contentWidth, theme));
+
   return {
-    lines: frameModal(lines, width, theme), layout, footerY,
-    detailViewportHeight: detailHeight, subagentSelectedId, subagentScroll,
-    listScroll, detailScroll,
+    lines: frameModal(lines, width, theme),
+    layout,
+    footerY,
+    detailViewportHeight: detailHeight,
+    subagentSelectedId,
+    subagentScroll,
+    listScroll,
+    detailScroll,
   };
 }

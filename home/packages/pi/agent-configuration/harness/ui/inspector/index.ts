@@ -51,7 +51,7 @@ class ActivityInspector implements Component {
   }
 
   invalidate(): void {
-    /* Rendered fresh from the store each frame. */
+    return;
   }
 
   private get input(): InspectorInput {
@@ -144,8 +144,10 @@ class ActivityInspector implements Component {
 
   private wrappedDetail(rows: InspectorRow[]): string[] {
     return wrappedDetail(
-      this.navigation.currentRow(rows), detailWidth(this.renderWidth), this.theme,
-      this.navigation.artifactText, this.navigation.expandedTasks,
+      this.navigation.currentRow(rows),
+      detailWidth(this.renderWidth),
+      this.theme,
+      this.navigation.artifactText,
     );
   }
 
@@ -154,7 +156,6 @@ class ActivityInspector implements Component {
       row,
       width: Math.max(1, detailWidth(this.renderWidth)),
       artifactText: this.navigation.artifactText,
-      taskExpanded: this.navigation.expandedTasks.has(row.entry.id),
     });
   }
 
