@@ -1,13 +1,8 @@
-{ lib, piTools, pkgs, ... }:
+{ piTools, pkgs, ... }:
 let
   agentConfiguration = ../agent-configuration;
   mcpConfigurations = ../mcp-configurations;
-  upstreamSkillSources = lib.filter (line: line != "" && !(lib.hasPrefix "#" line)) (
-    lib.splitString "\n" (builtins.readFile (agentConfiguration + "/skills/upstream-sources.tsv"))
-  );
-  upstreamSkillNames = map (
-    line: lib.last (lib.splitString "/" (builtins.elemAt (lib.splitString "\t" line) 2))
-  ) upstreamSkillSources;
+  repositorySkills = ../../../../.agents/skills;
 
   mkJsonFile = source: {
     text = builtins.toJSON (import source);
@@ -33,14 +28,20 @@ in
     ".agents/skills/efficient-repository-workflow/SKILL.md" = mkSourceFile (
       agentConfiguration + "/skills/efficient-tools/SKILL.md"
     );
-    ".agents/skills/code-modularization/SKILL.md" = mkSourceFile (
-      agentConfiguration + "/skills/code-modularization/SKILL.md"
+    ".agents/skills/code-clarity" = mkSourceFile (
+      repositorySkills + "/code-clarity"
     );
-    ".agents/skills/code-clarity/SKILL.md" = mkSourceFile (
-      agentConfiguration + "/skills/code-clarity/SKILL.md"
+    ".agents/skills/code-modularization" = mkSourceFile (
+      repositorySkills + "/code-modularization"
     );
-    ".agents/skills/commit-workflow/SKILL.md" = mkSourceFile (
-      agentConfiguration + "/skills/commit-workflow/SKILL.md"
+    ".agents/skills/commit-workflow" = mkSourceFile (
+      repositorySkills + "/commit-workflow"
+    );
+    ".agents/skills/technical-writing" = mkSourceFile (
+      repositorySkills + "/technical-writing"
+    );
+    ".agents/skills/unslop" = mkSourceFile (
+      repositorySkills + "/unslop"
     );
     ".pi/agent/mcp.json" = mkJsonFile (agentConfiguration + "/settings/mcp.nix");
     ".config/mcp/mcp.json" = mkJsonFile (mcpConfigurations + "/mcp-host-configuration.nix");
@@ -63,8 +64,5 @@ in
       source = "${piTools}/lib/pi-packages";
       force = true;
     };
-  } // builtins.listToAttrs (map (name: {
-    name = ".agents/skills/${name}";
-    value = mkSourceFile (agentConfiguration + "/skills/upstream/${name}");
-  }) upstreamSkillNames);
+  };
 }
