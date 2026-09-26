@@ -4,17 +4,48 @@ import { join } from "node:path";
 const packagePath = process.argv[2];
 if (!packagePath) throw new Error("Pi package path is required");
 
+const ASSISTANT_RENDER_BEFORE = [
+	"const lines = super.render(width);",
+	"        if (this.hasToolCalls || lines.length === 0) {",
+].join("\n");
+const ASSISTANT_RENDER_AFTER = [
+	"const lines = super.render(width);",
+	'        if (lines.every((line) => line.trim() === "")) return [];',
+	"        if (this.hasToolCalls || lines.length === 0) {",
+].join("\n");
+const BUNDLED_RENDER_BEFORE = [
+	"render(width){",
+	"let lines=super.render(width);",
+	"return this.hasToolCalls||lines.length===0||",
+].join("");
+const BUNDLED_RENDER_AFTER = [
+	"render(width){",
+	"let lines=super.render(width);",
+	'return lines.every(line=>line.trim()==="")?[]:this.hasToolCalls||lines.length===0||',
+].join("");
+const MODULAR_THINKING_STATUS =
+	"            this.showStatus(`Thinking level: ${newLevel}`);\n";
+const MODULAR_DEFAULT_THINKING_STATUS =
+	"            this.showStatus(persist ? `Default thinking level: ${level}` : `Thinking level: ${level}`);\n";
+const BUNDLED_THINKING_STATUS = [
+	"this.updateEditorBorderColor(),",
+	"this.showStatus(`Thinking level: ${newLevel}`)",
+].join("");
+const BUNDLED_DEFAULT_THINKING_STATUS = [
+	"this.updateEditorBorderColor(),",
+	"this.showStatus(persist?`Default thinking level: ${level}`:`Thinking level: ${level}`)",
+].join("");
+
 function replaceOnce(path, before, after) {
 	const source = readFileSync(path, "utf8");
 	const first = source.indexOf(before);
-	if (first < 0 || source.indexOf(before, first + before.length) >= 0) {
+	const duplicate = source.indexOf(before, first + before.length);
+	if (first < 0 || duplicate >= 0) {
 		throw new Error(`Expected exactly one assistant render site in ${path}`);
 	}
 	writeFileSync(path, source.replace(before, after));
 }
 
-// Keep tool calls mounted for Alt+V, but leave them out of the chat layout
-// while hidden. Filtering the container also removes each tool's Spacer(1).
 const modularFilter = `class HarnessFilteredChatContainer extends Container {
     render(width) {
         if (Reflect.get(globalThis, "pi.harness.toolHistoryVisible") !== false)
@@ -32,17 +63,14 @@ const modularFilter = `class HarnessFilteredChatContainer extends Container {
 }
 `;
 
-// Pi adds spacers before it applies Markdown transformers. During streaming,
-// thinking arrives before the tool call, so a hidden assistant message can
-// temporarily render blank rows even before hasToolCalls becomes true.
 const componentPath = join(
 	packagePath,
 	"dist/modes/interactive/components/assistant-message.js",
 );
 replaceOnce(
 	componentPath,
-	"const lines = super.render(width);\n        if (this.hasToolCalls || lines.length === 0) {",
-	'const lines = super.render(width);\n        if (lines.every((line) => line.trim() === "")) return [];\n        if (this.hasToolCalls || lines.length === 0) {',
+	ASSISTANT_RENDER_BEFORE,
+	ASSISTANT_RENDER_AFTER,
 );
 
 const interactivePath = join(
@@ -61,23 +89,21 @@ replaceOnce(
 );
 replaceOnce(
 	interactivePath,
-	"            this.showStatus(`Thinking level: ${newLevel}`);\n",
+	MODULAR_THINKING_STATUS,
 	"",
 );
 replaceOnce(
 	interactivePath,
-	"            this.showStatus(persist ? `Default thinking level: ${level}` : `Thinking level: ${level}`);\n",
+	MODULAR_DEFAULT_THINKING_STATUS,
 	"",
 );
 
-// The installed Pi executable runs the bundled copy of the same component.
 const chunksPath = join(packagePath, "dist/bundle/chunks");
-const bundledBefore =
-	"render(width){let lines=super.render(width);return this.hasToolCalls||lines.length===0||";
-const matchingChunks = readdirSync(chunksPath)
-	.filter((name) => name.endsWith(".js"))
-	.map((name) => join(chunksPath, name))
-	.filter((path) => readFileSync(path, "utf8").includes(bundledBefore));
+const chunkFiles = readdirSync(chunksPath).filter((name) => name.endsWith(".js"));
+const chunkPaths = chunkFiles.map((name) => join(chunksPath, name));
+const matchingChunks = chunkPaths.filter((path) =>
+	readFileSync(path, "utf8").includes(BUNDLED_RENDER_BEFORE),
+);
 if (matchingChunks.length !== 1) {
 	throw new Error(
 		`Expected one bundled assistant component, found ${matchingChunks.length}`,
@@ -85,12 +111,18 @@ if (matchingChunks.length !== 1) {
 }
 replaceOnce(
 	matchingChunks[0],
-	bundledBefore,
-	'render(width){let lines=super.render(width);return lines.every(line=>line.trim()==="")?[]:this.hasToolCalls||lines.length===0||',
+	BUNDLED_RENDER_BEFORE,
+	BUNDLED_RENDER_AFTER,
 );
 
-const bundledFilter =
-	'var HarnessFilteredChatContainer=class extends Container{render(width){if(Reflect.get(globalThis,"pi.harness.toolHistoryVisible")!==false)return super.render(width);let children=this.children;this.children=children.filter(child=>!(child instanceof ToolExecutionComponent)&&!(child instanceof AssistantMessageComponent&&(child.isStreaming||child.hasToolCalls)));try{return super.render(width)}finally{this.children=children}}};';
+const bundledFilter = [
+	"var HarnessFilteredChatContainer=class extends Container{render(width){",
+	'if(Reflect.get(globalThis,"pi.harness.toolHistoryVisible")!==false)return super.render(width);',
+	"let children=this.children;",
+	"this.children=children.filter(child=>!(child instanceof ToolExecutionComponent)&&",
+	"!(child instanceof AssistantMessageComponent&&(child.isStreaming||child.hasToolCalls)));",
+	"try{return super.render(width)}finally{this.children=children}}};",
+].join("");
 replaceOnce(
 	matchingChunks[0],
 	"var InteractiveMode=class",
@@ -103,11 +135,11 @@ replaceOnce(
 );
 replaceOnce(
 	matchingChunks[0],
-	'this.updateEditorBorderColor(),this.showStatus(`Thinking level: ${newLevel}`)',
+	BUNDLED_THINKING_STATUS,
 	"this.updateEditorBorderColor()",
 );
 replaceOnce(
 	matchingChunks[0],
-	'this.updateEditorBorderColor(),this.showStatus(persist?`Default thinking level: ${level}`:`Thinking level: ${level}`)',
+	BUNDLED_DEFAULT_THINKING_STATUS,
 	"this.updateEditorBorderColor()",
 );
