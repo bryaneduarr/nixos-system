@@ -8,6 +8,26 @@ import { searchRepo } from "./tools/search.ts";
 import { EditParams, ReadParams, RunParams, SearchParams } from "./tools/parameters.ts";
 import { installHarnessPresentation } from "./ui/install.ts";
 import { createHarnessRenderers } from "./ui/tool-renderer.ts";
+import { registerSubagentTool } from "./subagents/tool.ts";
+import { TASK_TOOL_NAME } from "./subagents/roles.ts";
+
+const SEARCH_TOOL_DESCRIPTION = [
+  "Find filenames, text, symbols, definitions, references, tests, structural matches, or git history.",
+  "Returns a small, classified result with omitted counts.",
+].join(" ");
+const READ_TOOL_DESCRIPTION = [
+  "Read a bounded slice of a source file by path, line range, or symbol.",
+  "Large broad reads return structure and symbols instead of the whole file.",
+].join(" ");
+const EDIT_TOOL_DESCRIPTION = [
+  "Modify files with precise patches.",
+  "Supports exact replacements, file creation, deletion, and moves.",
+  "Returns a compact name and diff summary instead of the whole file.",
+].join(" ");
+const RUN_TOOL_DESCRIPTION = [
+  "Run a shell command when no specialized tool covers the operation.",
+  "Captures exit code, compresses large output, and stores the full output under .agent/runs.",
+].join(" ");
 
 const WEB_TOOLS = [
   "web_search",
@@ -15,11 +35,16 @@ const WEB_TOOLS = [
   "get_search_content",
   "source_check",
 ] as const;
-const ALLOWED_TOOL_SET = new Set<string>([...HARNESS_TOOLS, ...WEB_TOOLS]);
+const ALLOWED_TOOL_SET = new Set<string>([
+  ...HARNESS_TOOLS,
+  TASK_TOOL_NAME,
+  ...WEB_TOOLS,
+]);
 
 function enforceActiveTools(pi: ExtensionAPI): void {
   const registered = new Set(pi.getAllTools().map((tool) => tool.name));
-  pi.setActiveTools([...HARNESS_TOOLS, ...WEB_TOOLS.filter((tool) => registered.has(tool))]);
+  const activeWebTools = WEB_TOOLS.filter((tool) => registered.has(tool));
+  pi.setActiveTools([...HARNESS_TOOLS, TASK_TOOL_NAME, ...activeWebTools]);
 }
 
 async function writeStatusFile(pi: ExtensionAPI): Promise<void> {
@@ -33,7 +58,7 @@ async function writeStatusFile(pi: ExtensionAPI): Promise<void> {
   try {
     await writeFile(target, JSON.stringify(payload, null, 2), "utf8");
   } catch {
-    // Diagnostics only.
+    return;
   }
 }
 
@@ -41,8 +66,7 @@ export default function harnessExtension(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "search",
     label: "Search",
-    description:
-      "Find filenames, text, symbols, definitions, references, tests, structural matches, or git history. Returns a small, classified result with omitted counts.",
+    description: SEARCH_TOOL_DESCRIPTION,
     promptSnippet: "Locate files, symbols, references, and tests with bounded output",
     promptGuidelines: [
       "Use search to locate relevant files, symbols, references, and tests before reading or editing.",
@@ -65,8 +89,7 @@ export default function harnessExtension(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "read",
     label: "Read",
-    description:
-      "Read a bounded slice of a source file by path, line range, or symbol. Large broad reads return structure and symbols instead of the whole file.",
+    description: READ_TOOL_DESCRIPTION,
     promptSnippet: "Read only the source needed for the current problem",
     promptGuidelines: [
       "Use read for the source required to understand the problem; it bounds large files automatically.",
@@ -88,8 +111,7 @@ export default function harnessExtension(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "edit",
     label: "Edit",
-    description:
-      "Modify files with precise patches. Supports exact replacements, file creation, deletion, and moves. Returns a compact name and diff summary instead of the whole file.",
+    description: EDIT_TOOL_DESCRIPTION,
     promptSnippet: "Apply precise file edits and report a compact diff",
     promptGuidelines: [
       "Use edit for code changes; prefer exact-text replacements over rewriting whole files.",
@@ -124,8 +146,7 @@ export default function harnessExtension(pi: ExtensionAPI): void {
   pi.registerTool({
     name: "run",
     label: "Run",
-    description:
-      "Run a shell command when no specialized tool covers the operation. Captures exit code, compresses large output, and stores the full output under .agent/runs.",
+    description: RUN_TOOL_DESCRIPTION,
     promptSnippet: "Run shell commands not covered by search, read, or edit",
     promptGuidelines: ["Use run only when search, read, or edit does not cover the operation."],
     parameters: RunParams,
@@ -140,6 +161,8 @@ export default function harnessExtension(pi: ExtensionAPI): void {
       return { content: [{ type: "text", text }], details: {} };
     },
   });
+
+  registerSubagentTool(pi);
 
   installHarnessPresentation(pi);
 
@@ -162,9 +185,13 @@ export default function harnessExtension(pi: ExtensionAPI): void {
 
   pi.on("tool_call", async (event) => {
     if (!ALLOWED_TOOL_SET.has(event.toolName)) {
+      const reason = [
+        `Tool "${event.toolName}" is not enabled in this session.`,
+        "Use the harness tools or the approved local web research tools.",
+      ].join(" ");
       return {
         block: true,
-        reason: `Tool "${event.toolName}" is not enabled in this session. Use the harness tools or the approved local web research tools.`,
+        reason,
       };
     }
   });

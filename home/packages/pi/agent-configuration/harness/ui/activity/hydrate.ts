@@ -7,6 +7,8 @@ import {
   readSubagentUsage,
 } from "../../activity/parse.ts";
 import { isHarnessTool } from "../../tools/config.ts";
+import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { taskResultFailed } from "../../subagents/result.ts";
 import { extractText, resultFailed } from "../tool-renderer.ts";
 import { recordThinking, recordUpdate, recordUserMessage, safeParseTimestamp } from "./records.ts";
 
@@ -91,9 +93,11 @@ export function hydrateFromSession(ctx: ExtensionContext): void {
         ? (message.content as Array<{ type: string; text?: string }>)
         : [],
     );
-    const status: ActivityStatus = message.isError === true ||
-      (isHarnessTool(toolName) && resultFailed(toolName, text))
-        ? "error" : "success";
+    const failedTask = toolName === TASK_TOOL_NAME && taskResultFailed(message.details);
+    const failedHarnessTool = isHarnessTool(toolName) && resultFailed(toolName, text);
+    const status: ActivityStatus = message.isError === true || failedTask || failedHarnessTool
+      ? "error"
+      : "success";
     activityStore.begin({
       id,
       toolName,

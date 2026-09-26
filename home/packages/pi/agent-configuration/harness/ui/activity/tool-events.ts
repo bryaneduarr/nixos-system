@@ -2,6 +2,8 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { type ActivityStatus, activityStore } from "../../activity/store.ts";
 import { readSubActivity, readSubagentMetadata, readSubagentUsage } from "../../activity/parse.ts";
 import { isHarnessTool } from "../../tools/config.ts";
+import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { taskResultFailed } from "../../subagents/result.ts";
 import { extractText, resultFailed } from "../tool-renderer.ts";
 
 interface RendererContent {
@@ -48,9 +50,11 @@ export function registerToolActivity(
     touch(ctx);
     const result = rendererPayload(event.result);
     const text = extractText(result.content ?? []);
-    const status: ActivityStatus = event.isError ||
-      (isHarnessTool(event.toolName) && resultFailed(event.toolName, text))
-        ? "error" : "success";
+    const failedTask = event.toolName === TASK_TOOL_NAME && taskResultFailed(result.details);
+    const failedHarnessTool = isHarnessTool(event.toolName) && resultFailed(event.toolName, text);
+    const status: ActivityStatus = event.isError || failedTask || failedHarnessTool
+      ? "error"
+      : "success";
     activityStore.finish(event.toolCallId, {
       text,
       details: result.details,
