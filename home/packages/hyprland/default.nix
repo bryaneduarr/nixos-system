@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  inputs,
   ...
 }:
 {
@@ -26,7 +25,7 @@
       exec-once = [
         "hyprctl setcursor Bibata-Modern-Classic 24"
         "systemctl --user import-environment WAYLAND_DISPLAY"
-        "bash $HOME/.config/hypr/scripts/awww-matugen-init.sh"
+        "bash $HOME/.config/wallpapers/awww-matugen-init.sh"
       ];
     }
     // import ./animations.nix
@@ -44,37 +43,10 @@
     };
 
     file = {
-      ".config/hypr/scripts/awww-wallpaper-switch.sh" = {
-        source = ./scripts/awww-wallpaper-switch.sh;
-        executable = true;
-      };
-
       ".config/hypr/scripts/right-alt-trigger.sh" = {
         source = ./scripts/right-alt-trigger.sh;
         executable = true;
       };
-
-      ".config/hypr/scripts/awww-matugen-init.sh" = {
-        source = ./scripts/awww-matugen-init.sh;
-        executable = true;
-      };
-    };
-  };
-
-  systemd.user.services.awww-daemon = {
-    Unit = {
-      Description = "awww wallpaper daemon";
-      After = [ "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
-    };
-    Service = {
-      ExecStart = "${inputs.awww.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/awww-daemon";
-      Restart = "on-failure";
-      RestartSec = 0;
-      StartLimitIntervalSec = 0;
-    };
-    Install = {
-      WantedBy = [ "graphical-session.target" ];
     };
   };
 }

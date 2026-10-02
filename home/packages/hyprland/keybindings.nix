@@ -38,7 +38,7 @@
     "SUPER SHIFT, 5, movetoworkspace, 5"
 
     # awww wallpaper switch
-    "SUPER SHIFT, W, exec, bash $HOME/.config/hypr/scripts/awww-wallpaper-switch.sh"
+    "SUPER SHIFT, W, exec, bash $HOME/.config/wallpapers/awww-wallpaper-switch.sh"
   ];
 
   bindm = [

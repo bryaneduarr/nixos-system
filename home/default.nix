@@ -19,6 +19,8 @@
     # Commands and scripts configuration will be placed here.
     ./commands/worktree-dev.nix
 
+    ./desktop/wallpapers
+
     # Packages installed configuration will be placed here.
     ./packages/btop.nix
     ./packages/git.nix
