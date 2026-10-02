@@ -29,6 +29,7 @@
     ./packages/onedrive/default.nix
     ./packages/pi/default.nix
     ./packages/starship/default.nix
+    ./packages/t3code/default.nix
     ./packages/tmux.nix
     ./packages/vscode.nix
     ./packages/waybar/default.nix
