@@ -118,8 +118,14 @@ let
       ];
     assert !(builtins.hasAttr "${otherCompositor}/workspaces" bar);
     assert !(builtins.hasAttr "${otherCompositor}/window" bar);
-    assert home.programs.waybar.systemd.enable;
+    assert home.programs.waybar.enable == hyprlandEnabled;
+    assert home.programs.waybar.systemd.enable == hyprlandEnabled;
     assert home.programs.waybar.systemd.targets == [ "graphical-session.target" ];
+    assert builtins.hasAttr "waybar" home.systemd.user.services == hyprlandEnabled;
+    assert builtins.hasAttr "waybar/config" configFiles == hyprlandEnabled;
+    assert builtins.hasAttr "waybar/style.css" configFiles == hyprlandEnabled;
+    assert builtins.hasAttr "systemd/user/waybar.service" configFiles == hyprlandEnabled;
+    assert builtins.elem "waybar" packageNames == hyprlandEnabled;
     assert wallpapers.Install.WantedBy == [ "graphical-session.target" ];
     assert wallpapers.Unit.PartOf == [ "graphical-session.target" ];
     assert configFiles."wallpapers/awww-matugen-init.sh".executable;

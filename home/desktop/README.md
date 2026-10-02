@@ -11,7 +11,7 @@
 
 Changing the selector does not replace a running compositor. A compositor reload alone does not apply this switch.
 
-NixOS installs only the selected compositor. Home Manager selects its configuration, Waybar modules, and desktop-specific Zen browser defaults. Niri also gets X11 application support through `xwayland-satellite`.
+NixOS installs only the selected compositor. Home Manager selects its configuration and desktop-specific Zen browser defaults. Waybar runs only in Hyprland. Niri also gets X11 application support through `xwayland-satellite`.
 
 ## Restore the managed Hyprland configuration
 
@@ -74,4 +74,4 @@ python3 home/desktop/tests/test_wallpapers.py
 
 The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, terminal blur, Waybar, and both system derivations. Nix substitutes the shared appearance values into `home/packages/niri/config.kdl`, then validates the result with the selected Niri package when building the managed file.
 
-The session setup follows [Niri's systemd integration](https://niri-wm.github.io/niri/Example-systemd-Setup.html). Waybar uses its native [Niri workspace](https://github.com/Alexays/Waybar/blob/master/man/waybar-niri-workspaces.5.scd) and [Niri window](https://github.com/Alexays/Waybar/blob/master/man/waybar-niri-window.5.scd) modules.
+The session setup follows [Niri's systemd integration](https://niri-wm.github.io/niri/Example-systemd-Setup.html). Selecting Niri removes Waybar's package, configuration, and user service without changing the Hyprland bar.

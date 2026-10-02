@@ -5,14 +5,15 @@
 }:
 let
   compositor = osConfig.desktop.compositor;
+  hyprlandEnabled = compositor == "hyprland";
 in
 {
   programs.waybar = {
-    enable = true;
+    enable = hyprlandEnabled;
     package = pkgs.waybar;
 
     systemd = {
-      enable = true;
+      enable = hyprlandEnabled;
       targets = [ "graphical-session.target" ];
     };
 
