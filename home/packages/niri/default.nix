@@ -1,12 +1,30 @@
 { pkgs, osConfig, ... }:
+let
+  appearance = import ../../desktop/appearance-constants.nix;
+
+  substitutions = {
+    "@blurPasses@" = toString appearance.blur.passes;
+    "@blurOffset@" = toString appearance.blur.size;
+    "@rounding@" = toString appearance.rounding;
+  };
+
+  configText =
+    builtins.replaceStrings (builtins.attrNames substitutions) (builtins.attrValues substitutions)
+      (builtins.readFile ./config.kdl);
+
+  configFile = pkgs.writeText "niri-config.kdl" configText;
+in
 {
   xdg.configFile."niri/config.kdl".source =
     pkgs.runCommand "niri-config.kdl"
       {
         nativeBuildInputs = [ osConfig.programs.niri.package ];
+        passthru = {
+          inherit configText;
+        };
       }
       ''
-        niri validate --config ${./config.kdl}
-        cp ${./config.kdl} $out
+        niri validate --config ${configFile}
+        cp ${configFile} $out
       '';
 }

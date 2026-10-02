@@ -2,6 +2,7 @@ let
   flake = builtins.getFlake ("path:" + toString ../../..);
   inherit (flake.inputs.nixpkgs) lib;
   system = flake.nixosConfigurations.nixos;
+  appearance = import ../appearance-constants.nix;
 
   selectCompositor =
     compositor:
@@ -22,7 +23,7 @@ let
       bar = home.programs.waybar.settings.mainBar;
       portals = config.xdg.portal.config.${compositor};
       wallpapers = home.systemd.user.services.awww-daemon;
-      niriConfigText = builtins.readFile ../../packages/niri/config.kdl;
+      niriConfigText = if hyprlandEnabled then "" else configFiles."niri/config.kdl".source.configText;
       installedPackages = config.environment.systemPackages ++ home.home.packages;
       packageNames = map (package: package.pname or package.name) installedPackages;
       sessions = lib.concatMap (
@@ -63,6 +64,26 @@ let
           ];
     assert hyprlandEnabled || lib.hasInfix "Super+Page_Up { focus-workspace-up; }" niriConfigText;
     assert hyprlandEnabled || lib.hasInfix "Super+Page_Down { focus-workspace-down; }" niriConfigText;
+    assert home.programs.kitty.settings.background_opacity == "0.90";
+    assert home.programs.kitty.settings.dynamic_background_opacity;
+    assert hyprlandEnabled || lib.hasInfix "passes ${toString appearance.blur.passes}" niriConfigText;
+    assert hyprlandEnabled || lib.hasInfix "offset ${toString appearance.blur.size}" niriConfigText;
+    assert
+      hyprlandEnabled
+      || lib.hasInfix "geometry-corner-radius ${toString appearance.rounding}" niriConfigText;
+    assert
+      hyprlandEnabled
+      || lib.hasInfix ''
+        window-rule {
+            match app-id="^kitty$"
+
+            background-effect {
+                blur true
+                xray false
+            }
+        }
+      '' niriConfigText;
+    assert hyprlandEnabled || !(lib.hasInfix "    opacity " niriConfigText);
     assert sessions == expectedSessions;
     assert !(builtins.elem otherCompositor packageNames);
     assert builtins.hasAttr "hypr/hyprland.conf" configFiles == hyprlandEnabled;

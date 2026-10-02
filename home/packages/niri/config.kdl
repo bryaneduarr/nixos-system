@@ -54,6 +54,13 @@ layout {
     }
 }
 
+blur {
+    passes @blurPasses@
+    offset @blurOffset@
+    noise 0.0117
+    saturation 1.0
+}
+
 workspace "1"
 workspace "2"
 workspace "3"
@@ -63,8 +70,17 @@ workspace "5"
 prefer-no-csd
 
 window-rule {
-    geometry-corner-radius 6
+    geometry-corner-radius @rounding@
     clip-to-geometry true
+}
+
+window-rule {
+    match app-id="^kitty$"
+
+    background-effect {
+        blur true
+        xray false
+    }
 }
 
 spawn-sh-at-startup "bash \"$HOME/.config/wallpapers/awww-matugen-init.sh\""

@@ -30,6 +30,15 @@ Edit the Nix files under `home/packages/hyprland/` to change Hyprland settings. 
 
 Both compositors use one `awww-daemon` user service and the same `~/.cache/matugen/last-wallpaper` cache. The shared scripts are in `home/desktop/wallpapers/scripts/`. An empty wallpaper directory leaves the session running without a wallpaper.
 
+## Adjust terminal blur in Niri
+
+1. Edit `blur` in `home/desktop/appearance-constants.nix` to change blur strength in both desktops.
+2. Run `nrs` to apply the configuration.
+
+Niri uses [native background blur](https://niri-wm.github.io/niri/Window-Effects.html#blur) for Kitty, with four passes and an offset of five. Kitty keeps its 90% background opacity without dimming text. Normal blur also includes windows behind the terminal, matching Hyprland's disabled xray setting.
+
+Niri's normal blur is experimental. It can disappear during window opening, closing, and tiled-window dragging. See [Niri's non-xray limitations](https://niri-wm.github.io/niri/Window-Effects.html#non-xray-effects-experimental).
+
 ## Use the Niri key bindings
 
 `Super` is the Windows key. The bindings use `Super` explicitly rather than [Niri's context-dependent `Mod` alias](https://niri-wm.github.io/niri/Configuration:-Key-Bindings.html).
@@ -56,6 +65,6 @@ python3 home/desktop/tests/test_hyprland_config.py
 python3 home/desktop/tests/test_wallpapers.py
 ```
 
-The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, Waybar, and both system derivations. Nix validates `home/packages/niri/config.kdl` with the selected Niri package when building the managed file.
+The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, terminal blur, Waybar, and both system derivations. Nix substitutes the shared appearance values into `home/packages/niri/config.kdl`, then validates the result with the selected Niri package when building the managed file.
 
 The session setup follows [Niri's systemd integration](https://niri-wm.github.io/niri/Example-systemd-Setup.html). Waybar uses its native [Niri workspace](https://github.com/Alexays/Waybar/blob/master/man/waybar-niri-workspaces.5.scd) and [Niri window](https://github.com/Alexays/Waybar/blob/master/man/waybar-niri-window.5.scd) modules.
