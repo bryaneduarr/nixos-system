@@ -6,6 +6,8 @@
   ...
 }:
 let
+  engram = pkgs.callPackage ./packages/engram { };
+
   activationPath = lib.makeBinPath [
     pkgs.bun
     pkgs.nodejs_latest
@@ -78,6 +80,7 @@ in
     docker
     deadnix
     difftastic
+    engram
     eza
     fastfetch
     fd
