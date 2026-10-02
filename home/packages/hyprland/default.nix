@@ -1,4 +1,17 @@
-{ pkgs, inputs, ... }: {
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
+{
+  xdg.configFile."hyprland-mimeapps.list".text = lib.generators.toINI { } {
+    "Default Applications" = lib.mapAttrs (
+      _: applications: lib.concatStringsSep ";" applications
+    ) config.xdg.mimeApps.defaultApplications;
+  };
+
   wayland.windowManager.hyprland = {
     enable = true;
     configType = "hyprlang";
