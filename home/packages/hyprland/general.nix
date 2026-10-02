@@ -1,7 +1,10 @@
+let
+  appearance = import ../../desktop/appearance-constants.nix;
+in
 {
   general = {
-    gaps_in = 4;
-    gaps_out = 5;
+    gaps_in = appearance.gaps.inner;
+    gaps_out = appearance.gaps.outer;
     gaps_workspaces = 50;
     border_size = 0;
     "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";

@@ -1,12 +1,14 @@
+let
+  appearance = import ../../desktop/appearance-constants.nix;
+in
 {
   decoration = {
-    rounding = 6;
+    inherit (appearance) rounding;
     rounding_power = 2.5;
 
     blur = {
       enabled = true;
-      size = 5;
-      passes = 4;
+      inherit (appearance.blur) size passes;
       ignore_opacity = true;
       xray = false;
       new_optimizations = false;
