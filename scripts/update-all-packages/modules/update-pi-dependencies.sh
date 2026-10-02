@@ -28,6 +28,8 @@ _update_pi_dependencies() {
     --legacy-peer-deps \
     --ignore-scripts \
     --save-exact
+
+  normalize_pi_npm_lock_integrity "$repo_root/home/packages/pi/package-lock.json"
 }
 
 update_pi_dependencies() {
