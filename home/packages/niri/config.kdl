@@ -75,6 +75,7 @@ workspace "5"
 prefer-no-csd
 
 window-rule {
+    open-maximized-to-edges false
     geometry-corner-radius @rounding@
     clip-to-geometry true
 }

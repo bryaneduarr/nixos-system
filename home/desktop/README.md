@@ -46,6 +46,8 @@ Niri's normal blur is experimental. It can disappear during window opening, clos
 
 Both desktops use five-pixel outer margins, eight pixels between tiled windows, six-pixel rounded corners, and no borders. Hyprland applies `gaps_in = 4` to each adjacent window. Niri uses `gaps 8` and [struts](https://niri-wm.github.io/niri/Configuration:-Layout.html#struts) of `-3` to match the outer margins. Niri's focus ring is disabled so it does not cover the gaps or tint transparent windows.
 
+Niri prevents applications from opening maximized to the screen edges because that state bypasses gaps. Use `Super+F` for a full-width column that keeps the margins. Fullscreen through `Super+Shift+F` still covers the screen.
+
 ## Use the Niri key bindings
 
 `Super` is the Windows key. The bindings use `Super` explicitly rather than [Niri's context-dependent `Mod` alias](https://niri-wm.github.io/niri/Configuration:-Key-Bindings.html).

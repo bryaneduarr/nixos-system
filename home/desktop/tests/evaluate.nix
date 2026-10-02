@@ -97,6 +97,7 @@ let
       ];
     assert hyprlandEnabled || lib.hasInfix "focus-ring {\n        off\n    }" niriConfigText;
     assert hyprlandEnabled || lib.hasInfix "border {\n        off\n    }" niriConfigText;
+    assert hyprlandEnabled || lib.hasInfix "open-maximized-to-edges false" niriConfigText;
     assert sessions == expectedSessions;
     assert !(builtins.elem otherCompositor packageNames);
     assert builtins.hasAttr "hypr/hyprland.conf" configFiles == hyprlandEnabled;
