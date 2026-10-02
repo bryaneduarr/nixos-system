@@ -24,6 +24,8 @@ let
       portals = config.xdg.portal.config.${compositor};
       wallpapers = home.systemd.user.services.awww-daemon;
       niriConfigText = if hyprlandEnabled then "" else configFiles."niri/config.kdl".source.configText;
+      niriWindowGap = appearance.gaps.inner * 2;
+      niriOuterStrut = appearance.gaps.outer - niriWindowGap;
       installedPackages = config.environment.systemPackages ++ home.home.packages;
       packageNames = map (package: package.pname or package.name) installedPackages;
       sessions = lib.concatMap (
@@ -84,6 +86,17 @@ let
         }
       '' niriConfigText;
     assert hyprlandEnabled || !(lib.hasInfix "    opacity " niriConfigText);
+    assert hyprlandEnabled || lib.hasInfix "gaps ${toString niriWindowGap}" niriConfigText;
+    assert
+      hyprlandEnabled
+      || lib.all (edge: lib.hasInfix "${edge} ${toString niriOuterStrut}" niriConfigText) [
+        "left"
+        "right"
+        "top"
+        "bottom"
+      ];
+    assert hyprlandEnabled || lib.hasInfix "focus-ring {\n        off\n    }" niriConfigText;
+    assert hyprlandEnabled || lib.hasInfix "border {\n        off\n    }" niriConfigText;
     assert sessions == expectedSessions;
     assert !(builtins.elem otherCompositor packageNames);
     assert builtins.hasAttr "hypr/hyprland.conf" configFiles == hyprlandEnabled;

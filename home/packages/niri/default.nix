@@ -1,8 +1,12 @@
 { pkgs, osConfig, ... }:
 let
   appearance = import ../../desktop/appearance-constants.nix;
+  windowGap = appearance.gaps.inner * 2;
+  outerStrut = appearance.gaps.outer - windowGap;
 
   substitutions = {
+    "@windowGap@" = toString windowGap;
+    "@outerStrut@" = toString outerStrut;
     "@blurPasses@" = toString appearance.blur.passes;
     "@blurOffset@" = toString appearance.blur.size;
     "@rounding@" = toString appearance.rounding;

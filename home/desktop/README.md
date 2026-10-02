@@ -39,6 +39,13 @@ Niri uses [native background blur](https://niri-wm.github.io/niri/Window-Effects
 
 Niri's normal blur is experimental. It can disappear during window opening, closing, and tiled-window dragging. See [Niri's non-xray limitations](https://niri-wm.github.io/niri/Window-Effects.html#non-xray-effects-experimental).
 
+## Match window spacing between desktops
+
+1. Edit `gaps` and `rounding` in `home/desktop/appearance-constants.nix`.
+2. Run `nrs` to apply the configuration.
+
+Both desktops use five-pixel outer margins, eight pixels between tiled windows, six-pixel rounded corners, and no borders. Hyprland applies `gaps_in = 4` to each adjacent window. Niri uses `gaps 8` and [struts](https://niri-wm.github.io/niri/Configuration:-Layout.html#struts) of `-3` to match the outer margins. Niri's focus ring is disabled so it does not cover the gaps or tint transparent windows.
+
 ## Use the Niri key bindings
 
 `Super` is the Windows key. The bindings use `Super` explicitly rather than [Niri's context-dependent `Mod` alias](https://niri-wm.github.io/niri/Configuration:-Key-Bindings.html).

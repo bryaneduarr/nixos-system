@@ -31,7 +31,14 @@ cursor {
 }
 
 layout {
-    gaps 5
+    gaps @windowGap@
+
+    struts {
+        left @outerStrut@
+        right @outerStrut@
+        top @outerStrut@
+        bottom @outerStrut@
+    }
 
     preset-column-widths {
         proportion 0.33333
@@ -44,9 +51,7 @@ layout {
     }
 
     focus-ring {
-        width 2
-        active-color "#33ccff"
-        inactive-color "#595959"
+        off
     }
 
     border {
