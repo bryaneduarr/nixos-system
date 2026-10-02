@@ -2,7 +2,6 @@
 let
   agentConfiguration = ../agent-configuration;
   mcpConfigurations = ../mcp-configurations;
-  repositorySkills = ../../../../.agents/skills;
 
   mkJsonFile = source: {
     text = builtins.toJSON (import source);
@@ -22,30 +21,17 @@ in
       text = builtins.toJSON (import (agentConfiguration + "/settings/web-search.nix") { inherit pkgs; });
       force = true;
     };
-    ".agents/skills/web-research/SKILL.md" = mkSourceFile (
+    ".pi/agent/skills/web-research/SKILL.md" = mkSourceFile (
       agentConfiguration + "/skills/web-research/SKILL.md"
     );
-    ".agents/skills/efficient-repository-workflow/SKILL.md" = mkSourceFile (
+    ".pi/agent/skills/efficient-repository-workflow/SKILL.md" = mkSourceFile (
       agentConfiguration + "/skills/efficient-tools/SKILL.md"
-    );
-    ".agents/skills/code-clarity" = mkSourceFile (
-      repositorySkills + "/code-clarity"
-    );
-    ".agents/skills/code-modularization" = mkSourceFile (
-      repositorySkills + "/code-modularization"
-    );
-    ".agents/skills/commit-workflow" = mkSourceFile (
-      repositorySkills + "/commit-workflow"
-    );
-    ".agents/skills/technical-writing" = mkSourceFile (
-      repositorySkills + "/technical-writing"
-    );
-    ".agents/skills/unslop" = mkSourceFile (
-      repositorySkills + "/unslop"
     );
     ".pi/agent/mcp.json" = mkJsonFile (agentConfiguration + "/settings/mcp.nix");
     ".config/mcp/mcp.json" = mkJsonFile (mcpConfigurations + "/mcp-host-configuration.nix");
-    ".pi/agent/extensions/clear.ts" = mkSourceFile (agentConfiguration + "/extensions/clear-session.ts");
+    ".pi/agent/extensions/clear.ts" = mkSourceFile (
+      agentConfiguration + "/extensions/clear-session.ts"
+    );
     ".pi/agent/extensions/last-model.ts" = mkSourceFile (
       agentConfiguration + "/extensions/last-model.ts"
     );

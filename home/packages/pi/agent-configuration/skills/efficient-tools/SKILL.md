@@ -53,7 +53,7 @@ Question: "Where is the web app's package script?" Call `search({query:"package.
 
 ### Handle a missing or deleted path
 
-Question: "Why can't I read a known reference?" If `read({path:".agents/skills/efficient-repository-workflow/references/primitives.md"})` returns `ENOENT`, use `run` for `git status --short -- .agents/skills/efficient-repository-workflow/references/primitives.md`.
+Question: "Why can't I read a known reference?" If `read({path:"docs/references/primitives.md"})` returns `ENOENT`, use `run` for `git status --short -- docs/references/primitives.md`.
 
 - Correct: a status line starting with ` D` explains that a tracked file is deleted in the working tree. Preserve the deletion unless the user asks to restore it; remove stale references in the file you are authorized to edit.
 - Incorrect: `ENOENT` is reported as proof the file never existed, or `git checkout` silently restores it.
