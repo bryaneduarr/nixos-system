@@ -38,24 +38,26 @@
     // import ./miscellaneous.nix;
   };
 
-  home.sessionVariables = {
-    NIXOS_OZONE_WL = "1"; # Hint Electron apps to use Wayland.
-  };
-
-  home.file = {
-    ".config/hypr/scripts/awww-wallpaper-switch.sh" = {
-      source = ./scripts/awww-wallpaper-switch.sh;
-      executable = true;
+  home = {
+    sessionVariables = {
+      NIXOS_OZONE_WL = "1"; # Hint Electron apps to use Wayland.
     };
 
-    ".config/hypr/scripts/right-alt-trigger.sh" = {
-      source = ./scripts/right-alt-trigger.sh;
-      executable = true;
-    };
+    file = {
+      ".config/hypr/scripts/awww-wallpaper-switch.sh" = {
+        source = ./scripts/awww-wallpaper-switch.sh;
+        executable = true;
+      };
 
-    ".config/hypr/scripts/awww-matugen-init.sh" = {
-      source = ./scripts/awww-matugen-init.sh;
-      executable = true;
+      ".config/hypr/scripts/right-alt-trigger.sh" = {
+        source = ./scripts/right-alt-trigger.sh;
+        executable = true;
+      };
+
+      ".config/hypr/scripts/awww-matugen-init.sh" = {
+        source = ./scripts/awww-matugen-init.sh;
+        executable = true;
+      };
     };
   };
 

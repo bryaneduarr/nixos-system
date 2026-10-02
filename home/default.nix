@@ -1,13 +1,15 @@
 # Central point file for the home-manager for the user.
 { pkgs, ... }:
 {
-  home.stateVersion = "26.05";
+  home = {
+    stateVersion = "26.05";
 
-  home.pointerCursor = {
-    enable = true;
-    package = pkgs.bibata-cursors;
-    name = "Bibata-Modern-Classic";
-    size = 24;
+    pointerCursor = {
+      enable = true;
+      package = pkgs.bibata-cursors;
+      name = "Bibata-Modern-Classic";
+      size = 24;
+    };
   };
 
   imports = [
