@@ -39,6 +39,14 @@ let
     assert config.programs.hyprland.enable == hyprlandEnabled;
     assert config.programs.niri.enable == !hyprlandEnabled;
     assert home.wayland.windowManager.hyprland.enable == hyprlandEnabled;
+    assert !hyprlandEnabled || configFiles."hypr/hyprland.conf".force;
+    assert !hyprlandEnabled || home.home.file."${home.xdg.configHome}/hypr/hyprland.conf".force;
+    assert
+      !hyprlandEnabled
+      || builtins.elem "linkGeneration" home.home.activation.backupUnmanagedHyprlandConfig.before;
+    assert
+      !hyprlandEnabled
+      || builtins.elem "writeBoundary" home.home.activation.backupUnmanagedHyprlandConfig.after;
     assert sessions == expectedSessions;
     assert !(builtins.elem otherCompositor packageNames);
     assert builtins.hasAttr "hypr/hyprland.conf" configFiles == hyprlandEnabled;
@@ -76,6 +84,8 @@ let
       wallpaperDaemon = wallpapers.Service.ExecStart;
       mimeDefaults = configFiles."${compositor}-mimeapps.list".text;
       niriConfig = if hyprlandEnabled then null else toString configFiles."niri/config.kdl".source;
+      hyprlandBackupScript =
+        if hyprlandEnabled then home.home.activation.backupUnmanagedHyprlandConfig.data else null;
     };
 
   conflictingConfig =
