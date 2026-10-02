@@ -1,11 +1,20 @@
 {
   pkgs,
+  osConfig,
   ...
 }:
+let
+  compositor = osConfig.desktop.compositor;
+in
 {
   programs.waybar = {
     enable = true;
     package = pkgs.waybar;
+
+    systemd = {
+      enable = true;
+      targets = [ "graphical-session.target" ];
+    };
 
     settings = {
       mainBar = {
@@ -15,8 +24,8 @@
         spacing = 4;
 
         modules-left = [
-          "hyprland/workspaces"
-          "hyprland/window"
+          "${compositor}/workspaces"
+          "${compositor}/window"
         ];
 
         modules-center = [ "clock" ];
@@ -29,7 +38,7 @@
           "tray"
         ];
 
-        "hyprland/workspaces" = {
+        "${compositor}/workspaces" = {
           all-outputs = true;
           format = "{icon}";
           format-icons = {
@@ -44,7 +53,7 @@
           };
         };
 
-        "hyprland/window" = {
+        "${compositor}/window" = {
           format = "{}";
           max-length = 50;
         };

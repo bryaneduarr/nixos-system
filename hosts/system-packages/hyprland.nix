@@ -1,14 +1,11 @@
-{ pkgs, ... }:
-{
+{ config, lib, ... }:
+lib.mkIf (config.desktop.compositor == "hyprland") {
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
   };
 
   xdg.portal = {
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-    xdgOpenUsePortal = true;
-
     config.hyprland = {
       default = [
         "hyprland"

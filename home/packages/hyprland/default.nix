@@ -1,16 +1,8 @@
 {
-  config,
-  lib,
   pkgs,
   ...
 }:
 {
-  xdg.configFile."hyprland-mimeapps.list".text = lib.generators.toINI { } {
-    "Default Applications" = lib.mapAttrs (
-      _: applications: lib.concatStringsSep ";" applications
-    ) config.xdg.mimeApps.defaultApplications;
-  };
-
   wayland.windowManager.hyprland = {
     enable = true;
     configType = "hyprlang";
@@ -37,16 +29,8 @@
     // import ./miscellaneous.nix;
   };
 
-  home = {
-    sessionVariables = {
-      NIXOS_OZONE_WL = "1"; # Hint Electron apps to use Wayland.
-    };
-
-    file = {
-      ".config/hypr/scripts/right-alt-trigger.sh" = {
-        source = ./scripts/right-alt-trigger.sh;
-        executable = true;
-      };
-    };
+  home.file.".config/hypr/scripts/right-alt-trigger.sh" = {
+    source = ./scripts/right-alt-trigger.sh;
+    executable = true;
   };
 }

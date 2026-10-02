@@ -10,7 +10,7 @@
     ./system/gpu.nix
     ./system/users.nix
 
-    ./system-packages/hyprland.nix
+    ./system-packages/desktop.nix
     ./system-packages/postgresql.nix
     ./system-packages/docker.nix
 
@@ -22,26 +22,31 @@
     ./system-services/keyd.nix
   ];
 
-  nix.settings = {
-    experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-    auto-optimise-store = true;
-    extra-sandbox-paths = [ "/etc/resolv.conf" ];
-  };
+  desktop.compositor = "hyprland";
 
-  nix.gc = {
-    automatic = true;
-    dates = "daily";
-    options = "--delete-older-than 14d";
+  nix = {
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      auto-optimise-store = true;
+      extra-sandbox-paths = [ "/etc/resolv.conf" ];
+    };
+
+    gc = {
+      automatic = true;
+      dates = "daily";
+      options = "--delete-older-than 14d";
+    };
   };
 
   hardware.bluetooth.enable = true;
 
-  networking.hostName = "nixos";
-
-  networking.networkmanager.enable = true;
+  networking = {
+    hostName = "nixos";
+    networkmanager.enable = true;
+  };
 
   programs.zsh.enable = true;
 
@@ -60,9 +65,12 @@
         ];
       }
     ];
-
   };
-  time.timeZone = "America/El_Salvador";
+
+  time = {
+    timeZone = "America/El_Salvador";
+    hardwareClockInLocalTime = true;
+  };
 
   fonts = {
     fontDir.enable = true;
@@ -70,8 +78,6 @@
       nerd-fonts.jetbrains-mono
     ];
   };
-
-  time.hardwareClockInLocalTime = true;
 
   system.stateVersion = "26.05";
 }

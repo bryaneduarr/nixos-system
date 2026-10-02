@@ -19,14 +19,13 @@
     # Commands and scripts configuration will be placed here.
     ./commands/worktree-dev.nix
 
-    ./desktop/wallpapers
+    ./desktop
 
     # Packages installed configuration will be placed here.
     ./packages/btop.nix
     ./packages/git.nix
     ./packages/fish/default.nix
     ./packages/herdr/default.nix
-    ./packages/hyprland/default.nix
     ./packages/kitty/default.nix
     ./packages/matugen/default.nix
     ./packages/nvim.nix
