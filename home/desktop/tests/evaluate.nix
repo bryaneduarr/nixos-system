@@ -22,6 +22,7 @@ let
       bar = home.programs.waybar.settings.mainBar;
       portals = config.xdg.portal.config.${compositor};
       wallpapers = home.systemd.user.services.awww-daemon;
+      niriConfigText = builtins.readFile ../../packages/niri/config.kdl;
       installedPackages = config.environment.systemPackages ++ home.home.packages;
       packageNames = map (package: package.pname or package.name) installedPackages;
       sessions = lib.concatMap (
@@ -47,6 +48,21 @@ let
     assert
       !hyprlandEnabled
       || builtins.elem "writeBoundary" home.home.activation.backupUnmanagedHyprlandConfig.after;
+    assert hyprlandEnabled || lib.hasInfix ''Super+T { spawn "kitty"; }'' niriConfigText;
+    assert
+      hyprlandEnabled
+      ||
+        lib.all
+          (workspace: lib.hasInfix ''Super+${workspace} { focus-workspace "${workspace}"; }'' niriConfigText)
+          [
+            "1"
+            "2"
+            "3"
+            "4"
+            "5"
+          ];
+    assert hyprlandEnabled || lib.hasInfix "Super+Page_Up { focus-workspace-up; }" niriConfigText;
+    assert hyprlandEnabled || lib.hasInfix "Super+Page_Down { focus-workspace-down; }" niriConfigText;
     assert sessions == expectedSessions;
     assert !(builtins.elem otherCompositor packageNames);
     assert builtins.hasAttr "hypr/hyprland.conf" configFiles == hyprlandEnabled;

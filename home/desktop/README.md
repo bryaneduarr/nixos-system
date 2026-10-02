@@ -32,12 +32,16 @@ Both compositors use one `awww-daemon` user service and the same `~/.cache/matug
 
 ## Use the Niri key bindings
 
+`Super` is the Windows key. The bindings use `Super` explicitly rather than [Niri's context-dependent `Mod` alias](https://niri-wm.github.io/niri/Configuration:-Key-Bindings.html).
+
 - Press `Super+T` for Kitty, `Super+R` for Rofi, or `Super+B` for Zen.
 - Press `Super+Q` to close a window or `Super+M` to exit Niri.
 - Press `Super` with an arrow key or `H`, `J`, `K`, or `L` to move focus.
 - Press `Super+Shift` with an arrow key to move a column or a window.
 - Press `Super+1` through `Super+5` to select a named workspace.
 - Press `Super+Shift+1` through `Super+Shift+5` to move a window to a named workspace.
+- Press `Super+Page Up` or `Super+Page Down` to change to the previous or next workspace.
+- Press `Super+Shift+Page Up` or `Super+Shift+Page Down` to move a window to the previous or next workspace.
 - Press `Super+V` to toggle floating, `Super+F` to maximize a column, or `Super+Shift+F` for fullscreen.
 - Press `Super+P` to change column width or `Super+O` for the overview.
 - Press `Print` for the screenshot picker, `Ctrl+Print` for the screen, or `Alt+Print` for the focused window.
