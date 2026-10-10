@@ -1,4 +1,8 @@
-_: {
+_:
+let
+  appearance = import ../../desktop/appearance-constants.nix;
+in
+{
   imports = [
     ./keybindings.nix
     ./matugen.nix
@@ -8,7 +12,7 @@ _: {
     enable = true;
 
     font = {
-      name = "JetBrains Mono Nerd Font";
+      name = appearance.fonts.monospace;
       size = 12.0;
     };
 

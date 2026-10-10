@@ -1,8 +1,11 @@
+let
+  appearance = import ../../desktop/appearance-constants.nix;
+in
 ''
   * {
     border: none;
     border-radius: 0;
-    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-family: "${appearance.fonts.default}", "${appearance.fonts.monospace}", sans-serif;
     font-size: 13px;
     min-height: 0;
   }

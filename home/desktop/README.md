@@ -43,6 +43,17 @@ The shortcut updates GTK themes and the desktop color preference for application
 
 The wallpaper stays unchanged. Without a valid cached wallpaper, Matugen uses a fallback accent color. The command uses [Matugen's light and dark modes](https://github.com/InioX/matugen/wiki/Usage).
 
+## Use the desktop font defaults
+
+1. Run `nrs` to install Figtree and apply the font defaults.
+2. Log out, then log in so applications receive the Qt font integration setting.
+
+Figtree is the default font for GTK applications, Qt applications that use the GTK3 platform plugin, Rofi, and Hyprland's Waybar. Fontconfig also uses Figtree for generic proportional fonts. Applications and websites that select their own fonts can ignore these defaults.
+
+Kitty keeps JetBrains Mono Nerd Font at size 12. Generic monospace fonts also use JetBrains Mono Nerd Font.
+
+Edit `fonts` in `home/desktop/appearance-constants.nix` to change the font names or the desktop font size. Both compositor selections use these values. Font defaults do not change the light and dark mode settings.
+
 ## Adjust terminal blur in Niri
 
 1. Edit `blur` in `home/desktop/appearance-constants.nix` to change blur strength in both desktops.
@@ -88,6 +99,6 @@ python3 home/desktop/tests/test_wallpapers.py
 python3 home/desktop/tests/test_theme_mode.py
 ```
 
-The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, terminal blur, Waybar, and both system derivations. Nix substitutes the shared appearance values into `home/packages/niri/config.kdl`, then validates the result with the selected Niri package when building the managed file.
+The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, font defaults, terminal blur, Waybar, and both system derivations. Nix substitutes the shared appearance values into `home/packages/niri/config.kdl`, then validates the result with the selected Niri package when building the managed file.
 
 The session setup follows [Niri's systemd integration](https://niri-wm.github.io/niri/Example-systemd-Setup.html). Selecting Niri removes Waybar's package, configuration, and user service without changing the Hyprland bar.

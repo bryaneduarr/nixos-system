@@ -2,6 +2,9 @@
   pkgs,
   ...
 }:
+let
+  appearance = import ../home/desktop/appearance-constants.nix;
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -74,7 +77,15 @@
 
   fonts = {
     fontDir.enable = true;
+
+    fontconfig.defaultFonts = {
+      sansSerif = [ appearance.fonts.default ];
+      serif = [ appearance.fonts.default ];
+      monospace = [ appearance.fonts.monospace ];
+    };
+
     packages = with pkgs; [
+      figtree
       nerd-fonts.jetbrains-mono
     ];
   };

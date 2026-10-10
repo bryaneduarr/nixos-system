@@ -21,6 +21,10 @@ let
       otherCompositor = if hyprlandEnabled then "niri" else "hyprland";
       configFiles = home.xdg.configFile;
       bar = home.programs.waybar.settings.mainBar;
+      fontDefaults = config.fonts.fontconfig.defaultFonts;
+      interfaceFonts = home.dconf.settings."org/gnome/desktop/interface";
+      desktopFont = "${appearance.fonts.default} ${toString appearance.fonts.size}";
+      fontPackages = map (package: package.pname or package.name) config.fonts.packages;
       portals = config.xdg.portal.config.${compositor};
       wallpapers = home.systemd.user.services.awww-daemon;
       niriConfigText = if hyprlandEnabled then "" else configFiles."niri/config.kdl".source.configText;
@@ -68,6 +72,47 @@ let
     assert hyprlandEnabled || lib.hasInfix "Super+Page_Down { focus-workspace-down; }" niriConfigText;
     assert builtins.elem "desktop-theme" packageNames;
     assert home.dconf.enable;
+    assert builtins.elem "figtree" fontPackages;
+    assert builtins.elem "nerd-fonts-jetbrains-mono" fontPackages;
+    assert fontDefaults.sansSerif == [ "Figtree" ];
+    assert fontDefaults.serif == [ "Figtree" ];
+    assert fontDefaults.monospace == [ "JetBrains Mono Nerd Font" ];
+    assert home.gtk.enable;
+    assert home.gtk.font.name == "Figtree";
+    assert home.gtk.font.size == appearance.fonts.size;
+    assert lib.all
+      (
+        version:
+        lib.hasInfix "gtk-font-name=${desktopFont}" configFiles."gtk-${version}.0/settings.ini".text
+      )
+      [
+        "3"
+        "4"
+      ];
+    assert lib.hasInfix ''gtk-font-name = "${desktopFont}"''
+      home.home.file.${home.gtk.gtk2.configLocation}.text;
+    assert interfaceFonts.font-name == desktopFont;
+    assert interfaceFonts.document-font-name == desktopFont;
+    assert
+      interfaceFonts.monospace-font-name
+      == "${appearance.fonts.monospace} ${toString appearance.fonts.size}";
+    assert
+      home.dconf.settings."org/gnome/desktop/wm/preferences".titlebar-font
+      == "${appearance.fonts.default} Bold ${toString appearance.fonts.size}";
+    assert !(builtins.hasAttr "gtk-theme" interfaceFonts);
+    assert !(builtins.hasAttr "color-scheme" interfaceFonts);
+    assert home.qt.enable;
+    assert home.qt.platformTheme.name == "gtk3";
+    assert home.home.sessionVariables.QT_QPA_PLATFORMTHEME == "gtk3";
+    assert home.systemd.user.sessionVariables.QT_QPA_PLATFORMTHEME == "gtk3";
+    assert home.programs.rofi.enable;
+    assert home.programs.rofi.settings.font == desktopFont;
+    assert lib.hasInfix ''font: "${desktopFont}";''
+      home.home.file.${home.programs.rofi.configPath}.text;
+    assert lib.hasInfix ''font-family: "Figtree", "JetBrains Mono Nerd Font", sans-serif;''
+      home.programs.waybar.style;
+    assert home.programs.kitty.font.name == "JetBrains Mono Nerd Font";
+    assert home.programs.kitty.font.size == 12.0;
     assert
       !hyprlandEnabled
       || builtins.elem "SUPER SHIFT, D, exec, desktop-theme toggle" home.wayland.windowManager.hyprland.settings.bind;
@@ -144,6 +189,13 @@ let
     assert hyprlandEnabled || builtins.elem "xwayland-satellite" packageNames;
     {
       inherit compositor sessions;
+      fonts = {
+        inherit fontDefaults;
+        gtk = home.gtk.font;
+        rofi = home.programs.rofi.settings.font;
+        kitty = home.programs.kitty.font;
+        qtPlatformTheme = home.qt.platformTheme.name;
+      };
       themeCommand = toString (
         lib.findFirst (package: package.name == "desktop-theme") null home.home.packages
       );
