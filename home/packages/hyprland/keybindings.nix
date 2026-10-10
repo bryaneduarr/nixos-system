@@ -11,6 +11,7 @@
     "SUPER, R, exec, rofi -show drun"
     "SUPER, P, pseudo"
     "SUPER, B, exec, zen-twilight"
+    "SUPER SHIFT, D, exec, desktop-theme toggle"
     "SUPER, J, layoutmsg, togglesplit"
 
     # Move focus

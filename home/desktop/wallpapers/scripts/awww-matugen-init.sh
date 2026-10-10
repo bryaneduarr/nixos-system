@@ -25,7 +25,8 @@ if [ ! -f "${WALLPAPER:-}" ]; then
 fi
 
 if [ -z "${WALLPAPER:-}" ] || [ ! -f "${WALLPAPER:-}" ]; then
-    log "No wallpaper, skipping"
+    log "No wallpaper, applying theme without an image"
+    desktop-theme apply >> "$LOG_FILE" 2>&1 &
     exit 0
 fi
 
@@ -45,17 +46,7 @@ log "Wallpaper: $WALLPAPER"
 mkdir -p "$(dirname "$CACHE_FILE")"
 echo "$WALLPAPER" > "$CACHE_FILE"
 
-(
-    log "Running matugen (background)..."
-    if matugen image "$WALLPAPER" --source-color-index 0 2>/tmp/matugen-err.log; then
-        sleep 0.5
-        for socket in /tmp/kitty-*; do
-            [ -S "$socket" ] && kitty @ --to "unix:$socket" set-colors -a -c ~/.config/kitty/matugen.conf 2>/dev/null
-        done
-    else
-        log "matugen ERROR: $(cat /tmp/matugen-err.log 2>/dev/null)"
-    fi
-) &
+desktop-theme apply "$WALLPAPER" >> "$LOG_FILE" 2>&1 &
 
 echo "init_done=yes" > "$STATE_FILE"
 echo "last_wallpaper=$WALLPAPER" >> "$STATE_FILE"

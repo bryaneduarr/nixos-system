@@ -30,6 +30,19 @@ Edit the Nix files under `home/packages/hyprland/` to change Hyprland settings. 
 
 Both compositors use one `awww-daemon` user service and the same `~/.cache/matugen/last-wallpaper` cache. The shared scripts are in `home/desktop/wallpapers/scripts/`. An empty wallpaper directory leaves the session running without a wallpaper.
 
+## Switch between light and dark mode
+
+1. Run `nrs` to install the shared theme command and both compositor bindings.
+2. Press `Super+Shift+D` to toggle light and dark mode in either desktop.
+
+Use `desktop-theme light` or `desktop-theme dark` to select a mode from the terminal. The first login defaults to dark mode.
+
+The command saves your choice in `~/.local/state/desktop-theme/mode`. Future logins, wallpaper changes, and compositor switches keep that mode.
+
+The shortcut updates GTK themes and the desktop color preference for applications that follow the system setting. It also regenerates Matugen colors for Kitty and new Zsh sessions. Hyprland's Waybar follows the GTK theme. Applications with their own appearance setting can ignore the system preference.
+
+The wallpaper stays unchanged. Without a valid cached wallpaper, Matugen uses a fallback accent color. The command uses [Matugen's light and dark modes](https://github.com/InioX/matugen/wiki/Usage).
+
 ## Adjust terminal blur in Niri
 
 1. Edit `blur` in `home/desktop/appearance-constants.nix` to change blur strength in both desktops.
@@ -72,6 +85,7 @@ Run the regression checks from the repository root:
 nix eval --impure --json --file home/desktop/tests/evaluate.nix
 python3 home/desktop/tests/test_hyprland_config.py
 python3 home/desktop/tests/test_wallpapers.py
+python3 home/desktop/tests/test_theme_mode.py
 ```
 
 The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, terminal blur, Waybar, and both system derivations. Nix substitutes the shared appearance values into `home/packages/niri/config.kdl`, then validates the result with the selected Niri package when building the managed file.

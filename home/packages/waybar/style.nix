@@ -8,24 +8,24 @@
   }
 
   window#waybar {
-    background: rgba(30, 30, 46, 0.9);
-    color: #cdd6f4;
+    background: alpha(@theme_bg_color, 0.9);
+    color: @theme_fg_color;
   }
 
   #workspaces button {
     padding: 0 10px;
-    color: #cdd6f4;
+    color: @theme_fg_color;
     background: transparent;
     border-bottom: 3px solid transparent;
   }
 
   #workspaces button.active {
-    background: rgba(137, 180, 250, 0.3);
-    border-bottom: 3px solid #89b4fa;
+    background: alpha(@theme_selected_bg_color, 0.3);
+    border-bottom: 3px solid @theme_selected_bg_color;
   }
 
   #workspaces button:hover {
-    background: rgba(137, 180, 250, 0.2);
+    background: alpha(@theme_selected_bg_color, 0.2);
   }
 
   #clock,
@@ -38,7 +38,7 @@
   #tray {
     padding: 0 10px;
     margin: 0 4px;
-    background: rgba(49, 50, 68, 0.8);
+    background: alpha(@theme_base_color, 0.8);
     border-radius: 5px;
   }
 

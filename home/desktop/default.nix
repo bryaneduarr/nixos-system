@@ -15,6 +15,7 @@ in
   imports = [
     compositorModules.${compositor}
     ./wallpapers
+    ./theme-mode
   ];
 
   home.sessionVariables.NIXOS_OZONE_WL = "1";

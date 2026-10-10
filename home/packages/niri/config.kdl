@@ -98,6 +98,7 @@ binds {
     Super+V { toggle-window-floating; }
     Super+R { spawn "rofi" "-show" "drun"; }
     Super+B { spawn "zen-twilight"; }
+    Super+Shift+D { spawn "desktop-theme" "toggle"; }
     Super+P { switch-preset-column-width; }
     Super+F { maximize-column; }
     Super+Shift+F { fullscreen-window; }

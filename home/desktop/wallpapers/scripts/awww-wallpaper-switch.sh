@@ -29,7 +29,7 @@ RANDOM_TRANSITION=${TRANSITIONS[$RANDOM % ${#TRANSITIONS[@]}]}
 
 log "Setting wallpaper..."
 AWWW_OK=false
-for i in $(seq 1 10); do
+for _ in $(seq 1 10); do
     if timeout 3 awww img "$WALLPAPER" --transition-type "$RANDOM_TRANSITION" \
         --transition-fps 280 --transition-step 255 --transition-duration 1 2>/dev/null; then
         AWWW_OK=true
@@ -40,7 +40,7 @@ done
 
 if [ "$AWWW_OK" = false ]; then
     log "Transition failed, trying plain..."
-    for i in $(seq 1 10); do
+    for _ in $(seq 1 10); do
         if timeout 2 awww img "$WALLPAPER" 2>/dev/null; then
             AWWW_OK=true
             break
@@ -54,13 +54,7 @@ log "awww_ok=$AWWW_OK"
 mkdir -p "$(dirname "$CACHE_FILE")"
 echo "$WALLPAPER" > "$CACHE_FILE"
 
-(
-    matugen image "$WALLPAPER" --source-color-index 0 2>/tmp/matugen-err.log
-    sleep 0.5
-    for socket in /tmp/kitty-*; do
-        [ -S "$socket" ] && kitty @ --to "unix:$socket" set-colors -a -c ~/.config/kitty/matugen.conf 2>/dev/null
-    done
-) &
+desktop-theme apply "$WALLPAPER" >> "$LOG_FILE" 2>&1 &
 
 echo "Wallpaper switched successfully"
 log "=== wallpaper-switch complete ==="

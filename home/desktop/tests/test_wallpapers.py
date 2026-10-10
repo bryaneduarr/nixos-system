@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 import unittest
 
 
@@ -28,7 +29,7 @@ class WallpaperTests(unittest.TestCase):
             "WALLPAPER_TEST_EVENTS": str(self.events),
         }
 
-        for command in ("awww", "matugen", "kitty"):
+        for command in ("awww", "desktop-theme"):
             executable = self.bin_directory / command
             executable.write_text(
                 '#!/usr/bin/env bash\n'
@@ -56,11 +57,20 @@ class WallpaperTests(unittest.TestCase):
             timeout=10,
         )
 
+    def wait_for_theme(self):
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if self.events.exists() and "desktop-theme <apply>" in self.events.read_text():
+                return
+            time.sleep(0.01)
+        self.fail("Wallpaper script did not apply the shared desktop theme")
+
     def assert_wallpaper_applied(self, wallpaper):
+        self.wait_for_theme()
         self.assertEqual(self.cache.read_text().strip(), str(wallpaper))
         events = self.events.read_text()
         self.assertIn(f"awww <img> <{wallpaper}>", events)
-        self.assertIn(f"matugen <image> <{wallpaper}>", events)
+        self.assertIn(f"desktop-theme <apply> <{wallpaper}>", events)
 
     def test_first_login_applies_wallpaper_in_each_compositor(self):
         wallpaper = self.create_wallpaper()
@@ -109,7 +119,8 @@ class WallpaperTests(unittest.TestCase):
             with self.subTest(compositor=compositor):
                 result = self.run_script("awww-matugen-init.sh", compositor)
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertFalse(self.events.exists())
+                self.wait_for_theme()
+                self.assertIn("desktop-theme <apply>", self.events.read_text())
                 self.assertFalse(self.cache.exists())
 
     def test_empty_directory_reports_no_wallpaper_to_switch(self):

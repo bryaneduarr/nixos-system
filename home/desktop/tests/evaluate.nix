@@ -66,6 +66,14 @@ let
           ];
     assert hyprlandEnabled || lib.hasInfix "Super+Page_Up { focus-workspace-up; }" niriConfigText;
     assert hyprlandEnabled || lib.hasInfix "Super+Page_Down { focus-workspace-down; }" niriConfigText;
+    assert builtins.elem "desktop-theme" packageNames;
+    assert home.dconf.enable;
+    assert
+      !hyprlandEnabled
+      || builtins.elem "SUPER SHIFT, D, exec, desktop-theme toggle" home.wayland.windowManager.hyprland.settings.bind;
+    assert
+      hyprlandEnabled
+      || lib.hasInfix ''Super+Shift+D { spawn "desktop-theme" "toggle"; }'' niriConfigText;
     assert home.programs.kitty.settings.background_opacity == "0.90";
     assert home.programs.kitty.settings.dynamic_background_opacity;
     assert hyprlandEnabled || lib.hasInfix "passes ${toString appearance.blur.passes}" niriConfigText;
@@ -136,6 +144,9 @@ let
     assert hyprlandEnabled || builtins.elem "xwayland-satellite" packageNames;
     {
       inherit compositor sessions;
+      themeCommand = toString (
+        lib.findFirst (package: package.name == "desktop-theme") null home.home.packages
+      );
       systemDerivation = config.system.build.toplevel.drvPath;
       homeDerivation = home.home.activationPackage.drvPath;
       wallpaperDaemon = wallpapers.Service.ExecStart;
