@@ -62,8 +62,8 @@ layout {
 blur {
     passes @blurPasses@
     offset @blurOffset@
-    noise 0.0117
-    saturation 1.0
+    noise 0.1
+    saturation 1
 }
 
 workspace "1"
