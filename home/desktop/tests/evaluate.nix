@@ -55,18 +55,24 @@ let
     assert
       !hyprlandEnabled
       || builtins.elem "writeBoundary" home.home.activation.backupUnmanagedHyprlandConfig.after;
-    assert hyprlandEnabled || lib.hasInfix ''Super+T { spawn "kitty"; }'' niriConfigText;
+    assert
+      hyprlandEnabled
+      || lib.hasInfix ''Super+T hotkey-overlay-title="Open a Terminal: Kitty" { spawn "kitty"; }'' niriConfigText;
     assert
       hyprlandEnabled
       ||
         lib.all
-          (workspace: lib.hasInfix ''Super+${workspace} { focus-workspace "${workspace}"; }'' niriConfigText)
+          (workspace: lib.hasInfix "Super+${workspace} { focus-workspace ${workspace}; }" niriConfigText)
           [
             "1"
             "2"
             "3"
             "4"
             "5"
+            "6"
+            "7"
+            "8"
+            "9"
           ];
     assert hyprlandEnabled || lib.hasInfix "Super+Page_Up { focus-workspace-up; }" niriConfigText;
     assert hyprlandEnabled || lib.hasInfix "Super+Page_Down { focus-workspace-down; }" niriConfigText;
@@ -118,7 +124,7 @@ let
       || builtins.elem "SUPER SHIFT, D, exec, desktop-theme toggle" home.wayland.windowManager.hyprland.settings.bind;
     assert
       hyprlandEnabled
-      || lib.hasInfix ''Super+Shift+D { spawn "desktop-theme" "toggle"; }'' niriConfigText;
+      || lib.hasInfix ''Super+Shift+D hotkey-overlay-title="Toggle light and dark mode" { spawn "desktop-theme" "toggle"; }'' niriConfigText;
     assert home.programs.kitty.settings.background_opacity == "0.90";
     assert home.programs.kitty.settings.dynamic_background_opacity;
     assert hyprlandEnabled || lib.hasInfix "passes ${toString appearance.blur.passes}" niriConfigText;
@@ -187,6 +193,28 @@ let
     assert lib.all (assertion: assertion.assertion) config.assertions;
     assert lib.all (assertion: assertion.assertion) home.assertions;
     assert hyprlandEnabled || builtins.elem "xwayland-satellite" packageNames;
+    assert
+      hyprlandEnabled
+      || lib.all (name: builtins.elem name packageNames) [
+        "brightnessctl"
+        "orca"
+        "playerctl"
+        "swaylock"
+        "wireplumber"
+      ];
+    assert hyprlandEnabled || builtins.hasAttr "swaylock" config.security.pam.services;
+    assert lib.all (name: builtins.elem name packageNames == !hyprlandEnabled) [
+      "brightnessctl"
+      "orca"
+      "playerctl"
+      "swaylock"
+    ];
+    assert config.services.gnome.at-spi2-core.enable == !hyprlandEnabled;
+    assert
+      hyprlandEnabled
+      || lib.any (
+        package: (package.pname or package.name) == "brightnessctl"
+      ) config.services.udev.packages;
     {
       inherit compositor sessions;
       fonts = {
@@ -204,6 +232,14 @@ let
       wallpaperDaemon = wallpapers.Service.ExecStart;
       mimeDefaults = configFiles."${compositor}-mimeapps.list".text;
       niriConfig = if hyprlandEnabled then null else toString configFiles."niri/config.kdl".source;
+      niriConfigDerivation =
+        if hyprlandEnabled then null else configFiles."niri/config.kdl".source.drvPath;
+      niriSourceDerivation = if hyprlandEnabled then null else config.programs.niri.package.src.drvPath;
+      niriDefaultConfig =
+        if hyprlandEnabled then
+          null
+        else
+          "${config.programs.niri.package.src}/resources/default-config.kdl";
       hyprlandBackupScript =
         if hyprlandEnabled then home.home.activation.backupUnmanagedHyprlandConfig.data else null;
     };

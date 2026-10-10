@@ -10,7 +10,19 @@ lib.mkIf (config.desktop.compositor == "niri") {
     useNautilus = false;
   };
 
-  environment.systemPackages = [ pkgs.xwayland-satellite ];
+  environment.systemPackages = with pkgs; [
+    brightnessctl
+    orca
+    playerctl
+    swaylock
+    wireplumber
+    xwayland-satellite
+  ];
+
+  services = {
+    gnome.at-spi2-core.enable = true;
+    udev.packages = [ pkgs.brightnessctl ];
+  };
 
   xdg.portal.config.niri."org.freedesktop.impl.portal.AppChooser" = [ "gtk" ];
 }

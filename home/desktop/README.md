@@ -74,19 +74,14 @@ Niri prevents applications from opening maximized to the screen edges because th
 
 ## Use the Niri key bindings
 
-`Super` is the Windows key. The bindings use `Super` explicitly rather than [Niri's context-dependent `Mod` alias](https://niri-wm.github.io/niri/Configuration:-Key-Bindings.html).
+1. Run `nrs` to install the bindings and their helper applications.
+2. Log out, then log in to apply the screen-reader session environment.
+3. Press `Super+Shift+/` to show the important-hotkeys overlay.
+4. Use the [Niri key binding reference](../packages/niri/KEYBINDINGS.md) for the complete shortcut list and changes from the previous configuration.
 
-- Press `Super+T` for Kitty, `Super+R` for Rofi, or `Super+B` for Zen.
-- Press `Super+Q` to close a window or `Super+M` to exit Niri.
-- Press `Super` with an arrow key or `H`, `J`, `K`, or `L` to move focus.
-- Press `Super+Shift` with an arrow key to move a column or a window.
-- Press `Super+1` through `Super+5` to select a named workspace.
-- Press `Super+Shift+1` through `Super+Shift+5` to move a window to a named workspace.
-- Press `Super+Page Up` or `Super+Page Down` to change to the previous or next workspace.
-- Press `Super+Shift+Page Up` or `Super+Shift+Page Down` to move a window to the previous or next workspace.
-- Press `Super+V` to toggle floating, `Super+F` to maximize a column, or `Super+Shift+F` for fullscreen.
-- Press `Super+P` to change column width or `Super+O` for the overview.
-- Press `Print` for the screenshot picker, `Ctrl+Print` for the screen, or `Alt+Print` for the focused window.
+`Super` is the Windows key. Press `Super+D` for Rofi and `Super+R` to cycle column widths. Move windows with `Super+Ctrl` and an arrow key. `Super+Shift` and an arrow key now focus monitors.
+
+Use `Super+M` to maximize a window to the screen edges. Exit Niri with `Super+Shift+E` or `Ctrl+Alt+Delete`.
 
 ## Validate without activating the system
 
@@ -97,8 +92,9 @@ nix eval --impure --json --file home/desktop/tests/evaluate.nix
 python3 home/desktop/tests/test_hyprland_config.py
 python3 home/desktop/tests/test_wallpapers.py
 python3 home/desktop/tests/test_theme_mode.py
+python3 home/desktop/tests/test_niri_keybindings.py
 ```
 
-The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, font defaults, terminal blur, Waybar, and both system derivations. Nix substitutes the shared appearance values into `home/packages/niri/config.kdl`, then validates the result with the selected Niri package when building the managed file.
+The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, font defaults, terminal blur, Waybar, and both system derivations. The key binding test compares every active binding against the configured Niri package's upstream defaults and checks for shortcut conflicts. Nix substitutes the shared appearance values into `home/packages/niri/config.kdl`, then validates the result with the selected Niri package when building the managed file.
 
 The session setup follows [Niri's systemd integration](https://niri-wm.github.io/niri/Example-systemd-Setup.html). Selecting Niri removes Waybar's package, configuration, and user service without changing the Hyprland bar.
