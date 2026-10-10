@@ -27,7 +27,7 @@ in
     ".pi/agent/skills/efficient-repository-workflow/SKILL.md" = mkSourceFile (
       agentConfiguration + "/skills/efficient-tools/SKILL.md"
     );
-    ".pi/agent/mcp.json" = mkJsonFile (agentConfiguration + "/settings/mcp.nix");
+    ".pi/agent/mcp-adapter.json" = mkJsonFile (agentConfiguration + "/settings/mcp.nix");
     ".config/mcp/mcp.json" = mkJsonFile (mcpConfigurations + "/mcp-host-configuration.nix");
     ".pi/agent/extensions/clear.ts" = mkSourceFile (
       agentConfiguration + "/extensions/clear-session.ts"

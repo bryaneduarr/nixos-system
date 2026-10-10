@@ -17,6 +17,7 @@ in
   home.file.".pi/agent/settings.json" = {
     text = builtins.toJSON {
       defaultTools = [ ];
+      extensions = [ "-builtin:mcp" ];
       hideThinkingBlock = false;
       showLastPrompt = false;
       lastChangelogVersion = builtins.getAttr "@earendil-works/pi-coding-agent" piDependencies;

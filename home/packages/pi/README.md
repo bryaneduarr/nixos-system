@@ -11,3 +11,7 @@
 - `home-manager/` installs files and configures Pi. `pi-tools/` packages dependencies. `tests/` contains extension tests.
 
 `home-manager/managed-files.nix` maps source files to `~/.pi/agent/`. Pi runs with the harness tools and configured web tools. The repository's root `AGENTS.md` points to `repo-dictionary/` for project facts. Run extension tests with `bun test` from this directory.
+
+## Extension settings
+
+Pi uses `pi-mcp-adapter` as its sole MCP extension. The managed settings disable `builtin:mcp` and store adapter settings in `~/.pi/agent/mcp-adapter.json`.
