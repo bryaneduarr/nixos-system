@@ -15,3 +15,11 @@
 ## Extension settings
 
 Pi uses `pi-mcp-adapter` as its sole MCP extension. The managed settings disable `builtin:mcp` and store adapter settings in `~/.pi/agent/mcp-adapter.json`. The Nix package patches the LSP adapter's host libraries into wildcard peer dependencies and removes nested copies.
+
+## Toggle Codex fast mode
+
+Select a supported `openai-codex` model, then run `/fast` to open the On/Off menu. You can also use `/fast on`, `/fast off`, `/fast toggle`, or `/fast status`. The footer shows the current state, including when the selected model does not support fast mode.
+
+Fast mode requests the `priority` service tier and increases usage. It starts off in new sessions and restores your choice when you resume a session. It does not write to the managed `settings.json`.
+
+The extension reads supported priority models from `$CODEX_HOME/models_cache.json`, or `~/.codex/models_cache.json` when `CODEX_HOME` is unset. If the cache is unavailable, the fallback models are `gpt-5.4` and `gpt-5.5`. Restart Pi after Codex refreshes its model cache. Unsupported models use their normal service tier even when the saved fast-mode preference is on.

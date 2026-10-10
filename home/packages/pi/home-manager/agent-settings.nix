@@ -29,6 +29,12 @@ in
         separator = "ascii";
         customItems = [
           {
+            id = "fast";
+            statusKey = "codex-fast-mode";
+            position = "right";
+            hideWhenMissing = true;
+          }
+          {
             id = "session";
             statusKey = "harness-session";
             position = "right";
@@ -45,6 +51,7 @@ in
           ];
           right = [
             "context_pct"
+            "custom:fast"
             "custom:session"
           ];
           secondary = [ ];

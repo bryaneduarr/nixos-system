@@ -29,6 +29,23 @@ in
     );
     ".pi/agent/mcp-adapter.json" = mkJsonFile (agentConfiguration + "/settings/mcp.nix");
     ".config/mcp/mcp.json" = mkJsonFile (mcpConfigurations + "/mcp-host-configuration.nix");
+    ".pi/agent/extensions/codex-fast-mode" = {
+      source = pkgs.linkFarm "pi-codex-fast-mode" [
+        {
+          name = "index.ts";
+          path = agentConfiguration + "/extensions/codex-fast-mode/index.ts";
+        }
+        {
+          name = "capabilities.ts";
+          path = agentConfiguration + "/extensions/codex-fast-mode/capabilities.ts";
+        }
+        {
+          name = "node_modules";
+          path = "${piTools}/lib/pi-packages/node_modules";
+        }
+      ];
+      force = true;
+    };
     ".pi/agent/extensions/clear.ts" = mkSourceFile (
       agentConfiguration + "/extensions/clear-session.ts"
     );
