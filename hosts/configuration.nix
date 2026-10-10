@@ -25,7 +25,7 @@ in
     ./system-services/keyd.nix
   ];
 
-  desktop.compositor = "hyprland";
+  desktop.compositor = "niri"; # niri, hyprland
 
   nix = {
     settings = {
