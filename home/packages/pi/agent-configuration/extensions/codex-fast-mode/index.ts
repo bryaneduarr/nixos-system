@@ -1,3 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { clampThinkingLevel, type Api, type Model, type SimpleStreamOptions, type TranscriptContext } from "@earendil-works/pi-ai";
 import { stream, streamSimple } from "@earendil-works/pi-ai/api/openai-codex-responses";
@@ -6,6 +10,36 @@ import { loadFastModels, supportsFastMode } from "./capabilities.ts";
 
 const statusKey = "codex-fast-mode";
 const entryType = "codex-fast-mode";
+const rainbowColors = [196, 220, 46, 39];
+const fastLabel = [..."fast"]
+  .map((letter, index) => `\u001b[38;5;${rainbowColors[index]}m${letter}`)
+  .join("") + "\u001b[39m";
+
+function preferenceFile(): string {
+  const stateHome = process.env.XDG_STATE_HOME || join(homedir(), ".local", "state");
+  return join(stateHome, "pi", "codex-fast-mode.json");
+}
+
+function readPreference(): boolean | undefined {
+  try {
+    const value: unknown = JSON.parse(readFileSync(preferenceFile(), "utf8"));
+    if (value && typeof value === "object" && "enabled" in value && typeof value.enabled === "boolean") {
+      return value.enabled;
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
+function savePreference(enabled: boolean): void {
+  const file = preferenceFile();
+  const temporary = `${file}.${process.pid}.${randomUUID()}.tmp`;
+  const directory = dirname(file);
+  mkdirSync(directory, { recursive: true });
+  writeFileSync(temporary, `${JSON.stringify({ enabled })}\n`, { mode: 0o600 });
+  renameSync(temporary, file);
+}
 
 export default function codexFastMode(pi: ExtensionAPI): void {
   let enabled = false;
@@ -14,7 +48,7 @@ export default function codexFastMode(pi: ExtensionAPI): void {
   function updateStatus(ctx: ExtensionContext): void {
     if (!ctx.hasUI) return;
     const eligible = supportsFastMode(ctx.model, fastModels);
-    const text = eligible ? `/fast: ${enabled ? "on" : "off"}` : "/fast: unavailable";
+    const text = enabled && eligible ? fastLabel : undefined;
     ctx.ui.setStatus(statusKey, text);
   }
 
@@ -47,14 +81,17 @@ export default function codexFastMode(pi: ExtensionAPI): void {
   });
 
   function restore(ctx: ExtensionContext): void {
-    enabled = false;
+    const preference = readPreference();
+    enabled = preference ?? false;
     fastModels = loadFastModels();
 
-    for (const entry of ctx.sessionManager.getBranch()) {
-      if (entry.type !== "custom" || entry.customType !== entryType) continue;
-      const data = entry.data;
-      if (data && typeof data === "object" && "enabled" in data && typeof data.enabled === "boolean") {
-        enabled = data.enabled;
+    if (preference === undefined) {
+      for (const entry of ctx.sessionManager.getBranch()) {
+        if (entry.type !== "custom" || entry.customType !== entryType) continue;
+        const data = entry.data;
+        if (data && typeof data === "object" && "enabled" in data && typeof data.enabled === "boolean") {
+          enabled = data.enabled;
+        }
       }
     }
 
@@ -62,11 +99,34 @@ export default function codexFastMode(pi: ExtensionAPI): void {
   }
 
   pi.on("session_start", (_event, ctx) => restore(ctx));
-  pi.on("session_tree", (_event, ctx) => restore(ctx));
+  pi.on("session_tree", (_event, ctx) => updateStatus(ctx));
   pi.on("model_select", (_event, ctx) => updateStatus(ctx));
 
+  function setEnabled(nextEnabled: boolean, ctx: ExtensionContext): void {
+    if (nextEnabled && !supportsFastMode(ctx.model, fastModels)) {
+      ctx.ui.notify("Fast mode is unavailable for this model. Select a supported openai-codex model first.", "warning");
+      return;
+    }
+
+    try {
+      savePreference(nextEnabled);
+    } catch {
+      ctx.ui.notify("Could not save the fast-mode preference. Fast mode was not changed.", "error");
+      return;
+    }
+
+    enabled = nextEnabled;
+    pi.appendEntry(entryType, { enabled });
+    updateStatus(ctx);
+  }
+
+  pi.registerShortcut("ctrl+alt+f", {
+    description: "Toggle Codex fast mode",
+    handler: async (ctx) => setEnabled(!enabled, ctx),
+  });
+
   pi.registerCommand("fast", {
-    description: "Turn Codex fast mode on or off, with increased usage",
+    description: "Turn Codex fast mode on or off",
     getArgumentCompletions: (prefix) => {
       const items = ["on", "off", "toggle", "status"].filter((item) => item.startsWith(prefix));
       return items.map((item) => ({ value: item, label: item }));
@@ -75,7 +135,7 @@ export default function codexFastMode(pi: ExtensionAPI): void {
       let action = args.trim().toLowerCase();
 
       if (!action && ctx.hasUI) {
-        const selection = await ctx.ui.select("Codex fast mode uses priority service and increases usage", ["On", "Off"]);
+        const selection = await ctx.ui.select("Codex fast mode", ["On", "Off"]);
         if (!selection) return;
         action = selection.toLowerCase();
       }
@@ -92,15 +152,7 @@ export default function codexFastMode(pi: ExtensionAPI): void {
       }
 
       const nextEnabled = action === "on" || (action === "toggle" && !enabled);
-      if (nextEnabled && !supportsFastMode(ctx.model, fastModels)) {
-        ctx.ui.notify("Fast mode is unavailable for this model. Select a supported openai-codex model first.", "warning");
-        return;
-      }
-
-      enabled = nextEnabled;
-      pi.appendEntry(entryType, { enabled });
-      updateStatus(ctx);
-      ctx.ui.notify(`Codex fast mode ${enabled ? "on. Priority service increases usage." : "off."}`, "info");
+      setEnabled(nextEnabled, ctx);
     },
   });
 }

@@ -31,7 +31,8 @@ in
           {
             id = "fast";
             statusKey = "codex-fast-mode";
-            position = "right";
+            position = "left";
+            selfColorize = true;
             hideWhenMissing = true;
           }
           {
@@ -45,13 +46,13 @@ in
         layout = {
           left = [
             "model"
+            "custom:fast"
             "thinking"
             "path"
             "git"
           ];
           right = [
             "context_pct"
-            "custom:fast"
             "custom:session"
           ];
           secondary = [ ];

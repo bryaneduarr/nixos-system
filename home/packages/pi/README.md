@@ -18,8 +18,8 @@ Pi uses `pi-mcp-adapter` as its sole MCP extension. The managed settings disable
 
 ## Toggle Codex fast mode
 
-Select a supported `openai-codex` model, then run `/fast` to open the On/Off menu. You can also use `/fast on`, `/fast off`, `/fast toggle`, or `/fast status`. The footer shows the current state, including when the selected model does not support fast mode.
+Select a supported `openai-codex` model, then run `/fast` to open the On/Off menu. You can also use `/fast on`, `/fast off`, `/fast toggle`, or `/fast status`. Press `Ctrl+Alt+F` to toggle fast mode. The footer shows a rainbow `fast` beside the model only when fast mode is on and the selected model supports it.
 
-Fast mode requests the `priority` service tier and increases usage. It starts off in new sessions and restores your choice when you resume a session. It does not write to the managed `settings.json`.
+Fast mode requests the `priority` service tier and increases usage. Pi saves your last on or off choice in `$XDG_STATE_HOME/pi/codex-fast-mode.json`, or `~/.local/state/pi/codex-fast-mode.json` when `XDG_STATE_HOME` is unset. This preference applies across new and resumed sessions. Without a saved preference, fast mode starts off or restores the active session's existing choice. It does not write to the managed `settings.json`.
 
 The extension reads supported priority models from `$CODEX_HOME/models_cache.json`, or `~/.codex/models_cache.json` when `CODEX_HOME` is unset. If the cache is unavailable, the fallback models are `gpt-5.4` and `gpt-5.5`. Restart Pi after Codex refreshes its model cache. Unsupported models use their normal service tier even when the saved fast-mode preference is on.
