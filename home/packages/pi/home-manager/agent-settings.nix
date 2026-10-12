@@ -75,7 +75,7 @@ in
       };
       quietStartup = true;
       theme = "dark";
-      tuiMode = "regular";
+      tuiMode = "fullscreen";
       terminal = {
         clearOnShrink = true;
         showTerminalProgress = true;
