@@ -68,3 +68,7 @@ Select a supported `openai-codex` model, then run `/fast` to open the On/Off men
 Fast mode requests the `priority` service tier and increases usage. Pi saves your last on or off choice in `$XDG_STATE_HOME/pi/codex-fast-mode.json`, or `~/.local/state/pi/codex-fast-mode.json` when `XDG_STATE_HOME` is unset. This preference applies across new and resumed sessions. Without a saved preference, fast mode starts off or restores the active session's existing choice. It does not write to the managed `settings.json`.
 
 The extension reads supported priority models from `$CODEX_HOME/models_cache.json`, or `~/.codex/models_cache.json` when `CODEX_HOME` is unset. If the cache is unavailable, the fallback models are `gpt-5.4` and `gpt-5.5`. Restart Pi after Codex refreshes its model cache. Unsupported models use their normal service tier even when the saved fast-mode preference is on.
+
+## Session groups, planned
+
+Session groups are designed but not implemented. The [approved design](docs/session-groups/design.md) defines an on-demand main session, a coordination-only member, focused workers, and a shared task board. The [implementation plan](docs/session-groups/implementation.md) defines phased delivery and acceptance checks. The [glossary](../../../GLOSSARY.md) defines the team terminology.
