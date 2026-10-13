@@ -10,7 +10,19 @@
 - The repository root `.agents/skills/` belongs to coding harnesses. Home Manager does not read or install it.
 - `home-manager/` installs files and configures Pi. `pi-tools/` packages dependencies. `tests/` contains extension tests.
 
-`home-manager/managed-files.nix` maps source files to `~/.pi/agent/`. Pi runs with the harness tools and configured web tools. The repository's root `AGENTS.md` points to `repo-dictionary/` for project facts. Run extension tests with `bun test` from this directory.
+`home-manager/managed-files.nix` maps source files to `~/.pi/agent/`. Pi runs with the harness tools and configured web tools. Run extension tests with `bun test` from this directory.
+
+## Browse and copy prompts
+
+Long sent prompts show a three-line text preview followed by `...` and a shortcut hint. Short prompts keep their Markdown rendering. This changes only the interactive transcript. Pi stores the complete prompt and sends it unchanged to the agent.
+
+Press `Ctrl+Alt+U` or run `/prompts` to open the read-only prompt browser. The left pane lists sent user messages from the current branch, newest first. A nonempty editor draft appears first and opens by default. The right pane shows the complete original text. Narrow terminals stack the panes. Opening or closing the browser does not change the draft or interrupt the agent. Resumed sessions use the same previews.
+
+Press `Tab` to switch panes. In the list, use `j`, `k`, or the arrow keys to choose a message. In the text, use `h`, `j`, `k`, and `l` to move the cursor, `w` and `b` to move between words, and Home and End to reach line edges. Use `gg` and `G` for message edges, `Ctrl+D` and `Ctrl+U` for half pages, or Page Up and Page Down for full pages. Arrow keys, Home, and End also work.
+
+Press `v` to select characters or `V` to select whole lines, then move the cursor and press `y` to copy. Use `yy` to copy the current line or `ggyG` to copy the complete message. The footer reports clipboard success or failure. Copies retain original whitespace and line endings, without borders or display-wrap breaks. Escape cancels an active selection; a second Escape closes the modal. `Ctrl+C` closes immediately.
+
+After installing the configuration with `nrs`, run `/reload` in Pi. The implementation is in `agent-configuration/harness/ui/prompts/`. Run `bun test tests/prompt-previews.test.ts tests/prompt-browser.test.ts` from this directory to check previews, navigation, selection, and clipboard handling.
 
 ## Extension settings
 
