@@ -6,14 +6,12 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { clampThinkingLevel, type Api, type Model, type SimpleStreamOptions, type TranscriptContext } from "@earendil-works/pi-ai";
 import { stream, streamSimple } from "@earendil-works/pi-ai/api/openai-codex-responses";
 import { buildBaseOptions } from "@earendil-works/pi-ai/api/simple-options";
+import { rainbow } from "pi-powerline-footer/theme.ts";
 import { loadFastModels, supportsFastMode } from "./capabilities.ts";
 
 const statusKey = "codex-fast-mode";
 const entryType = "codex-fast-mode";
-const rainbowColors = [196, 220, 46, 39];
-const fastLabel = [..."fast"]
-  .map((letter, index) => `\u001b[38;5;${rainbowColors[index]}m${letter}`)
-  .join("") + "\u001b[39m";
+const fastLabel = rainbow("fast");
 
 function preferenceFile(): string {
   const stateHome = process.env.XDG_STATE_HOME || join(homedir(), ".local", "state");

@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { rainbow } from "pi-powerline-footer/theme.ts";
 import { fastModelsFromCache, supportsFastMode } from "../agent-configuration/extensions/codex-fast-mode/capabilities";
 
 const requests: { fast: boolean; options: any }[] = [];
@@ -118,13 +119,24 @@ test("the visible menu toggles priority options without usage notifications", as
   expect(harness.notifications).toEqual([]);
 });
 
+test("the fast badge uses the high-reasoning rainbow gradient", async () => {
+  const harness = runtime();
+  harness.emit("session_start");
+  await harness.command("on");
+
+  expect(harness.label).toBe("fast");
+  expect(harness.status).toBe(rainbow("fast"));
+  expect(harness.status).toStartWith("\u001b[38;2;178;129;214m");
+  expect(harness.status).toEndWith("\u001b[0m");
+});
+
 test("the shortcut persists both choices across fresh extension instances", async () => {
   const harness = runtime();
   harness.emit("session_start");
   expect(harness.shortcutKey).toBe("ctrl+alt+f");
   await harness.toggle();
   expect(harness.label).toBe("fast");
-  expect(harness.status).toContain("\u001b[38;5;");
+  expect(harness.status).toContain("\u001b[38;2;");
   expect(JSON.parse(readFileSync(stateFile, "utf8"))).toEqual({ enabled: true });
 
   const nextSession = runtime();
