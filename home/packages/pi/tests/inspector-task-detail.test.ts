@@ -1,12 +1,7 @@
-import { expect, mock, test } from "bun:test";
+import { expect, test } from "bun:test";
 import { activityStore } from "../agent-configuration/harness/activity/store.ts";
 
 const TEST_CWD = "/tmp";
-
-mock.module("@earendil-works/pi-tui", () => ({
-  visibleWidth: (text: string) => text.length,
-  truncateToWidth: (text: string, width: number) => text.slice(0, width),
-}));
 
 const { buildDetail } = await import("../agent-configuration/harness/ui/inspector/detail.ts");
 

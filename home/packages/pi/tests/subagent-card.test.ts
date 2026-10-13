@@ -1,13 +1,8 @@
-import { beforeEach, expect, mock, test } from "bun:test";
+import { beforeEach, expect, test } from "bun:test";
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { activityStore } from "../agent-configuration/harness/activity/store.ts";
 
 const TEST_CWD = "/tmp";
-
-mock.module("@earendil-works/pi-tui", () => ({
-  visibleWidth: (text: string) => text.length,
-  truncateToWidth: (text: string, width: number) => text.slice(0, width),
-}));
 
 const { renderSubagentCard } = await import("../agent-configuration/harness/subagents/card.ts");
 const { resetActivityVisibility, toggleActivityVisibility, setAgentWorking } =
@@ -68,7 +63,7 @@ test("the card shows only the active tool, its target, and its state", () => {
   const lines = card.render(80).join("\n");
 
   expect(lines).toContain("+-- / SUBAGENT ");
-  expect(lines).toContain("| Inspect parser |");
+  expect(lines).toMatch(/\| Inspect parser\s+\|/);
   expect(lines).toContain("BASH pwd");
   expect(lines).toContain("Running...");
   expect(lines).not.toContain("READ");

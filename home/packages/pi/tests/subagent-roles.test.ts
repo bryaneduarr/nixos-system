@@ -1,9 +1,5 @@
-import { expect, mock, test } from "bun:test";
+import { expect, test } from "bun:test";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-
-mock.module("@earendil-works/pi-coding-agent", () => ({
-  defineTool: (tool: unknown) => tool,
-}));
 
 import {
   buildTaskSystemPrompt,
