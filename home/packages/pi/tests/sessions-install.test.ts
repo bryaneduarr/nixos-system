@@ -101,6 +101,7 @@ test("install reports lifecycle and session identity, protects user history acro
   let entries: any[] = [{ type: "message", message: { role: "custom", content: "startup" } }];
   let selection: any;
   let createFails = false;
+  let notificationFails = false;
   let terminalInput: (data: string) => void = () => {};
   let editor = "";
   let idle = true;
@@ -131,6 +132,7 @@ test("install reports lifecycle and session identity, protects user history acro
       herdr: (registry) => {
         const herdr = new HerdrSessions(registry, async (args) => {
           commands.push(args);
+          if (args[0] === "notification" && notificationFails) throw new Error("Herdr notification unavailable");
           if (args[0] === "agent" && args[1] === "rename" && pendingRenames > 0) {
             pendingRenames--;
             throw Object.assign(new Error("startup pending"), { code: "agent_launch_pending" });
@@ -178,6 +180,35 @@ test("install reports lifecycle and session identity, protects user history acro
     await events.get("agent_settled")({}, ctx);
     const idleReport = commands.findLast((args) => args[1] === "report-agent")!;
     expect(idleReport[idleReport.indexOf("--state") + 1]).toBe("idle");
+    const completionName = commands.findLast((args) => args[0] === "pane" && args[1] === "rename")![3]!;
+    expect(commands.filter((args) => args[0] === "notification")).toEqual([
+      ["notification", "show", "Pi finished", "--body", completionName, "--sound", "done"],
+    ]);
+    await events.get("agent_settled")({}, ctx);
+    expect(commands.filter((args) => args[0] === "notification")).toHaveLength(1);
+
+    for (const mode of ["rpc", "print", "json"]) {
+      await events.get("agent_start")({}, { ...ctx, mode });
+      await events.get("agent_settled")({}, { ...ctx, mode });
+    }
+    expect(commands.filter((args) => args[0] === "notification")).toHaveLength(1);
+
+    await events.get("agent_start")({}, ctx);
+    await events.get("agent_settled")({ aborted: true }, ctx);
+    expect(commands.filter((args) => args[0] === "notification")).toHaveLength(1);
+
+    await events.get("agent_start")({}, ctx);
+    await events.get("agent_settled")({}, ctx);
+    expect(commands.filter((args) => args[0] === "notification")).toHaveLength(2);
+
+    notificationFails = true;
+    await events.get("agent_start")({}, ctx);
+    await events.get("agent_settled")({}, ctx);
+    expect(notifications.at(-1)).toContain("Completion notification failed");
+    await events.get("agent_settled")({}, ctx);
+    expect(commands.filter((args) => args[0] === "notification")).toHaveLength(3);
+    notificationFails = false;
+
     selection = "self";
     await registeredCommands.get("sessions")("", ctx);
     expect(shutdowns).toBe(0);

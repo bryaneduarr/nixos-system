@@ -3,6 +3,11 @@ let
   c = flake.nixosConfigurations.nixos.config;
   h = c.home-manager.users.bryaneduarr;
 in
+assert builtins.elem "pi = \"off\"" (
+  flake.inputs.nixpkgs.lib.splitString "\n" h.home.file.".config/herdr/config.toml".text
+);
+assert
+  builtins.match ".*server reload-config.*" h.home.file.".config/herdr/config.toml".onChange != null;
 {
   boot = {
     inherit (c.boot) kernelParams kernelModules extraModulePackages;

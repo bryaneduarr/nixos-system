@@ -92,6 +92,13 @@ export class HerdrSessions {
     ]);
   }
 
+  async notifyCompletion(name: string): Promise<void> {
+    await this.command([
+      "notification", "show", "Pi finished",
+      "--body", name, "--sound", "done",
+    ]);
+  }
+
   async release(row: LiveSession): Promise<void> {
     await this.command([
       "pane", "release-agent", row.pane,

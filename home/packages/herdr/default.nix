@@ -1,17 +1,31 @@
-_: {
-  home.file.".config/herdr/config.toml".text = ''
-    onboarding = false
+{ config, pkgs, ... }:
+{
+  home.file.".config/herdr/config.toml" = {
+    onChange = ''
+      herdr_socket="''${HERDR_SOCKET_PATH:-''${HERDR_API_SOCKET:-${config.xdg.configHome}/herdr/herdr.sock}}"
+      if [ -S "$herdr_socket" ]; then
+        HERDR_SOCKET_PATH="$herdr_socket" HERDR_API_SOCKET="$herdr_socket" ${pkgs.herdr}/bin/herdr server reload-config ||
+          printf '%s\n' 'Herdr config reload failed. Run herdr server reload-config to apply notification settings.' >&2
+      fi
+    '';
 
-    [experimental]
-    pane_history = true
+    text = ''
+      onboarding = false
 
-    [ui]
-    sidebar_collapsed_mode = "hidden"
+      [experimental]
+      pane_history = true
 
-    [keys]
-    switch_workspace = "prefix+1..9"
-    previous_workspace = "prefix+shift+k"
-    next_workspace = "prefix+shift+j"
-    switch_tab = "prefix+alt+1..9"
-  '';
+      [ui]
+      sidebar_collapsed_mode = "hidden"
+
+      [ui.sound.agents]
+      pi = "off"
+
+      [keys]
+      switch_workspace = "prefix+1..9"
+      previous_workspace = "prefix+shift+k"
+      next_workspace = "prefix+shift+j"
+      switch_tab = "prefix+alt+1..9"
+    '';
+  };
 }

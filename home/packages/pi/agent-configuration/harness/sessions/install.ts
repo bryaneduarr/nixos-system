@@ -42,6 +42,7 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
   let pane: Awaited<ReturnType<HerdrSessions["current"]>> | undefined;
   let historyEver = false;
   let compacting = false;
+  let agentActive = false;
   let publishing: Promise<void> | undefined;
   let open = false;
   let socket = "";
@@ -118,6 +119,7 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
     removeInputListener = undefined;
     timer = undefined;
     context = undefined;
+    agentActive = false;
     if (publishing) await publishing.catch(() => {});
     if (latest && herdr) await herdr.release(latest).catch(() => {});
     if (registry && identity) await registry.remove(identity, preserveName);
@@ -192,12 +194,25 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
   pi.on("agent_start", async (_event, ctx) => {
     if (!context || ctx.mode !== "tui") return;
     context = ctx;
+    agentActive = true;
     await publish();
   });
-  pi.on("agent_settled", async (_event, ctx) => {
+  pi.on("agent_settled", async (event, ctx) => {
     if (!context || ctx.mode !== "tui") return;
     context = ctx;
-    await publish();
+    const notifyCompletion = agentActive && !event.aborted;
+    agentActive = false;
+    try {
+      await publish();
+    } finally {
+      if (notifyCompletion && herdr) {
+        try {
+          await herdr.notifyCompletion(name);
+        } catch (error) {
+          ctx.ui.notify(`Completion notification failed: ${String(error)}`, "warning");
+        }
+      }
+    }
   });
   pi.on("session_shutdown", (event) => stop(["reload", "new", "resume", "fork"].includes(event.reason)));
 

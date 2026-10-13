@@ -43,6 +43,8 @@ Cleanup requests a graceful Pi shutdown. A detached helper waits for that exact 
 
 The harness reports `working` and `idle` to Herdr under its own `pi:harness` source, separate from Herdr's native Pi integration. Drafts remain `idle` in Herdr and appear as `draft` in the Pi session menu. After changing the reporter, run `nrs`, then `/reload` in each live Pi instance. Reloading Herdr's config alone does not reload Pi extensions.
 
+Pi sends one audible completion notification after the agent settles. Repeated settlement events, aborted runs, and noninteractive subagents do not send another notification. Herdr's automatic Pi state-change sound is muted to avoid a second sound. Home Manager reloads a running Herdr server when its configuration file changes. If an older server still plays both sounds, run `herdr server reload-config`; no Pi restart is needed.
+
 The manager uses the existing `pi` executable through `herdr agent start --kind pi`. It does not install a shell wrapper or change noninteractive Pi invocations. Pi must load this harness in the new pane. Restart older Pi processes to make them appear in the menu. Run the tests with `bun test home/packages/pi/tests` from the repository root. Tests cover sibling-pane creation, numbered names, startup-before-focus ordering, both shortcuts, draft reporting, menu rendering, and pane-only cleanup. Focus commands use mocked tests to avoid changing the active terminal during validation. Install dependencies before running the test suite. The existing renderer tests use the real TUI package rather than global package mocks.
 
 ## Extension settings
