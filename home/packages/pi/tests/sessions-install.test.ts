@@ -154,7 +154,7 @@ test("install reports lifecycle and session identity, protects user history acro
       scheduleCleanup: async () => { cleanups++; return () => {}; },
     };
     installSessions(api, dependencies);
-    expect([...shortcuts.keys()]).toEqual(["ctrl+alt+s", "ctrl+alt+n"]);
+    expect([...shortcuts.keys()]).toEqual(["ctrl+alt+q", "ctrl+alt+s", "ctrl+alt+n"]);
     await createHere({ ...ctx, mode: "rpc" });
     expect(created).toEqual([]);
     expect(notifications.at(-1)).toContain("interactive Pi");

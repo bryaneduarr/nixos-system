@@ -6,6 +6,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { getKeybindings } from "@earendil-works/pi-tui";
 import { HerdrSessions, scopedHerdr } from "./herdr.ts";
 import { canCleanup, scheduleCleanup } from "./cleanup.ts";
+import { installExit, type ExitDependencies } from "./exit.ts";
 import type { selectProject, selectSession } from "./menu.ts";
 import { canReportSession, canonicalDirectory, processStartIdentity, processSessionIdentity, registryDirectory, SessionRegistry, sessionStatus, type LiveSession } from "./registry.ts";
 
@@ -29,9 +30,12 @@ export interface SessionDependencies {
   selectSession?: typeof selectSession;
   selectProject?: typeof selectProject;
   scheduleCleanup?: typeof scheduleCleanup;
+  exit?: ExitDependencies;
 }
 
 export function installSessions(pi: ExtensionAPI, dependencies: SessionDependencies = {}): void {
+  installExit(pi, dependencies.exit);
+
   let context: ExtensionContext | undefined;
   let registry: SessionRegistry | undefined;
   let herdr: HerdrSessions | undefined;

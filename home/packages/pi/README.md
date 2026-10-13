@@ -47,6 +47,16 @@ Pi sends one audible completion notification after the agent settles. Repeated s
 
 The manager uses the existing `pi` executable through `herdr agent start --kind pi`. It does not install a shell wrapper or change noninteractive Pi invocations. Pi must load this harness in the new pane. Restart older Pi processes to make them appear in the menu. Run the tests with `bun test home/packages/pi/tests` from the repository root. Tests cover sibling-pane creation, numbered names, startup-before-focus ordering, both shortcuts, draft reporting, menu rendering, and pane-only cleanup. Focus commands use mocked tests to avoid changing the active terminal during validation. Install dependencies before running the test suite. The existing renderer tests use the real TUI package rather than global package mocks.
 
+## Exit Pi
+
+Run `/exit` or press `Ctrl+Alt+Q` in interactive Pi. Outside Herdr, this requests Pi's graceful shutdown without closing a terminal. Inside Herdr, it also schedules closure of the current pane after the exact Pi process exits. Explicit exit works with conversation history and with Pi instances that the session manager did not create. It does not change the automatic unused-session cleanup rules.
+
+Pi asks for confirmation when it has active work, pending messages, or an editor draft. Cancel leaves Pi running and preserves that work. Confirm requests shutdown and aborts active work. Pi keeps the saved conversation for `/resume`. Unsent drafts and queued prompts are not saved as conversation messages.
+
+Before shutdown, the extension verifies the current pane, Pi process, socket, and shell process identity. If verification or helper startup fails, Pi stays running and reports an error. Check the Herdr socket and pane process information, then retry. Pi's built-in `Ctrl+D` with an empty editor exits without requesting pane closure.
+
+The detached helper waits up to 60 seconds for Pi to exit, then up to 10 seconds for the original shell to remain alone. It rechecks the exact pane and original shell start identity before closing only that pane. It never sends a tab-close command. If another process starts, the shell changes, or Herdr information becomes unavailable, the helper leaves the pane open. Check the remaining processes before closing that pane manually. Repeated invocations do not schedule extra helpers. Reload or session replacement cancels an in-flight exit request.
+
 ## Extension settings
 
 Pi uses `pi-mcp-adapter` as its sole MCP extension. The managed settings disable `builtin:mcp` and store adapter settings in `~/.pi/agent/mcp-adapter.json`. The Nix package patches the LSP adapter's host libraries into wildcard peer dependencies and removes nested copies.
