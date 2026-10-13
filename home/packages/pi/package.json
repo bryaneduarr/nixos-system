@@ -13,9 +13,9 @@
     "@juvio15/pi-ast-grep": "0.4.2",
     "knip": "6.41.0",
     "pi-lsp-adapter": "0.1.3",
-    "pi-mcp-adapter": "5.1.0",
-    "pi-powerline-footer": "0.19.1",
+    "pi-mcp-adapter": "5.2.0",
+    "pi-powerline-footer": "0.20.0",
     "pi-tree-sitter": "0.2.8",
-    "pi-web-access": "0.37.0"
+    "pi-web-access": "0.39.0"
   }
 }
