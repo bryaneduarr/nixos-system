@@ -15,6 +15,12 @@ let
 in
 {
   home.file = {
+    ".pi/agent/keybindings.json" = {
+      text = builtins.toJSON {
+        "app.clipboard.pasteImage" = "ctrl+v";
+      };
+      force = true;
+    };
     ".pi/agent/lsp.json" = mkJsonFile (agentConfiguration + "/settings/lsp.nix");
     ".pi/agent/pi-fff.json" = mkJsonFile (agentConfiguration + "/settings/pi-fff.nix");
     ".pi/agent/web-search.json" = {

@@ -10,6 +10,7 @@ import { installHarnessPresentation } from "./ui/install.ts";
 import { createHarnessRenderers } from "./ui/tool-renderer.ts";
 import { registerSubagentTool } from "./subagents/tool.ts";
 import { TASK_TOOL_NAME } from "./subagents/roles.ts";
+import { installSessions } from "./sessions/install.ts";
 
 const SEARCH_TOOL_DESCRIPTION = [
   "Find filenames, text, symbols, definitions, references, tests, structural matches, or git history.",
@@ -165,6 +166,7 @@ export default function harnessExtension(pi: ExtensionAPI): void {
   registerSubagentTool(pi);
 
   installHarnessPresentation(pi);
+  installSessions(pi);
 
   pi.on("session_start", async () => {
     enforceActiveTools(pi);
