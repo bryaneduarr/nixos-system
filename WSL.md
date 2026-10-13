@@ -44,7 +44,7 @@ After a successful rebuild, start a new Zsh or Fish session.
 
 ## Use the installed commands
 
-Run `nrs` to rebuild the detected configuration. Run `nfu` to update Pi dependencies and flake inputs, refresh the Pi dependency hash, rebuild the detected configuration, and verify Pi.
+Run `nrs` to rebuild the detected configuration. Run `nfu` to update Pi dependencies and flake inputs, refresh the Pi dependency hash, rebuild the detected configuration, and check the installed Pi tool versions. The update script does not start Pi RPC sessions, call a model, or run extension smoke tests.
 
 The update-all script runs the same pipeline:
 

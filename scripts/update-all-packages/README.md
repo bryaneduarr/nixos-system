@@ -1,6 +1,6 @@
 # Update all packages
 
-This script updates the configured Pi packages and flake inputs. It refreshes the related lock data, rebuilds the detected NixOS or WSL configuration, and verifies Pi.
+This script updates the configured Pi packages and flake inputs. It refreshes the related lock data, rebuilds the detected NixOS or WSL configuration, and checks installed tool versions. The final check does not start Pi RPC sessions or run extension smoke tests.
 
 `nfu` runs this script in Zsh and Fish. WSL selects `wsl-x86_64` or `wsl-aarch64` automatically. The existing x86_64 machine with hostname `nixos` selects `nixos`. Unsupported machines stop before updates. Set `NIXOS_REBUILD_TARGET` for an explicit target.
 
