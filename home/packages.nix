@@ -8,6 +8,16 @@
 let
   engram = pkgs.callPackage ./packages/engram { };
 
+  typescriptLanguageServer = pkgs.typescript-language-server.overrideAttrs (previous: {
+    pnpmDeps =
+      if previous.pnpmDeps.outputHash == "sha256-MUSxDMlbG21KSesGdEvqa2kEpuVfLlXRUX1qV/FGsSo=" then
+        previous.pnpmDeps.overrideAttrs {
+          outputHash = "sha256-xR/EF60lVBsITKgH7wCM2wHM46PFQevD51KfCENSUH4=";
+        }
+      else
+        previous.pnpmDeps;
+  });
+
   activationPath = lib.makeBinPath [
     pkgs.bun
     pkgs.nodejs_latest
@@ -80,7 +90,7 @@ in
       tailscale
       tree
       tree-sitter
-      typescript-language-server
+      typescriptLanguageServer
       unzip
       uv
       valgrind
