@@ -23,7 +23,7 @@ let
     exec 9>"$HOME/.cache/bun-maintenance.lock"
     ${pkgs.util-linux}/bin/flock 9
 
-    ${lib.concatMapStringsSep "\n" (pkg: ''${pkgs.bun}/bin/bun install -g "${pkg}" || true'') packages}
+    ${lib.concatMapStringsSep "\n" (pkg: ''${pkgs.bun}/bin/bun install -g "${pkg}"'') packages}
   '';
 in
 {

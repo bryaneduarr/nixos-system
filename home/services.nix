@@ -16,7 +16,7 @@
           ${pkgs.util-linux}/bin/flock 9
 
           export BUN_INSTALL="$HOME/.bun"
-          ${pkgs.bun}/bin/bun pm cache rm
+          ${pkgs.bun}/bin/bun pm --global cache rm
         '';
       };
     };

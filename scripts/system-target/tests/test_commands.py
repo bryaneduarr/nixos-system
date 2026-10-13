@@ -208,9 +208,32 @@ if sys.argv[1:2] == ["build"]:
                         ["nix", "flake", "update", "--flake", reference],
                         ["nix", "build", "--no-link", "--impure", f"{reference}#packages.{system}.pi-tools", *limits],
                         ["sudo", "nixos-rebuild", "switch", "--flake", f"{reference}#{target}", *limits, "--show-trace"],
+                        ["bun", "update", "--global", "--latest", "--no-cache"],
+                        ["bun", "pm", "--global", "cache", "rm"],
                         ["nix", "test-verify-pi"],
                     ])
                     self.assertNotIn("fakeHash", self.pi_definition.read_text())
+
+    def test_failed_bun_update_cleans_cache_and_stops_pipeline(self):
+        self.environment["TEST_BUN_UPDATE_STATUS"] = "7"
+        result = self.run_command([
+            "bash", str(self.repository / "scripts/update-all-packages/update-all-packages.sh")
+        ])
+        self.assertEqual(result.returncode, 7, result.stderr)
+        self.assertEqual(self.commands()[-2:], [
+            ["bun", "update", "--global", "--latest", "--no-cache"],
+            ["bun", "pm", "--global", "cache", "rm"],
+        ])
+        self.assertNotIn(["nix", "test-verify-pi"], self.commands())
+
+    def test_failed_bun_cleanup_stops_pipeline(self):
+        self.environment["TEST_BUN_CLEANUP_STATUS"] = "8"
+        result = self.run_command([
+            "bash", str(self.repository / "scripts/update-all-packages/update-all-packages.sh")
+        ])
+        self.assertEqual(result.returncode, 8, result.stderr)
+        self.assertEqual(self.commands()[-1], ["bun", "pm", "--global", "cache", "rm"])
+        self.assertNotIn(["nix", "test-verify-pi"], self.commands())
 
     def test_unsupported_host_stops_before_maintenance_or_rebuild(self):
         for architecture, host in (("aarch64", "Linux"), ("unknown", "Linux"), ("x86_64", "Darwin")):
