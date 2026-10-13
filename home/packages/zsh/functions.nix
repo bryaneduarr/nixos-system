@@ -1,15 +1,7 @@
 { config, pkgs, ... }:
 {
   programs.zsh.initContent = ''
-    # Function to update and rebuild the system using flakes
-    nrs() {
-      sudo nixos-rebuild switch --flake ~/nixos-system/#nixos "$@"
-    }
-
-    # Function that comes from the scripts/ folder to update all the system
-    nfu() {
-      ${config.home.homeDirectory}/nixos-system/scripts/update-all-packages/update-all-packages.sh "$@"
-    }
+    ${builtins.readFile ../../../scripts/system-target/commands.zsh}
 
     # Yazi function to stay in the directory and activate with 'y'
     y() {

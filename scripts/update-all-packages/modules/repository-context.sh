@@ -1,5 +1,9 @@
 repo_root="$(cd -- "$script_directory/../.." && pwd)"
 flake_ref="path:$repo_root"
+source "$repo_root/scripts/system-target/select-target.sh"
+select_system_target
+show_system_target
+
 pi_nix_file="$repo_root/home/packages/pi/pi-tools/default.nix"
 
 # Run a task with a small text-only spinner. Successful command output stays

@@ -8,7 +8,7 @@ refresh_pi_npm_hash() {
   sed -i -E 's|^([[:space:]]*)npmDepsHash = ".*";|\1npmDepsHash = lib.fakeHash;|' "$pi_nix_file"
 
   set +e
-  build_output="$(nix build --no-link --impure "$flake_ref#pi-tools" 2>&1)"
+  build_output="$(nix build --no-link --impure "$flake_ref#packages.$rebuild_system_architecture.pi-tools" "${build_limit_args[@]}" 2>&1)"
   set -e
 
   new_hash="$(printf '%s\n' "$build_output" | sed -n 's/.*got:[[:space:]]*//p' | tr -d '[:space:]' | tail -n 1)"

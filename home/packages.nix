@@ -1,7 +1,7 @@
 # This file manages all of the user's packages.
 {
   pkgs,
-  inputs,
+  desktopTools ? true,
   lib,
   ...
 }:
@@ -27,53 +27,13 @@ let
   '';
 in
 {
-  systemd.user = {
-    services.bun-cache-cleanup = {
-      Unit = {
-        Description = "Prune Bun's download cache";
-      };
-
-      Service = {
-        Type = "oneshot";
-        ExecStart = pkgs.writeShellScript "bun-cache-cleanup" ''
-          set -euo pipefail
-
-          install -d -m 700 "$HOME/.cache"
-          exec 9>"$HOME/.cache/bun-maintenance.lock"
-          ${pkgs.util-linux}/bin/flock 9
-
-          export BUN_INSTALL="$HOME/.bun"
-          ${pkgs.bun}/bin/bun pm cache rm
-        '';
-      };
-    };
-
-    timers.bun-cache-cleanup = {
-      Unit = {
-        Description = "Daily Bun cache cleanup";
-      };
-
-      Timer = {
-        OnCalendar = "daily";
-        Persistent = true;
-        RandomizedDelaySec = "1h";
-      };
-
-      Install = {
-        WantedBy = [ "timers.target" ];
-      };
-    };
-  };
 
   # Install all of the user packages in here.
   home = {
     packages = with pkgs; [
-      inputs.awww.packages.${pkgs.stdenv.hostPlatform.system}.default
-      bibata-cursors
       awscli2
       bat
       biome
-      bluetui
       bubblewrap
       bun
       cargo
@@ -95,13 +55,10 @@ in
       git
       gnumake
       herdr
-      google-chrome
       hyperfine
       jq
       killall
-      kitty
       lazygit
-      matugen
       neovim
       nil
       nixfmt
@@ -117,7 +74,6 @@ in
       sqlite-vec
       redis
       ripgrep
-      rofi
       sqlite
       ssm-session-manager-plugin
       statix
@@ -128,11 +84,7 @@ in
       unzip
       uv
       valgrind
-      vscode
       wget
-      wl-clipboard
-      wtype
-      wev
       yazi
       yq-go
       tmux
@@ -140,14 +92,21 @@ in
     ];
 
     activation = {
-      installBunGlobalPackages = lib.hm.dag.entryAfter [ "linkGeneration" ] (bunGlobalInstall [
-        "opencode-ai@latest"
-        "tree-sitter-cli"
-        "npm-check-updates"
-        "agent-browser"
-        "chrome-devtools-mcp@latest"
-        "skills"
-      ]);
+      installBunGlobalPackages = lib.hm.dag.entryAfter [ "linkGeneration" ] (
+        bunGlobalInstall (
+          [
+            "opencode-ai@latest"
+            "tree-sitter-cli"
+            "npm-check-updates"
+          ]
+          ++ lib.optionals desktopTools [
+            "agent-browser"
+            "chrome-devtools-mcp@latest"
+          ]
+          ++ [ "skills" ]
+          ++ lib.optionals (!desktopTools) [ "@openai/codex@latest" ]
+        )
+      );
     };
 
     # Neovim specific spell spanish files with hashes and URL using Nix derivation.

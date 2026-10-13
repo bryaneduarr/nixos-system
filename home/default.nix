@@ -1,43 +1,9 @@
-# Central point file for the home-manager for the user.
-{ pkgs, ... }:
-{
-  home = {
-    stateVersion = "26.05";
-
-    pointerCursor = {
-      enable = true;
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Classic";
-      size = 24;
-    };
-  };
+_: {
+  home.stateVersion = "26.05";
 
   imports = [
-    # Here is where we will install nix packages.
-    ./packages.nix
-
-    # Commands and scripts configuration will be placed here.
-    ./commands/worktree-dev.nix
-
-    ./desktop
-
-    # Packages installed configuration will be placed here.
-    ./packages/btop.nix
-    ./packages/git.nix
-    ./packages/fish/default.nix
-    ./packages/herdr/default.nix
-    ./packages/kitty/default.nix
-    ./packages/matugen/default.nix
-    ./packages/nvim.nix
-    ./packages/onedrive/default.nix
-    ./packages/pi/default.nix
-    ./packages/starship/default.nix
-    ./packages/t3code/default.nix
-    ./packages/tmux.nix
-    ./packages/vscode.nix
-    ./packages/waybar/default.nix
-    ./packages/yazi.nix
-    ./packages/zen-browser.nix
-    ./packages/zsh/default.nix
+    ./terminal-tools.nix
+    ./desktop-tools.nix
+    ./services.nix
   ];
 }

@@ -47,7 +47,7 @@
 
     functions = {
       nrs = ''
-        sudo nixos-rebuild switch --flake path:$HOME/dot-files.nix#nixos $argv
+        ${config.home.homeDirectory}/nixos-system/scripts/system-target/rebuild.sh $argv
       '';
 
       nfu = ''
