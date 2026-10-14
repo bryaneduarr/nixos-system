@@ -1,0 +1,531 @@
+Add a client-local tab bar toggle to Herdr.
+
+Adds keys.toggle_tab_bar (default "prefix+t") and ui.tab_bar_start_hidden
+(default false). Hiding the bar gives its row to the pane surface.
+
+Base: github.com/herdrdev/herdr tag v0.9.3, the source nixpkgs builds
+(src hash sha256-uu452Xe23pSvFk7w7fKPjiaqY5QenUIljao2SFAxpc0=).
+Touches no protocol, codec, or persisted state.
+
+diff --git a/docs/next/website/src/content/docs/keyboard.mdx b/docs/next/website/src/content/docs/keyboard.mdx
+index 9e3a705..659b653 100644
+--- a/docs/next/website/src/content/docs/keyboard.mdx
++++ b/docs/next/website/src/content/docs/keyboard.mdx
+@@ -49,6 +49,7 @@ Tabs:
+ | Jump to tab 1–9 | `prefix+1..9` |
+ | Rename tab | `prefix+shift+t` |
+ | Close tab | `prefix+shift+x` |
++| Toggle tab bar | `prefix+t` |
+ 
+ Workspaces and session:
+ 
+diff --git a/docs/next/website/src/data/config-reference.json b/docs/next/website/src/data/config-reference.json
+index eb7e08d..ee05769 100644
+--- a/docs/next/website/src/data/config-reference.json
++++ b/docs/next/website/src/data/config-reference.json
+@@ -835,6 +835,12 @@
+           "default": "\"prefix+b\"",
+           "description": "Toggle sidebar collapse."
+         },
++        {
++          "key": "keys.toggle_tab_bar",
++          "type": "keybinding",
++          "default": "\"prefix+t\"",
++          "description": "Toggle tab bar visibility for the current client."
++        },
+         {
+           "key": "keys.indexed.tabs",
+           "type": "string",
+@@ -999,6 +1005,12 @@
+           "default": "false",
+           "description": "Hide the tab row when the workspace has one tab."
+         },
++        {
++          "key": "ui.tab_bar_start_hidden",
++          "type": "boolean",
++          "default": "false",
++          "description": "Start each client with the tab row hidden. keys.toggle_tab_bar shows it again and overrides hide_tab_bar_when_single_tab until the client exits. Changes take effect on the next launch."
++        },
+         {
+           "key": "ui.tab_bar_position",
+           "type": "enum",
+diff --git a/src/client/shell/actions.rs b/src/client/shell/actions.rs
+index 9d0a3bd..cf53c23 100644
+--- a/src/client/shell/actions.rs
++++ b/src/client/shell/actions.rs
+@@ -19,6 +19,12 @@ impl ClientShellState {
+                 outcome.resize = true;
+                 self.persist_chrome_preferences(outcome);
+             }
++            crate::input::KeybindMatch::Action(crate::input::KeybindAction::ToggleTabBar) => {
++                self.tab_bar_visibility_override = Some(!self.tab_bar_visible());
++                self.invalidate_pane_surface();
++                outcome.repaint = true;
++                outcome.resize = true;
++            }
+             crate::input::KeybindMatch::Action(action) => {
+                 if self.workspace_preview_action_blocked()
+                     && matches!(
+diff --git a/src/client/shell/config.rs b/src/client/shell/config.rs
+index bfa1fb2..e3c0b14 100644
+--- a/src/client/shell/config.rs
++++ b/src/client/shell/config.rs
+@@ -121,6 +121,7 @@ impl ClientShellConfig {
+             mobile_width_threshold: config.ui.mobile_width_threshold,
+             tab_bar_position: config.ui.tab_bar_position,
+             hide_tab_bar_when_single_tab: config.ui.hide_tab_bar_when_single_tab,
++            tab_bar_start_hidden: config.ui.tab_bar_start_hidden,
+             spaces: config.ui.sidebar.spaces.clone(),
+             agents: config.ui.sidebar.agents.clone(),
+             agent_panel_sort: config.ui.agent_panel_sort,
+@@ -362,7 +363,7 @@ impl ClientShellConfig {
+         cols: u16,
+         rows: u16,
+         sidebar_collapsed: bool,
+-        tab_count: usize,
++        tab_bar_visible: bool,
+         sidebar_width: u16,
+     ) -> ClientShellLayout {
+         if cols <= self.mobile_width_threshold {
+@@ -390,7 +391,7 @@ impl ClientShellConfig {
+         }
+         .min(cols.saturating_sub(1));
+         let main = Rect::new(sidebar_width, 0, cols.saturating_sub(sidebar_width), rows);
+-        let show_tab_bar = rows > 1 && !(self.hide_tab_bar_when_single_tab && tab_count == 1);
++        let show_tab_bar = rows > 1 && tab_bar_visible;
+         let tab_height = u16::from(show_tab_bar);
+         let (tab_bar, pane_surface) = match self.tab_bar_position {
+             TabBarPositionConfig::Top => (
+@@ -435,7 +436,13 @@ impl ClientShellConfig {
+             .unwrap_or(self.sidebar_width)
+             .clamp(min_width, max_width);
+         let surface = self
+-            .layout(cols, rows, sidebar_collapsed, 0, sidebar_width)
++            .layout(
++                cols,
++                rows,
++                sidebar_collapsed,
++                !self.tab_bar_start_hidden,
++                sidebar_width,
++            )
+             .pane_surface;
+         ClientSurfaceSize {
+             cols: surface.width.max(1),
+diff --git a/src/client/shell/state.rs b/src/client/shell/state.rs
+index c170c9b..75fc110 100644
+--- a/src/client/shell/state.rs
++++ b/src/client/shell/state.rs
+@@ -21,6 +21,7 @@ pub(crate) struct ClientShellConfig {
+     pub(super) mobile_width_threshold: u16,
+     pub(super) tab_bar_position: TabBarPositionConfig,
+     pub(super) hide_tab_bar_when_single_tab: bool,
++    pub(super) tab_bar_start_hidden: bool,
+     pub(super) spaces: SpacesSidebarConfig,
+     pub(super) agents: crate::config::AgentsSidebarConfig,
+     pub(super) agent_panel_sort: crate::config::AgentPanelSortConfig,
+@@ -858,6 +859,7 @@ pub(crate) struct ClientShellState {
+     pub(super) popup_terminal_id: Option<String>,
+     pub(super) sidebar_collapsed: bool,
+     pub(super) sidebar_collapsed_manual: bool,
++    pub(super) tab_bar_visibility_override: Option<bool>,
+     pub(super) sidebar_width: u16,
+     pub(super) sidebar_width_manual: bool,
+     pub(super) sidebar_section_split: f32,
+@@ -980,6 +982,7 @@ impl ClientShellState {
+         let sidebar_collapsed = preferences
+             .sidebar_collapsed
+             .unwrap_or(config.sidebar_start_collapsed);
++        let tab_bar_visibility_override = config.tab_bar_start_hidden.then_some(false);
+         let (min_width, max_width) = crate::config::validated_sidebar_bounds(
+             config.sidebar_min_width,
+             config.sidebar_max_width,
+@@ -1023,6 +1026,7 @@ impl ClientShellState {
+             popup_terminal_id: None,
+             sidebar_collapsed,
+             sidebar_collapsed_manual: preferences.sidebar_collapsed.is_some(),
++            tab_bar_visibility_override,
+             sidebar_width,
+             sidebar_width_manual: preferences.sidebar_width.is_some(),
+             sidebar_section_split,
+@@ -1198,11 +1202,17 @@ impl ClientShellState {
+             cols,
+             rows,
+             self.sidebar_collapsed,
+-            self.focused_tab_count(),
++            self.tab_bar_visible(),
+             self.sidebar_width,
+         )
+     }
+ 
++    pub(super) fn tab_bar_visible(&self) -> bool {
++        self.tab_bar_visibility_override.unwrap_or_else(|| {
++            !(self.config.hide_tab_bar_when_single_tab && self.focused_tab_count() == 1)
++        })
++    }
++
+     pub(crate) fn surface_size(&self, cols: u16, rows: u16) -> ClientSurfaceSize {
+         let surface = self.layout(cols, rows).pane_surface;
+         ClientSurfaceSize {
+diff --git a/src/client/shell/tests/mod.rs b/src/client/shell/tests/mod.rs
+index 9d96014..cdb3780 100644
+--- a/src/client/shell/tests/mod.rs
++++ b/src/client/shell/tests/mod.rs
+@@ -260,3 +260,4 @@ mod mobile;
+ mod mouse_selection;
+ mod popup_focus_projection;
+ mod startup_overlays;
++mod tab_bar;
+diff --git a/src/client/shell/tests/tab_bar.rs b/src/client/shell/tests/tab_bar.rs
+new file mode 100644
+index 0000000..923848b
+--- /dev/null
++++ b/src/client/shell/tests/tab_bar.rs
+@@ -0,0 +1,120 @@
++use super::*;
++
++fn state_with(configure: impl FnOnce(&mut ClientShellConfig)) -> ClientShellState {
++    let mut config = ClientShellConfig::from_config(&Config::default());
++    configure(&mut config);
++    let mut state = ClientShellState::new(config);
++    state.set_snapshot(Box::new(snapshot()));
++    state.set_pane_surface(surface());
++    state
++}
++
++fn toggle_tab_bar(state: &mut ClientShellState) -> ClientShellInput {
++    let mut outcome = ClientShellInput::default();
++    state.record_binding(
++        crate::input::KeybindMatch::Action(crate::input::KeybindAction::ToggleTabBar),
++        &mut outcome,
++    );
++    outcome
++}
++
++#[test]
++fn start_hidden_tab_bar_gives_its_row_to_the_pane_surface() {
++    let mut state = state_with(|config| config.tab_bar_start_hidden = true);
++    let layout = state.layout(106, 30);
++    assert!(layout.tab_bar.is_empty());
++    assert_eq!(layout.pane_surface.y, 0);
++    assert_eq!(layout.pane_surface.height, 30);
++    assert_eq!(state.surface_size(106, 30).rows, 30);
++    assert_eq!(
++        state.config.initial_surface_size(106, 30).rows,
++        state.surface_size(106, 30).rows
++    );
++    state.compose(106, 30).expect("hidden tab bar frame");
++    assert!(state.hits.tabs.is_empty());
++    assert!(state.hits.new_tab.is_empty());
++
++    let shown = toggle_tab_bar(&mut state);
++    assert!(shown.repaint);
++    assert!(shown.resize);
++    assert!(shown.actions.is_empty());
++    assert!(state.pane_surface.is_none());
++    state.set_pane_surface(surface());
++    let layout = state.layout(106, 30);
++    assert_eq!(layout.tab_bar.y, 0);
++    assert_eq!(layout.tab_bar.height, 1);
++    assert_eq!(layout.pane_surface.y, 1);
++    assert_eq!(state.surface_size(106, 30).rows, 29);
++    state.compose(106, 30).expect("shown tab bar frame");
++    assert!(!state.hits.tabs.is_empty());
++
++    toggle_tab_bar(&mut state);
++    assert!(state.layout(106, 30).tab_bar.is_empty());
++    state.set_pane_surface(surface());
++    state.compose(106, 30).expect("hidden again tab bar frame");
++    assert!(state.hits.tabs.is_empty());
++}
++
++#[test]
++fn default_config_keeps_the_tab_bar_and_toggle_hides_it() {
++    let mut state = state_with(|_| {});
++    assert_eq!(state.layout(106, 30).tab_bar.height, 1);
++    assert_eq!(state.config.initial_surface_size(106, 30).rows, 29);
++
++    toggle_tab_bar(&mut state);
++    assert!(state.layout(106, 30).tab_bar.is_empty());
++    assert_eq!(state.surface_size(106, 30).rows, 30);
++}
++
++#[test]
++fn bottom_tab_bar_hides_and_returns_to_the_last_row() {
++    let mut state = state_with(|config| {
++        config.tab_bar_position = crate::config::TabBarPositionConfig::Bottom;
++        config.tab_bar_start_hidden = true;
++    });
++    let layout = state.layout(106, 30);
++    assert!(layout.tab_bar.is_empty());
++    assert_eq!(layout.pane_surface.y, 0);
++    assert_eq!(layout.pane_surface.height, 30);
++
++    toggle_tab_bar(&mut state);
++    let layout = state.layout(106, 30);
++    assert_eq!(layout.tab_bar.y, 29);
++    assert_eq!(layout.tab_bar.height, 1);
++    assert_eq!(layout.pane_surface.y, 0);
++    assert_eq!(layout.pane_surface.height, 29);
++}
++
++#[test]
++fn manual_toggle_overrides_single_tab_auto_hide() {
++    let mut state = state_with(|config| config.hide_tab_bar_when_single_tab = true);
++    assert_eq!(state.focused_tab_count(), 1);
++    assert!(state.layout(106, 30).tab_bar.is_empty());
++
++    toggle_tab_bar(&mut state);
++    assert_eq!(state.layout(106, 30).tab_bar.height, 1);
++
++    toggle_tab_bar(&mut state);
++    assert!(state.layout(106, 30).tab_bar.is_empty());
++}
++
++#[test]
++fn config_reload_keeps_the_manual_tab_bar_choice() {
++    let mut state = state_with(|config| config.tab_bar_start_hidden = true);
++    toggle_tab_bar(&mut state);
++
++    let mut next = Config::default();
++    next.ui.tab_bar_start_hidden = true;
++    next.ui.hide_tab_bar_when_single_tab = true;
++    state.config.apply_live_config(&next, &[], &[]);
++
++    assert_eq!(state.layout(106, 30).tab_bar.height, 1);
++}
++
++#[test]
++fn mobile_layout_ignores_the_tab_bar_toggle() {
++    let mut state = state_with(|_| {});
++    let before = state.layout(44, 20);
++    toggle_tab_bar(&mut state);
++    assert_eq!(state.layout(44, 20), before);
++}
+diff --git a/src/config/keybinds.rs b/src/config/keybinds.rs
+index 903f85c..8705db9 100644
+--- a/src/config/keybinds.rs
++++ b/src/config/keybinds.rs
+@@ -403,6 +403,7 @@ pub struct Keybinds {
+     pub resize_pane_up: ActionKeybinds,
+     pub resize_pane_right: ActionKeybinds,
+     pub toggle_sidebar: ActionKeybinds,
++    pub toggle_tab_bar: ActionKeybinds,
+     pub custom_commands: Vec<CustomCommandKeybind>,
+ }
+ 
+@@ -586,6 +587,7 @@ impl Config {
+             resize_pane_up: empty_action!(),
+             resize_pane_right: empty_action!(),
+             toggle_sidebar: empty_action!(),
++            toggle_tab_bar: empty_action!(),
+             custom_commands: Vec::new(),
+         };
+ 
+@@ -734,6 +736,7 @@ impl Config {
+             apply_action!(keybinds.resize_pane_up, resize_pane_up, source);
+             apply_action!(keybinds.resize_pane_right, resize_pane_right, source);
+             apply_action!(keybinds.toggle_sidebar, toggle_sidebar, source);
++            apply_action!(keybinds.toggle_tab_bar, toggle_tab_bar, source);
+ 
+             if source == field_source!(indexed) {
+                 append_legacy_indexed_bindings(
+diff --git a/src/config/model.rs b/src/config/model.rs
+index 0e2e57c..59dd28a 100644
+--- a/src/config/model.rs
++++ b/src/config/model.rs
+@@ -455,6 +455,8 @@ pub struct KeysConfig {
+     pub resize_pane_right: BindingConfig,
+     /// Toggle sidebar collapse. Default: "prefix+b"
+     pub toggle_sidebar: BindingConfig,
++    /// Toggle tab bar visibility. Default: "prefix+t"
++    pub toggle_tab_bar: BindingConfig,
+     /// Optional indexed shortcuts expanded over number keys 1-9.
+     pub indexed: IndexedKeysConfig,
+     /// Prefix-mode custom command bindings.
+@@ -592,6 +594,8 @@ pub(crate) struct KeysConfigOverlay {
+     #[serde(skip_serializing_if = "Option::is_none")]
+     toggle_sidebar: Option<BindingConfig>,
+     #[serde(skip_serializing_if = "Option::is_none")]
++    toggle_tab_bar: Option<BindingConfig>,
++    #[serde(skip_serializing_if = "Option::is_none")]
+     indexed: Option<IndexedKeysConfig>,
+     #[serde(skip_serializing)]
+     command: Option<Vec<CommandKeybindConfig>>,
+@@ -703,6 +707,7 @@ impl<'de> Deserialize<'de> for KeysConfig {
+         apply_field!(resize_pane_up);
+         apply_field!(resize_pane_right);
+         apply_field!(toggle_sidebar);
++        apply_field!(toggle_tab_bar);
+         apply_field!(indexed);
+         apply_field!(command);
+ 
+@@ -808,6 +813,7 @@ impl KeysConfig {
+         copy_effective_action_field!(resize_pane_up, keybinds.resize_pane_up);
+         copy_effective_action_field!(resize_pane_right, keybinds.resize_pane_right);
+         copy_effective_action_field!(toggle_sidebar, keybinds.toggle_sidebar);
++        copy_effective_action_field!(toggle_tab_bar, keybinds.toggle_tab_bar);
+         copy_user_field!(indexed);
+ 
+         profile
+@@ -982,6 +988,8 @@ pub struct UiConfig {
+     pub show_agent_labels_on_pane_borders: bool,
+     /// Hide the tab row when the workspace has one tab. Default: false.
+     pub hide_tab_bar_when_single_tab: bool,
++    /// Start each client with the tab row hidden until toggled. Default: false.
++    pub tab_bar_start_hidden: bool,
+     /// Desktop tab row placement. Default: top.
+     pub tab_bar_position: TabBarPositionConfig,
+     /// Ordered entries shown at the right edge of the desktop tab row. Empty by default.
+@@ -1177,6 +1185,7 @@ impl Default for KeysConfig {
+             resize_pane_up: BindingConfig::empty(),
+             resize_pane_right: BindingConfig::empty(),
+             toggle_sidebar: BindingConfig::one("prefix+b"),
++            toggle_tab_bar: BindingConfig::one("prefix+t"),
+             indexed: IndexedKeysConfig::default(),
+             command: Vec::new(),
+             user_fields: BTreeSet::new(),
+@@ -1216,6 +1225,7 @@ impl Default for UiConfig {
+             pane_gaps: true,
+             show_agent_labels_on_pane_borders: false,
+             hide_tab_bar_when_single_tab: false,
++            tab_bar_start_hidden: false,
+             tab_bar_position: TabBarPositionConfig::Top,
+             tab_bar_right: Vec::new(),
+             tab_bar_right_separator: " ".into(),
+@@ -1688,6 +1698,21 @@ mobile_width_threshold = 96
+         assert_eq!(config.ui.mobile_width_threshold, 96);
+     }
+ 
++    #[test]
++    fn tab_bar_start_hidden_defaults_off_and_parses_on() {
++        let default_config = Config::default();
++        assert!(!default_config.ui.tab_bar_start_hidden);
++
++        let toml = r#"
++[ui]
++tab_bar_start_hidden = true
++hide_tab_bar_when_single_tab = true
++"#;
++        let config: Config = toml::from_str(toml).unwrap();
++        assert!(config.ui.tab_bar_start_hidden);
++        assert!(config.ui.hide_tab_bar_when_single_tab);
++    }
++
+     #[test]
+     fn sidebar_start_collapsed_defaults_off_and_parses_on() {
+         let default_config = Config::default();
+diff --git a/src/input/keybind_help.rs b/src/input/keybind_help.rs
+index cb1fdb9..679a009 100644
+--- a/src/input/keybind_help.rs
++++ b/src/input/keybind_help.rs
+@@ -147,6 +147,7 @@ pub(crate) fn keybind_help_groups(
+                 entry(binding_label(&keybinds.move_tab_next), "move tab right"),
+                 entry(indexed_label(&keybinds.switch_tab), "switch tab 1-9"),
+                 entry(binding_label(&keybinds.close_tab), "close tab"),
++                entry(binding_label(&keybinds.toggle_tab_bar), "toggle tab bar"),
+             ],
+         ),
+         (
+diff --git a/src/input/keybindings.rs b/src/input/keybindings.rs
+index 9ffce2e..1c00837 100644
+--- a/src/input/keybindings.rs
++++ b/src/input/keybindings.rs
+@@ -61,6 +61,7 @@ pub(crate) enum KeybindAction {
+     ResizePaneUp,
+     ResizePaneRight,
+     ToggleSidebar,
++    ToggleTabBar,
+     CyclePaneNext,
+     CyclePanePrevious,
+     LastPane,
+@@ -147,6 +148,7 @@ pub(crate) fn resolve_non_indexed_action(
+         (&keybinds.resize_pane_up, KeybindAction::ResizePaneUp),
+         (&keybinds.resize_pane_right, KeybindAction::ResizePaneRight),
+         (&keybinds.toggle_sidebar, KeybindAction::ToggleSidebar),
++        (&keybinds.toggle_tab_bar, KeybindAction::ToggleTabBar),
+         (&keybinds.reload_config, KeybindAction::ReloadConfig),
+         (
+             &keybinds.open_notification_target,
+@@ -294,6 +296,58 @@ mod tests {
+         ));
+     }
+ 
++    #[test]
++    fn toggle_tab_bar_defaults_to_prefix_t_and_yields_to_user_bindings() {
++        let keybinds = crate::config::Config::default().keybinds();
++        let lower_t = TerminalKey::new(KeyCode::Char('t'), KeyModifiers::empty());
++        let shift_t = TerminalKey::new(KeyCode::Char('T'), KeyModifiers::SHIFT)
++            .with_generated_text(Some("T".to_owned()));
++        assert!(matches!(
++            resolve_prefix_binding(&keybinds, &lower_t),
++            Some(KeybindMatch::Action(KeybindAction::ToggleTabBar))
++        ));
++        assert!(matches!(
++            resolve_prefix_binding(&keybinds, &shift_t),
++            Some(KeybindMatch::Action(KeybindAction::RenameTab))
++        ));
++        assert!(resolve_direct_binding(&keybinds, &lower_t).is_none());
++
++        let config: crate::config::Config = toml::from_str(
++            "[keys]\nnew_tab = \"prefix+t\"\n\n[[keys.command]]\nkey = \"prefix+g\"\ncommand = \"lazygit\"\n",
++        )
++        .unwrap();
++        assert!(config.collect_diagnostics().is_empty());
++        assert!(matches!(
++            resolve_prefix_binding(&config.keybinds(), &lower_t),
++            Some(KeybindMatch::Action(KeybindAction::NewTab))
++        ));
++
++        let config: crate::config::Config =
++            toml::from_str("[[keys.command]]\nkey = \"prefix+t\"\ncommand = \"lazygit\"\n")
++                .unwrap();
++        assert!(config.collect_diagnostics().is_empty());
++        assert!(matches!(
++            resolve_prefix_binding(&config.keybinds(), &lower_t),
++            Some(KeybindMatch::Command(_))
++        ));
++
++        let config: crate::config::Config =
++            toml::from_str("[keys]\ntoggle_tab_bar = \"ctrl+alt+t\"").unwrap();
++        assert!(config.collect_diagnostics().is_empty());
++        let keybinds = config.keybinds();
++        assert!(resolve_prefix_binding(&keybinds, &lower_t).is_none());
++        assert!(matches!(
++            resolve_direct_binding(
++                &keybinds,
++                &TerminalKey::new(
++                    KeyCode::Char('t'),
++                    KeyModifiers::CONTROL | KeyModifiers::ALT
++                )
++            ),
++            Some(KeybindMatch::Action(KeybindAction::ToggleTabBar))
++        ));
++    }
++
+     #[test]
+     fn one_shared_resolver_handles_direct_prefix_and_indexed_bindings() {
+         let keybinds = Keybinds {
+diff --git a/src/main.rs b/src/main.rs
+index 45a6409..12b5622 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -190,6 +190,7 @@ const DEFAULT_CONFIG: &str = r##"# herdr configuration
+ # resize_pane_up = ""     # optional, e.g. "ctrl+shift+alt+up"
+ # resize_pane_right = ""  # optional, e.g. "ctrl+shift+alt+right"
+ # toggle_sidebar = "prefix+b"
++# toggle_tab_bar = "prefix+t"
+ 
+ # Navigate-mode movement. These local shortcuts win while navigate mode is open.
+ # They are independent from focus_pane_*. Do not include prefix+, esc, enter, tab, or 1..9 here.
+@@ -310,6 +311,11 @@ const DEFAULT_CONFIG: &str = r##"# herdr configuration
+ # New tabs can still be created with the configured keybinding.
+ # hide_tab_bar_when_single_tab = false
+ 
++# Start each client with the tab row hidden. Toggle it with keys.toggle_tab_bar.
++# The toggle overrides hide_tab_bar_when_single_tab until the client exits.
++# Changes take effect on the next launch.
++# tab_bar_start_hidden = false
++
+ # Desktop tab row placement: "top" or "bottom".
+ # tab_bar_position = "top"
+ 

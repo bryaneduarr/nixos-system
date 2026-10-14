@@ -43,6 +43,8 @@
       ...
     }@inputs:
     let
+      herdrOverlay = import ./home/packages/herdr/overlay.nix;
+
       wslSystem =
         system:
         nixpkgs.lib.nixosSystem {
@@ -53,7 +55,10 @@
             ./hosts/wsl.nix
             home-manager.nixosModules.home-manager
             {
-              nixpkgs.config.allowUnfree = true;
+              nixpkgs = {
+                config.allowUnfree = true;
+                overlays = [ herdrOverlay ];
+              };
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
@@ -84,6 +89,7 @@
             {
               nixpkgs = {
                 config.allowUnfree = true;
+                overlays = [ herdrOverlay ];
               };
             }
 
