@@ -17,6 +17,7 @@
 
       [ui]
       sidebar_collapsed_mode = "hidden"
+      tab_bar_start_hidden = true
 
       [ui.sound.agents]
       pi = "off"
