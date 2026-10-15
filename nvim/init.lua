@@ -1,6 +1,5 @@
-require("config.settings")
+require("config.options")
 require("config.lazy")
 require("config.keymaps")
 require("config.statusline")
--- require("config.winbar")
-require("config.auto-cmds")
+require("config.autocmds")

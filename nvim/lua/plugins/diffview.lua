@@ -19,7 +19,9 @@ return {
           end
 
           local eventignore = vim.o.eventignore
-          if eventignore == "all" or vim.tbl_contains(vim.split(eventignore, ",", { plain = true }), "BufWritePost") then
+          if
+            eventignore == "all" or vim.tbl_contains(vim.split(eventignore, ",", { plain = true }), "BufWritePost")
+          then
             return
           end
 
@@ -43,13 +45,7 @@ return {
       },
       hooks = {
         diff_buf_read = function(bufnr, ctx)
-          vim.b[bufnr].miniclue_config = {
-            clues = {
-              { mode = "n", keys = "<leader>G", desc = "+diffview" },
-            },
-          }
-
-          -- Left buffer (".git/" index) should not be editable.
+          -- The left side is the Git index, which must not be edited here.
           if ctx and ctx.symbol == "a" then
             vim.bo[bufnr].modifiable = false
           end

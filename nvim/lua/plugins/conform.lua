@@ -19,7 +19,6 @@ return {
         c = { "clang_format" },
         cpp = { "clang_format" },
         nix = { "nixfmt" },
-        -- For filetypes without a formatter:
         ["_"] = { "trim_whitespace", "trim_newlines" },
       },
       formatters = {
@@ -38,14 +37,6 @@ return {
           prepend_args = { "--style=file", "--fallback-style=LLVM" },
         },
       },
-
-      -- format_on_save = {
-      --   lsp_fallback = true,
-      --   timeout_ms = 1000,
-      -- },
-      -- format_after_save = {
-      --   lsp_format = "first",
-      -- },
     })
 
     vim.keymap.set({ "n", "v" }, "<leader>lf", function()
@@ -54,7 +45,6 @@ return {
         async = false,
         timeout_ms = 1000,
       })
-      vim.g.autoformat = true
     end, { desc = "Format file or range (in visual mode)" })
   end,
 }

@@ -1,120 +1,82 @@
--- Using Neovim's new built-in LSP system
-return {
-  {
-    "neovim/nvim-lspconfig",
-    event = { "BufReadPre", "BufNewFile" },
-    dependencies = {
-      "saghen/blink.cmp",
-    },
-    config = function()
-      -- Configure clangd
-      vim.lsp.config("clangd", {
-        cmd = {
-          "clangd",
-          "--query-driver=/etc/profiles/per-user/bryaneduarr/bin/gcc",
-          "--background-index",
-        },
-      })
+local servers = { "clangd", "nil_ls", "ts_ls", "html", "cssls", "tailwindcss", "lua_ls", "emmet_ls" }
 
-      -- Configure nil_ls for Nix
-      vim.lsp.config("nil_ls", {
-        settings = {
-          ["nil"] = {
-            formatting = {
-              command = { "nixfmt" },
-            },
-          },
-        },
-      })
+local function set_lsp_keymaps(bufnr)
+  local function map(mode, lhs, rhs, desc)
+    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
+  end
 
-      -- Configure other LSP servers using vim.lsp.config
-      vim.lsp.config("ts_ls", {})
-      vim.lsp.config("html", {})
-      vim.lsp.config("cssls", {})
-      vim.lsp.config("tailwindcss", {})
-      vim.lsp.config("lua_ls", {
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = { "vim" },
-            },
-            workspace = {
-              library = vim.api.nvim_get_runtime_file("", true),
-            },
-          },
-        },
-      })
-      vim.lsp.config("emmet_ls", {})
+  map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "See available code actions")
+  map("n", "<leader>rn", vim.lsp.buf.rename, "Smart rename")
+  map("n", "<leader>D", "<cmd>FzfLua diagnostics_document<CR>", "Show buffer diagnostics")
+  map("n", "<leader>d", vim.diagnostic.open_float, "Show line diagnostics")
+  map("n", "M", vim.lsp.buf.hover, "Show documentation for what is under cursor")
+  map("n", "<leader>rs", ":LspRestart<CR>", "Restart LSP")
+  map("n", "<leader>gt", vim.lsp.buf.type_definition, "Go to type definition")
+  map("n", "<leader>gr", vim.lsp.buf.references, "List references")
+end
 
-      -- Enable all configured servers
-      vim.lsp.enable({
-        "clangd",
-        "nil_ls",
-        "ts_ls",
-        "html",
-        "cssls",
-        "tailwindcss",
-        "lua_ls",
-        "emmet_ls",
-      })
-
-      -- Keyboard mapping utility.
-      local keymap = vim.keymap
-
-      -- Configure diagnostics display
-      vim.diagnostic.config({
-        virtual_text = true, -- Show diagnostic messages beside the line.
-        signs = true, -- Show signs in the sign column of the numbers.
-        underline = true, -- Underline text with issues.
-        update_in_insert = false, -- Don't update diagnostics in insert mode.
-        severity_sort = true, -- Sort diagnostics by severity.
-        float = {
-          border = "single",
-        },
-      })
-
-      -- Automatically show line diagnostics in hover window when cursor holds.
-      vim.o.updatetime = 250 -- Faster update time for better UX.
-      vim.api.nvim_create_autocmd("CursorHold", {
-        callback = function()
-          vim.diagnostic.open_float(nil, {
-            focusable = false,
-            close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
-            scope = "cursor",
-          })
-        end,
-      })
-
-      -- Keybindings.
-      vim.api.nvim_create_autocmd("LspAttach", {
-        group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-        callback = function(ev)
-          local opts = { buffer = ev.buf, silent = true }
-
-          opts.desc = "See available code actions"
-          keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
-
-          opts.desc = "Smart rename"
-          keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- smart rename
-
-          opts.desc = "Show buffer diagnostics"
-          keymap.set("n", "<leader>D", "<cmd>FzfLua diagnostics_document<CR>", opts) -- show diagnostics for file
-
-          opts.desc = "Show line diagnostics"
-          keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
-
-          opts.desc = "Show documentation for what is under cursor"
-          keymap.set("n", "M", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
-
-          opts.desc = "Restart LSP"
-          keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
-
-          opts.desc = "Go to type definition"
-          keymap.set("n", "<leader>gt", vim.lsp.buf.type_definition, opts)
-          opts.desc = "List references"
-          keymap.set("n", "<leader>gr", vim.lsp.buf.references, opts)
-        end,
-      })
+local function highlight_references(bufnr, group)
+  vim.api.nvim_create_autocmd("CursorMoved", {
+    group = group,
+    buffer = bufnr,
+    desc = "Highlight references under cursor",
+    callback = function()
+      if vim.fn.mode() ~= "i" then
+        vim.lsp.buf.clear_references()
+        vim.lsp.buf.document_highlight()
+      end
     end,
-  },
+  })
+end
+
+return {
+  "neovim/nvim-lspconfig",
+  event = { "BufReadPre", "BufNewFile" },
+  dependencies = { "saghen/blink.cmp" },
+  config = function()
+    vim.lsp.config("clangd", {
+      cmd = { "clangd", "--query-driver=/etc/profiles/per-user/bryaneduarr/bin/gcc", "--background-index" },
+    })
+    vim.lsp.config("nil_ls", {
+      settings = { ["nil"] = { formatting = { command = { "nixfmt" } } } },
+    })
+    vim.lsp.enable(servers)
+
+    vim.diagnostic.config({
+      virtual_text = true,
+      signs = true,
+      underline = true,
+      update_in_insert = false,
+      severity_sort = true,
+      float = { border = "single" },
+    })
+
+    vim.o.updatetime = 250
+    vim.api.nvim_create_autocmd("CursorHold", {
+      group = vim.api.nvim_create_augroup("lsp_line_diagnostics", { clear = true }),
+      desc = "Show line diagnostics when the cursor rests",
+      callback = function()
+        vim.diagnostic.open_float(nil, {
+          focusable = false,
+          close_events = { "BufLeave", "CursorMoved", "InsertEnter", "FocusLost" },
+          scope = "cursor",
+        })
+      end,
+    })
+
+    local reference_group = vim.api.nvim_create_augroup("lsp_reference_highlight", { clear = true })
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+      desc = "Set LSP keymaps and reference highlighting for the buffer",
+      callback = function(args)
+        set_lsp_keymaps(args.buf)
+
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if client and client:supports_method("textDocument/documentHighlight", args.buf) then
+          vim.api.nvim_clear_autocmds({ group = reference_group, buffer = args.buf })
+          highlight_references(args.buf, reference_group)
+        end
+      end,
+    })
+  end,
 }

@@ -1,5 +1,6 @@
 return {
   "nvim-tree/nvim-tree.lua",
+  lazy = false,
   opts = {
     on_attach = function(bufnr)
       local api = require("nvim-tree.api")
@@ -8,7 +9,7 @@ return {
         return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
       end
 
-      api.config.mappings.default_on_attach(bufnr)
+      api.map.on_attach.default(bufnr)
 
       vim.keymap.set("n", "l", api.node.open.edit, opts("Open"))
       vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close"))
@@ -42,6 +43,20 @@ return {
           git = { unmerged = "" },
         },
       },
+    },
+  },
+  keys = {
+    {
+      "<leader>e",
+      function()
+        local api = require("nvim-tree.api")
+        if vim.bo.filetype == "NvimTree" then
+          api.tree.toggle()
+        else
+          api.tree.focus()
+        end
+      end,
+      desc = "Toggle or focus nvim-tree sidebar",
     },
   },
 }

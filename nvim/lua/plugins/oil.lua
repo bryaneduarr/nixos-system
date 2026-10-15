@@ -1,20 +1,18 @@
 return {
   "stevearc/oil.nvim",
+  lazy = false,
   dependencies = { { "echasnovski/mini.icons", opts = {} } },
   opts = {
-    columns = {
-      "icon",
-      -- "permissions",
-      -- "size",
-      -- "mtime",
-    },
+    columns = { "icon" },
     skip_confirm_for_simple_edits = true,
     view_options = {
       show_hidden = true,
-      -- This function defines what is considered a "hidden" file
-      is_hidden_file = function(name, _)
+      is_hidden_file = function(name)
         return vim.startswith(name, ".")
       end,
     },
+  },
+  keys = {
+    { "-", "<CMD>Oil<CR>", desc = "Open Oil.nvim buffer" },
   },
 }
