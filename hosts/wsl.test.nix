@@ -40,6 +40,9 @@ let
     assert c.services.postgresql.enable;
     assert c.services.tailscale.enable;
     assert c.virtualisation.docker.enable;
+    assert c.custom.playwright.enable;
+    assert c.environment.sessionVariables.PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS == "1";
+    assert builtins.any (p: (p.pname or "") == "glib") c.programs.nix-ld.libraries;
     assert builtins.elem "neovim" packageNames;
     assert h.programs.zsh.enable;
     assert h.programs.fish.enable;

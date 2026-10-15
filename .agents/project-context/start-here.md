@@ -6,6 +6,7 @@ Read only what the task needs; these notes are evidence pointers, not replacemen
 - Agreed direction (typed options, feature modules, Pi harness move): [target layout](architecture/target-layout.md).
 - Rebuild, update, test commands and missing tools: [commands](development/commands.md).
 - Pi/Claude Code wiring: [agent harnesses](development/agent-harnesses.md).
+- Running Playwright browsers on NixOS: [playwright](development/playwright.md).
 - Recent work, not a new assignment: [agent instructions](tasks/agent-instructions/handoff.md).
 - Workflows: [commits](../skills/commit-done/SKILL.md), [PR writing](../skills/pr/SKILL.md), [feature completion](../skills/finish-feature/SKILL.md).
 

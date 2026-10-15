@@ -3,6 +3,7 @@
   imports = [
     ./system/users.nix
     ./services.nix
+    ../modules/nixos/playwright
   ];
 
   wsl = {
@@ -11,6 +12,8 @@
   };
 
   users.users.bryaneduarr.extraGroups = [ "docker" ];
+
+  custom.playwright.enable = true;
 
   nixpkgs.overlays = [
     (_: previous: {
