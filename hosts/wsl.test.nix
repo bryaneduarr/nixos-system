@@ -1,5 +1,7 @@
+# Asserts the WSL targets in hosts/wsl.nix: build limits, enabled services,
+# and that desktop-only packages and features stay off.
 let
-  flake = builtins.getFlake ("path:" + builtins.getEnv "REPO_ROOT");
+  flake = builtins.getFlake ("path:" + toString ../.);
   inspect =
     target: system:
     let

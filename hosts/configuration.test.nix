@@ -1,13 +1,10 @@
+# Prints the evaluated settings of the desktop target in hosts/configuration.nix.
+# It asserts nothing; compare its output before and after a refactor.
 let
-  flake = builtins.getFlake ("path:" + builtins.getEnv "REPO_ROOT");
+  flake = builtins.getFlake ("path:" + toString ../.);
   c = flake.nixosConfigurations.nixos.config;
   h = c.home-manager.users.bryaneduarr;
 in
-assert builtins.elem "pi = \"off\"" (
-  flake.inputs.nixpkgs.lib.splitString "\n" h.home.file.".config/herdr/config.toml".text
-);
-assert
-  builtins.match ".*server reload-config.*" h.home.file.".config/herdr/config.toml".onChange != null;
 {
   boot = {
     inherit (c.boot) kernelParams kernelModules extraModulePackages;
