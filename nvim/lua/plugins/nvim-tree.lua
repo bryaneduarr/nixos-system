@@ -1,3 +1,13 @@
+-- Git signs reuse the statusline colors: green added, orange changed, red removed.
+local git_highlights = {
+  NvimTreeGitStagedIcon = "StatuslineGitAdded",
+  NvimTreeGitNewIcon = "StatuslineGitAdded",
+  NvimTreeGitDirtyIcon = "StatuslineGitChanged",
+  NvimTreeGitRenamedIcon = "StatuslineGitChanged",
+  NvimTreeGitDeletedIcon = "StatuslineGitRemoved",
+  NvimTreeGitMergeIcon = "StatuslineGitRemoved",
+}
+
 return {
   "nvim-tree/nvim-tree.lua",
   lazy = false,
@@ -40,11 +50,30 @@ return {
             open = "",
             symlink = "",
           },
-          git = { unmerged = "" },
+          git = {
+            staged = "+",
+            untracked = "?",
+            unstaged = "~",
+            renamed = ">",
+            deleted = "-",
+            unmerged = "!",
+            ignored = ".",
+          },
         },
       },
     },
   },
+  config = function(_, opts)
+    require("nvim-tree").setup(opts)
+
+    -- gruvbox-material gives the sidebar its own background; clear it to match Normal.
+    for _, group in ipairs({ "NvimTreeNormal", "NvimTreeEndOfBuffer" }) do
+      vim.cmd.highlight(group .. " guibg=NONE ctermbg=NONE")
+    end
+    for group, target in pairs(git_highlights) do
+      vim.api.nvim_set_hl(0, group, { link = target })
+    end
+  end,
   keys = {
     {
       "<leader>e",
