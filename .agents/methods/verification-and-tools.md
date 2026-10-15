@@ -52,6 +52,16 @@ For structure-only refactors, compare the toplevel `drvPath` before and after. A
 
 `nrs dry-build` shows what would be built without activation. `nrs build` builds without activation. Neither is needed for every change; use them when packaging or derivations changed.
 
+## When changing Neovim Lua
+
+From `nvim/`, run the lua-language-server check. It reads `.luarc.json`, includes installed plugins from `~/.local/share/nvim/lazy`, and exits non-zero when it reports anything. Then run `stylua --check .`.
+
+```sh
+VIMRUNTIME=$(nvim --clean --headless "+lua io.write(vim.env.VIMRUNTIME)" +qa) lua-language-server --check . --checklevel=Information --logpath /tmp/luals-check
+```
+
+Until the next rebuild replaces it with a link, `~/.config/nvim` may be a stale copy. For headless behavior checks, point `XDG_CONFIG_HOME` at a temporary directory holding an `nvim` symlink to the checkout.
+
 ## When changing shell scripts
 
 Run `bash -n` on standalone scripts. Scripts packaged with `writeShellApplication` run ShellCheck during the build, so building the package checks them. Run `shellcheck` and `shfmt -d` on standalone scripts. Before they are on `PATH`, `nix run nixpkgs#shellcheck -- <file>` runs ShellCheck once.
