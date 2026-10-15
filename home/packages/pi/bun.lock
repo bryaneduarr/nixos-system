@@ -19,7 +19,7 @@
         "pi-mcp-adapter": "5.3.0",
         "pi-powerline-footer": "0.20.1",
         "pi-tree-sitter": "0.2.8",
-        "pi-web-access": "0.40.0",
+        "pi-web-access": "0.41.0",
       },
     },
   },
@@ -752,7 +752,7 @@
 
     "pi-tree-sitter": ["pi-tree-sitter@0.2.8", "", { "dependencies": { "web-tree-sitter": "^0.26.10" }, "peerDependencies": { "@earendil-works/pi-coding-agent": "*", "@earendil-works/pi-tui": "*", "typebox": "*" } }, "sha512-hU0il7FEhkHVCOQ4cHPjYW8zf44vbWlb0WWBd2C2siRlGKV2hZnLWZd7aOVsY18XqgR0CLjJw/xgO5XuPSzTJg=="],
 
-    "pi-web-access": ["pi-web-access@0.40.0", "", { "dependencies": { "@modelcontextprotocol/sdk": "1.32.1", "@mozilla/readability": "^0.6.0", "defuddle": "0.19.3", "linkedom": "^0.16.0", "p-limit": "^6.1.0", "promise.try": "^2.0.1", "turndown": "^7.2.0", "undici": "^8.11.2", "unpdf": "^1.6.2" }, "peerDependencies": { "@earendil-works/pi-ai": "*", "@earendil-works/pi-coding-agent": "*", "@earendil-works/pi-tui": "*", "typebox": "*" }, "optionalPeers": ["@earendil-works/pi-ai", "@earendil-works/pi-coding-agent", "@earendil-works/pi-tui"], "bin": { "pi-web-access-mcp": "dist/mcp-cli.js" } }, "sha512-eybqc4Agn1QZIFggtW0YMIma9K/Jqa6WFPnBQ854yi7GrISs9Lt2kRQmv402CYWaAdSPS8MbMB3kX2d3lZ7KAQ=="],
+    "pi-web-access": ["pi-web-access@0.41.0", "", { "dependencies": { "@modelcontextprotocol/sdk": "1.32.1", "@mozilla/readability": "^0.6.0", "defuddle": "0.19.3", "linkedom": "^0.16.0", "p-limit": "^6.1.0", "promise.try": "^2.0.1", "turndown": "^7.2.0", "undici": "^8.11.2", "unpdf": "^1.6.2" }, "peerDependencies": { "@earendil-works/pi-ai": "*", "@earendil-works/pi-coding-agent": "*", "@earendil-works/pi-tui": "*", "typebox": "*" }, "optionalPeers": ["@earendil-works/pi-ai", "@earendil-works/pi-coding-agent", "@earendil-works/pi-tui"], "bin": { "pi-web-access-mcp": "dist/mcp-cli.js" } }, "sha512-8+UoNENGHKlYBxrtwh7Hwoh2twVfs+tcdR1Ciq7sRUtTur0mOXP8N/o7/y72JbdYij3NuSyCNjShbWBPPJ8JPA=="],
 
     "picomatch": ["picomatch@4.0.7", "", {}, "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA=="],
 
