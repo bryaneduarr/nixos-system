@@ -69,6 +69,7 @@ in
       jq
       killall
       lazygit
+      lua-language-server
       neovim
       nil
       nixfmt
@@ -81,12 +82,15 @@ in
           trafilatura
         ]
       ))
+      shellcheck
+      shfmt
       sqlite-vec
       redis
       ripgrep
       sqlite
       ssm-session-manager-plugin
       statix
+      stylua
       tailscale
       tree
       tree-sitter
