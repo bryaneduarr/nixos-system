@@ -43,10 +43,10 @@ Run [context-review](.agents/skills/context-review/SKILL.md) only when explicitl
 - Make the smallest correct change; preserve unrelated behavior and user edits. Required relocation of related existing files is part of that change, not an unrelated refactor.
 - Prefer Nix over scripts, bash over TypeScript for simple glue, and TypeScript over bash for logic. No new Python.
 - Hosts configure features only through typed `custom.<feature>` options. Feature behavior lives in feature modules, not in host files or `specialArgs` flags.
-- Organize by feature with descriptive kebab-case names and the deepest meaningful owner. Never create `shared/`, `common/`, `utils/`, or `helpers/` folders, or barrel files.
+- Organize by feature with descriptive kebab-case names and the deepest meaningful owner. Never create `shared/`, `common/`, `utils/`, or `helpers/` folders, barrel files, or `default.nix` files.
 - Every change must keep every target evaluating: `nixos`, `wsl-x86_64`, and `wsl-aarch64`. Desktop-only features stay disabled on WSL.
 - Validate untrusted data at boundaries. No `any`, no unsafe casts, no suppressed type errors.
 - Never put secrets in the repository or the Nix store.
 - Do not activate the system (`nrs`, `nixos-rebuild switch`) unless explicitly asked. Evaluate or build to verify.
-- Keep READMEs to instructions, guides, processes, and overall structure. Agent-facing facts belong in `.agents/project-context/`.
+- Create README files only when the user asks for one, and keep them to short instructions. Agent-facing facts belong in `.agents/project-context/`.
 - Inspect the scoped diff and report verification accurately. Never claim evaluation or type checks prove runtime behavior.

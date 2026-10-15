@@ -45,11 +45,11 @@ Explain any necessary large atomic commit in the plan.
 Default layer order:
 
 1. Genuine prerequisite flake changes, such as new inputs or overlays.
-2. `modules/` feature modules, with option providers before modules that set
-   those options.
+2. `system/`, `services/`, `packages/`, and `scripts/` modules, with option
+   providers before modules that set those options.
 3. `hosts/`, enabling or configuring the features from earlier commits.
-4. Consumers outside Nix: `pi-harness/`, `scripts/`, and `nvim/`, with
-   foundations before their consumers.
+4. Consumers outside Nix, such as Pi TypeScript, shell scripts, and `nvim/`,
+   with foundations before their consumers.
 
 Dependency ordering means code relationships: imports, option declarations,
 packages, function calls, and runtime integration. Order option declarations
@@ -170,8 +170,8 @@ options so each host can opt in without copying settings.
 **Footers:** None.
 
 **Files:**
-- `modules/nixos/tailscale/default.nix` (add)
-- `hosts/system-services/tailscale.nix` (delete)
+- `modules/nixos/tailscale/tailscale.nix` (add)
+- `hosts/wsl/wsl.nix` (modify)
 
 **Depends on:** None.
 **Order rationale:** The host commits set these options.

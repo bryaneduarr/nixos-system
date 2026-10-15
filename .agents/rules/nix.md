@@ -29,6 +29,7 @@ This rule addresses Statix's `repeated_keys` diagnostic, `W20`.
 ## Expressions
 
 - Use `inherit` instead of `x = x;`. Avoid `rec`; use `let` instead.
+- Write a module or function that uses none of its arguments as `_: { ... }`, never `{ ... }: { ... }`. This matches deadnix and nixfmt.
 - Do not use `with` except as `with pkgs; [ ... ]` for a package list. Never use top-level `with lib;`.
 - Reference executables with `lib.getExe` or `lib.getExe'`, not hardcoded store paths or bare command names that depend on `PATH`.
 - Use `lib.mkDefault`, `lib.mkForce`, and `lib.mkMerge` only with a concrete reason. `mkForce` needs a comment naming the conflicting definition.

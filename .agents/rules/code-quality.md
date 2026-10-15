@@ -32,7 +32,7 @@ These rules apply to `#`, `//`, `/** */`, and `--` comments alike.
 
 - Write code that is understandable without explanation: descriptive names, focused functions, and a straightforward flow.
 - Required documentation is not optional: Nix option `description` fields and TypeScript contract comments follow [nix.md](nix.md) and [typescript.md](typescript.md).
-- Outside required documentation, do not add comments that restate what the code, configuration, or script already shows, such as narrative, summary, section-banner, or usage comments.
+- Tests follow these rules too. Outside required documentation, do not add comments that restate what the code, configuration, or script already shows, such as narrative, summary, section-banner, or usage comments.
 - Add a comment only when it records something the code cannot express and a future maintainer needs: a non-obvious external constraint, a value that must stay in sync elsewhere, a workaround for an upstream bug with its link, or a reason an apparently simpler change would break behavior. Keep it to one short line when possible.
 - Simplify unclear code instead of explaining it.
 - Do not prefix comments with `Why:` or `What:`. Do not use numbered step comments, decorative separators, or label-style comments.
@@ -42,6 +42,8 @@ These rules apply to `#`, `//`, `/** */`, and `--` comments alike.
 
 ## README files
 
+- Do not create README files or other documentation files for features, packages, services, or scripts unless the user asks for one. Self-explanatory code replaces them.
+- Keep a requested README short and precise: what the feature is and what someone must do to use or maintain it.
 - READMEs contain only instructions, guides, processes, and the overall structure a newcomer needs. They are not changelogs or inventories of features, files, packages, or options.
 - Do not add README content because a feature, module, or package was added. Change a README only when the user asks for specific content, or when an instruction, process, or structural statement it already makes becomes incorrect.
 - When something is removed from the project, remove its README mentions so the text reads as if it never existed. Never write that something was removed, replaced, renamed, or deprecated.
