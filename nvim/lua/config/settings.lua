@@ -57,7 +57,7 @@ vim.opt.spell = true
 
 vim.opt.spelllang = { "en_us" }
 
-if vim.fn.filereadable(vim.fn.stdpath("config") .. "/spell/es.utf-8.spl") == 1 then
+if vim.fn.filereadable(vim.fn.stdpath("data") .. "/site/spell/es.utf-8.spl") == 1 then
   vim.opt.spelllang = { "en_us", "es" }
   vim.opt.spellfile = {
     vim.fn.stdpath("config") .. "/spell/en.utf-8.add",

@@ -44,6 +44,8 @@ let
     assert c.environment.sessionVariables.PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS == "1";
     assert builtins.any (p: (p.pname or "") == "glib") c.programs.nix-ld.libraries;
     assert builtins.elem "neovim" packageNames;
+    assert h.custom.neovim.enable;
+    assert h.xdg.dataFile ? "nvim/site/spell/es.utf-8.spl";
     assert h.programs.zsh.enable;
     assert h.programs.fish.enable;
     assert h.programs.tmux.enable;

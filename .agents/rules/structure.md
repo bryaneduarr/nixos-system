@@ -13,7 +13,7 @@ hosts/<target>/              One folder per target (desktop, wsl). Imports featu
 modules/nixos/<feature>/     System-level feature modules: typed options plus config.
 modules/home/<feature>/      Home Manager feature modules: typed options plus config.
 pi-harness/                  Pi harness TypeScript source, tests, tsconfig, and lockfiles.
-nvim/                        Neovim Lua configuration, copied as-is by a home module.
+nvim/                        Neovim Lua configuration, linked as-is by a home module.
 scripts/<tool>/              Standalone tools packaged by Nix; one folder per tool.
 .agents/                     Agent instructions only. Never imported by Nix.
 ```

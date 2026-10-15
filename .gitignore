@@ -32,3 +32,6 @@ local-config.nix
 
 # Personal Claude Code settings.
 .claude/settings.local.json
+
+# Compiled Neovim spell additions; the .add word lists stay tracked.
+nvim/spell/*.spl

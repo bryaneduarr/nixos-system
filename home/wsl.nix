@@ -1,6 +1,8 @@
 _: {
   home.stateVersion = "25.05";
 
+  custom.neovim.enable = true;
+
   imports = [
     ./terminal-tools.nix
     ./services.nix

@@ -7,4 +7,4 @@ These rules are mandatory for files under `nvim/`. The configuration stays plain
 - Format with the repository `nvim/stylua.toml` settings.
 - Use `vim.keymap.set` with a `desc` for every mapping, and `vim.api.nvim_create_autocmd` with a named augroup.
 - Do not edit `nvim/lazy-lock.json` by hand. Plugin updates happen through lazy.nvim deliberately.
-- Home Manager copies `nvim/` into `~/.config/nvim` during activation, so Neovim changes take effect after a rebuild. Do not edit `~/.config/nvim` directly.
+- `modules/home/neovim` links `~/.config/nvim` to this checkout's `nvim/` folder, so edits apply on the next Neovim start without a rebuild. Edit files here, never through another copy.

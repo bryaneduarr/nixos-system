@@ -6,7 +6,7 @@ _: {
     ./packages/git.nix
     ./packages/fish/default.nix
     ./packages/herdr/default.nix
-    ./packages/nvim.nix
+    ../modules/home/neovim
     ./packages/pi/default.nix
     ./packages/starship/default.nix
     ./packages/tmux.nix
