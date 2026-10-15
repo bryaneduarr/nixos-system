@@ -29,3 +29,6 @@ local-config.nix
 
 # Pi harness working state (large command output, task reports, evidence).
 .agent/
+
+# Personal Claude Code settings.
+.claude/settings.local.json
