@@ -106,6 +106,7 @@ in
         bunGlobalInstall (
           [
             "opencode-ai@latest"
+            "@anthropic-ai/claude-code"
             "tree-sitter-cli"
             "npm-check-updates"
           ]
