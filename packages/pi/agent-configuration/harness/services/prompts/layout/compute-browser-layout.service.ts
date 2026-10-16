@@ -4,7 +4,9 @@ import {
   BROWSER_HEIGHT_RATIO,
   LIST_MIN_WIDTH,
   LIST_WIDTH_RATIO,
+  STACKED_DIVIDER_ROWS,
   STACKED_LAYOUT_BELOW_WIDTH,
+  STACKED_LIST_HEIGHT_DIVISOR,
   STACKED_LIST_MAX_ROWS,
 } from "../../../constants/prompts/viewer.constant.ts";
 import type { BrowserLayout } from "../../../types/prompts/browser-layout.interface.ts";
@@ -15,8 +17,9 @@ export function computeBrowserLayout(width: number, terminalRows: number): Brows
   const body = Math.max(1, height - BROWSER_CHROME_ROWS);
   const stacked = width < STACKED_LAYOUT_BELOW_WIDTH;
   const listWidth = stacked ? inner : Math.max(LIST_MIN_WIDTH, Math.floor(inner * LIST_WIDTH_RATIO));
-  const listHeight = stacked ? Math.min(STACKED_LIST_MAX_ROWS, Math.max(1, Math.floor(body / 3))) : body;
+  const stackedListHeight = Math.max(1, Math.floor(body / STACKED_LIST_HEIGHT_DIVISOR));
+  const listHeight = stacked ? Math.min(STACKED_LIST_MAX_ROWS, stackedListHeight) : body;
   const detailWidth = Math.max(1, stacked ? inner : inner - listWidth - PANE_SEPARATOR_WIDTH);
-  const pageSize = Math.max(1, stacked ? body - listHeight - 1 : body);
+  const pageSize = Math.max(1, stacked ? body - listHeight - STACKED_DIVIDER_ROWS : body);
   return { height, inner, body, stacked, listWidth, listHeight, detailWidth, pageSize };
 }

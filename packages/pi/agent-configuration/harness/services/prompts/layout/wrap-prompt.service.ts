@@ -1,5 +1,6 @@
 import { visibleWidth } from "@earendil-works/pi-tui";
 import { REPLACEMENT_CHARACTER } from "../../../constants/prompts/layout.constant.ts";
+import { NEWLINE_CHARACTER } from "../../../constants/prompts/text.constant.ts";
 import type { DisplayCell, DisplayRow } from "../../../types/prompts/display-row.interface.ts";
 import type { Grapheme } from "../../../types/prompts/grapheme.interface.ts";
 import { safeDisplay } from "./safe-display.service.ts";
@@ -10,7 +11,7 @@ export function wrapPrompt(units: readonly Grapheme[], width: number): DisplayRo
   let row: DisplayCell[] = [];
   let column = 0;
   for (const [index, unit] of units.entries()) {
-    if (unit.text.includes("\n")) {
+    if (unit.text.includes(NEWLINE_CHARACTER)) {
       row.push({ index, text: "", column, width: 0 });
       rows.push(row);
       row = [];

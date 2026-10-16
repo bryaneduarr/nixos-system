@@ -12,13 +12,10 @@ const plainTheme: PromptTheme = {
 
 function browser(text: string, clipboard: ClipboardWriter = () => {}) {
   let closed = 0;
-  let renders = 0;
   const terminal = { rows: 24 };
   const host: PromptBrowserHost = {
     terminal,
-    requestRender: () => {
-      renders++;
-    },
+    requestRender: () => {},
   };
   const component = new PromptBrowser(
     [
@@ -33,7 +30,7 @@ function browser(text: string, clipboard: ClipboardWriter = () => {}) {
     clipboard,
   );
   component.render(100);
-  return { component, terminal, closed: () => closed, renders: () => renders };
+  return { component, terminal, closed: () => closed };
 }
 
 function keys(component: PromptBrowser, ...inputs: string[]) {
@@ -48,8 +45,8 @@ async function settle() {
 test("character selections copy exact graphemes, CRLF, and control bytes", async () => {
   const text = "é👩‍💻界\r\n\x1b[31mend\n";
   const copied: string[] = [];
-  const { component } = browser(text, (value) => {
-    copied.push(value);
+  const { component } = browser(text, (copiedText) => {
+    copied.push(copiedText);
   });
   keys(component, "v", "l", "y");
   await settle();
@@ -65,8 +62,8 @@ test("character selections copy exact graphemes, CRLF, and control bytes", async
 test("line selection and yy retain whitespace and exact newline endings", async () => {
   const text = "  first\r\nsecond\nlast";
   const copied: string[] = [];
-  const { component } = browser(text, (value) => {
-    copied.push(value);
+  const { component } = browser(text, (copiedText) => {
+    copied.push(copiedText);
   });
   keys(component, "y", "y");
   await settle();
@@ -106,9 +103,9 @@ test("escape cancels a selection before closing and ctrl+c always closes", () =>
 test("clipboard failures keep the selection and allow a retry", async () => {
   let fail = true;
   const copied: string[] = [];
-  const { component } = browser("raw\ntext", async (value) => {
+  const { component } = browser("raw\ntext", async (copiedText) => {
     if (fail) throw new Error("unavailable");
-    copied.push(value);
+    copied.push(copiedText);
   });
   keys(component, "v", "l", "y");
   await settle();

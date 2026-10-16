@@ -45,8 +45,8 @@ export function createPromptNavigation(text: string): PromptNavigation {
     word(direction) {
       navigation.move(findWordIndex(units, navigation.cursor, direction));
     },
-    lineEdge(end) {
-      navigation.move(findLineEdgeIndex(units, navigation.lineRange(navigation.cursor), end));
+    lineEdge(toLineEnd) {
+      navigation.move(findLineEdgeIndex(units, navigation.lineRange(navigation.cursor), toLineEnd));
     },
   };
   return navigation;
