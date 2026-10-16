@@ -3,34 +3,51 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import clearExtension from "../agent-configuration/extensions/clear-session";
+import clearExtension from "./clear-session.ts";
 
 const stateHome = mkdtempSync(join(tmpdir(), "pi-clear-test-"));
 process.env.XDG_STATE_HOME = stateHome;
 afterAll(() => rmSync(stateHome, { recursive: true, force: true }));
 
 // Import after setting XDG_STATE_HOME; the extension resolves the state path at load time.
-const { default: lastModelExtension } = await import("../agent-configuration/extensions/last-model");
+const { default: lastModelExtension } = await import("./last-model/index.ts");
 
-type Model = { provider: string; id: string };
-type Handler = (event: any, ctx: any) => Promise<void> | void;
+interface FakeModel {
+  readonly provider: string;
+  readonly id: string;
+}
 
-function runtime(model: Model, thinkingLevel: string, availableModels: Model[] = [model]) {
-  const handlers = new Map<string, Handler>();
-  let clear: ((args: string, ctx: any) => Promise<void>) | undefined;
+interface FakeRuntimeContext {
+  readonly mode: "tui";
+  readonly model: FakeModel;
+  readonly scopedModels: readonly never[];
+  readonly modelRegistry: { readonly find: (provider: string, id: string) => FakeModel | undefined };
+  readonly sessionManager: { readonly getEntries: () => never[]; readonly getSessionFile: () => undefined };
+}
+
+interface FakeClearContext {
+  readonly newSession: () => Promise<{ readonly cancelled: boolean }>;
+}
+
+type FakeHandler = (event: { readonly reason: string }, ctx: FakeRuntimeContext) => Promise<void> | void;
+
+function runtime(model: FakeModel, thinkingLevel: string, availableModels: readonly FakeModel[] = [model]) {
+  const handlers = new Map<string, FakeHandler>();
+  let clear: ((args: string, ctx: FakeClearContext) => Promise<void>) | undefined;
   let stale = false;
   let selectedModel = model;
   let selectedThinkingLevel = thinkingLevel;
+  // The fake implements only the ExtensionAPI members these extensions call.
   const pi = {
-    on: (name: string, handler: Handler) => handlers.set(name, handler),
-    registerCommand: (_name: string, command: { handler: typeof clear }) => {
+    on: (name: string, handler: FakeHandler) => handlers.set(name, handler),
+    registerCommand: (_name: string, command: { handler: (args: string, ctx: FakeClearContext) => Promise<void> }) => {
       clear = command.handler;
     },
     getThinkingLevel: () => {
       if (stale) throw new Error("stale pi");
       return selectedThinkingLevel;
     },
-    setModel: async (next: Model) => {
+    setModel: async (next: FakeModel) => {
       if (stale) throw new Error("stale pi");
       selectedModel = next;
       return true;
@@ -42,7 +59,7 @@ function runtime(model: Model, thinkingLevel: string, availableModels: Model[] =
   };
   clearExtension(pi as unknown as ExtensionAPI);
   lastModelExtension(pi as unknown as ExtensionAPI);
-  const ctx = () => ({
+  const context = (): FakeRuntimeContext => ({
     mode: "tui",
     model: selectedModel,
     scopedModels: [],
@@ -52,6 +69,15 @@ function runtime(model: Model, thinkingLevel: string, availableModels: Model[] =
     },
     sessionManager: { getEntries: () => [], getSessionFile: () => undefined },
   });
+  function dispatch(name: string, event: { readonly reason: string }): Promise<void> | void {
+    const handler = handlers.get(name);
+    if (!handler) throw new Error(`No handler registered for ${name}`);
+    return handler(event, context());
+  }
+  function runClear(clearContext: FakeClearContext): Promise<void> {
+    if (!clear) throw new Error("No clear command registered");
+    return clear("", clearContext);
+  }
   return {
     get model() {
       return selectedModel;
@@ -62,8 +88,8 @@ function runtime(model: Model, thinkingLevel: string, availableModels: Model[] =
     invalidate() {
       stale = true;
     },
-    emit: (name: string, event: any) => handlers.get(name)?.(event, ctx()),
-    clear: (context: any) => clear!("", context),
+    emit: dispatch,
+    clear: runClear,
   };
 }
 
@@ -93,10 +119,12 @@ test("/clear preserves the active model and thinking level without accessing sta
 
   // A second /clear must carry the same selection forward again.
   let next: ReturnType<typeof runtime> | undefined;
-  await replacement!.clear({
+  const carried = replacement;
+  if (!carried) throw new Error("Replacement runtime was not created");
+  await carried.clear({
     newSession: async () => {
-      await replacement!.emit("session_before_switch", { reason: "new" });
-      replacement!.invalidate();
+      await carried.emit("session_before_switch", { reason: "new" });
+      carried.invalidate();
       next = runtime({ provider: "example", id: "default" }, "low", [chosen]);
       await next.emit("session_start", { reason: "new" });
       return { cancelled: false };

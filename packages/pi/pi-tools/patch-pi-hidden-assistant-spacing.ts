@@ -23,19 +23,18 @@ const BUNDLED_RENDER_AFTER = [
   "let lines=super.render(width);",
   'return lines.every(line=>line.trim()==="")?[]:this.hasToolCalls||lines.length===0||',
 ].join("");
-const MODULAR_THINKING_STATUS = "            this.showStatus(`Thinking level: ${newLevel}`);\n";
-const MODULAR_DEFAULT_THINKING_STATUS =
-  "            this.showStatus(persist ? `Default thinking level: ${level}` : `Thinking level: ${level}`);\n";
+const MODULAR_THINKING_STATUS = `            this.showStatus(\`Thinking level: \${newLevel}\`);\n`;
+const MODULAR_DEFAULT_THINKING_STATUS = `            this.showStatus(persist ? \`Default thinking level: \${level}\` : \`Thinking level: \${level}\`);\n`;
 const BUNDLED_THINKING_STATUS = [
   "this.updateEditorBorderColor(),",
-  "this.showStatus(`Thinking level: ${newLevel}`)",
+  `this.showStatus(\`Thinking level: \${newLevel}\`)`,
 ].join("");
 const BUNDLED_DEFAULT_THINKING_STATUS = [
   "this.updateEditorBorderColor(),",
-  "this.showStatus(persist?`Default thinking level: ${level}`:`Thinking level: ${level}`)",
+  `this.showStatus(persist?\`Default thinking level: \${level}\`:\`Thinking level: \${level}\`)`,
 ].join("");
 
-function replaceOnce(path, before, after) {
+function replaceOnce(path: string, before: string, after: string): void {
   const source = readFileSync(path, "utf8");
   const first = source.indexOf(before);
   const duplicate = source.indexOf(before, first + before.length);
@@ -43,6 +42,15 @@ function replaceOnce(path, before, after) {
     throw new Error(`Expected exactly one assistant render site in ${path}`);
   }
   writeFileSync(path, source.replace(before, after));
+}
+
+function findSingleChunkContaining(chunkPaths: readonly string[], needle: string): string {
+  const matches = chunkPaths.filter((path) => readFileSync(path, "utf8").includes(needle));
+  const [match] = matches;
+  if (matches.length !== 1 || match === undefined) {
+    throw new Error(`Expected one bundled assistant component, found ${matches.length}`);
+  }
+  return match;
 }
 
 const modularFilter = `class HarnessFilteredChatContainer extends Container {
@@ -76,13 +84,11 @@ replaceOnce(interactivePath, MODULAR_THINKING_STATUS, "");
 replaceOnce(interactivePath, MODULAR_DEFAULT_THINKING_STATUS, "");
 
 const chunksPath = join(packagePath, "dist/bundle/chunks");
-const chunkFiles = readdirSync(chunksPath).filter((name) => name.endsWith(".js"));
-const chunkPaths = chunkFiles.map((name) => join(chunksPath, name));
-const matchingChunks = chunkPaths.filter((path) => readFileSync(path, "utf8").includes(BUNDLED_RENDER_BEFORE));
-if (matchingChunks.length !== 1) {
-  throw new Error(`Expected one bundled assistant component, found ${matchingChunks.length}`);
-}
-replaceOnce(matchingChunks[0], BUNDLED_RENDER_BEFORE, BUNDLED_RENDER_AFTER);
+const chunkPaths = readdirSync(chunksPath)
+  .filter((name) => name.endsWith(".js"))
+  .map((name) => join(chunksPath, name));
+const bundledChunkPath = findSingleChunkContaining(chunkPaths, BUNDLED_RENDER_BEFORE);
+replaceOnce(bundledChunkPath, BUNDLED_RENDER_BEFORE, BUNDLED_RENDER_AFTER);
 
 const bundledFilter = [
   "var HarnessFilteredChatContainer=class extends Container{render(width){",
@@ -92,11 +98,11 @@ const bundledFilter = [
   "!(child instanceof AssistantMessageComponent&&(child.isStreaming||child.hasToolCalls)));",
   "try{return super.render(width)}finally{this.children=children}}};",
 ].join("");
-replaceOnce(matchingChunks[0], "var InteractiveMode=class", `${bundledFilter}var InteractiveMode=class`);
+replaceOnce(bundledChunkPath, "var InteractiveMode=class", `${bundledFilter}var InteractiveMode=class`);
 replaceOnce(
-  matchingChunks[0],
+  bundledChunkPath,
   "this.chatContainer=new Container",
   "this.chatContainer=new HarnessFilteredChatContainer",
 );
-replaceOnce(matchingChunks[0], BUNDLED_THINKING_STATUS, "this.updateEditorBorderColor()");
-replaceOnce(matchingChunks[0], BUNDLED_DEFAULT_THINKING_STATUS, "this.updateEditorBorderColor()");
+replaceOnce(bundledChunkPath, BUNDLED_THINKING_STATUS, "this.updateEditorBorderColor()");
+replaceOnce(bundledChunkPath, BUNDLED_DEFAULT_THINKING_STATUS, "this.updateEditorBorderColor()");

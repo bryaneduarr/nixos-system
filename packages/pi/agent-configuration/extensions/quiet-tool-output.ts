@@ -1,14 +1,32 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { CONFIG_DIR_NAME, type ExtensionAPI, isToolCallEventType } from "@earendil-works/pi-coding-agent";
+import {
+  CONFIG_DIR_NAME,
+  type ExtensionAPI,
+  isToolCallEventType,
+  type ToolResultEvent,
+} from "@earendil-works/pi-coding-agent";
 
 const MAX_CHARS = 12_000;
 const MAX_LINES = 240;
 const READ_LIMIT = 120;
 const PREVIEW_CHAR_LIMIT = 12_000;
+const HEAD_LINES = 100;
+const TAIL_LINES = 60;
+const ERROR_HEAD_LINES = 160;
+const ERROR_TAIL_LINES = 120;
+const LINE_BREAK_PATTERN = /\r?\n/;
+const UNSAFE_FILE_NAME_CHARACTERS = /[^a-zA-Z0-9_-]/g;
+
+/* Result of writing the full output of a tool call to a file. */
+type SavedOutput =
+  /* The full output was written to the file at the relative path. */
+  | { readonly saved: true; readonly relativePath: string }
+  /* Writing the full output failed with the given message. */
+  | { readonly saved: false; readonly message: string };
 
 function previewOutput(output: string, headLines: number, tailLines: number): string {
-  const lines = output.split(/\r?\n/);
+  const lines = output.split(LINE_BREAK_PATTERN);
   const omittedLines = Math.max(0, lines.length - headLines - tailLines);
   const omissionMarker = `... ${omittedLines} lines omitted ...`;
   const previewLines =
@@ -29,6 +47,38 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+function joinTextBlocks(content: ToolResultEvent["content"]): string {
+  let fullOutput = "";
+  for (const block of content) {
+    if (block.type === "text") {
+      fullOutput += `${fullOutput.length > 0 ? "\n" : ""}${block.text}`;
+    }
+  }
+  return fullOutput;
+}
+
+function fitsWithoutPreview(output: string): boolean {
+  const lineCount = output.split(LINE_BREAK_PATTERN).length;
+  return output.length <= MAX_CHARS && lineCount <= MAX_LINES;
+}
+
+function toSafeFileNamePart(value: string): string {
+  return value.replace(UNSAFE_FILE_NAME_CHARACTERS, "-");
+}
+
+async function saveFullOutput(cwd: string, toolName: string, toolCallId: string, output: string): Promise<SavedOutput> {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const fileName = `${timestamp}-${toSafeFileNamePart(toolName)}-${toSafeFileNamePart(toolCallId)}.txt`;
+  const artifactDirectory = join(cwd, CONFIG_DIR_NAME, "tool-output");
+  try {
+    await mkdir(artifactDirectory, { recursive: true });
+    await writeFile(join(artifactDirectory, fileName), output, "utf8");
+    return { saved: true, relativePath: join(CONFIG_DIR_NAME, "tool-output", fileName) };
+  } catch (error) {
+    return { saved: false, message: errorMessage(error) };
+  }
+}
+
 export default function quietToolsExtension(pi: ExtensionAPI): void {
   pi.on("tool_call", (event) => {
     if (isToolCallEventType("read", event) && event.input.limit === undefined) {
@@ -37,49 +87,24 @@ export default function quietToolsExtension(pi: ExtensionAPI): void {
   });
 
   pi.on("tool_result", async (event, context) => {
-    let fullOutput = "";
-    for (const block of event.content) {
-      if (block.type === "text") {
-        fullOutput += `${fullOutput.length > 0 ? "\n" : ""}${block.text}`;
-      }
-    }
+    const fullOutput = joinTextBlocks(event.content);
+    if (fitsWithoutPreview(fullOutput)) return;
 
-    const lineCount = fullOutput.split(/\r?\n/).length;
-    if (fullOutput.length <= MAX_CHARS && lineCount <= MAX_LINES) {
-      return;
-    }
-
-    const headLines = event.isError ? 160 : 100;
-    const tailLines = event.isError ? 120 : 60;
-    const preview = previewOutput(fullOutput, headLines, tailLines);
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const safeToolName = event.toolName.replace(/[^a-zA-Z0-9_-]/g, "-");
-    const safeCallId = event.toolCallId.replace(/[^a-zA-Z0-9_-]/g, "-");
-    const fileName = `${timestamp}-${safeToolName}-${safeCallId}.txt`;
-    const artifactDirectory = join(context.cwd, CONFIG_DIR_NAME, "tool-output");
-    const artifactPath = join(artifactDirectory, fileName);
-    const relativeArtifactPath = join(CONFIG_DIR_NAME, "tool-output", fileName);
-
-    try {
-      await mkdir(artifactDirectory, { recursive: true });
-      await writeFile(artifactPath, fullOutput, "utf8");
-    } catch (error) {
+    const preview = previewOutput(
+      fullOutput,
+      event.isError ? ERROR_HEAD_LINES : HEAD_LINES,
+      event.isError ? ERROR_TAIL_LINES : TAIL_LINES,
+    );
+    const saved = await saveFullOutput(context.cwd, event.toolName, event.toolCallId, fullOutput);
+    if (!saved.saved) {
       return {
-        content: [
-          {
-            type: "text",
-            text: `${preview}\n\nFull output could not be saved: ${errorMessage(error)}`,
-          },
-        ],
+        content: [{ type: "text", text: `${preview}\n\nFull output could not be saved: ${saved.message}` }],
       };
     }
 
     return {
       content: [
-        {
-          type: "text",
-          text: `${preview}\n\nFull output: ${relativeArtifactPath}`,
-        },
+        { type: "text", text: `${preview}\n\nFull output: ${saved.relativePath}` },
         ...event.content.filter((block) => block.type !== "text"),
       ],
     };
