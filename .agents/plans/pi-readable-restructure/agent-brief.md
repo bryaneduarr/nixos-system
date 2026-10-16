@@ -6,7 +6,7 @@ You are one of 8 parallel agents restructuring `packages/pi/` (TypeScript, run b
 
 1. Read these rule files completely; they are mandatory: `.agents/rules/code-quality.md`, `.agents/rules/structure.md`, `.agents/rules/typescript.md`, `.agents/rules/scripts.md` (Tests section).
 2. Run `bun install --frozen-lockfile` in `packages/pi/` (your worktree has no `node_modules`).
-3. Record the baseline from `packages/pi/`: `tsc --noEmit 2>&1 | grep -c "error TS"`, `biome lint . --reporter=summary --colors=off`, `./node_modules/.bin/knip --reporter compact`, and `bun test 2>&1 | tail -3`.
+3. Record the baseline from `packages/pi/`: `tsc --noEmit 2>&1 | grep -c "error TS"` (use the `tsc` on `PATH`; the package has no local TypeScript, and a "command not found" counts as 0, which is wrong), `biome lint . --reporter=summary --colors=off`, `./node_modules/.bin/knip --reporter compact`, and `bun test 2>&1 | tail -3`.
 
 ## Fixed constraints
 
@@ -156,6 +156,17 @@ Create `types/`, `schemas/`, and `constants/` for your area. Move every interfac
 Done when: no new tsc errors anywhere (total count not above baseline, and zero in `types/`, `schemas/`, `constants/`), `biome ci` reports nothing in files you created, `bun test` passes.
 
 ### Phase B: code
+
+Phase A is merged. Contracts now live in `types/`, `schemas/`, and `constants/`; reuse them, do not recreate them. Known items from phase A:
+
+- activity and subagents: `TaskProgress` still has optional `model`, `thinkingLevel`, and `usage`. Replace them with the activity unions (`ToolActivityUsage`, `ValueState<T>`). Task progress is saved in Pi session history, so old sessions may lack these fields: the activity parser converts persisted `details` once through a schema into the unions. `ToolActivity.details` must stop being `unknown`: store the parsed task progress union instead. subagents owns `TaskProgress`; activity owns the parser and `ToolActivity`. Agree on the shape through the types files: subagents changes `types/subagents/tasks/`, activity consumes it.
+- activity: `services/activity/value/` helpers (`presentValue`, `toValueState`) are used by inspector, subagents, and tool-rendering. Keep them in `services/activity/value/` with one function per file.
+- activity: inspector pseudo-tool names (`constants/inspector/pseudo-tool.constant.ts`) duplicate `constants/activity/activity-entry.constant.ts`. activity keeps its constants; inspector imports them and deletes its duplicates.
+- sessions: the cleanup worker runs as a plain Node process outside Pi's loader, from the Nix store, with no `node_modules` beside it. It may import only `node:` built-ins and relative files that do the same. Do not import `typebox` there; validate its payload with named check functions instead (see the long-condition example).
+- tool-rendering: remove the re-exports from `ui/tool-renderer.ts`; consumers import from the owning file.
+- extensions: `codex-fast-mode` imports the raw source of `pi-powerline-footer/theme.ts`, which causes one tsc error inside `node_modules`. Leave the import; report it.
+- Biome's `useShorthandFunctionType` requires a function type alias instead of an interface with only a call signature. That is allowed.
+- Single-file roots: a `pi.registerTool` or `pi.registerCommand` block that moves out of an entry or install file goes to `tools/` or `commands/`; event wiring (`pi.on(...)`) goes to `services/<domain>/events/` as an `install-<what>-events.service.ts`.
 
 Move all implementation of your area into `services/`, `tools/`, `commands/`, and `components/` as described above, apply every coding rule, convert classes, split long files and conditions, move tests next to subjects, and delete the emptied old files and folders.
 
