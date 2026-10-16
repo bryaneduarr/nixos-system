@@ -5,7 +5,7 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 ## Strict compiler settings
 
 - Each TypeScript project has a `tsconfig.json` with `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and `noImplicitOverride` enabled, and a type-check command that runs `tsc --noEmit`.
-- The Pi harness does not have this yet. Adding it belongs to the move into `pi-harness/`; until then, report the missing type check rather than claiming types were verified.
+- The Pi harness does not have this yet. Adding it belongs to the Pi harness work in `packages/pi/`; until then, report the missing type check rather than claiming types were verified.
 - Do not weaken compiler options or add suppressions to make a change pass.
 
 ## No unsafe typing

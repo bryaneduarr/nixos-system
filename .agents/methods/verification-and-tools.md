@@ -6,7 +6,7 @@ Use this guide to choose a useful approach for the current task. It is a decisio
 
 | Situation                                                  | Useful starting point                                                         |
 | ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| The relevant file is not known.                            | Search filenames under `hosts/`, `home/`, `modules/`, `scripts/`, or `nvim/`. |
+| The relevant file is not known.                            | Search filenames under `hosts/`, `system/`, `services/`, `packages/`, `scripts/`, or `nvim/`. |
 | An option, package, or setting needs locating.             | Use a scoped text search, then read the matching module.                      |
 | The final value of an option matters.                      | Evaluate it with `nix eval` instead of reading every module that sets it.     |
 | A NixOS or Home Manager option's type or meaning is needed. | Search the upstream option docs or `nixpkgs` source; do not guess.           |
@@ -40,11 +40,11 @@ nix eval .#nixosConfigurations.wsl-aarch64.config.system.build.toplevel.drvPath
 Run the evaluation tests next to the changed modules. Each file locates the flake from its own path, so it runs from any directory. To find them all, run `git ls-files '*.test.nix'`.
 
 ```sh
-nix eval --impure --json --file hosts/wsl.test.nix
-nix eval --impure --json --file home/packages/herdr/config.test.nix
+nix eval --impure --json --file hosts/wsl/wsl.test.nix
+nix eval --impure --json --file packages/herdr/herdr.test.nix
 ```
 
-`hosts/configuration.test.nix` asserts nothing; it prints the desktop target's settings for before-and-after comparison.
+`hosts/desktop/desktop.test.nix` asserts nothing; it prints the desktop target's settings for before-and-after comparison.
 
 For a single value, evaluate it directly, for example `nix eval .#nixosConfigurations.wsl-x86_64.config.custom.<feature>.enable`.
 

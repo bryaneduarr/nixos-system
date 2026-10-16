@@ -1,6 +1,6 @@
 _update_pi_dependencies() {
   run_quietly bun add \
-    --cwd "$repo_root/home/packages/pi" \
+    --cwd "$repo_root/packages/pi" \
     --lockfile-only \
     --ignore-scripts \
     --exact \
@@ -23,13 +23,13 @@ _update_pi_dependencies() {
   # Nix's reproducible node dependency builder currently consumes package-lock.json.
   # Bun updates package.json/bun.lock; npm mirrors that resolution into the
   # lockfile required by buildNpmPackage.
-  run_quietly npm --prefix "$repo_root/home/packages/pi" install \
+  run_quietly npm --prefix "$repo_root/packages/pi" install \
     --package-lock-only \
     --legacy-peer-deps \
     --ignore-scripts \
     --save-exact
 
-  normalize_pi_npm_lock_integrity "$repo_root/home/packages/pi/package-lock.json"
+  normalize_pi_npm_lock_integrity "$repo_root/packages/pi/package-lock.json"
 }
 
 update_pi_dependencies() {

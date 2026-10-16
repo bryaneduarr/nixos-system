@@ -26,7 +26,7 @@ vim.opt.foldtext = ""
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
 
--- The Spanish dictionary is installed by modules/home/neovim.
+-- The Spanish dictionary is installed by packages/neovim.
 if vim.fn.filereadable(vim.fn.stdpath("data") .. "/site/spell/es.utf-8.spl") == 1 then
   vim.opt.spelllang = { "en_us", "es" }
   vim.opt.spellfile = {

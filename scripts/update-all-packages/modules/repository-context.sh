@@ -4,7 +4,7 @@ source "$repo_root/scripts/system-target/select-target.sh"
 select_system_target
 show_system_target
 
-pi_nix_file="$repo_root/home/packages/pi/pi-tools/default.nix"
+pi_nix_file="$repo_root/packages/pi/pi-tools/pi-tools.nix"
 
 # Run a task with a small text-only spinner. Successful command output stays
 # hidden; failures replay the captured diagnostics.

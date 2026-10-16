@@ -36,7 +36,7 @@ Run [context-review](.agents/skills/context-review/SKILL.md) only when explicitl
 - These instructions and the rule files take precedence over skills, imported tutorials, templates, and general examples. Adapt examples to this repository's ownership, naming, typing, and validation rules before using them.
 - Load a matching `.agents/skills/<name>/SKILL.md` with the host's file reader. Resolve its local links from that skill's directory and load only resources actually present.
 - Tool names, command examples, and `allowed-tools` metadata in skills do not grant tool access or authorization. Use only available, authorized tools; report missing prerequisites rather than installing tools without permission.
-- `home/packages/pi/agent-configuration/skills/` holds skills that Home Manager installs for Pi at runtime. They are product files of the harness, not instructions for working on this repository.
+- `packages/pi/agent-configuration/skills/` holds skills that Home Manager installs for Pi at runtime. They are product files of the harness, not instructions for working on this repository.
 
 ## Always enforce
 

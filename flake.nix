@@ -43,17 +43,44 @@
       ...
     }@inputs:
     let
-      herdrOverlay = import ./home/packages/herdr/overlay.nix;
+      inherit (nixpkgs) lib;
 
-      wslSystem =
-        system:
-        nixpkgs.lib.nixosSystem {
+      herdrOverlay = import ./packages/herdr/overlay.nix;
+
+      discoverModules =
+        role:
+        lib.concatMap
+          (
+            category:
+            lib.pipe (builtins.readDir ./${category}) [
+              (lib.filterAttrs (_: type: type == "directory"))
+              builtins.attrNames
+              (map (name: ./${category}/${name}/${name}.${role}.nix))
+              (builtins.filter builtins.pathExists)
+            ]
+          )
+          [
+            "system"
+            "services"
+            "packages"
+            "scripts"
+          ];
+
+      nixosTarget =
+        {
+          system,
+          hostModule,
+          homeModule,
+        }:
+        lib.nixosSystem {
           inherit system;
           specialArgs = { inherit inputs; };
           modules = [
-            inputs.nixos-wsl.nixosModules.default
-            ./hosts/wsl.nix
+            hostModule
             home-manager.nixosModules.home-manager
+          ]
+          ++ discoverModules "system"
+          ++ [
             {
               nixpkgs = {
                 config.allowUnfree = true;
@@ -63,65 +90,37 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 extraSpecialArgs = {
-                  inherit yazi-plugins tmux-tpm inputs;
-                  desktopTools = false;
+                  inherit
+                    yazi-plugins
+                    tmux-tpm
+                    inputs
+                    ;
                 };
-                users.bryaneduarr = import ./home/wsl.nix;
+                users.bryaneduarr.imports = [ homeModule ] ++ discoverModules "home";
               };
             }
           ];
+        };
+
+      wslTarget =
+        system:
+        nixosTarget {
+          inherit system;
+          hostModule = ./hosts/wsl/wsl.nix;
+          homeModule = ./hosts/wsl/wsl.home.nix;
         };
     in
     {
-      # This configuration is named 'nixos' and follows the standard 'nixpkgs' library to build the NixOS system.
       nixosConfigurations = {
-        wsl-x86_64 = wslSystem "x86_64-linux";
-        wsl-aarch64 = wslSystem "aarch64-linux";
-
-        nixos = nixpkgs.lib.nixosSystem {
+        nixos = nixosTarget {
           system = "x86_64-linux";
-
-          specialArgs = {
-            inherit inputs;
-          };
-
-          modules = [
-            {
-              nixpkgs = {
-                config.allowUnfree = true;
-                overlays = [ herdrOverlay ];
-              };
-            }
-
-            ./hosts/configuration.nix # General system configuration for NixOS.
-
-            home-manager.nixosModules.home-manager # Import the home-manager configuration to manage user-specific configurations.
-
-            {
-              home-manager = {
-                useGlobalPkgs = true; # Tell home-manager to use the global Nix packages that are available in the system.
-
-                useUserPackages = true; # Enable using user-specific packages with home-manager.
-
-                extraSpecialArgs = {
-                  inherit yazi-plugins tmux-tpm inputs; # Pass to the home-manager custom plugins and configurations.
-                  desktopTools = true;
-                };
-
-                users.bryaneduarr = import ./home/default.nix; # Enable the configuration we have in our system to be used with home-manager.
-              };
-
-              # Enables the nix-ld program, which allows running dynamically linked binaries that are
-              # not built with Nix by providing a compatible dynamic linker and libraries. This was
-              # used for Visual Studio Code to open correctly while on SSH.
-              programs.nix-ld.enable = true;
-            }
-          ];
+          hostModule = ./hosts/desktop/desktop.nix;
+          homeModule = ./hosts/desktop/desktop.home.nix;
         };
-
+        wsl-x86_64 = wslTarget "x86_64-linux";
+        wsl-aarch64 = wslTarget "aarch64-linux";
       };
 
-      # Development shell for brain documentation pipeline tools, for opencode ignore/remove if not needed.
       devShells.x86_64-linux.default = nixpkgs.legacyPackages.x86_64-linux.mkShell {
         name = "nixos-system-brain";
 
@@ -142,7 +141,7 @@
 
       packages = {
         aarch64-linux.pi-tools =
-          nixpkgs.legacyPackages.aarch64-linux.callPackage ./home/packages/pi/pi-tools
+          nixpkgs.legacyPackages.aarch64-linux.callPackage ./packages/pi/pi-tools/pi-tools.nix
             { };
 
         x86_64-linux =
@@ -155,7 +154,7 @@
           {
             default = pkgs.hello;
 
-            pi-tools = pkgs.callPackage ./home/packages/pi/pi-tools { };
+            pi-tools = pkgs.callPackage ./packages/pi/pi-tools/pi-tools.nix { };
           };
       };
     };
