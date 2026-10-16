@@ -1,10 +1,11 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ModelSelectionLookup } from "../../types/model-selection/model-selection.interface.ts";
+import type { SessionFile } from "../../types/session-history/session-file.interface.ts";
 import { collectSessionFiles } from "./collect-session-files.service.ts";
 import { readSessionFileModel } from "./read-session-file-model.service.ts";
 
-function newestFirst(a: { readonly modified: number }, b: { readonly modified: number }): number {
+function newestFirst(a: SessionFile, b: SessionFile): number {
   return b.modified - a.modified;
 }
 

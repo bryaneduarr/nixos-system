@@ -2,12 +2,13 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { OFF_ACTION, ON_ACTION, STATUS_ACTION, TOGGLE_ACTION } from "../../constants/fast-mode/fast-mode.constant.ts";
 import type { FastModeControls } from "../../types/fast-mode/fast-mode-controls.interface.ts";
 
-const COMPLETED_ACTIONS = [ON_ACTION, OFF_ACTION, TOGGLE_ACTION, STATUS_ACTION];
-const CHANGE_ACTIONS = [ON_ACTION, OFF_ACTION, TOGGLE_ACTION];
+const COMPLETED_ACTIONS: readonly string[] = [ON_ACTION, OFF_ACTION, TOGGLE_ACTION, STATUS_ACTION];
+const CHANGE_ACTIONS: readonly string[] = [ON_ACTION, OFF_ACTION, TOGGLE_ACTION];
 
 function showStatus(controls: FastModeControls, ctx: ExtensionContext): void {
   const fastState = controls.isEnabled() ? "on" : "off";
-  const supportText = controls.isModelSupported(ctx.model)
+  const isCurrentModelSupported = ctx.model !== undefined && controls.isModelSupported(ctx.model);
+  const supportText = isCurrentModelSupported
     ? "Current model supports priority."
     : "Current model does not support priority.";
   controls.updateStatus(ctx);
@@ -18,7 +19,10 @@ export function registerFastCommand(pi: ExtensionAPI, controls: FastModeControls
   pi.registerCommand("fast", {
     description: "Turn Codex fast mode on or off",
     getArgumentCompletions: (prefix) =>
-      COMPLETED_ACTIONS.filter((item) => item.startsWith(prefix)).map((item) => ({ value: item, label: item })),
+      COMPLETED_ACTIONS.filter((action) => action.startsWith(prefix)).map((action) => ({
+        value: action,
+        label: action,
+      })),
     handler: async (args, ctx) => {
       let action = args.trim().toLowerCase();
 

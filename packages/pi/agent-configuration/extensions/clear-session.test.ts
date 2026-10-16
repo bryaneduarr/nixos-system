@@ -31,7 +31,7 @@ interface FakeClearContext {
 
 type FakeHandler = (event: { readonly reason: string }, ctx: FakeRuntimeContext) => Promise<void> | void;
 
-function runtime(model: FakeModel, thinkingLevel: string, availableModels: readonly FakeModel[] = [model]) {
+function createFakeRuntime(model: FakeModel, thinkingLevel: string, availableModels: readonly FakeModel[] = [model]) {
   const handlers = new Map<string, FakeHandler>();
   let clear: ((args: string, ctx: FakeClearContext) => Promise<void>) | undefined;
   let stale = false;
@@ -95,13 +95,13 @@ function runtime(model: FakeModel, thinkingLevel: string, availableModels: reado
 
 test("/clear preserves the active model and thinking level without accessing stale pi", async () => {
   const chosen = { provider: "example", id: "chosen" };
-  const previous = runtime(chosen, "high");
-  let replacement: ReturnType<typeof runtime> | undefined;
+  const previous = createFakeRuntime(chosen, "high");
+  let replacement: ReturnType<typeof createFakeRuntime> | undefined;
   await previous.clear({
     newSession: async () => {
       await previous.emit("session_before_switch", { reason: "new" });
       previous.invalidate();
-      replacement = runtime({ provider: "example", id: "default" }, "low", [
+      replacement = createFakeRuntime({ provider: "example", id: "default" }, "low", [
         { provider: "example", id: "default" },
         chosen,
       ]);
@@ -109,7 +109,8 @@ test("/clear preserves the active model and thinking level without accessing sta
       return { cancelled: false };
     },
   });
-  expect(JSON.parse(readFileSync(join(stateHome, "pi", "last-model.json"), "utf8"))).toEqual({
+  const savedModel: unknown = JSON.parse(readFileSync(join(stateHome, "pi", "last-model.json"), "utf8"));
+  expect(savedModel).toEqual({
     provider: "example",
     id: "chosen",
     thinkingLevel: "high",
@@ -117,19 +118,18 @@ test("/clear preserves the active model and thinking level without accessing sta
   expect(replacement?.model).toEqual(chosen);
   expect(replacement?.thinkingLevel).toBe("high");
 
-  // A second /clear must carry the same selection forward again.
-  let next: ReturnType<typeof runtime> | undefined;
-  const carried = replacement;
-  if (!carried) throw new Error("Replacement runtime was not created");
-  await carried.clear({
+  let nextRuntime: ReturnType<typeof createFakeRuntime> | undefined;
+  const replacementRuntime = replacement;
+  if (!replacementRuntime) throw new Error("Replacement runtime was not created");
+  await replacementRuntime.clear({
     newSession: async () => {
-      await carried.emit("session_before_switch", { reason: "new" });
-      carried.invalidate();
-      next = runtime({ provider: "example", id: "default" }, "low", [chosen]);
-      await next.emit("session_start", { reason: "new" });
+      await replacementRuntime.emit("session_before_switch", { reason: "new" });
+      replacementRuntime.invalidate();
+      nextRuntime = createFakeRuntime({ provider: "example", id: "default" }, "low", [chosen]);
+      await nextRuntime.emit("session_start", { reason: "new" });
       return { cancelled: false };
     },
   });
-  expect(next?.model).toEqual(chosen);
-  expect(next?.thinkingLevel).toBe("high");
+  expect(nextRuntime?.model).toEqual(chosen);
+  expect(nextRuntime?.thinkingLevel).toBe("high");
 });

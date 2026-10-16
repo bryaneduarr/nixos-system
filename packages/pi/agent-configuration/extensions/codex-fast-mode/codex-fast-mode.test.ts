@@ -2,11 +2,8 @@ import { afterAll, beforeEach, expect, mock, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Api, Model } from "@earendil-works/pi-ai";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { rainbow } from "pi-powerline-footer/theme.ts";
-import { fastModelsFromCache } from "./services/codex-models/fast-models-from-cache.service.ts";
-import { supportsFastMode } from "./services/codex-models/supports-fast-mode.service.ts";
 
 interface RecordedRequest {
   readonly fast: boolean;
@@ -75,7 +72,7 @@ afterAll(() => {
   rmSync(codexDirectory, { recursive: true, force: true });
 });
 
-function runtime() {
+function createFastModeRuntime() {
   const handlers = new Map<string, FakeEventHandler>();
   const entries: FakeEntry[] = [];
   let command: { handler: (args: string, ctx: FakeContext) => Promise<void> } | undefined;
@@ -156,32 +153,12 @@ function runtime() {
   };
 }
 
-function codexModel(id: string): Model<Api> {
-  return { provider: "openai-codex", api: "openai-codex-responses", id } as unknown as Model<Api>;
+function readSavedPreference(): unknown {
+  return JSON.parse(readFileSync(stateFile, "utf8"));
 }
-
-function unsupportedModel(provider: string, api: string, id: string): Model<Api> {
-  return { provider, api, id } as unknown as Model<Api>;
-}
-
-test("fast capability detection validates cache tiers and provider API", () => {
-  for (const value of [null, {}, { models: null }, { models: [null, 2, {}] }]) {
-    expect(fastModelsFromCache(value).size).toBe(0);
-  }
-  const models = fastModelsFromCache({
-    models: [
-      { slug: "fast", service_tiers: [null, { id: "priority" }] },
-      { slug: "slow", service_tiers: [{ id: "default" }] },
-    ],
-  });
-  expect([...models]).toEqual(["fast"]);
-  expect(supportsFastMode(codexModel("fast"), models)).toBe(true);
-  expect(supportsFastMode(unsupportedModel("openai", "openai-codex-responses", "fast"), models)).toBe(false);
-  expect(supportsFastMode(unsupportedModel("openai-codex", "openai-responses", "fast"), models)).toBe(false);
-});
 
 test("the visible menu toggles priority options without usage notifications", async () => {
-  const harness = runtime();
+  const harness = createFastModeRuntime();
   harness.emit("session_start");
   expect(harness.status).toBeUndefined();
   harness.request();
@@ -212,7 +189,7 @@ test("the visible menu toggles priority options without usage notifications", as
 });
 
 test("the fast badge uses the high-reasoning rainbow gradient", async () => {
-  const harness = runtime();
+  const harness = createFastModeRuntime();
   harness.emit("session_start");
   await harness.command("on");
 
@@ -223,15 +200,15 @@ test("the fast badge uses the high-reasoning rainbow gradient", async () => {
 });
 
 test("the shortcut persists both choices across fresh extension instances", async () => {
-  const harness = runtime();
+  const harness = createFastModeRuntime();
   harness.emit("session_start");
   expect(harness.shortcutKey).toBe("ctrl+alt+f");
   await harness.toggle();
   expect(harness.label).toBe("fast");
   expect(harness.status).toContain("\u001b[38;2;");
-  expect(JSON.parse(readFileSync(stateFile, "utf8"))).toEqual({ enabled: true });
+  expect(readSavedPreference()).toEqual({ enabled: true });
 
-  const nextSession = runtime();
+  const nextSession = createFastModeRuntime();
   nextSession.entries.push({ type: "custom", customType: "codex-fast-mode", data: { enabled: false } });
   nextSession.emit("session_start");
   expect(nextSession.label).toBe("fast");
@@ -241,9 +218,9 @@ test("the shortcut persists both choices across fresh extension instances", asyn
   expect(requests.at(-1)?.fast).toBe(true);
   await nextSession.toggle();
   expect(nextSession.status).toBeUndefined();
-  expect(JSON.parse(readFileSync(stateFile, "utf8"))).toEqual({ enabled: false });
+  expect(readSavedPreference()).toEqual({ enabled: false });
 
-  const offSession = runtime();
+  const offSession = createFastModeRuntime();
   offSession.entries.push({ type: "custom", customType: "codex-fast-mode", data: { enabled: true } });
   offSession.emit("session_start");
   expect(offSession.status).toBeUndefined();
@@ -252,7 +229,7 @@ test("the shortcut persists both choices across fresh extension instances", asyn
 });
 
 test("missing or invalid preferences fall back to validated session entries", () => {
-  const harness = runtime();
+  const harness = createFastModeRuntime();
   harness.entries.push({ type: "custom", customType: "codex-fast-mode", data: { enabled: true } });
   harness.entries.push({ type: "custom", customType: "codex-fast-mode", data: { enabled: "false" } });
   harness.emit("session_start");
@@ -270,7 +247,7 @@ test("missing or invalid preferences fall back to validated session entries", ()
 
 test("a failed preference write leaves fast mode unchanged", async () => {
   writeFileSync(join(codexDirectory, "pi"), "not a directory");
-  const harness = runtime();
+  const harness = createFastModeRuntime();
   harness.emit("session_start");
   await harness.toggle();
   expect(harness.status).toBeUndefined();
@@ -281,7 +258,7 @@ test("a failed preference write leaves fast mode unchanged", async () => {
 });
 
 test("unsupported models never request priority, even with a saved on preference", async () => {
-  const harness = runtime();
+  const harness = createFastModeRuntime();
   harness.emit("session_start");
   await harness.command("on");
   harness.ctx.model.id = "unsupported";

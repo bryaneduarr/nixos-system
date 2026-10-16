@@ -33,7 +33,8 @@ export default function codexFastMode(pi: ExtensionAPI): void {
   }
 
   function setEnabled(nextEnabled: boolean, ctx: ExtensionContext): void {
-    if (nextEnabled && !supportsFastMode(ctx.model, fastModels)) {
+    const isCurrentModelSupported = ctx.model !== undefined && supportsFastMode(ctx.model, fastModels);
+    if (nextEnabled && !isCurrentModelSupported) {
       ctx.ui.notify("Fast mode is unavailable for this model. Select a supported openai-codex model first.", "warning");
       return;
     }

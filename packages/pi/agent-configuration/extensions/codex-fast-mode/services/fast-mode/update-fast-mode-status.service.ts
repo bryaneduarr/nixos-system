@@ -7,6 +7,7 @@ const fastLabel = rainbow("fast");
 
 export function updateFastModeStatus(ctx: ExtensionContext, enabled: boolean, fastModels: Set<string>): void {
   if (!ctx.hasUI) return;
-  const isFastActive = enabled && supportsFastMode(ctx.model, fastModels);
+  const isCurrentModelSupported = ctx.model !== undefined && supportsFastMode(ctx.model, fastModels);
+  const isFastActive = enabled && isCurrentModelSupported;
   ctx.ui.setStatus(FAST_MODE_STATUS_KEY, isFastActive ? fastLabel : undefined);
 }

@@ -39,7 +39,7 @@ function replaceOnce(path: string, before: string, after: string): void {
   const first = source.indexOf(before);
   const duplicate = source.indexOf(before, first + before.length);
   if (first < 0 || duplicate >= 0) {
-    throw new Error(`Expected exactly one assistant render site in ${path}`);
+    throw new Error(`Expected exactly one match for the patch target in ${path}`);
   }
   writeFileSync(path, source.replace(before, after));
 }

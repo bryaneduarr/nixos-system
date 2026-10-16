@@ -1,2 +1,6 @@
 /* Result of reading the saved fast-mode preference. */
-export type FastModePreferenceLookup = { readonly found: true; readonly enabled: boolean } | { readonly found: false };
+export type FastModePreferenceLookup =
+  /* A valid preference was saved. */
+  | { readonly found: true; readonly enabled: boolean }
+  /* No valid saved preference exists. */
+  | { readonly found: false };

@@ -17,6 +17,8 @@ const ERROR_HEAD_LINES = 160;
 const ERROR_TAIL_LINES = 120;
 const LINE_BREAK_PATTERN = /\r?\n/;
 const UNSAFE_FILE_NAME_CHARACTERS = /[^a-zA-Z0-9_-]/g;
+const UNSAFE_TIMESTAMP_CHARACTERS = /[:.]/g;
+const SHORTENED_PREVIEW_RESERVED_CHARACTERS = 24;
 
 /* Result of writing the full output of a tool call to a file. */
 type SavedOutput =
@@ -36,7 +38,7 @@ function previewOutput(output: string, headLines: number, tailLines: number): st
 
   let text = previewLines.join("\n");
   if (text.length > PREVIEW_CHAR_LIMIT) {
-    const half = Math.floor((PREVIEW_CHAR_LIMIT - omissionMarker.length - 24) / 2);
+    const half = Math.floor((PREVIEW_CHAR_LIMIT - omissionMarker.length - SHORTENED_PREVIEW_RESERVED_CHARACTERS) / 2);
     text = `${text.slice(0, half)}\n${omissionMarker}\n... preview shortened ...\n${text.slice(-half)}`;
   }
 
@@ -67,7 +69,7 @@ function toSafeFileNamePart(value: string): string {
 }
 
 async function saveFullOutput(cwd: string, toolName: string, toolCallId: string, output: string): Promise<SavedOutput> {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const timestamp = new Date().toISOString().replace(UNSAFE_TIMESTAMP_CHARACTERS, "-");
   const fileName = `${timestamp}-${toSafeFileNamePart(toolName)}-${toSafeFileNamePart(toolCallId)}.txt`;
   const artifactDirectory = join(cwd, CONFIG_DIR_NAME, "tool-output");
   try {
@@ -79,7 +81,7 @@ async function saveFullOutput(cwd: string, toolName: string, toolCallId: string,
   }
 }
 
-export default function quietToolsExtension(pi: ExtensionAPI): void {
+export default function quietToolOutputExtension(pi: ExtensionAPI): void {
   pi.on("tool_call", (event) => {
     if (isToolCallEventType("read", event) && event.input.limit === undefined) {
       event.input.limit = READ_LIMIT;

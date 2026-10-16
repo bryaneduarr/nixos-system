@@ -23,12 +23,14 @@ test("the LSP packaging patch uses host peers and removes duplicate host librari
       const result = Bun.spawnSync(["node", script, directory]);
       expect(result.exitCode).toBe(0);
     }
-    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-    expect(manifest.dependencies).toEqual({ "vscode-jsonrpc": "^8.2.1" });
-    expect(manifest.peerDependencies).toEqual({
-      "@earendil-works/pi-ai": "*",
-      "@earendil-works/pi-tui": "*",
-      typebox: "*",
+    const manifest: unknown = JSON.parse(readFileSync(manifestPath, "utf8"));
+    expect(manifest).toEqual({
+      dependencies: { "vscode-jsonrpc": "^8.2.1" },
+      peerDependencies: {
+        "@earendil-works/pi-ai": "*",
+        "@earendil-works/pi-tui": "*",
+        typebox: "*",
+      },
     });
     expect(existsSync(join(directory, "node_modules/@earendil-works/pi-tui"))).toBe(false);
     expect(existsSync(join(directory, "node_modules/typebox"))).toBe(false);
