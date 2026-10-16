@@ -88,11 +88,15 @@ Use `Super+M` to maximize a window to the screen edges. Exit Niri with `Super+Sh
 Run the regression checks from the repository root:
 
 ```sh
-nix eval --impure --json --file home/desktop/tests/evaluate.nix
-python3 home/desktop/tests/test_hyprland_config.py
-python3 home/desktop/tests/test_wallpapers.py
-python3 home/desktop/tests/test_theme_mode.py
-python3 home/desktop/tests/test_niri_keybindings.py
+nix eval --impure --json --file system/desktop-session/desktop-session.test.nix
+nix eval --impure --json --file system/desktop-session/theme-mode/desktop-theme-modes.test.nix
+nix eval --impure --json --file system/desktop-session/theme-mode/desktop-theme-failures.test.nix
+nix eval --impure --json --file system/desktop-session/wallpapers/wallpaper-scripts.test.nix
+nix eval --impure --json --file packages/niri/niri.test.nix
+nix eval --impure --json --file packages/niri/keybindings.test.nix
+nix eval --impure --json --file packages/hyprland/hyprland.test.nix
+nix eval --impure --json --file packages/hyprland/unmanaged-config-backup.test.nix
+nix eval --impure --json --file packages/waybar/waybar.test.nix
 ```
 
 The checks evaluate both compositor selections, enforce exclusive sessions and packages, and verify the shared wallpaper configuration. They also check portals, browser defaults, font defaults, terminal blur, Waybar, and both system derivations. The key binding test compares every active binding against the configured Niri package's upstream defaults and checks for shortcut conflicts. Nix substitutes the shared appearance values into `packages/niri/config.kdl`, then validates the result with the selected Niri package when building the managed file.
