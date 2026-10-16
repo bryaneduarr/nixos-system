@@ -12,8 +12,8 @@ import { renderBox } from "../../services/tool-rendering/box/render-box.service.
 import { toolColor } from "../../services/tool-rendering/presentation/tool-color.service.ts";
 import { toolLabel } from "../../services/tool-rendering/presentation/tool-label.service.ts";
 import { toolTarget } from "../../services/tool-rendering/presentation/tool-target.service.ts";
+import { isHarnessTool } from "../../services/tools/is-harness-tool.service.ts";
 import { resolveTaskRole } from "../../subagents/roles.ts";
-import { isHarnessTool } from "../../tools/config.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import type { SubToolActivity } from "../../types/activity/sub-tool-activity.interface.ts";
 import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";

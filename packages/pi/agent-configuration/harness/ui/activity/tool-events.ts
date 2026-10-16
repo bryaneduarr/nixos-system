@@ -6,8 +6,8 @@ import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { RendererPayloadSchema } from "../../schemas/activity/renderer-payload.schema.ts";
 import { resultFailed } from "../../services/tool-rendering/presentation/result-failed.service.ts";
 import { extractText } from "../../services/tool-rendering/text/extract-text.service.ts";
+import { isHarnessTool } from "../../services/tools/is-harness-tool.service.ts";
 import { taskResultFailed } from "../../subagents/result.ts";
-import { isHarnessTool } from "../../tools/config.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import type { RendererResult } from "../../types/activity/renderer-result.interface.ts";
 

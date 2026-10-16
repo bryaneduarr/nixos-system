@@ -1,10 +1,12 @@
-import { RUN_HEAD_LINES, RUN_TAIL_LINES } from "../constants/tools/run-limits.constant.ts";
-import { MAX_TEXT_CHARS, MAX_TEXT_LINES } from "../constants/tools/text-limits.constant.ts";
-import { RUN_DIR } from "../constants/tools/workspace.constant.ts";
-import type { RunRequest } from "../types/tools/run/run-request.interface.ts";
-import { writeArtifact } from "./artifacts.ts";
-import { runCommand } from "./exec.ts";
-import { clampLines, headTail, splitLines } from "./format.ts";
+import { RUN_HEAD_LINES, RUN_TAIL_LINES } from "../../../constants/tools/run-limits.constant.ts";
+import { MAX_TEXT_CHARS, MAX_TEXT_LINES } from "../../../constants/tools/text-limits.constant.ts";
+import { RUN_DIR } from "../../../constants/tools/workspace.constant.ts";
+import type { RunRequest } from "../../../types/tools/run/run-request.interface.ts";
+import { writeArtifact } from "../artifacts/write-artifact.service.ts";
+import { runCommand } from "../process/run-command.service.ts";
+import { clampLines } from "../text/clamp-lines.service.ts";
+import { headTail } from "../text/head-tail.service.ts";
+import { splitLines } from "../text/split-lines.service.ts";
 
 function summarize(output: string): string | undefined {
   const lines = splitLines(output);
@@ -45,7 +47,8 @@ export async function runShell(request: RunRequest): Promise<string> {
   }
 
   const lines = splitLines(combined);
-  if (combined.length <= MAX_TEXT_CHARS && lines.length <= MAX_TEXT_LINES) {
+  const fitsInline = combined.length <= MAX_TEXT_CHARS && lines.length <= MAX_TEXT_LINES;
+  if (fitsInline) {
     return `${header}\n\n${combined}`;
   }
 

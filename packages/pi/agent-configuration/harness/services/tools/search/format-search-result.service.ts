@@ -1,6 +1,6 @@
-import type { SearchMatch } from "../../types/tools/search/search-match.interface.ts";
+import type { SearchMatch } from "../../../types/tools/search/search-match.interface.ts";
 
-function formatLocations(matches: SearchMatch[], limit: number): string {
+function formatLocations(matches: readonly SearchMatch[], limit: number): string {
   return matches
     .slice(0, limit)
     .map((match) => `${match.file}:${match.line}`)
