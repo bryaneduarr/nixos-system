@@ -1,9 +1,10 @@
 import { expect, test } from "bun:test";
 import { visibleWidth } from "@earendil-works/pi-tui";
+import type { ClipboardWriter } from "../agent-configuration/harness/types/prompts/clipboard-writer.interface.ts";
 import { collectPrompts } from "../agent-configuration/harness/ui/prompts/collection.ts";
 import { cursorRow, moveVertical, wrapPrompt } from "../agent-configuration/harness/ui/prompts/layout.ts";
 import { PromptNavigation } from "../agent-configuration/harness/ui/prompts/model.ts";
-import { type ClipboardWriter, PromptBrowser, viewPrompt } from "../agent-configuration/harness/ui/prompts/viewer.ts";
+import { PromptBrowser, viewPrompt } from "../agent-configuration/harness/ui/prompts/viewer.ts";
 
 const theme: any = {
   fg: (_color: string, text: string) => text,
@@ -88,9 +89,9 @@ test("reverse character and line ranges include both endpoints", () => {
   navigation.move(4);
   navigation.toggleSelection("character");
   navigation.move(1);
-  expect(navigation.selectedText()).toBe("🙂\nb界");
+  expect(navigation.selectedText()).toEqual({ found: true, text: "🙂\nb界" });
   navigation.toggleSelection("line");
-  expect(navigation.selectedText()).toBe("a🙂\nb界\n");
+  expect(navigation.selectedText()).toEqual({ found: true, text: "a🙂\nb界\n" });
 });
 
 test("escape cancels a selection before closing and ctrl+c always closes", () => {
@@ -115,7 +116,7 @@ test("clipboard failures keep the selection and allow a retry", async () => {
   keys(component, "v", "l", "y");
   await settle();
   expect(component.render(100).join("\n")).toContain("Copy failed");
-  expect(component.navigation.selectedText()).toBe("ra");
+  expect(component.navigation.selectedText()).toEqual({ found: true, text: "ra" });
   fail = false;
   keys(component, "y");
   await settle();
@@ -157,7 +158,7 @@ test("resize preserves raw selections and bounds both dimensions", () => {
       const lines = component.render(width);
       expect(lines.length).toBeLessThanOrEqual(height);
       for (const line of lines) expect(visibleWidth(line)).toBeLessThanOrEqual(width);
-      expect(component.navigation.selectedText()).toBe(selected);
+      expect(component.navigation.selectedText()).toEqual(selected);
     }
   }
 });

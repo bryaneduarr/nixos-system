@@ -1,5 +1,5 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type { PromptItem } from "./model.ts";
+import type { PromptItem } from "../../types/prompts/prompt-item.interface.ts";
 
 export function collectPrompts(ctx: ExtensionContext): PromptItem[] {
   const sent = ctx.sessionManager
