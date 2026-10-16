@@ -2,7 +2,7 @@ import { afterAll, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { asExtensionApi } from "./clear-session.test-double.ts";
 import clearExtension from "./clear-session.ts";
 import lastModelExtension from "./last-model/index.ts";
 
@@ -39,7 +39,6 @@ function createFakeRuntime(model: FakeModel, thinkingLevel: string, availableMod
   let stale = false;
   let selectedModel = model;
   let selectedThinkingLevel = thinkingLevel;
-  // The fake implements only the ExtensionAPI members these extensions call.
   const pi = {
     on: (name: string, handler: FakeHandler) => handlers.set(name, handler),
     registerCommand: (_name: string, command: { handler: FakeClearHandler }) => {
@@ -59,8 +58,8 @@ function createFakeRuntime(model: FakeModel, thinkingLevel: string, availableMod
       selectedThinkingLevel = level;
     },
   };
-  clearExtension(pi as unknown as ExtensionAPI);
-  lastModelExtension(pi as unknown as ExtensionAPI);
+  clearExtension(asExtensionApi(pi));
+  lastModelExtension(asExtensionApi(pi));
   const context = (): FakeRuntimeContext => ({
     mode: "tui",
     model: selectedModel,
