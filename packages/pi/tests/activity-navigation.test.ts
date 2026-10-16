@@ -22,7 +22,10 @@ test("navigation follows the selected tool and its child calls", () => {
   navigation.syncSelection(navigation.buildRows());
   expect(navigation.selectedId).toBe("task-1");
   expect(navigation.adjustSubagentCollapse("right")).toBe(true);
-  expect(navigation.buildRows().map((row) => row.sub?.id ?? row.entry.id)).toEqual(["task-1", "read-1"]);
+  expect(navigation.buildRows().map((row) => (row.level === "sub" ? row.sub.id : row.entry.id))).toEqual([
+    "task-1",
+    "read-1",
+  ]);
   expect(navigation.selectedId).toBe("task-1::read-1");
   expect(navigation.adjustSubagentCollapse("left")).toBe(true);
   expect(navigation.selectedId).toBe("task-1");

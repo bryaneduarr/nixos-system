@@ -1,19 +1,26 @@
 import { activityStore, type ToolActivity } from "../../activity/store.ts";
-import type { InspectorRow } from "./detail.ts";
-import type { InspectorPage } from "./input.ts";
+import {
+  THINKING_TOOL_NAME,
+  UPDATE_TOOL_NAME,
+  USER_MESSAGE_TOOL_NAME,
+} from "../../constants/inspector/pseudo-tool.constant.ts";
+import type { DetailArtifact } from "../../types/inspector/detail/detail-artifact.interface.ts";
+import type { InspectorRow } from "../../types/inspector/detail/inspector-row.interface.ts";
+import type { InspectorFocus, InspectorPage } from "../../types/inspector/navigation/inspector-page.interface.ts";
+import type { SubagentSelection } from "../../types/inspector/subagents/subagent-selection.interface.ts";
 
 export function rowKey(row: InspectorRow): string {
-  return row.sub ? `${row.entry.id}::${row.sub.id}` : row.entry.id;
+  return row.level === "sub" ? `${row.entry.id}::${row.sub.id}` : row.entry.id;
 }
 
 export class InspectorNavigation {
   selectedId?: string;
-  focus: "list" | "detail" = "list";
+  focus: InspectorFocus = "list";
   detailScroll = 0;
-  artifactText?: string;
+  artifact: DetailArtifact = { kind: "tool-result" };
   page: InspectorPage = "tools";
   readonly expandedTasks = new Set<string>();
-  subagentSelectedId?: string;
+  subagentSelection: SubagentSelection = { kind: "none" };
   subagentScroll = 0;
   detailViewportHeight = 0;
   listScroll = 0;
@@ -28,13 +35,17 @@ export class InspectorNavigation {
     const rows: InspectorRow[] = [];
     for (const entry of activityStore.all()) {
       if (this.page === "messages") {
-        if (entry.toolName !== "message") continue;
-      } else if (entry.toolName === "message" || entry.toolName === "thinking" || entry.toolName === "update") {
+        if (entry.toolName !== USER_MESSAGE_TOOL_NAME) continue;
+      } else if (
+        entry.toolName === USER_MESSAGE_TOOL_NAME ||
+        entry.toolName === THINKING_TOOL_NAME ||
+        entry.toolName === UPDATE_TOOL_NAME
+      ) {
         continue;
       }
-      rows.push({ entry });
+      rows.push({ level: "entry", entry });
       if (!this.expandedTasks.has(entry.id)) continue;
-      for (const sub of entry.sub) rows.push({ entry, sub });
+      for (const sub of entry.sub) rows.push({ level: "sub", entry, sub });
     }
     return rows;
   }
@@ -82,10 +93,11 @@ export class InspectorNavigation {
     if (rows.length === 0) return;
     const current = Math.max(
       0,
-      rows.findIndex((row) => row.id === this.subagentSelectedId),
+      rows.findIndex((row) => this.subagentSelection.kind === "selected" && row.id === this.subagentSelection.id),
     );
     const next = Math.max(0, Math.min(rows.length - 1, current + delta));
-    this.subagentSelectedId = rows[next]?.id;
+    const nextRow = rows[next];
+    if (nextRow) this.subagentSelection = { kind: "selected", id: nextRow.id };
     const height = Math.max(1, this.bodyHeight() - 2);
     this.subagentScroll = Math.max(0, Math.min(Math.max(0, rows.length - height), Math.max(0, next - height + 1)));
     this.changed();
@@ -95,7 +107,7 @@ export class InspectorNavigation {
     if (this.selectedId === id) return;
     this.selectedId = id;
     this.detailScroll = 0;
-    this.artifactText = undefined;
+    this.artifact = { kind: "tool-result" };
     this.changed();
   }
 
@@ -122,7 +134,7 @@ export class InspectorNavigation {
       const rows = this.subagentEntries();
       const row = where === "start" ? rows[0] : rows[rows.length - 1];
       if (row) {
-        this.subagentSelectedId = row.id;
+        this.subagentSelection = { kind: "selected", id: row.id };
         const height = Math.max(1, this.bodyHeight() - 1);
         this.subagentScroll = where === "start" ? 0 : Math.max(0, rows.length - height);
         this.changed();

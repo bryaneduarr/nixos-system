@@ -4,17 +4,17 @@ import type { ExtensionContext, Theme } from "@earendil-works/pi-coding-agent";
 import { copyToClipboard } from "@earendil-works/pi-coding-agent";
 import type { Component, TUI, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { activityStore } from "../../activity/store.ts";
-import { buildDetail, type InspectorRow } from "./detail.ts";
-import { handleInspectorKey, handleInspectorMouse, type InspectorInput, type InspectorLayout } from "./input.ts";
+import type { DetailArtifact } from "../../types/inspector/detail/detail-artifact.interface.ts";
+import type { DetailLine } from "../../types/inspector/detail/detail-line.interface.ts";
+import type { InspectorRow } from "../../types/inspector/detail/inspector-row.interface.ts";
+import type { InspectorInput } from "../../types/inspector/input/inspector-input.interface.ts";
+import type { InspectorOptions } from "../../types/inspector/overlay/inspector-options.interface.ts";
+import type { InspectorSelection } from "../../types/inspector/selection/inspector-selection.interface.ts";
+import type { InspectorLayoutState } from "../../types/inspector/view/inspector-layout.interface.ts";
+import { buildDetail } from "./detail.ts";
+import { handleInspectorKey, handleInspectorMouse } from "./input.ts";
 import { InspectorNavigation } from "./navigation.ts";
 import { bodyHeight, detailWidth, renderInspector, wrappedDetail } from "./view.ts";
-
-interface InspectorOptions {
-  tui: TUI;
-  theme: Theme;
-  done: () => void;
-  selectId?: string;
-}
 
 let inspectorOpen = false;
 
@@ -26,7 +26,7 @@ class ActivityInspector implements Component {
 
   private readonly navigation: InspectorNavigation;
   private status = "";
-  private layout: InspectorLayout | undefined;
+  private layout: InspectorLayoutState = { kind: "none" };
   private renderWidth = 80;
   private readonly timer: ReturnType<typeof setInterval>;
   private footerY = 0;
@@ -40,7 +40,7 @@ class ActivityInspector implements Component {
       () => this.wrappedDetail(this.navigation.buildRows()).length,
       () => this.tui.requestRender(),
     );
-    if (options.selectId) this.navigation.selectedId = options.selectId;
+    if (options.selection.kind === "tool-call") this.navigation.selectedId = options.selection.toolCallId;
     this.unsubscribe = activityStore.subscribe(() => this.tui.requestRender());
     this.timer = setInterval(() => this.tui.requestRender(), 1000);
   }
@@ -66,7 +66,7 @@ class ActivityInspector implements Component {
         this.navigation.page = page;
         this.navigation.focus = "list";
         this.navigation.detailScroll = 0;
-        this.navigation.artifactText = undefined;
+        this.navigation.artifact = { kind: "tool-result" };
         this.status = "";
         this.requestRender();
       },
@@ -79,12 +79,13 @@ class ActivityInspector implements Component {
         this.requestRender();
       },
       openSubagent: () => {
-        if (!this.navigation.subagentSelectedId) return;
+        const selection = this.navigation.subagentSelection;
+        if (selection.kind !== "selected") return;
         this.navigation.page = "tools";
-        this.navigation.selectedId = this.navigation.subagentSelectedId;
+        this.navigation.selectedId = selection.id;
         this.navigation.focus = "detail";
         this.navigation.detailScroll = 0;
-        this.navigation.artifactText = undefined;
+        this.navigation.artifact = { kind: "tool-result" };
         this.status = "";
         this.requestRender();
       },
@@ -100,7 +101,7 @@ class ActivityInspector implements Component {
       jump: (where) => this.navigation.jump(where),
       subagentEntries: () => this.navigation.subagentEntries(),
       selectSubagent: (id) => {
-        this.navigation.subagentSelectedId = id;
+        this.navigation.subagentSelection = { kind: "selected", id };
         this.requestRender();
       },
       select: (id) => this.navigation.select(id),
@@ -129,9 +130,9 @@ class ActivityInspector implements Component {
       rows,
       selected: this.navigation.selectedIndex(rows),
       expandedTasks: this.navigation.expandedTasks,
-      artifactText: this.navigation.artifactText,
+      artifact: this.navigation.artifact,
       subagents: this.navigation.subagentEntries(),
-      subagentSelectedId: this.navigation.subagentSelectedId,
+      subagentSelection: this.navigation.subagentSelection,
       subagentScroll: this.navigation.subagentScroll,
       listScroll: this.navigation.listScroll,
       detailScroll: this.navigation.detailScroll,
@@ -139,7 +140,7 @@ class ActivityInspector implements Component {
     this.layout = result.layout;
     this.footerY = result.footerY;
     this.navigation.detailViewportHeight = result.detailViewportHeight;
-    this.navigation.subagentSelectedId = result.subagentSelectedId;
+    this.navigation.subagentSelection = result.subagentSelection;
     this.navigation.subagentScroll = result.subagentScroll;
     this.navigation.listScroll = result.listScroll;
     this.navigation.detailScroll = result.detailScroll;
@@ -151,15 +152,15 @@ class ActivityInspector implements Component {
       this.navigation.currentRow(rows),
       detailWidth(this.renderWidth),
       this.theme,
-      this.navigation.artifactText,
+      this.navigation.artifact,
     );
   }
 
-  private detailLines(row: InspectorRow) {
+  private detailLines(row: InspectorRow): DetailLine[] {
     return buildDetail({
       row,
       width: Math.max(1, detailWidth(this.renderWidth)),
-      artifactText: this.navigation.artifactText,
+      artifact: this.navigation.artifact,
     });
   }
 
@@ -179,7 +180,7 @@ class ActivityInspector implements Component {
       this.setStatus("nothing selected");
       return;
     }
-    const text = this.navigation.artifactText ?? this.plainDetail(row);
+    const text = loadedText(this.navigation.artifact) ?? this.plainDetail(row);
     try {
       await copyToClipboard(text);
       this.setStatus(`copied ${text.length} chars`);
@@ -189,8 +190,8 @@ class ActivityInspector implements Component {
   }
 
   private async toggleArtifact(): Promise<void> {
-    if (this.navigation.artifactText) {
-      this.navigation.artifactText = undefined;
+    if (this.navigation.artifact.kind === "loaded") {
+      this.navigation.artifact = { kind: "tool-result" };
       this.navigation.detailScroll = 0;
       this.setStatus("showing tool result");
       return;
@@ -204,7 +205,7 @@ class ActivityInspector implements Component {
     try {
       const absolute = isAbsolute(path) ? path : resolve(row.entry.cwd, path);
       const content = await readFile(absolute, "utf8");
-      this.navigation.artifactText = content;
+      this.navigation.artifact = { kind: "loaded", text: content };
       this.navigation.detailScroll = 0;
       this.setStatus(`loaded ${path} (${content.length} chars)`);
     } catch {
@@ -222,12 +223,16 @@ class ActivityInspector implements Component {
   }
 }
 
-export async function openInspector(ctx: ExtensionContext, options: { selectId?: string } = {}): Promise<void> {
+function loadedText(artifact: DetailArtifact): string | undefined {
+  return artifact.kind === "loaded" ? artifact.text : undefined;
+}
+
+export async function openInspector(ctx: ExtensionContext, selection: InspectorSelection): Promise<void> {
   if (inspectorOpen) return;
   inspectorOpen = true;
   try {
     await ctx.ui.custom<void>(
-      (tui, theme, _keybindings, done) => new ActivityInspector({ tui, theme, done, selectId: options.selectId }),
+      (tui, theme, _keybindings, done) => new ActivityInspector({ tui, theme, done, selection }),
       {
         overlay: true,
         overlayOptions: {

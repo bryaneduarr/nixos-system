@@ -1,38 +1,7 @@
 import { matchesKey, type TuiMouseEvent, type TuiMouseEventResult, visibleWidth } from "@earendil-works/pi-tui";
-import type { ToolActivity } from "../../activity/store.ts";
-import type { InspectorRow } from "./detail.ts";
-
-export type InspectorPage = "tools" | "subagents" | "messages";
-export interface InspectorLayout {
-  leftWidth: number;
-  bodyTop: number;
-  bodyHeight: number;
-  listHeight: number;
-  twoPane: boolean;
-  rows: InspectorRow[];
-}
-
-export interface InspectorInput {
-  page: InspectorPage;
-  footerY: number;
-  layout?: InspectorLayout;
-  subagentScroll: number;
-  listScroll: number;
-  close(): void;
-  switchPage(page: InspectorPage): void;
-  switchFocus(): void;
-  focusDetail(): void;
-  openSubagent(): void;
-  collapse(direction: "left" | "right"): boolean;
-  copy(): void;
-  toggleArtifact(): void;
-  pageSize(): number;
-  step(delta: number): void;
-  jump(where: "start" | "end"): void;
-  subagentEntries(): ToolActivity[];
-  selectSubagent(id: string): void;
-  select(id: string): void;
-}
+import { PANE_DIVIDER_WIDTH } from "../../constants/inspector/layout.constant.ts";
+import type { InspectorInput } from "../../types/inspector/input/inspector-input.interface.ts";
+import type { InspectorPage } from "../../types/inspector/navigation/inspector-page.interface.ts";
 
 export function handleInspectorKey(data: string, inspector: InspectorInput): void {
   if (matchesKey(data, "escape") || matchesKey(data, "ctrl+c") || data === "q") {
@@ -117,17 +86,21 @@ export function handleInspectorMouse(event: TuiMouseEvent, inspector: InspectorI
       return { handled: true, focus: true };
     }
   }
-  const layout = inspector.layout;
-  if (!layout) return undefined;
+  const layoutState = inspector.layout;
+  if (layoutState.kind === "none") return undefined;
+  const layout = layoutState.layout;
   const rowOffset = event.y - layout.bodyTop;
   if (rowOffset < 0 || rowOffset >= layout.bodyHeight) return undefined;
-  if ((layout.twoPane && event.x >= layout.leftWidth + 3) || (!layout.twoPane && rowOffset >= layout.listHeight)) {
+  if (
+    (layout.twoPane && event.x >= layout.leftWidth + PANE_DIVIDER_WIDTH) ||
+    (!layout.twoPane && rowOffset >= layout.listHeight)
+  ) {
     inspector.focusDetail();
     return { handled: true, focus: true };
   }
   if (rowOffset >= layout.listHeight) return undefined;
   const row = layout.rows[inspector.listScroll + rowOffset];
   if (!row) return undefined;
-  inspector.select(row.sub ? `${row.entry.id}::${row.sub.id}` : row.entry.id);
+  inspector.select(row.level === "sub" ? `${row.entry.id}::${row.sub.id}` : row.entry.id);
   return { handled: true, focus: true };
 }

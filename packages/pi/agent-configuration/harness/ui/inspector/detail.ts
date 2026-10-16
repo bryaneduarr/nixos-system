@@ -1,30 +1,21 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
-import { type ActivityStatus, activityStore, type SubToolActivity, type ToolActivity } from "../../activity/store.ts";
+import { type ActivityStatus, activityStore } from "../../activity/store.ts";
+import { BLANK_DETAIL_LINE } from "../../constants/inspector/detail-line.constant.ts";
+import {
+  THINKING_TOOL_NAME,
+  UPDATE_TOOL_NAME,
+  USER_MESSAGE_TOOL_NAME,
+} from "../../constants/inspector/pseudo-tool.constant.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { resolveTaskRole } from "../../subagents/roles.ts";
 import { isHarnessTool } from "../../tools/config.ts";
+import type { DetailLine } from "../../types/inspector/detail/detail-line.interface.ts";
+import type { DetailOptions } from "../../types/inspector/detail/detail-options.interface.ts";
 import { renderBox } from "../formatting.ts";
 import { toolColor, toolLabel, toolTarget } from "../tool-renderer.ts";
 import { formatTokens, modelLabel } from "./usage.ts";
 
 const TASK_DEFAULT_TOOLS = "search, read, run";
-
-export interface InspectorRow {
-  entry: ToolActivity;
-  sub?: SubToolActivity;
-}
-
-export interface DetailLine {
-  text: string;
-  color?: ThemeColor;
-  bold?: boolean;
-}
-
-interface DetailOptions {
-  row: InspectorRow;
-  width: number;
-  artifactText?: string;
-}
 
 function statusColor(status: ActivityStatus): ThemeColor {
   switch (status) {
@@ -137,36 +128,36 @@ export function formatDuration(ms: number): string {
 
 function boxDetails(title: string, text: string, color: ThemeColor, width: number): DetailLine[] {
   const wrappedLines = text.split(/\r?\n/);
-  return renderBox(title, wrappedLines, width).map((line) => ({ text: line, color }));
+  return renderBox(title, wrappedLines, width).map((line) => ({ text: line, color, bold: false }));
 }
 
-export function buildDetail({ row, width, artifactText }: DetailOptions): DetailLine[] {
+export function buildDetail({ row, width, artifact }: DetailOptions): DetailLine[] {
   const entry = row.entry;
-  const sub = row.sub;
+  const sub = row.level === "sub" ? row.sub : undefined;
   const tool = sub?.toolName ?? entry.toolName;
   const args = sub?.args ?? entry.args;
   const status = sub?.status ?? entry.status;
   const startedAt = sub?.startedAt ?? entry.startedAt;
   const endedAt = sub?.endedAt ?? entry.endedAt;
-  const rawText = artifactText ?? sub?.text ?? entry.text;
+  const rawText = artifact.kind === "loaded" ? artifact.text : (sub?.text ?? entry.text);
   const output = formatOutput(rawText);
   const lines: DetailLine[] = [];
   const color = isHarnessTool(tool)
     ? toolColor(tool)
-    : tool === "message" || tool === "thinking" || tool === "update"
+    : tool === USER_MESSAGE_TOOL_NAME || tool === THINKING_TOOL_NAME || tool === UPDATE_TOOL_NAME
       ? "accent"
       : "muted";
   const elapsed = formatDuration(Math.max(0, (endedAt ?? Date.now()) - startedAt));
   const runningLabel = endedAt === undefined ? " · running" : "";
   const timing = `${formatTime(startedAt)} · ${elapsed}${runningLabel}`;
   const heading =
-    tool === "message"
+    tool === USER_MESSAGE_TOOL_NAME
       ? `USER MESSAGE ${String(args.number ?? "")} · ${formatTime(startedAt)}`
       : `${toolLabel(tool)} · ${status.toUpperCase()} · ${formatTime(startedAt)}`;
 
   lines.push({
     text: heading,
-    color: tool === "message" ? "accent" : statusColor(status),
+    color: tool === USER_MESSAGE_TOOL_NAME ? "accent" : statusColor(status),
     bold: true,
   });
 
@@ -175,13 +166,13 @@ export function buildDetail({ row, width, artifactText }: DetailOptions): Detail
     lines.push({ text: target, color, bold: true });
   }
 
-  lines.push({ text: "" });
+  lines.push(BLANK_DETAIL_LINE);
 
-  if (tool === "message") {
+  if (tool === USER_MESSAGE_TOOL_NAME) {
     const entries = activityStore.all();
     const index = entries.indexOf(entry);
     const following = entries.slice(index + 1);
-    const nextMessage = following.findIndex((item) => item.toolName === "message");
+    const nextMessage = following.findIndex((item) => item.toolName === USER_MESSAGE_TOOL_NAME);
     const group = nextMessage < 0 ? following : following.slice(0, nextMessage);
     const calls = group.filter((item) => isHarnessTool(item.toolName)).length;
     const callLabel = `${calls} tool call${calls === 1 ? "" : "s"}`;
@@ -189,22 +180,23 @@ export function buildDetail({ row, width, artifactText }: DetailOptions): Detail
     lines.push({
       text: `${callLabel} after this message · ${formatTime(startedAt)}`,
       color: "accent",
+      bold: false,
     });
-    lines.push({ text: "" });
+    lines.push(BLANK_DETAIL_LINE);
     lines.push(...boxDetails("user message", rawText || "(no text)", "accent", width));
     return lines;
   }
 
-  if (tool === "update") {
+  if (tool === UPDATE_TOOL_NAME) {
     lines.push({ text: `AGENT UPDATE  ${timing}`, color: "accent", bold: true });
-    lines.push({ text: "" });
+    lines.push(BLANK_DETAIL_LINE);
     lines.push(...boxDetails("update", rawText, "accent", width));
     return lines;
   }
 
-  if (tool === "thinking") {
+  if (tool === THINKING_TOOL_NAME) {
     lines.push({ text: `THINKING  ${timing}`, color: "accent", bold: true });
-    lines.push({ text: "" });
+    lines.push(BLANK_DETAIL_LINE);
     lines.push(...boxDetails("thinking", rawText || "(redacted)", "accent", width));
     return lines;
   }
@@ -218,33 +210,34 @@ export function buildDetail({ row, width, artifactText }: DetailOptions): Detail
     const callCount = entry.sub.length;
 
     lines.push({ text: `MODEL ${modelLabel(entry.model)}`, color: "accent", bold: true });
-    lines.push({ text: `REASONING ${reasoning}`, color: "accent" });
+    lines.push({ text: `REASONING ${reasoning}`, color: "accent", bold: false });
     lines.push({
       text: `CONTEXT ${currentContext}/${contextWindow} | ${callCount} calls`,
       color: "accent",
       bold: true,
     });
-    lines.push({ text: "" });
+    lines.push(BLANK_DETAIL_LINE);
   }
 
   lines.push({ text: `INPUT  ${timing}`, color, bold: true });
-  lines.push({ text: "" });
+  lines.push(BLANK_DETAIL_LINE);
   lines.push(...boxDetails("input", formatInput(tool, args), color, width));
-  lines.push({ text: "" });
+  lines.push(BLANK_DETAIL_LINE);
 
   if (entry.artifactPath) {
-    const artifactAction = artifactText ? "· open" : "· press a";
+    const artifactAction = artifact.kind === "loaded" ? "· open" : "· press a";
     lines.push({
       text: `artifact ${artifactAction} · ${entry.artifactPath}`,
       color: "muted",
+      bold: false,
     });
-    lines.push({ text: "" });
+    lines.push(BLANK_DETAIL_LINE);
   }
 
-  const outputTitle = artifactText ? "ARTIFACT" : "OUTPUT";
-  const outputBoxTitle = artifactText ? "json" : "result";
+  const outputTitle = artifact.kind === "loaded" ? "ARTIFACT" : "OUTPUT";
+  const outputBoxTitle = artifact.kind === "loaded" ? "json" : "result";
   lines.push({ text: outputTitle, color, bold: true });
-  lines.push({ text: "" });
+  lines.push(BLANK_DETAIL_LINE);
   lines.push(...boxDetails(outputBoxTitle, output, color, width));
   return lines;
 }

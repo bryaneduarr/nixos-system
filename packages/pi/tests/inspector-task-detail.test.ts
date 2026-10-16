@@ -48,7 +48,9 @@ test("task detail shows current context, call count, and reasoning without redun
     sub: subagentCalls,
   });
 
-  const lines = buildDetail({ row: { entry }, width: 80 }).map((line) => line.text);
+  const lines = buildDetail({ row: { level: "entry", entry }, width: 80, artifact: { kind: "tool-result" } }).map(
+    (line) => line.text,
+  );
   const text = lines.join("\n");
 
   expect(lines[0]).toMatch(/^TASK · SUCCESS · /);
@@ -81,7 +83,7 @@ test("task input shows the effective role and default tools", () => {
     endedAt: 2000,
   });
 
-  const detail = buildDetail({ row: { entry }, width: 100 });
+  const detail = buildDetail({ row: { level: "entry", entry }, width: 100, artifact: { kind: "tool-result" } });
   const text = detail.map((line) => line.text).join("\n");
 
   expect(text).toContain("role: explore");

@@ -72,8 +72,8 @@ export function installActivity(pi: ExtensionAPI): void {
   let thinkingSequence = 0;
   let messageSequence = 0;
 
-  setInspectOpener((ctx, toolCallId) => {
-    void openInspector(ctx, { selectId: toolCallId });
+  setInspectOpener((ctx, selection) => {
+    void openInspector(ctx, selection);
   });
 
   const touch = (ctx: ExtensionContext): void => {
@@ -205,7 +205,7 @@ export function installActivity(pi: ExtensionAPI): void {
     description: "Inspect harness tool activity",
     handler: async (ctx) => {
       touch(ctx);
-      await openInspector(ctx, {});
+      await openInspector(ctx, { kind: "latest" });
     },
   });
 
@@ -213,7 +213,7 @@ export function installActivity(pi: ExtensionAPI): void {
     description: "Inspect agent thinking, tool calls, source read, results, and delegation",
     handler: async (_args, ctx) => {
       touch(ctx);
-      await openInspector(ctx, {});
+      await openInspector(ctx, { kind: "latest" });
     },
   });
 }

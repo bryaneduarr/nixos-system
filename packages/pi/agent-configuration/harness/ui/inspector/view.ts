@@ -1,43 +1,25 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
-import { activityStore, type ToolActivity } from "../../activity/store.ts";
-import { buildDetail, type InspectorRow } from "./detail.ts";
+import { activityStore } from "../../activity/store.ts";
+import {
+  LEFT_PANE_WIDTH_RATIO,
+  MAX_LEFT_WIDTH,
+  MIN_LEFT_WIDTH,
+  MIN_TWO_PANE_WIDTH,
+  PANE_DIVIDER_WIDTH,
+} from "../../constants/inspector/layout.constant.ts";
+import {
+  THINKING_TOOL_NAME,
+  UPDATE_TOOL_NAME,
+  USER_MESSAGE_TOOL_NAME,
+} from "../../constants/inspector/pseudo-tool.constant.ts";
+import type { DetailArtifact } from "../../types/inspector/detail/detail-artifact.interface.ts";
+import type { InspectorRow } from "../../types/inspector/detail/inspector-row.interface.ts";
+import type { InspectorLayoutState } from "../../types/inspector/view/inspector-layout.interface.ts";
+import type { InspectorViewResult, InspectorViewState } from "../../types/inspector/view/inspector-view.interface.ts";
+import { buildDetail } from "./detail.ts";
 import { footer, frameModal, padCell } from "./frame.ts";
-import type { InspectorLayout, InspectorPage } from "./input.ts";
 import { renderSubagentList, renderToolList } from "./lists.ts";
-
-export const MIN_TWO_PANE_WIDTH = 64;
-export const MIN_LEFT_WIDTH = 24;
-export const MAX_LEFT_WIDTH = 44;
-
-export interface InspectorViewState {
-  width: number;
-  terminalRows: number;
-  theme: Theme;
-  page: InspectorPage;
-  focus: "list" | "detail";
-  status: string;
-  rows: InspectorRow[];
-  selected: number;
-  expandedTasks: ReadonlySet<string>;
-  artifactText?: string;
-  subagents: ToolActivity[];
-  subagentSelectedId?: string;
-  subagentScroll: number;
-  listScroll: number;
-  detailScroll: number;
-}
-
-export interface InspectorViewResult {
-  lines: string[];
-  layout?: InspectorLayout;
-  footerY: number;
-  detailViewportHeight: number;
-  subagentSelectedId?: string;
-  subagentScroll: number;
-  listScroll: number;
-  detailScroll: number;
-}
 
 export function bodyHeight(terminalRows: number): number {
   const scaledHeight = Math.floor(terminalRows * 0.8) - 6;
@@ -48,20 +30,23 @@ export function detailWidth(width: number): number {
   const contentWidth = Math.max(8, width - 4);
   if (width < MIN_TWO_PANE_WIDTH) return contentWidth;
 
-  const leftWidth = Math.max(MIN_LEFT_WIDTH, Math.min(MAX_LEFT_WIDTH, Math.round(contentWidth * 0.34)));
-  return Math.max(1, contentWidth - leftWidth - 3);
+  const leftWidth = Math.max(
+    MIN_LEFT_WIDTH,
+    Math.min(MAX_LEFT_WIDTH, Math.round(contentWidth * LEFT_PANE_WIDTH_RATIO)),
+  );
+  return Math.max(1, contentWidth - leftWidth - PANE_DIVIDER_WIDTH);
 }
 
 export function wrappedDetail(
   row: InspectorRow | undefined,
   width: number,
   theme: Theme,
-  artifactText: string | undefined,
+  artifact: DetailArtifact,
 ): string[] {
   if (!row) return [];
 
   const lines: string[] = [];
-  const details = buildDetail({ row, width, artifactText });
+  const details = buildDetail({ row, width, artifact });
 
   for (const detail of details) {
     if (detail.text === "") {
@@ -69,8 +54,8 @@ export function wrappedDetail(
       continue;
     }
 
-    let styledText = detail.color ? theme.fg(detail.color, detail.text) : detail.text;
-    if (detail.bold) styledText = theme.bold(styledText);
+    const coloredText = detail.color === "plain" ? detail.text : theme.fg(detail.color, detail.text);
+    const styledText = detail.bold ? theme.bold(coloredText) : coloredText;
 
     const wrappedLines = wrapTextWithAnsi(styledText, width);
     lines.push(...(wrappedLines.length > 0 ? wrappedLines : [""]));
@@ -117,18 +102,21 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
   const twoPane = width >= MIN_TWO_PANE_WIDTH;
   const contentWidth = Math.max(8, width - 4);
   const leftWidth = twoPane
-    ? Math.max(MIN_LEFT_WIDTH, Math.min(MAX_LEFT_WIDTH, Math.round(contentWidth * 0.34)))
+    ? Math.max(MIN_LEFT_WIDTH, Math.min(MAX_LEFT_WIDTH, Math.round(contentWidth * LEFT_PANE_WIDTH_RATIO)))
     : contentWidth;
-  const rightWidth = twoPane ? Math.max(1, contentWidth - leftWidth - 3) : contentWidth;
+  const rightWidth = twoPane ? Math.max(1, contentWidth - leftWidth - PANE_DIVIDER_WIDTH) : contentWidth;
   const listHeight = twoPane ? height : Math.max(4, Math.floor((height - 1) * 0.38));
   const detailHeight = twoPane ? height : Math.max(3, height - listHeight - 1);
-  let { detailScroll, subagentScroll, subagentSelectedId } = state;
+  let { detailScroll, subagentScroll, subagentSelection } = state;
   let listScroll = state.listScroll;
-  let layout: InspectorLayout | undefined;
+  let layout: InspectorLayoutState = { kind: "none" };
 
   const activityEntries = activityStore.all();
   const totalCalls = activityEntries.filter(
-    (entry) => entry.toolName !== "thinking" && entry.toolName !== "message" && entry.toolName !== "update",
+    (entry) =>
+      entry.toolName !== THINKING_TOOL_NAME &&
+      entry.toolName !== USER_MESSAGE_TOOL_NAME &&
+      entry.toolName !== UPDATE_TOOL_NAME,
   ).length;
   const phase = activityStore.currentAgent().phase;
   const active = phase === "thinking" || phase === "working" || phase === "responding";
@@ -144,12 +132,17 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
     if (subagents.length === 0) {
       lines.push(theme.fg("dim", "  No subagents have been spawned yet."));
     } else {
-      const selectionIsAvailable = subagentSelectedId && subagents.some((row) => row.id === subagentSelectedId);
-      if (!selectionIsAvailable) {
-        subagentSelectedId = subagents[subagents.length - 1]?.id;
+      const isSelectionAvailable = subagents.some(
+        (row) => subagentSelection.kind === "selected" && row.id === subagentSelection.id,
+      );
+      if (!isSelectionAvailable) {
+        const lastSubagent = subagents[subagents.length - 1];
+        subagentSelection = lastSubagent ? { kind: "selected", id: lastSubagent.id } : { kind: "none" };
       }
 
-      const selectedIndex = subagents.findIndex((row) => row.id === subagentSelectedId);
+      const selectedIndex = subagents.findIndex(
+        (row) => subagentSelection.kind === "selected" && row.id === subagentSelection.id,
+      );
       const availableRows = Math.max(1, height - 1);
       const maxScroll = Math.max(0, subagents.length - availableRows);
       const preferredScroll = Math.min(subagentScroll, Math.max(0, selectedIndex));
@@ -163,7 +156,7 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
         width: contentWidth,
         height: availableRows,
         scroll: subagentScroll,
-        selectedId: subagentSelectedId ?? "",
+        selection: subagentSelection,
         theme,
       });
       lines.push(...subagentLines);
@@ -188,7 +181,7 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
         theme,
       });
       const selectedRow = rows[state.selected];
-      const detail = wrappedDetail(selectedRow, Math.max(1, rightWidth), theme, state.artifactText);
+      const detail = wrappedDetail(selectedRow, Math.max(1, rightWidth), theme, state.artifact);
       const maxDetailScroll = Math.max(0, detail.length - detailHeight);
       detailScroll = Math.max(0, Math.min(detailScroll, maxDetailScroll));
 
@@ -211,12 +204,15 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
       }
 
       layout = {
-        leftWidth,
-        bodyTop: 4,
-        bodyHeight: twoPane ? height : listHeight + 1 + detailHeight,
-        listHeight,
-        twoPane,
-        rows,
+        kind: "laid-out",
+        layout: {
+          leftWidth,
+          bodyTop: 4,
+          bodyHeight: twoPane ? height : listHeight + 1 + detailHeight,
+          listHeight,
+          twoPane,
+          rows,
+        },
       };
     }
   }
@@ -229,7 +225,7 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
     layout,
     footerY,
     detailViewportHeight: detailHeight,
-    subagentSelectedId,
+    subagentSelection,
     subagentScroll,
     listScroll,
     detailScroll,
