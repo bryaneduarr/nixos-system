@@ -1,5 +1,13 @@
 import { spawn } from "node:child_process";
-import { MAX_CAPTURE_BYTES, NO_TIMEOUT_MS } from "../../../constants/tools/process.constant.ts";
+import {
+  CHILD_STDIO,
+  EXIT_CODE_KILLED,
+  EXIT_CODE_SPAWN_FAILED,
+  EXIT_CODE_UNKNOWN,
+  KILL_SIGNAL,
+  MAX_CAPTURE_BYTES,
+  NO_TIMEOUT_MS,
+} from "../../../constants/tools/process.constant.ts";
 import type { ExecRequest } from "../../../types/tools/process/exec-request.interface.ts";
 import type { ExecResult } from "../../../types/tools/process/exec-result.interface.ts";
 
@@ -13,13 +21,13 @@ export async function runCommand(request: ExecRequest): Promise<ExecResult> {
             cwd,
             shell: false,
             env: process.env,
-            stdio: ["ignore", "pipe", "pipe"],
+            stdio: CHILD_STDIO,
           })
         : spawn(command.shellLine, {
             cwd,
             shell: true,
             env: process.env,
-            stdio: ["ignore", "pipe", "pipe"],
+            stdio: CHILD_STDIO,
           });
 
     let stdout = "";
@@ -33,13 +41,13 @@ export async function runCommand(request: ExecRequest): Promise<ExecResult> {
         ? setTimeout(() => {
             timedOut = true;
             killed = true;
-            child.kill("SIGKILL");
+            child.kill(KILL_SIGNAL);
           }, timeoutMs)
         : undefined;
 
     const onAbort = () => {
       killed = true;
-      child.kill("SIGKILL");
+      child.kill(KILL_SIGNAL);
     };
 
     if (cancellation.kind === "abortable") {
@@ -55,11 +63,11 @@ export async function runCommand(request: ExecRequest): Promise<ExecResult> {
       if (cancellation.kind === "abortable") cancellation.signal.removeEventListener("abort", onAbort);
     };
 
-    child.stdout.on("data", (data: Buffer) => {
-      if (stdout.length < MAX_CAPTURE_BYTES) stdout += data.toString();
+    child.stdout.on("data", (chunk: Buffer) => {
+      if (stdout.length < MAX_CAPTURE_BYTES) stdout += chunk.toString();
     });
-    child.stderr.on("data", (data: Buffer) => {
-      if (stderr.length < MAX_CAPTURE_BYTES) stderr += data.toString();
+    child.stderr.on("data", (chunk: Buffer) => {
+      if (stderr.length < MAX_CAPTURE_BYTES) stderr += chunk.toString();
     });
 
     const finish = (result: ExecResult) => {
@@ -73,7 +81,7 @@ export async function runCommand(request: ExecRequest): Promise<ExecResult> {
       finish({
         stdout,
         stderr: `${stderr}${stderr ? "\n" : ""}${error.message}`,
-        code: 127,
+        code: EXIT_CODE_SPAWN_FAILED,
         killed,
         timedOut,
       });
@@ -83,7 +91,7 @@ export async function runCommand(request: ExecRequest): Promise<ExecResult> {
       finish({
         stdout,
         stderr,
-        code: code ?? (killed ? 124 : 1),
+        code: code ?? (killed ? EXIT_CODE_KILLED : EXIT_CODE_UNKNOWN),
         killed: killed || timedOut,
         timedOut,
       });

@@ -30,10 +30,10 @@ export async function replaceFile(change: ReplaceChange, target: string): Promis
     return { summary: `Replace failed: ${message}`, changed: false };
   }
 
-  let next = content;
+  let nextContent = content;
   let stats = emptyDiff();
   for (const edit of change.edits) {
-    const occurrences = countOccurrences(next, edit.oldText);
+    const occurrences = countOccurrences(nextContent, edit.oldText);
     if (occurrences === 0) {
       return {
         summary: `Replace failed: oldText not found in ${change.path}.\n\noldText:\n${edit.oldText}`,
@@ -47,19 +47,19 @@ export async function replaceFile(change: ReplaceChange, target: string): Promis
       };
     }
     const replaced = change.replaceAll
-      ? next.split(edit.oldText).join(edit.newText)
-      : next.replace(edit.oldText, edit.newText);
-    if (replaced === next) {
+      ? nextContent.split(edit.oldText).join(edit.newText)
+      : nextContent.replace(edit.oldText, edit.newText);
+    if (replaced === nextContent) {
       return {
         summary: `Replace failed: replacement produced no change in ${change.path}.`,
         changed: false,
       };
     }
-    next = replaced;
+    nextContent = replaced;
     stats = addDiff(stats, replacementDiff(edit.oldText, edit.newText));
   }
 
-  await writeFile(target, next, "utf8");
+  await writeFile(target, nextContent, "utf8");
   return {
     summary: `Modified:\n${change.path}\n\n${formatDiffStats(stats)}`,
     changed: true,

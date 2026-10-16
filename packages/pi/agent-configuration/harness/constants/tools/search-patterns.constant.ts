@@ -1,0 +1,17 @@
+export const DEFINITION_KEYWORDS = [
+  "function",
+  "class",
+  "interface",
+  "type",
+  "enum",
+  "const",
+  "let",
+  "var",
+  "def",
+  "func",
+  "fn",
+  "struct",
+  "trait",
+  "impl",
+  "record",
+];

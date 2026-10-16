@@ -1,7 +1,9 @@
 import { Type } from "typebox";
 
 export const RunParamsSchema = Type.Object({
+  /* Shell command to execute. */
   command: Type.String({ description: "Shell command to execute." }),
+  /* Milliseconds before the command is killed. */
   timeoutMs: Type.Optional(
     Type.Integer({
       minimum: 1,

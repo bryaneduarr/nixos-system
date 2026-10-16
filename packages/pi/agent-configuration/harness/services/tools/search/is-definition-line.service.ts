@@ -1,22 +1,5 @@
+import { DEFINITION_KEYWORDS } from "../../../constants/tools/search-patterns.constant.ts";
 import { escapeRegExp } from "../text/escape-reg-exp.service.ts";
-
-const DEFINITION_KEYWORDS = [
-  "function",
-  "class",
-  "interface",
-  "type",
-  "enum",
-  "const",
-  "let",
-  "var",
-  "def",
-  "func",
-  "fn",
-  "struct",
-  "trait",
-  "impl",
-  "record",
-];
 
 function isBareIdentifier(query: string): boolean {
   return /^[A-Za-z_$][A-Za-z0-9_$.-]*$/.test(query.trim());

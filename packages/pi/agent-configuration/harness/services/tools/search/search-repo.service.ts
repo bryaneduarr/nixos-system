@@ -27,7 +27,7 @@ function isTestFile(file: string): boolean {
 
 function formatMixedResult(
   query: string,
-  kind: string,
+  strategyLabel: string,
   files: string[],
   matches: SearchMatch[],
   limit: number,
@@ -35,7 +35,7 @@ function formatMixedResult(
   const definitions = matches.filter((match) => isDefinitionLine(match.text, query));
   const tests = matches.filter((match) => isTestFile(match.file));
   const references = matches.filter((match) => !isDefinitionLine(match.text, query) && !isTestFile(match.file));
-  return formatSearchResult(query, kind, files, tests, references, limit, definitions);
+  return formatSearchResult({ query, strategyLabel, files, tests, references, definitions, limit });
 }
 
 async function searchText(request: SearchRequest, query: string): Promise<string> {
@@ -51,14 +51,15 @@ async function searchStructural(request: SearchRequest, query: string): Promise<
   if (structural.length === 0) {
     const textMatches = await rgMatches(cwd, query, scope, cancellation);
     if (textMatches.length === 0) return `No structural matches for: ${query}`;
-    return formatSearchResult(
+    return formatSearchResult({
       query,
-      "structural (no AST matches; text fallback)",
-      [],
-      [],
-      uniqueByLocation(textMatches),
+      strategyLabel: "structural (no AST matches; text fallback)",
+      files: [],
+      tests: [],
+      references: uniqueByLocation(textMatches),
+      definitions: [],
       limit,
-    );
+    });
   }
   const files = await fdMatches(cwd, query, scope, cancellation);
   return formatMixedResult(query, "structural", files, uniqueByLocation(structural), limit);
@@ -79,14 +80,15 @@ async function searchSymbols(request: SearchRequest, query: string): Promise<str
   const matches = uniqueByLocation(await rgMatches(cwd, query, scope, cancellation));
   const definitions = matches.filter((match) => isDefinitionLine(match.text, query));
   const hasDefinitions = definitions.length > 0;
-  return formatSearchResult(
+  return formatSearchResult({
     query,
-    hasDefinitions ? "symbol" : "symbol (no declaration found; showing text matches)",
-    [],
-    [],
-    hasDefinitions ? definitions : matches,
+    strategyLabel: hasDefinitions ? "symbol" : "symbol (no declaration found; showing text matches)",
+    files: [],
+    tests: [],
+    references: hasDefinitions ? definitions : matches,
+    definitions: [],
     limit,
-  );
+  });
 }
 
 export async function searchRepo(request: SearchRequest): Promise<string> {

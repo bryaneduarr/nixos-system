@@ -1,4 +1,5 @@
 import type { SearchMatch } from "../../../types/tools/search/search-match.interface.ts";
+import type { SearchResultSections } from "../../../types/tools/search/search-result-sections.interface.ts";
 
 function formatLocations(matches: readonly SearchMatch[], limit: number): string {
   return matches
@@ -7,20 +8,13 @@ function formatLocations(matches: readonly SearchMatch[], limit: number): string
     .join("\n");
 }
 
-export function formatSearchResult(
-  query: string,
-  kind: string,
-  files: string[],
-  tests: SearchMatch[],
-  references: SearchMatch[],
-  limit: number,
-  definitions: SearchMatch[] = [],
-): string {
-  const sections: string[] = [];
+export function formatSearchResult(sections: SearchResultSections): string {
+  const { query, strategyLabel, files, tests, references, definitions, limit } = sections;
+  const output: string[] = [];
   const shownIds = new Set<string>();
 
   const push = (title: string, body: string) => {
-    if (body) sections.push(`${title}:\n${body}`);
+    if (body) output.push(`${title}:\n${body}`);
   };
 
   if (definitions.length > 0) {
@@ -47,7 +41,7 @@ export function formatSearchResult(
     push("References", formatLocations(uniqueReferences, limit));
   }
 
-  if (sections.length === 0) return `No matches for: ${query}`;
+  if (output.length === 0) return `No matches for: ${query}`;
 
   const shownCount =
     Math.min(definitions.length, limit) +
@@ -56,7 +50,7 @@ export function formatSearchResult(
     Math.min(uniqueReferences.length, limit);
   const totalCount = definitions.length + files.length + tests.length + uniqueReferences.length;
   const omitted = Math.max(0, totalCount - shownCount);
-  if (omitted > 0) sections.push(`Additional matches omitted: ${omitted}`);
+  if (omitted > 0) output.push(`Additional matches omitted: ${omitted}`);
 
-  return `search "${query}" (${kind})\n\n${sections.join("\n\n")}`;
+  return `search "${query}" (${strategyLabel})\n\n${output.join("\n\n")}`;
 }
