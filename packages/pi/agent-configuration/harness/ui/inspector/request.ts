@@ -1,6 +1,5 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-
-type InspectorOpener = (ctx: ExtensionContext, toolCallId?: string) => void;
+import type { InspectorOpener } from "../../types/inspector/request/inspector-opener.interface.ts";
 
 let currentContext: ExtensionContext | undefined;
 let openInspector: InspectorOpener | undefined;
@@ -21,7 +20,7 @@ export function setInspectOpener(opener: InspectorOpener): void {
  * Renderers only receive args/theme/context, so they reach the UI through this
  * small indirection instead of importing the overlay directly.
  */
-export function requestInspection(toolCallId?: string): void {
+export function requestInspection(toolCallId: string): void {
   if (!currentContext || !openInspector) return;
-  openInspector(currentContext, toolCallId);
+  openInspector(currentContext, { kind: "tool-call", toolCallId });
 }
