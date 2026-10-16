@@ -4,14 +4,13 @@ export const AUDIT_RULES = [
   "optional-property",
   "type-assertion",
   "function-comment",
+  "plain-block-comment",
   "file-length",
 ] as const;
 
 export const STALE_BOUNDARY_RULE = "stale-boundary";
 
 export const MAX_FILE_LINES = 150;
-
-export const BOUNDARIES_FILE_NAME = "rule-audit-boundaries.json";
 
 export const TYPESCRIPT_EXTENSION = ".ts";
 

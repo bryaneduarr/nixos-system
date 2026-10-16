@@ -7,6 +7,7 @@ import { listTypescriptFiles } from "../files/list-typescript-files.service.ts";
 import { checkFileLength } from "../rules/check-file-length.service.ts";
 import { findFunctionComments } from "../rules/find-function-comments.service.ts";
 import { findLinePatternFindings } from "../rules/find-line-pattern-findings.service.ts";
+import { findPlainBlockComments } from "../rules/find-plain-block-comments.service.ts";
 import { readSourceLines } from "../source/read-source-lines.service.ts";
 
 function auditFile(projectDirectory: string, file: string): readonly AuditFinding[] {
@@ -14,6 +15,7 @@ function auditFile(projectDirectory: string, file: string): readonly AuditFindin
   return [
     ...findLinePatternFindings(file, lines),
     ...findFunctionComments(file, lines),
+    ...findPlainBlockComments(file, lines),
     ...checkFileLength(file, lines),
   ];
 }

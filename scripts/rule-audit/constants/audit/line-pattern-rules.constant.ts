@@ -17,3 +17,5 @@ export const FUNCTION_DECLARATION_PATTERNS: readonly RegExp[] = [
 ];
 
 export const COMMENT_END_PATTERN = /(\*\/|^\s*\/\/.*)\s*$/;
+
+export const PLAIN_BLOCK_COMMENT_PATTERN = /^\s*\/\*(?!\*)/;

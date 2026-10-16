@@ -3,6 +3,7 @@ import { readSourceLines } from "../source/read-source-lines.service.ts";
 import { checkFileLength } from "./check-file-length.service.ts";
 import { findFunctionComments } from "./find-function-comments.service.ts";
 import { findLinePatternFindings } from "./find-line-pattern-findings.service.ts";
+import { findPlainBlockComments } from "./find-plain-block-comments.service.ts";
 
 const FILE = "example.ts";
 
@@ -55,5 +56,14 @@ describe("file length", () => {
     expect(checkFileLength(FILE, readSourceLines("line\n".repeat(151)))).toEqual([
       { file: FILE, line: 0, rule: "file-length" },
     ]);
+  });
+});
+
+describe("plain block comments", () => {
+  test("report block comments that are not JSDoc", () => {
+    expect(findPlainBlockComments(FILE, readSourceLines("/* A row. */\nconst row = 1;\n"))).toEqual([
+      { file: FILE, line: 1, rule: "plain-block-comment" },
+    ]);
+    expect(findPlainBlockComments(FILE, readSourceLines("/** A row. */\nconst row = 1;\n"))).toEqual([]);
   });
 });

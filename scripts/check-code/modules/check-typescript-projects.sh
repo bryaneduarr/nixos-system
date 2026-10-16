@@ -1,6 +1,6 @@
 readonly TYPESCRIPT_EXTENSIONS=(ts tsx mts cts js jsx mjs cjs)
 readonly LOCAL_KNIP_COMMAND="node_modules/.bin/knip"
-readonly RULE_AUDIT_BOUNDARIES_FILE="rule-audit-boundaries.json"
+readonly RULE_AUDIT_RULES_DIRECTORY=".agents/rules"
 
 check_typescript_project() {
   local project="$1"
@@ -23,7 +23,11 @@ check_typescript_project() {
     run_check "knip $project" run_in_directory "$project" "$LOCAL_KNIP_COMMAND"
   fi
 
-  if [[ -e "$project/$RULE_AUDIT_BOUNDARIES_FILE" ]]; then
+  local exceptions_file
+  exceptions_file="$RULE_AUDIT_RULES_DIRECTORY/$(basename "$project")-rule-audit.md"
+  if [[ -e "$exceptions_file" ]]; then
+    run_check "rule-audit $project" rule-audit "$project" "$exceptions_file"
+  else
     run_check "rule-audit $project" rule-audit "$project"
   fi
 }

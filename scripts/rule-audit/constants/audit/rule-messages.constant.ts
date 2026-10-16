@@ -5,5 +5,6 @@ export const RULE_MESSAGES = {
   "type-assertion": "Type assertion other than `as const`; correct the type or narrow it.",
   "function-comment": "Comment above a function; the name and signature describe it.",
   "file-length": "File is longer than the line limit; split it by responsibility.",
-  "stale-boundary": "Boundary entry matches no finding; remove it from the allowlist.",
+  "plain-block-comment": "Plain block comment; use a JSDoc /** */ comment.",
+  "stale-boundary": "Exception matches no finding; remove its row from the rule file.",
 } as const;

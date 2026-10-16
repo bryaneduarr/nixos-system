@@ -57,7 +57,6 @@ stdenvNoCC.mkDerivation {
       ../tsconfig.json
       ../biome.json
       ../knip.json
-      ../rule-audit-boundaries.json
     ];
   };
   nativeBuildInputs = [
@@ -78,7 +77,7 @@ stdenvNoCC.mkDerivation {
     biome ci .
     node node_modules/.bin/knip
     bun test
-    rule-audit .
+    rule-audit . ${../../../.agents/rules/pi-rule-audit.md}
     runHook postBuild
   '';
 
