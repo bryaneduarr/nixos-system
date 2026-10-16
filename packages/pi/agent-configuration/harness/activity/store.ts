@@ -1,101 +1,24 @@
-export type ActivityStatus = "running" | "success" | "error";
-export type AgentActivityPhase = "idle" | "thinking" | "working" | "responding";
+import { ARTIFACT_PATTERNS } from "../constants/activity/artifact-pattern.constant.ts";
+import type { ActivityBeginInput } from "../types/activity/activity-begin-input.interface.ts";
+import type { ActivityFinishPatch } from "../types/activity/activity-finish-patch.interface.ts";
+import type { ActivityListener } from "../types/activity/activity-listener.interface.ts";
+import type { ActivityUpdatePatch } from "../types/activity/activity-update-patch.interface.ts";
+import type { AgentActivity, AgentActivityPatch } from "../types/activity/agent-activity.interface.ts";
+import type { ArtifactPathLookup } from "../types/activity/artifact-path.interface.ts";
+import type { ToolActivity } from "../types/activity/tool-activity.interface.ts";
 
-export interface SubagentModel {
-  provider: string;
-  id: string;
-  name?: string;
-  reasoning?: boolean;
-  contextWindow?: number;
-}
-
-export interface SubagentMetadata {
-  model?: SubagentModel;
-  thinkingLevel?: string;
-}
-
-export interface SubagentUsage {
-  inputTokens: number;
-  outputTokens: number;
-  cacheReadTokens: number;
-  cacheWriteTokens: number;
-  reasoningTokens: number;
-  /** Cumulative tokens spent across completed responses. */
-  totalTokens: number;
-  /** Token usage reported for the latest response/context. */
-  contextTokens?: number;
-  /** Largest context usage observed in any response. */
-  maxContextTokens?: number;
-}
-
-export interface AgentActivity {
-  phase: AgentActivityPhase;
-  thinking: string;
-  thinkingRedacted: boolean;
-  response: string;
-  updatedAt: number;
-}
-
-export interface AssistantActivitySnapshot {
-  thinking: string;
-  thinkingRedacted: boolean;
-  response: string;
-  hasToolCall: boolean;
-}
-
-/** A single tool call executed by a delegated worker (sub-agent). */
-export interface SubToolActivity {
-  id: string;
-  toolName: string;
-  args: Record<string, unknown>;
-  status: ActivityStatus;
-  /** Bounded, model-visible result text for this tool call. */
-  text: string;
-  startedAt: number;
-  endedAt?: number;
-}
-
-/** A single tool call executed by the primary agent. */
-export interface ToolActivity {
-  id: string;
-  toolName: string;
-  args: Record<string, unknown>;
-  status: ActivityStatus;
-  /** Provider-reported usage for a delegated worker. */
-  usage?: SubagentUsage;
-  /** Model metadata captured for a delegated worker. */
-  model?: SubagentModel;
-  /** Effective thinking/reasoning level used by a delegated worker. */
-  thinkingLevel?: string;
-  /** Full, model-visible result text for this tool call. */
-  text: string;
-  details?: unknown;
-  cwd: string;
-  startedAt: number;
-  endedAt?: number;
-  /** Path (relative to cwd) of a saved full-output artifact, when present. */
-  artifactPath?: string;
-  /** Nested worker tool calls, only present for the `task` tool. */
-  sub: SubToolActivity[];
-}
-
-const ARTIFACT_PATTERNS = [/^\s*Full output:\s*(\S+)\s*$/m, /^\s*artifact:\s*(\S+)\s*$/m];
-
-/** Extracts a referenced full-output artifact path from tool result text. */
-export function findArtifactPath(text: string): string | undefined {
+export function findArtifactPath(text: string): ArtifactPathLookup {
   for (const pattern of ARTIFACT_PATTERNS) {
-    const match = pattern.exec(text);
-    if (match?.[1]) return match[1];
+    const path = pattern.exec(text)?.[1];
+    if (path) return { found: true, path };
   }
-  return undefined;
+  return { found: false };
 }
-
-type Listener = () => void;
 
 export class ActivityStore {
   private entries: ToolActivity[] = [];
   private byId = new Map<string, ToolActivity>();
-  private listeners = new Set<Listener>();
+  private listeners = new Set<ActivityListener>();
   private agent: AgentActivity = {
     phase: "idle",
     thinking: "",
@@ -117,11 +40,11 @@ export class ActivityStore {
     this.emit();
   }
 
-  updateAgent(patch: Partial<Omit<AgentActivity, "updatedAt">> & { updatedAt?: number }): void {
+  updateAgent(patch: AgentActivityPatch): void {
     this.agent = {
       ...this.agent,
       ...patch,
-      updatedAt: patch.updatedAt ?? Date.now(),
+      updatedAt: patch.updatedAt === undefined ? Date.now() : patch.updatedAt,
     };
     this.emit();
   }
@@ -130,13 +53,7 @@ export class ActivityStore {
     return this.agent;
   }
 
-  begin(input: {
-    id: string;
-    toolName: string;
-    args: Record<string, unknown>;
-    cwd: string;
-    startedAt?: number;
-  }): ToolActivity {
+  begin(input: ActivityBeginInput): ToolActivity {
     const existing = this.byId.get(input.id);
     if (existing) return existing;
     const entry: ToolActivity = {
@@ -144,9 +61,15 @@ export class ActivityStore {
       toolName: input.toolName,
       args: input.args,
       status: "running",
+      usage: { usageState: "unreported" },
+      model: { state: "absent" },
+      thinkingLevel: { state: "absent" },
       text: "",
+      details: undefined,
       cwd: input.cwd,
-      startedAt: input.startedAt ?? Date.now(),
+      startedAt: input.startedAt === undefined ? Date.now() : input.startedAt,
+      endedAt: { state: "absent" },
+      artifactPath: { found: false },
       sub: [],
     };
     this.entries.push(entry);
@@ -155,49 +78,34 @@ export class ActivityStore {
     return entry;
   }
 
-  update(
-    id: string,
-    patch: Partial<Pick<ToolActivity, "text" | "details" | "sub" | "status" | "usage" | "model" | "thinkingLevel">>,
-  ): void {
+  update(id: string, patch: ActivityUpdatePatch): void {
     const entry = this.byId.get(id);
     if (!entry) return;
     if (patch.text !== undefined) entry.text = patch.text;
     if (patch.details !== undefined) entry.details = patch.details;
     if (patch.sub !== undefined) entry.sub = patch.sub;
     if (patch.status !== undefined) entry.status = patch.status;
-    if (patch.usage !== undefined) entry.usage = patch.usage;
-    if (patch.model !== undefined) entry.model = patch.model;
-    if (patch.thinkingLevel !== undefined) {
+    if (patch.usage !== undefined && patch.usage.usageState === "reported") entry.usage = patch.usage;
+    if (patch.model !== undefined && patch.model.state === "present") entry.model = patch.model;
+    if (patch.thinkingLevel !== undefined && patch.thinkingLevel.state === "present") {
       entry.thinkingLevel = patch.thinkingLevel;
     }
     this.emit();
   }
 
-  finish(
-    id: string,
-    patch: {
-      text: string;
-      details?: unknown;
-      sub?: SubToolActivity[];
-      usage?: SubagentUsage;
-      model?: SubagentModel;
-      thinkingLevel?: string;
-      status: ActivityStatus;
-      endedAt?: number;
-    },
-  ): void {
+  finish(id: string, patch: ActivityFinishPatch): void {
     const entry = this.byId.get(id);
     if (!entry) return;
     entry.text = patch.text;
     if (patch.details !== undefined) entry.details = patch.details;
     if (patch.sub !== undefined) entry.sub = patch.sub;
-    if (patch.usage !== undefined) entry.usage = patch.usage;
-    if (patch.model !== undefined) entry.model = patch.model;
-    if (patch.thinkingLevel !== undefined) {
+    if (patch.usage !== undefined && patch.usage.usageState === "reported") entry.usage = patch.usage;
+    if (patch.model !== undefined && patch.model.state === "present") entry.model = patch.model;
+    if (patch.thinkingLevel !== undefined && patch.thinkingLevel.state === "present") {
       entry.thinkingLevel = patch.thinkingLevel;
     }
     entry.status = patch.status;
-    entry.endedAt = patch.endedAt ?? Date.now();
+    entry.endedAt = { state: "present", value: patch.endedAt === undefined ? Date.now() : patch.endedAt };
     entry.artifactPath = findArtifactPath(entry.text);
     this.emit();
   }
@@ -210,7 +118,7 @@ export class ActivityStore {
     return this.entries;
   }
 
-  subscribe(listener: Listener): () => void {
+  subscribe(listener: ActivityListener): () => void {
     this.listeners.add(listener);
     return () => {
       this.listeners.delete(listener);

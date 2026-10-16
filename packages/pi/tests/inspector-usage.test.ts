@@ -10,9 +10,10 @@ import {
 const model = {
   provider: "example",
   id: "sample-model",
-  name: "Sample model",
-  contextWindow: 20_000,
-};
+  name: { state: "present", value: "Sample model" },
+  reasoning: { state: "absent" },
+  contextWindow: { state: "present", value: 20_000 },
+} as const;
 
 test("model labels include the provider when showing full details", () => {
   expect(modelLabel(model)).toBe("Sample model (example/sample-model)");
@@ -21,7 +22,16 @@ test("model labels include the provider when showing full details", () => {
 });
 
 test("usage labels distinguish total tokens from current and peak context", () => {
-  const usage = { totalTokens: 5_000, contextTokens: 1_000, maxContextTokens: 2_000 };
+  const usage = {
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
+    reasoningTokens: 0,
+    totalTokens: 5_000,
+    contextTokens: { state: "present", value: 1_000 },
+    maxContextTokens: { state: "present", value: 2_000 },
+  } as const;
   expect(usageLabel(usage, model)).toBe("spent 5.0k · max ctx 2.0k/20k (10%)");
   expect(compactUsageLabel(usage, model)).toBe("spent 5.0k · peak 2.0k/20k");
   expect(contextUsageLabel(usage, model)).toBe("now 1.0k/20k (5.0%) · peak 2.0k/20k (10%)");

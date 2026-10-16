@@ -57,7 +57,10 @@ export const defaultSessionDependencies: SessionDependencies = {
   exit: defaultExitDependencies,
 };
 
-export function installSessions(pi: ExtensionAPI, dependencies: SessionDependencies = defaultSessionDependencies): void {
+export function installSessions(
+  pi: ExtensionAPI,
+  dependencies: SessionDependencies = defaultSessionDependencies,
+): void {
   installExit(pi, dependencies.exit);
 
   let context: ExtensionContext | undefined;

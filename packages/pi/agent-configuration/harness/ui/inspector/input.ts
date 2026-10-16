@@ -1,5 +1,6 @@
 import { matchesKey, type TuiMouseEvent, type TuiMouseEventResult, visibleWidth } from "@earendil-works/pi-tui";
 import { PANE_DIVIDER_WIDTH } from "../../constants/inspector/layout.constant.ts";
+import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import type { InspectorInput } from "../../types/inspector/input/inspector-input.interface.ts";
 import type { InspectorPage } from "../../types/inspector/navigation/inspector-page.interface.ts";
 

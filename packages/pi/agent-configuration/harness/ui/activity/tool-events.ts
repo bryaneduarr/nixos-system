@@ -1,19 +1,18 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { Value } from "typebox/value";
 import { readSubActivity, readSubagentMetadata, readSubagentUsage } from "../../activity/parse.ts";
-import { type ActivityStatus, activityStore } from "../../activity/store.ts";
+import { activityStore } from "../../activity/store.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
+import { RendererPayloadSchema } from "../../schemas/activity/renderer-payload.schema.ts";
 import { taskResultFailed } from "../../subagents/result.ts";
 import { isHarnessTool } from "../../tools/config.ts";
+import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
+import type { RendererResult } from "../../types/activity/renderer-result.interface.ts";
 import { extractText, resultFailed } from "../tool-renderer.ts";
 
-interface RendererContent {
-  content?: Array<{ type: string; text?: string }>;
-  details?: unknown;
-}
-
-function rendererPayload(value: unknown): RendererContent {
-  if (!value || typeof value !== "object") return {};
-  return value as RendererContent;
+function rendererResult(value: unknown): RendererResult {
+  if (!Value.Check(RendererPayloadSchema, value)) return { text: "", details: undefined };
+  return { text: extractText(value.content ?? []), details: value.details };
 }
 
 export function registerToolActivity(
@@ -35,9 +34,9 @@ export function registerToolActivity(
 
   pi.on("tool_execution_update", (event, ctx) => {
     touch(ctx);
-    const partial = rendererPayload(event.partialResult);
+    const partial = rendererResult(event.partialResult);
     activityStore.update(event.toolCallId, {
-      text: extractText(partial.content ?? []),
+      text: partial.text,
       details: partial.details,
       sub: readSubActivity(partial.details),
       usage: readSubagentUsage(partial.details),
@@ -48,13 +47,12 @@ export function registerToolActivity(
 
   pi.on("tool_execution_end", (event, ctx) => {
     touch(ctx);
-    const result = rendererPayload(event.result);
-    const text = extractText(result.content ?? []);
+    const result = rendererResult(event.result);
     const failedTask = event.toolName === TASK_TOOL_NAME && taskResultFailed(result.details);
-    const failedHarnessTool = isHarnessTool(event.toolName) && resultFailed(event.toolName, text);
+    const failedHarnessTool = isHarnessTool(event.toolName) && resultFailed(event.toolName, result.text);
     const status: ActivityStatus = event.isError || failedTask || failedHarnessTool ? "error" : "success";
     activityStore.finish(event.toolCallId, {
-      text,
+      text: result.text,
       details: result.details,
       sub: readSubActivity(result.details),
       usage: readSubagentUsage(result.details),

@@ -12,8 +12,8 @@ import {
 } from "../constants/sessions/registry.constant.ts";
 import { NameReservationSchema } from "../schemas/sessions/registry/name-reservation.schema.ts";
 import { SessionRowSchema } from "../schemas/sessions/registry/session-row.schema.ts";
-import type { NameReservation } from "../types/sessions/registry/name-reservation.interface.ts";
 import type { LiveSession, SessionStatus } from "../types/sessions/registry/live-session.interface.ts";
+import type { NameReservation } from "../types/sessions/registry/name-reservation.interface.ts";
 import type { SessionRowParse } from "../types/sessions/registry/session-row-parse.interface.ts";
 
 function projectName(cwd: string): string {
@@ -136,9 +136,7 @@ export class SessionRegistry {
           continue;
         }
         reservations.push(parsed);
-      } catch {
-        continue;
-      }
+      } catch {}
     }
     let order = Math.max(now, ...reservations.map((row) => row.order));
     for (const row of live) {
@@ -225,9 +223,7 @@ export class SessionRegistry {
           continue;
         }
         result.push(row);
-      } catch {
-        continue;
-      }
+      } catch {}
     }
     return result.sort((a, b) => a.cwd.localeCompare(b.cwd) || a.name.localeCompare(b.name));
   }
@@ -239,9 +235,7 @@ export class SessionRegistry {
       if (!/^[a-f0-9]{64}\.project$/.test(file)) continue;
       try {
         paths.add(await canonicalDirectory(await readFile(join(this.directory, file), "utf8"), "/"));
-      } catch {
-        continue;
-      }
+      } catch {}
     }
     return [...paths].sort();
   }

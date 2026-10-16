@@ -115,9 +115,7 @@ function recentSessionModel(currentSessionFile: string | undefined): ModelSelect
       if (model.found && (hasMessage || modelChanges > 1)) {
         return { found: true, selection: { ...model.selection, thinking } };
       }
-    } catch {
-      continue;
-    }
+    } catch {}
   }
   return { found: false };
 }

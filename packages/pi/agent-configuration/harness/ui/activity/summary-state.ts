@@ -1,10 +1,10 @@
-import { type ActivityStatus, activityStore, type ToolActivity } from "../../activity/store.ts";
+import { activityStore } from "../../activity/store.ts";
+import { MESSAGE_ACTIVITY_NAME } from "../../constants/activity/activity-entry.constant.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { isHarnessTool } from "../../tools/config.ts";
-
-export const ACTIVITY_SUMMARY_ENTRY = "harness-activity-summary";
-export const ACTIVITY_WIDGET_KEY = "harness-activity";
-export const ACTIVITY_COMPLETION_ENTRY = "harness-activity-completion";
+import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
+import type { ActivityActionSummary } from "../../types/activity/activity-summary.interface.ts";
+import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 
 const completions = new Map<number, number>();
 let working = false;
@@ -31,14 +31,6 @@ export function activitySummaryState() {
   return { working, frame, completions };
 }
 
-export interface ActivityActionSummary {
-  status: ActivityStatus;
-}
-
-export interface ActivitySummaryData {
-  messageNumber: number;
-}
-
 export function summarizeActivity(entries: readonly ToolActivity[]): ActivityActionSummary[] {
   return entries.flatMap((entry) => {
     const isTaskTool = entry.toolName === TASK_TOOL_NAME;
@@ -50,10 +42,12 @@ export function summarizeActivity(entries: readonly ToolActivity[]): ActivityAct
 
 export function actionsForMessage(messageNumber: number): ActivityActionSummary[] {
   const entries = activityStore.all();
-  const start = entries.findIndex((entry) => entry.toolName === "message" && entry.args.number === messageNumber);
+  const start = entries.findIndex(
+    (entry) => entry.toolName === MESSAGE_ACTIVITY_NAME && entry.args.number === messageNumber,
+  );
   if (start < 0) return [];
 
-  const next = entries.findIndex((entry, index) => index > start && entry.toolName === "message");
+  const next = entries.findIndex((entry, index) => index > start && entry.toolName === MESSAGE_ACTIVITY_NAME);
   const end = next < 0 ? undefined : next;
   return summarizeActivity(entries.slice(start + 1, end));
 }

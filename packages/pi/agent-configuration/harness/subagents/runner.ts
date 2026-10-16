@@ -7,7 +7,7 @@ import {
   SessionManager,
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
-import type { SubagentUsage } from "../activity/store.ts";
+import type { Static } from "typebox";
 import {
   COMPLETED_TASK_LABEL,
   STARTING_TASK_LABEL,
@@ -17,6 +17,10 @@ import {
 } from "../constants/subagents/progress.constant.ts";
 import { APPROVED_COMMAND_TOOL } from "../constants/subagents/roles.constant.ts";
 import { USAGE_FIELDS } from "../constants/subagents/usage.constant.ts";
+import { toValueState } from "../services/activity/value/to-value-state.service.ts";
+import type { SubToolActivity } from "../types/activity/sub-tool-activity.interface.ts";
+import type { SubagentModel } from "../types/activity/subagent-model.interface.ts";
+import type { SubagentUsage } from "../types/activity/subagent-usage.interface.ts";
 import type { TaskInput } from "../types/subagents/tasks/task-input.interface.ts";
 import type { TaskProgress } from "../types/subagents/tasks/task-progress.interface.ts";
 import type { TaskResult } from "../types/subagents/tasks/task-result.interface.ts";
@@ -43,6 +47,8 @@ function usageFromMessages(messages: readonly unknown[], contextTokens?: number 
     cacheWriteTokens: 0,
     reasoningTokens: 0,
     totalTokens: 0,
+    contextTokens: { state: "absent" },
+    maxContextTokens: { state: "absent" },
   };
 
   for (const message of messages) {
@@ -62,7 +68,7 @@ function usageFromMessages(messages: readonly unknown[], contextTokens?: number 
 
   usage.totalTokens = usage.inputTokens + usage.outputTokens + usage.cacheReadTokens + usage.cacheWriteTokens;
   if (typeof contextTokens === "number" && Number.isFinite(contextTokens)) {
-    usage.contextTokens = contextTokens;
+    usage.contextTokens = { state: "present", value: contextTokens };
   }
 
   return usage;
@@ -168,9 +174,9 @@ export async function runTask(
     model: {
       provider: model.provider,
       id: model.id,
-      name: model.name,
-      reasoning: model.reasoning,
-      contextWindow: model.contextWindow,
+      name: toValueState(model.name),
+      reasoning: toValueState(model.reasoning),
+      contextWindow: toValueState(model.contextWindow),
     },
     thinkingLevel: session.thinkingLevel,
     activity: [],
@@ -187,6 +193,7 @@ export async function runTask(
         status: "running",
         text: "",
         startedAt: Date.now(),
+        endedAt: { state: "absent" },
       });
       publish();
       return;
@@ -197,7 +204,7 @@ export async function runTask(
       if (call) {
         call.status = event.isError ? "error" : "success";
         call.text = textContent(event.result?.content);
-        call.endedAt = Date.now();
+        call.endedAt = { state: "present", value: Date.now() };
       }
 
       const runningCall = progress.activity.findLast((item) => item.status === "running");

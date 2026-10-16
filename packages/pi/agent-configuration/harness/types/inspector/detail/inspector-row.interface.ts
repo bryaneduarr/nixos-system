@@ -1,4 +1,5 @@
-import type { SubToolActivity, ToolActivity } from "../../../activity/store.ts";
+import type { SubToolActivity } from "../../activity/sub-tool-activity.interface.ts";
+import type { ToolActivity } from "../../activity/tool-activity.interface.ts";
 
 /* Row of the tool list: a top-level tool call or a child call of a subagent task. */
 export type InspectorRow = EntryInspectorRow | SubToolInspectorRow;

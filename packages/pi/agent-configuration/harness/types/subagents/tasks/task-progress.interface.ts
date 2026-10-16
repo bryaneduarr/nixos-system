@@ -1,4 +1,6 @@
-import type { SubagentModel, SubagentUsage, SubToolActivity } from "../../../activity/store.ts";
+import type { SubToolActivity } from "../../activity/sub-tool-activity.interface.ts";
+import type { SubagentModel } from "../../activity/subagent-model.interface.ts";
+import type { SubagentUsage } from "../../activity/subagent-usage.interface.ts";
 import type { TaskRole } from "../roles/task-role.interface.ts";
 import type { TaskStatus } from "./task-status.interface.ts";
 

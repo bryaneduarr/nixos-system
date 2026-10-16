@@ -197,8 +197,8 @@ class ActivityInspector implements Component {
       return;
     }
     const row = this.navigation.currentRow();
-    const path = row?.entry.artifactPath;
-    if (!row || !path) {
+    const path = row === undefined || !row.entry.artifactPath.found ? undefined : row.entry.artifactPath.path;
+    if (!row || path === undefined) {
       this.setStatus("no saved artifact for this call");
       return;
     }

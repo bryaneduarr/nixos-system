@@ -2,6 +2,7 @@ import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { activityStore } from "../activity/store.ts";
 import { ELAPSED_TIME_LABEL } from "../constants/tool-rendering/elapsed-label.constant.ts";
+import { presentValue } from "../services/activity/value/present-value.service.ts";
 import type { HarnessVisualState } from "../types/tool-rendering/harness-presentation.interface.ts";
 import type { RendererContext, RendererOptions, RendererResult } from "../types/tool-rendering/renderer.interface.ts";
 import type { HarnessTool } from "../types/tools/harness-tool.interface.ts";
@@ -130,7 +131,7 @@ export function createHarnessRenderers(tool: HarnessTool) {
       const lines = presentationLines(presentation, theme);
       const entry = context.toolCallId ? activityStore.get(context.toolCallId) : undefined;
       if (entry) {
-        const elapsedMs = Math.max(0, (entry.endedAt ?? Date.now()) - entry.startedAt);
+        const elapsedMs = Math.max(0, (presentValue(entry.endedAt) ?? Date.now()) - entry.startedAt);
         const elapsedLabel = elapsedMs < 1000 ? `${elapsedMs} ms` : `${(elapsedMs / 1000).toFixed(1)} s`;
         lines.push(theme.fg("muted", `${ELAPSED_TIME_LABEL}${elapsedLabel}`));
       }

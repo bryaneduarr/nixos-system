@@ -17,7 +17,17 @@ test("navigation follows the selected tool and its child calls", () => {
   );
   activityStore.begin({ id: "task-1", toolName: "task", args: {}, cwd: "/tmp" });
   activityStore.update("task-1", {
-    sub: [{ id: "read-1", toolName: "read", args: {}, status: "success", text: "ok", startedAt: 1 }],
+    sub: [
+      {
+        id: "read-1",
+        toolName: "read",
+        args: {},
+        status: "success",
+        text: "ok",
+        startedAt: 1,
+        endedAt: { state: "absent" },
+      },
+    ],
   });
   navigation.syncSelection(navigation.buildRows());
   expect(navigation.selectedId).toBe("task-1");
@@ -58,12 +68,25 @@ test("activity parsers reject malformed data and preserve reported usage", () =>
     }),
   ).toEqual({ thinking: "reason", thinkingRedacted: true, response: "answer", hasToolCall: true });
   expect(readSubagentUsage({ usage: { inputTokens: 2, outputTokens: 3, contextTokens: 4 } })).toMatchObject({
-    inputTokens: 2,
-    outputTokens: 3,
-    totalTokens: 5,
-    contextTokens: 4,
+    usageState: "reported",
+    usage: {
+      inputTokens: 2,
+      outputTokens: 3,
+      totalTokens: 5,
+      contextTokens: { state: "present", value: 4 },
+    },
   });
   expect(readSubagentMetadata({ model: { provider: "example", id: "sample", contextWindow: -1 } })).toEqual({
-    model: { provider: "example", id: "sample" },
+    model: {
+      state: "present",
+      value: {
+        provider: "example",
+        id: "sample",
+        name: { state: "absent" },
+        reasoning: { state: "absent" },
+        contextWindow: { state: "absent" },
+      },
+    },
+    thinkingLevel: { state: "absent" },
   });
 });

@@ -1,10 +1,11 @@
+import { TRANSCRIPT_VISIBILITY_KEY } from "../../constants/activity/visibility.constant.ts";
+
 let agentWorking = false;
 let workingOverride: boolean | undefined;
 let idleOverride: boolean | undefined;
-const transcriptVisibilityKey = "pi.harness.toolHistoryVisible";
 
 function syncTranscriptVisibility(): void {
-  Reflect.set(globalThis, transcriptVisibilityKey, isActivityVisible());
+  Reflect.set(globalThis, TRANSCRIPT_VISIBILITY_KEY, isActivityVisible());
 }
 
 export function resetActivityVisibility(): void {

@@ -1,18 +1,19 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
-import type { ActivityStatus } from "../../activity/store.ts";
 import {
   THINKING_TOOL_NAME,
   UPDATE_TOOL_NAME,
   USER_MESSAGE_TOOL_NAME,
 } from "../../constants/inspector/pseudo-tool.constant.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
+import { presentValue } from "../../services/activity/value/present-value.service.ts";
 import { isHarnessTool } from "../../tools/config.ts";
+import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import type { SubagentListOptions } from "../../types/inspector/lists/subagent-list-options.interface.ts";
 import type { ToolListOptions } from "../../types/inspector/lists/tool-list-options.interface.ts";
 import { toolLabel, toolTarget } from "../tool-renderer.ts";
 import { formatDuration, formatValue } from "./detail.ts";
-import { compactUsageLabel, formatTokens, modelShortLabel, usageLabel } from "./usage.ts";
+import { compactUsageLabel, formatTokens, modelShortLabel, reportedUsageOf, usageLabel } from "./usage.ts";
 
 function padCell(text: string, width: number): string {
   const missing = width - visibleWidth(text);
@@ -70,9 +71,13 @@ export function renderToolList({
     const hasChildren = !sub && row.entry.sub.length > 0;
     const disclosure = hasChildren ? (expandedTasks.has(row.entry.id) ? "▾ " : "▸ ") : sub ? "  ↳ " : "  ";
     const startedAt = sub?.startedAt ?? row.entry.startedAt;
-    const endedAt = sub?.endedAt ?? row.entry.endedAt ?? Date.now();
+    const endedAt =
+      (sub === undefined ? undefined : presentValue(sub.endedAt)) ?? presentValue(row.entry.endedAt) ?? Date.now();
     const elapsed = formatDuration(Math.max(0, endedAt - startedAt));
-    const usage = !sub && tool === TASK_TOOL_NAME ? ` · ${usageLabel(row.entry.usage, row.entry.model)}` : "";
+    const usage =
+      !sub && tool === TASK_TOOL_NAME
+        ? ` · ${usageLabel(reportedUsageOf(row.entry.usage), presentValue(row.entry.model))}`
+        : "";
     const isSelected = scroll + index === selected;
     const label =
       tool === USER_MESSAGE_TOOL_NAME
@@ -89,7 +94,7 @@ export function renderToolList({
 }
 
 export function renderSubagentList({ rows, width, height, scroll, selection, theme }: SubagentListOptions): string[] {
-  const totalTokens = rows.reduce((total, row) => total + (row.usage?.totalTokens ?? 0), 0);
+  const totalTokens = rows.reduce((total, row) => total + (reportedUsageOf(row.usage)?.totalTokens ?? 0), 0);
   const output = [
     theme.fg("muted", `${rows.length} subagents · spent ${formatTokens(totalTokens)} · ↑/↓ move · → open`),
   ];
@@ -102,12 +107,14 @@ export function renderSubagentList({ rows, width, height, scroll, selection, the
       target = oneSentence(row.args.prompt);
     }
     const state = row.status === "running" ? "running" : row.status;
-    const thinking = row.thinkingLevel ?? "—";
-    const window = row.model?.contextWindow ? formatTokens(row.model.contextWindow) : "—";
-    const elapsed = formatDuration(Math.max(0, (row.endedAt ?? Date.now()) - row.startedAt));
+    const thinking = presentValue(row.thinkingLevel) ?? "—";
+    const subagentModel = presentValue(row.model);
+    const contextWindow = subagentModel === undefined ? undefined : presentValue(subagentModel.contextWindow);
+    const window = contextWindow ? formatTokens(contextWindow) : "—";
+    const elapsed = formatDuration(Math.max(0, (presentValue(row.endedAt) ?? Date.now()) - row.startedAt));
     const rowNumber = String(actualIndex + 1).padStart(2, "0");
-    const usage = compactUsageLabel(row.usage, row.model);
-    const model = modelShortLabel(row.model);
+    const usage = compactUsageLabel(reportedUsageOf(row.usage), subagentModel);
+    const model = modelShortLabel(subagentModel);
     const identity = `${statusGlyph(row.status, theme)} SUBAGENT ${rowNumber} ${state}`;
     const details = [elapsed, usage, model, thinking, `win ${window}`, target].join(" · ");
     const text = `${identity} · ${details}`;

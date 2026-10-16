@@ -1,5 +1,5 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import type { ToolActivity } from "../../../activity/store.ts";
+import type { ToolActivity } from "../../activity/tool-activity.interface.ts";
 import type { DetailArtifact } from "../detail/detail-artifact.interface.ts";
 import type { InspectorRow } from "../detail/inspector-row.interface.ts";
 import type { InspectorFocus, InspectorPage } from "../navigation/inspector-page.interface.ts";
