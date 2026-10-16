@@ -1,3 +1,3 @@
-export function oneLine(value: string): string {
-  return value.replace(/\s+/g, " ").trim();
+export function oneLine(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
 }

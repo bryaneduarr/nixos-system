@@ -18,8 +18,12 @@ import { runningPresentation } from "./presentation/running-presentation.service
 import { toolColor } from "./presentation/tool-color.service.ts";
 import { extractText } from "./text/extract-text.service.ts";
 
-function reuseOrCreateToolBox(context: RendererContext, theme: Theme, tool: HarnessTool): ToolBox {
-  return context.lastComponent instanceof ToolBox ? context.lastComponent : new ToolBox(theme, "", [], toolColor(tool));
+function reuseOrCreateToolBox(lastComponent: Component | undefined, theme: Theme, tool: HarnessTool): ToolBox {
+  return lastComponent instanceof ToolBox ? lastComponent : new ToolBox(theme, "", [], toolColor(tool), true);
+}
+
+function runningBoxTitle(tool: HarnessTool, theme: Theme): string {
+  return `${theme.fg("accent", "/")} ${boxTitle(tool, theme)}`;
 }
 
 export function createHarnessRenderers(tool: HarnessTool) {
@@ -27,11 +31,14 @@ export function createHarnessRenderers(tool: HarnessTool) {
     renderShell: "self" as const,
     renderCall(args: Record<string, unknown>, theme: Theme, context: RendererContext): Component {
       if (context.isPartial === false) return EMPTY;
-      const box = reuseOrCreateToolBox(context, theme, tool);
-      const title = `${theme.fg("accent", "/")} ${boxTitle(tool, theme)}`;
-      const lines = presentationLines(runningPresentation(tool, args), theme);
-
-      box.setContent(title, lines, context.toolCallId, toolColor(tool));
+      const box = reuseOrCreateToolBox(context.lastComponent, theme, tool);
+      box.setContent({
+        title: runningBoxTitle(tool, theme),
+        lines: presentationLines(runningPresentation(tool, args), theme),
+        toolCall: { state: "present", value: context.toolCallId },
+        color: toolColor(tool),
+        elapsedStartedAt: { state: "absent" },
+      });
       return box;
     },
     renderResult(result: RendererResult, options: RendererOptions, theme: Theme, context: RendererContext): Component {
@@ -39,13 +46,16 @@ export function createHarnessRenderers(tool: HarnessTool) {
       const state = resultVisualState(tool, text, options.isPartial, context.isError);
       const lines = presentationLines(resultPresentation(tool, context.args, text, state), theme);
       const lookup = readToolActivity(context.toolCallId);
-      const entry = lookup.found ? lookup.entry : undefined;
-      if (entry) lines.push(elapsedLine(entry, theme));
+      if (lookup.found) lines.push(elapsedLine(lookup.entry, theme));
 
-      const box = reuseOrCreateToolBox(context, theme, tool);
-      const title = state === "running" ? `${theme.fg("accent", "/")} ${boxTitle(tool, theme)}` : boxTitle(tool, theme);
-
-      box.setContent(title, lines, context.toolCallId, toolColor(tool));
+      const box = reuseOrCreateToolBox(context.lastComponent, theme, tool);
+      box.setContent({
+        title: state === "running" ? runningBoxTitle(tool, theme) : boxTitle(tool, theme),
+        lines,
+        toolCall: { state: "present", value: context.toolCallId },
+        color: toolColor(tool),
+        elapsedStartedAt: { state: "absent" },
+      });
       return box;
     },
   };

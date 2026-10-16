@@ -2,8 +2,8 @@ import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts
 import { oneLine } from "../text/one-line.service.ts";
 
 function stringArg(args: Record<string, unknown>, key: string): string {
-  const value = args[key];
-  return typeof value === "string" ? value : "";
+  const argument = args[key];
+  return typeof argument === "string" ? argument : "";
 }
 
 export function toolTarget(tool: HarnessTool, args: Record<string, unknown>): string {

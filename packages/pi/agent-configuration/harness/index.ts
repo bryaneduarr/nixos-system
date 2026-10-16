@@ -65,10 +65,10 @@ export default function harnessExtension(pi: ExtensionAPI): void {
     handler: async (_args, ctx) => {
       enforceActiveTools(pi);
       await writeStatusFile(pi);
-      const active = pi.getActiveTools();
-      const all = pi.getAllTools().map((tool) => tool.name);
+      const activeToolNames = pi.getActiveTools();
+      const registeredToolNames = pi.getAllTools().map((tool) => tool.name);
       ctx.ui.notify(
-        `active: ${active.join(", ")}\nregistered: ${all.join(", ")}\nharness: ${HARNESS_TOOLS.join(", ")}`,
+        `active: ${activeToolNames.join(", ")}\nregistered: ${registeredToolNames.join(", ")}\nharness: ${HARNESS_TOOLS.join(", ")}`,
         "info",
       );
     },

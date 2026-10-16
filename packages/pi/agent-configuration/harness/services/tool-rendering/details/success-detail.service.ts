@@ -4,22 +4,21 @@ import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts
 import { firstLine } from "../text/first-line.service.ts";
 import { runDetail } from "./run-detail.service.ts";
 
+function isSearchMetadataLine(line: string): boolean {
+  const isEmpty = line === "";
+  const isSearchHeader = line.startsWith("search ");
+  const isSectionTitle = SEARCH_SECTION_TITLES.has(line);
+  const isAdditionalNote = line.startsWith("Additional ");
+  const isFullOutputNote = line.startsWith("Full output:");
+  const isBracketedNote = line.startsWith("[") && line.endsWith("]");
+  return isEmpty || isSearchHeader || isSectionTitle || isAdditionalNote || isFullOutputNote || isBracketedNote;
+}
+
 function countSearchEntries(text: string): number {
-  let count = 0;
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (
-      !line ||
-      line.startsWith("search ") ||
-      SEARCH_SECTION_TITLES.has(line) ||
-      line.startsWith("Additional ") ||
-      line.startsWith("Full output:") ||
-      (line.startsWith("[") && line.endsWith("]"))
-    )
-      continue;
-    count += 1;
-  }
-  return count;
+  return text
+    .split(/\r?\n/)
+    .map((raw) => raw.trim())
+    .filter((line) => !isSearchMetadataLine(line)).length;
 }
 
 function readDetail(text: string): string {
