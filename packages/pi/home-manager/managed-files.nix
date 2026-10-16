@@ -18,6 +18,13 @@ let
     inherit source;
     force = true;
   };
+
+  withoutTests =
+    directory:
+    lib.fileset.toSource {
+      root = directory;
+      fileset = lib.fileset.fileFilter (file: !(lib.hasSuffix ".test.ts" file.name)) directory;
+    };
 in
 lib.mkIf config.custom.pi.enable {
   home.file = {
@@ -42,33 +49,32 @@ lib.mkIf config.custom.pi.enable {
     ".pi/agent/mcp-adapter.json" = mkJsonFile (agentConfiguration + "/settings/mcp.nix");
     ".config/mcp/mcp.json" = mkJsonFile (mcpConfigurations + "/mcp-host-configuration.nix");
     ".pi/agent/extensions/codex-fast-mode" = {
-      source = pkgs.linkFarm "pi-codex-fast-mode" [
-        {
-          name = "index.ts";
-          path = agentConfiguration + "/extensions/codex-fast-mode/index.ts";
-        }
-        {
-          name = "capabilities.ts";
-          path = agentConfiguration + "/extensions/codex-fast-mode/capabilities.ts";
-        }
-        {
-          name = "node_modules";
-          path = "${piTools}/lib/pi-packages/node_modules";
-        }
-      ];
+      source = pkgs.symlinkJoin {
+        name = "pi-codex-fast-mode";
+        paths = [
+          (withoutTests (agentConfiguration + "/extensions/codex-fast-mode"))
+          (pkgs.linkFarm "pi-codex-fast-mode-node-modules" [
+            {
+              name = "node_modules";
+              path = "${piTools}/lib/pi-packages/node_modules";
+            }
+          ])
+        ];
+      };
       force = true;
     };
     ".pi/agent/extensions/clear.ts" = mkSourceFile (
       agentConfiguration + "/extensions/clear-session.ts"
     );
-    ".pi/agent/extensions/last-model.ts" = mkSourceFile (
-      agentConfiguration + "/extensions/last-model.ts"
-    );
+    ".pi/agent/extensions/last-model" = {
+      source = withoutTests (agentConfiguration + "/extensions/last-model");
+      force = true;
+    };
     ".pi/agent/extensions/quiet-tools.ts" = mkSourceFile (
       agentConfiguration + "/extensions/quiet-tool-output.ts"
     );
     ".pi/agent/extensions/harness" = {
-      source = agentConfiguration + "/harness";
+      source = withoutTests (agentConfiguration + "/harness");
       force = true;
     };
     ".pi/agent/extensions/powerline-footer/theme.json" = mkSourceFile (
