@@ -1,4 +1,4 @@
-local servers = { "clangd", "nil_ls", "ts_ls", "html", "cssls", "tailwindcss", "lua_ls", "emmet_ls" }
+local servers = { "bashls", "clangd", "nil_ls", "ts_ls", "html", "cssls", "tailwindcss", "lua_ls", "emmet_ls" }
 
 local function set_lsp_keymaps(bufnr)
   local function map(mode, lhs, rhs, desc)
