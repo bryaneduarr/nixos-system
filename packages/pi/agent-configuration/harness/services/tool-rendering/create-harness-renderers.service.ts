@@ -1,6 +1,5 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
-import { activityStore } from "../../activity/store.ts";
 import { EMPTY } from "../../components/tool-rendering/empty.component.ts";
 import { ToolBox } from "../../components/tool-rendering/tool-box.component.ts";
 import type {
@@ -9,6 +8,7 @@ import type {
   RendererResult,
 } from "../../types/tool-rendering/renderer.interface.ts";
 import type { HarnessTool } from "../../types/tools/harness-tool.interface.ts";
+import { readToolActivity } from "../activity/store/read-tool-activity.service.ts";
 import { boxTitle } from "./presentation/box-title.service.ts";
 import { elapsedLine } from "./presentation/elapsed-line.service.ts";
 import { presentationLines } from "./presentation/presentation-lines.service.ts";
@@ -38,7 +38,8 @@ export function createHarnessRenderers(tool: HarnessTool) {
       const text = extractText(result.content);
       const state = resultVisualState(tool, text, options.isPartial, context.isError);
       const lines = presentationLines(resultPresentation(tool, context.args, text, state), theme);
-      const entry = context.toolCallId ? activityStore.get(context.toolCallId) : undefined;
+      const lookup = readToolActivity(context.toolCallId);
+      const entry = lookup.found ? lookup.entry : undefined;
       if (entry) lines.push(elapsedLine(entry, theme));
 
       const box = reuseOrCreateToolBox(context, theme, tool);

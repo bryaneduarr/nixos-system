@@ -1,4 +1,3 @@
-import { activityStore } from "../../../activity/store.ts";
 import {
   MESSAGE_ACTIVITY_NAME,
   THINKING_ACTIVITY_NAME,
@@ -6,6 +5,7 @@ import {
 } from "../../../constants/activity/activity-entry.constant.ts";
 import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
 import type { InspectorPage } from "../../../types/inspector/navigation/inspector-page.interface.ts";
+import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 
 export function buildInspectorRows(page: InspectorPage, expandedTasks: ReadonlySet<string>): InspectorRow[] {
   const rows: InspectorRow[] = [];

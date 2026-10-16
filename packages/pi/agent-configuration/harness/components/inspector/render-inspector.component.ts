@@ -1,9 +1,9 @@
-import { activityStore } from "../../activity/store.ts";
 import {
   MESSAGE_ACTIVITY_NAME,
   THINKING_ACTIVITY_NAME,
   UPDATE_ACTIVITY_NAME,
 } from "../../constants/activity/activity-entry.constant.ts";
+import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
 import { readInspectorGeometry } from "../../services/inspector/layout/read-inspector-geometry.service.ts";
 import type { InspectorLayoutState } from "../../types/inspector/view/inspector-layout.interface.ts";
 import type { InspectorViewResult, InspectorViewState } from "../../types/inspector/view/inspector-view.interface.ts";

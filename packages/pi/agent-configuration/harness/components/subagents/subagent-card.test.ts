@@ -1,13 +1,12 @@
 import { beforeEach, expect, test } from "bun:test";
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import { activityStore } from "../../activity/store.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../constants/activity/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
+import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
 
 const TEST_CWD = "/tmp";
 
 const { renderSubagentCard } = await import("./subagent-card.component.ts");
-const { resetActivityVisibility, toggleActivityVisibility, setAgentWorking } = await import(
-  "../../ui/activity/visibility.ts"
-);
 
 const theme = {
   fg: (_color: string, text: string) => text,
@@ -16,8 +15,8 @@ const theme = {
 
 beforeEach(() => {
   activityStore.clear();
-  resetActivityVisibility();
-  setAgentWorking(true);
+  activityVisibility.reset();
+  activityVisibility.setAgentWorking(true);
 });
 
 test("the card shows only the active tool, its target, and its state", () => {
@@ -51,15 +50,10 @@ test("the card shows only the active tool, its target, and its state", () => {
   ];
 
   activityStore.update("call-1", {
+    ...NO_TOOL_RESULT_FIELDS,
+    text: "",
+    status: { state: "absent" },
     sub: activity,
-    details: {
-      id: "worker-1",
-      title: "Inspect parser",
-      currentTask: "read parser.ts",
-      status: "running",
-      model: { provider: "test", id: "sample" },
-      activity,
-    },
   });
 
   const card = renderSubagentCard(theme, "call-1", "Inspect parser");
@@ -117,17 +111,11 @@ test("a completed card shows the last tool's duration without earlier calls or t
   ];
 
   activityStore.finish("done-call", {
+    ...NO_TOOL_RESULT_FIELDS,
     sub: activity,
     text: "done",
     status: "success",
     endedAt: 35400,
-    details: {
-      title: "Locate pi harness",
-      currentTask: "Completed",
-      status: "success",
-      model: { provider: "test", id: "sample" },
-      activity,
-    },
   });
 
   const card = renderSubagentCard(theme, "done-call", "Locate pi harness");
@@ -152,13 +140,14 @@ test("Alt+V hides the subagent box and the renderer reuses its component", () =>
     toolName: "task",
     args: {},
     cwd: TEST_CWD,
+    startedAt: Date.now(),
   });
   const card = renderSubagentCard(theme, "call-1", "Inspect parser");
 
   expect(card.render(80).length).toBeGreaterThan(0);
-  toggleActivityVisibility();
+  activityVisibility.toggle();
   expect(card.render(80)).toEqual([]);
-  toggleActivityVisibility();
+  activityVisibility.toggle();
 
   const reusedCard = renderSubagentCard(theme, "call-1", "Inspect parser", undefined, card);
   expect(reusedCard).toBe(card);

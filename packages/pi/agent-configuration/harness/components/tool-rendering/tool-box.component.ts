@@ -1,10 +1,10 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
-import { activityStore } from "../../activity/store.ts";
 import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/elapsed-label.constant.ts";
+import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
+import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
 import { inspectRequestStore } from "../../services/inspector/request/inspect-request-store.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
-import { isActivityVisible } from "../../ui/activity/visibility.ts";
 
 export class ToolBox implements Component {
   private cached: string[] | undefined;
@@ -48,9 +48,10 @@ export class ToolBox implements Component {
   }
 
   render(width: number): string[] {
-    if (!isActivityVisible()) return [];
+    if (!activityVisibility.isVisible()) return [];
 
-    const entry = this.toolCallId ? activityStore.get(this.toolCallId) : undefined;
+    const lookup = readToolActivity(this.toolCallId);
+    const entry = lookup.found ? lookup.entry : undefined;
     const running = entry?.status === "running";
     if (this.cached && this.cachedWidth === width && !running) return this.cached;
 

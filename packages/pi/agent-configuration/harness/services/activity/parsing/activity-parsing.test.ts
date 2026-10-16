@@ -1,8 +1,10 @@
 import { expect, test } from "bun:test";
-import { readAssistantActivity, readSubagentMetadata, readSubagentUsage } from "../../../activity/parse.ts";
+import { readAssistantActivity } from "./read-assistant-activity.service.ts";
+import { readSubagentMetadata } from "./read-subagent-metadata.service.ts";
+import { readSubagentUsage } from "./read-subagent-usage.service.ts";
 
 test("activity parsers reject malformed data and preserve reported usage", () => {
-  expect(readAssistantActivity({ role: "user", content: [] })).toBeUndefined();
+  expect(readAssistantActivity({ role: "user", content: [] })).toEqual({ found: false });
   expect(
     readAssistantActivity({
       role: "assistant",
@@ -12,7 +14,10 @@ test("activity parsers reject malformed data and preserve reported usage", () =>
         { type: "toolCall" },
       ],
     }),
-  ).toEqual({ thinking: "reason", thinkingRedacted: true, response: "answer", hasToolCall: true });
+  ).toEqual({
+    found: true,
+    snapshot: { thinking: "reason", thinkingRedacted: true, response: "answer", hasToolCall: true },
+  });
   expect(readSubagentUsage({ usage: { inputTokens: 2, outputTokens: 3, contextTokens: 4 } })).toMatchObject({
     usageState: "reported",
     usage: {

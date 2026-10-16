@@ -1,4 +1,3 @@
-import { activityStore } from "../../../activity/store.ts";
 import {
   MESSAGE_ACTIVITY_NAME,
   THINKING_ACTIVITY_NAME,
@@ -7,6 +6,7 @@ import {
 import { BLANK_DETAIL_LINE } from "../../../constants/inspector/detail-line.constant.ts";
 import type { ToolActivity } from "../../../types/activity/tool-activity.interface.ts";
 import type { DetailLine } from "../../../types/inspector/detail/detail-line.interface.ts";
+import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 import { isHarnessTool } from "../../tools/is-harness-tool.service.ts";
 import { boxDetails } from "./box-details.service.ts";
 import { formatTime } from "./format-time.service.ts";

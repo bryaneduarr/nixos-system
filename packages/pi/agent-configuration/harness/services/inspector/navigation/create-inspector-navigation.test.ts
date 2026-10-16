@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { activityStore } from "../../../activity/store.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 import { createInspectorNavigation } from "./create-inspector-navigation.service.ts";
 
 beforeEach(() => activityStore.clear());
@@ -11,8 +12,11 @@ describe("inspector navigation", () => {
       detailLength: () => 0,
       changed: () => {},
     });
-    activityStore.begin({ id: "task-1", toolName: "task", args: {}, cwd: "/tmp" });
+    activityStore.begin({ id: "task-1", toolName: "task", args: {}, cwd: "/tmp", startedAt: 0 });
     activityStore.update("task-1", {
+      ...NO_TOOL_RESULT_FIELDS,
+      text: "",
+      status: { state: "absent" },
       sub: [
         {
           id: "read-1",
