@@ -25,14 +25,14 @@ function startToolCall(input: TrackTaskProgressInput, event: ToolExecutionStartE
 
 function finishToolCall(input: TrackTaskProgressInput, event: ToolExecutionEndEvent): void {
   const { progress, publish } = input;
-  const call = progress.activity.find((item) => item.id === event.toolCallId);
-  if (call) {
-    call.status = event.isError ? "error" : "success";
-    call.text = textContent(event.result?.content);
-    call.endedAt = { state: "present", value: Date.now() };
+  const matchingCall = progress.activity.find((toolCall) => toolCall.id === event.toolCallId);
+  if (matchingCall) {
+    matchingCall.status = event.isError ? "error" : "success";
+    matchingCall.text = textContent(event.result?.content);
+    matchingCall.endedAt = { state: "present", value: Date.now() };
   }
 
-  const runningCall = progress.activity.findLast((item) => item.status === "running");
+  const runningCall = progress.activity.findLast((toolCall) => toolCall.status === "running");
   progress.currentTask = runningCall
     ? describeToolActivity(runningCall.toolName, runningCall.args)
     : WRITING_RESULT_TASK_LABEL;

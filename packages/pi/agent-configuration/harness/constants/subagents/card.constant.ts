@@ -7,3 +7,4 @@ export const CARD_DONE_LABEL = "Done";
 export const CARD_CANCELLED_LABEL = "Cancelled";
 export const CARD_TIME_LABEL = "Time:";
 export const CARD_BOX_TITLE = "SUBAGENT";
+export const MILLISECONDS_PER_SECOND = 1000;

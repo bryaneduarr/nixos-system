@@ -4,18 +4,19 @@ import {
   STOPPED_TASK_LABEL,
   TIMED_OUT_ERROR_MESSAGE,
 } from "../../../constants/subagents/progress.constant.ts";
+import { DEFAULT_TASK_REASONING_LEVEL } from "../../../constants/subagents/reasoning.constant.ts";
 import { APPROVED_COMMAND_TOOL } from "../../../constants/subagents/roles.constant.ts";
+import { ABORTED_STOP_REASON, ERROR_STOP_REASON } from "../../../constants/subagents/stop-reason.constant.ts";
 import { createApprovedCommandTool } from "../../../tools/approved-command/approved-command.tool.ts";
 import type { SubagentProgressListener } from "../../../types/subagents/registry/subagent-progress-listener.interface.ts";
-import type { TaskInput } from "../../../types/subagents/tasks/task-input.interface.ts";
 import type { TaskProgress } from "../../../types/subagents/tasks/task-progress.interface.ts";
+import type { TaskRequest } from "../../../types/subagents/tasks/task-request.interface.ts";
 import type { TaskResult } from "../../../types/subagents/tasks/task-result.interface.ts";
 import type { TaskStatus } from "../../../types/subagents/tasks/task-status.interface.ts";
 import { presentValue } from "../../activity/value/present-value.service.ts";
 import { toValueState } from "../../activity/value/to-value-state.service.ts";
 import { buildTaskSystemPrompt } from "../roles/build-task-system-prompt.service.ts";
 import { resolveTaskRole } from "../roles/resolve-task-role.service.ts";
-import { toTaskRoleInput } from "../roles/to-task-role-input.service.ts";
 import { createTaskProgress } from "./create-task-progress.service.ts";
 import { createTaskResourceLoader } from "./create-task-resource-loader.service.ts";
 import { createTaskSession } from "./create-task-session.service.ts";
@@ -29,9 +30,10 @@ import { resolveTaskModel } from "./resolve-task-model.service.ts";
 import { trackTaskProgress } from "./track-task-progress.service.ts";
 import { usageFromMessages } from "./usage-from-messages.service.ts";
 
-function taskPrompt(input: TaskInput): string {
-  const context = input.context ? `Context:\n${input.context}\n\n` : "";
-  return `${context}Mission:\n${input.mission}`;
+function taskPrompt(request: TaskRequest): string {
+  const context = presentValue(request.context);
+  const contextBlock = context ? `Context:\n${context}\n\n` : "";
+  return `${contextBlock}Mission:\n${request.mission}`;
 }
 
 function taskStatusOf(wasCancelled: boolean, failed: boolean): TaskStatus {
@@ -42,22 +44,22 @@ function taskStatusOf(wasCancelled: boolean, failed: boolean): TaskStatus {
 
 export async function runTask(
   id: string,
-  input: TaskInput,
+  request: TaskRequest,
   ctx: ExtensionContext,
-  signal: AbortSignal | undefined,
+  signal: AbortSignal,
   onProgress: SubagentProgressListener,
 ): Promise<TaskResult> {
-  const resolvedRole = resolveTaskRole(toTaskRoleInput(input));
+  const resolvedRole = resolveTaskRole(request);
   const runtime = await ModelRuntime.create();
   const model = resolveTaskModel({
     runtime,
-    requestedModel: toValueState(input.model),
+    requestedModel: request.model,
     currentModel: toValueState(ctx.model),
   });
   const resourceLoader = await createTaskResourceLoader({
     cwd: ctx.cwd,
     systemPrompt: buildTaskSystemPrompt(resolvedRole),
-    skillNames: input.skills ?? [],
+    skillNames: presentValue(request.skills) ?? [],
   });
   const customTools = resolvedRole.tools.includes(APPROVED_COMMAND_TOOL)
     ? [createApprovedCommandTool(resolvedRole.verificationCommands)]
@@ -66,14 +68,14 @@ export async function runTask(
     cwd: ctx.cwd,
     model,
     runtime,
-    thinkingLevel: input.reasoning ?? ctx.thinkingLevel ?? "medium",
+    thinkingLevel: presentValue(request.reasoning) ?? ctx.thinkingLevel ?? DEFAULT_TASK_REASONING_LEVEL,
     tools: resolvedRole.tools,
     customTools,
     resourceLoader,
   });
 
   const progress: TaskProgress = {
-    ...createTaskProgress(id, input.title, resolvedRole),
+    ...createTaskProgress(id, request.title, resolvedRole),
     model: { state: "present", value: describeTaskModel(model) },
     thinkingLevel: toValueState(session.thinkingLevel),
   };
@@ -84,9 +86,9 @@ export async function runTask(
   try {
     const promptOutcome = await promptTaskSession({
       session,
-      prompt: taskPrompt(input),
+      prompt: taskPrompt(request),
       signal,
-      timeoutMs: toValueState(input.timeoutMs),
+      timeoutMs: request.timeoutMs,
     });
 
     progress.usage = {
@@ -98,8 +100,14 @@ export async function runTask(
     const assistant = readAssistantOutcome(session.messages);
     const stopReason = presentValue(assistant.stopReason);
     const promptErrorText = presentValue(promptOutcome.promptError);
-    const wasCancelled = signal?.aborted === true || promptOutcome.timedOut || stopReason === "aborted";
-    const failed = Boolean(promptErrorText) || stopReason === "error" || !output;
+
+    const isAbortRequested = signal.aborted;
+    const isStoppedByAbort = stopReason === ABORTED_STOP_REASON;
+    const wasCancelled = isAbortRequested || promptOutcome.timedOut || isStoppedByAbort;
+    const hasPromptError = Boolean(promptErrorText);
+    const hasErrorStopReason = stopReason === ERROR_STOP_REASON;
+    const hasNoOutput = output === "";
+    const failed = hasPromptError || hasErrorStopReason || hasNoOutput;
 
     progress.status = taskStatusOf(wasCancelled, failed);
     progress.currentTask = progress.status === "success" ? COMPLETED_TASK_LABEL : STOPPED_TASK_LABEL;

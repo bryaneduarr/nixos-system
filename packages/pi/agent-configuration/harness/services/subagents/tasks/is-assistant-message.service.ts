@@ -1,5 +1,6 @@
-import { isRecord } from "./is-record.service.ts";
+import type { AgentMessage } from "@earendil-works/pi-agent-core";
+import type { AssistantMessage } from "@earendil-works/pi-ai";
 
-export function isAssistantMessage(message: unknown): message is Record<string, unknown> {
-  return isRecord(message) && message.role === "assistant";
+export function isAssistantMessage(message: AgentMessage): message is AssistantMessage {
+  return message.role === "assistant";
 }

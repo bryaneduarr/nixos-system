@@ -1,23 +1,25 @@
 import { expect, test } from "bun:test";
+import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 import type { TaskRoleInput } from "../../../types/subagents/roles/task-role-input.interface.ts";
-import { toValueState } from "../../activity/value/to-value-state.service.ts";
 import { buildTaskSystemPrompt } from "./build-task-system-prompt.service.ts";
 import { resolveTaskRole } from "./resolve-task-role.service.ts";
 
-function roleInput(request: {
-  readonly role?: string;
-  readonly tools?: readonly string[];
-  readonly verificationCommands?: readonly string[];
-}): TaskRoleInput {
-  return {
-    role: toValueState(request.role),
-    tools: toValueState(request.tools),
-    verificationCommands: toValueState(request.verificationCommands),
-  };
+const absent: ValueState<never> = { state: "absent" };
+
+function present<T>(value: T): ValueState<T> {
+  return { state: "present", value };
+}
+
+function roleRequest(role: string): TaskRoleInput {
+  return { role: present(role), tools: absent, verificationCommands: absent };
+}
+
+function toolRequest(role: string, tools: readonly string[]): TaskRoleInput {
+  return { role: present(role), tools: present(tools), verificationCommands: absent };
 }
 
 test("omitting the role keeps the generic task defaults", () => {
-  const role = resolveTaskRole(roleInput({}));
+  const role = resolveTaskRole({ role: absent, tools: absent, verificationCommands: absent });
 
   expect(role.role).toBe("task");
   expect(role.tools).toEqual(["read", "grep", "find", "ls"]);
@@ -25,14 +27,18 @@ test("omitting the role keeps the generic task defaults", () => {
     "End with status, summary, findings, files_changed, and errors sections.",
   );
 
-  const customTools = resolveTaskRole(roleInput({ tools: ["edit", "bash"] }));
+  const customTools = resolveTaskRole({
+    role: absent,
+    tools: present(["edit", "bash"]),
+    verificationCommands: absent,
+  });
   expect(customTools.tools).toEqual(["edit", "bash"]);
 });
 
 test("roles select different default tools and instructions", () => {
-  const explore = resolveTaskRole(roleInput({ role: "explore" }));
-  const implement = resolveTaskRole(roleInput({ role: "implement" }));
-  const verify = resolveTaskRole(roleInput({ role: "verify" }));
+  const explore = resolveTaskRole(roleRequest("explore"));
+  const implement = resolveTaskRole(roleRequest("implement"));
+  const verify = resolveTaskRole(roleRequest("verify"));
 
   expect(explore.tools).toEqual(["read", "grep", "find", "ls"]);
   expect(implement.tools).toContain("edit");
@@ -48,11 +54,11 @@ test("roles select different default tools and instructions", () => {
 });
 
 test("role overrides reject tools that exceed the role", () => {
-  expect(() => resolveTaskRole(roleInput({ role: "explore", tools: ["read", "edit"] }))).toThrow(
+  expect(() => resolveTaskRole(toolRequest("explore", ["read", "edit"]))).toThrow(
     'Role "explore" cannot use tool(s): edit.',
   );
-  expect(() => resolveTaskRole(roleInput({ role: "verify", tools: ["read", "bash"] }))).toThrow(
+  expect(() => resolveTaskRole(toolRequest("verify", ["read", "bash"]))).toThrow(
     'Role "verify" cannot use tool(s): bash.',
   );
-  expect(() => resolveTaskRole(roleInput({ role: "unknown" }))).toThrow("Unknown task role: unknown");
+  expect(() => resolveTaskRole(roleRequest("unknown"))).toThrow("Unknown task role: unknown");
 });

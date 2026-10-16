@@ -8,7 +8,7 @@ export interface PromptTaskSessionInput {
   /* Prompt text with the context and mission of the task. */
   readonly prompt: string;
   /* Signal that aborts the worker when the parent cancels. */
-  readonly signal: AbortSignal | undefined;
+  readonly signal: AbortSignal;
   /* Maximum runtime in milliseconds, when the task sets one. */
   readonly timeoutMs: ValueState<number>;
 }

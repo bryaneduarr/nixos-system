@@ -3,17 +3,17 @@ import type { TaskProgress } from "./task-progress.interface.ts";
 /* Final report of a finished subagent run. */
 export interface TaskResult extends TaskProgress {
   /* Short summary of what the worker did or found. */
-  summary: string;
+  readonly summary: string;
   /* Findings the worker reported. */
-  findings: string[];
+  readonly findings: readonly string[];
   /* Questions the worker could not resolve. */
-  unresolvedQuestions: string[];
+  readonly unresolvedQuestions: readonly string[];
   /* Checks the worker ran and their outcomes. */
-  checks: string[];
+  readonly checks: readonly string[];
   /* Paths the worker changed. */
-  filesChanged: string[];
+  readonly filesChanged: readonly string[];
   /* Remaining risks the worker reported. */
-  risks: string[];
+  readonly risks: readonly string[];
   /* Errors the worker or run reported. */
-  errors: string[];
+  readonly errors: readonly string[];
 }

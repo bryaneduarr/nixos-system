@@ -49,7 +49,8 @@ export function resolveTaskRole(input: TaskRoleInput): ResolvedTaskRole {
 
   const requestedToolList = presentValue(input.tools);
   const requestedTools: string[] = requestedToolList ? [...requestedToolList] : [...definition.defaultTools];
-  if (requestedToolList === undefined && hasVerificationCommands) {
+  const isToolListOmitted = requestedToolList === undefined;
+  if (isToolListOmitted && hasVerificationCommands) {
     requestedTools.push(APPROVED_COMMAND_TOOL);
   }
 

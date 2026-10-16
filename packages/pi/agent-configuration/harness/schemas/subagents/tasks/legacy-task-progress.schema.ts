@@ -2,7 +2,7 @@ import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
 import { TASK_ROLES } from "../../../constants/subagents/roles.constant.ts";
 
-export const TaskProgressDetailsSchema = Type.Object({
+export const LegacyTaskProgressSchema = Type.Object({
   /* Identifier of the subagent run. */
   id: Type.String(),
   /* Title the parent gave the task. */
@@ -22,10 +22,10 @@ export const TaskProgressDetailsSchema = Type.Object({
     Type.Literal("error"),
     Type.Literal("cancelled"),
   ]),
-  /* Model metadata, absent in details persisted by older sessions. */
+  /* Model metadata of sessions saved before it was tracked, validated when it is converted. */
   model: Type.Optional(Type.Unknown()),
-  /* Reasoning level, absent in details persisted by older sessions. */
+  /* Reasoning level of sessions saved before it was tracked, validated when it is converted. */
   thinkingLevel: Type.Optional(Type.Unknown()),
-  /* Usage totals, absent in details persisted by older sessions. */
+  /* Usage totals of sessions saved before it was tracked, validated when they are converted. */
   usage: Type.Optional(Type.Unknown()),
 });
