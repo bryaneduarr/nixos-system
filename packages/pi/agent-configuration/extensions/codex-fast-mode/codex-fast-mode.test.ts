@@ -2,22 +2,60 @@ import { afterAll, beforeEach, expect, mock, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { Api, Model } from "@earendil-works/pi-ai";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { rainbow } from "pi-powerline-footer/theme.ts";
-import { fastModelsFromCache, supportsFastMode } from "../agent-configuration/extensions/codex-fast-mode/capabilities";
+import { fastModelsFromCache } from "./services/codex-models/fast-models-from-cache.service.ts";
+import { supportsFastMode } from "./services/codex-models/supports-fast-mode.service.ts";
 
-const requests: { fast: boolean; options: any }[] = [];
+interface RecordedRequest {
+  readonly fast: boolean;
+  readonly options: Record<string, unknown>;
+}
+
+interface FakeModel {
+  api: string;
+  provider: string;
+  id: string;
+  readonly maxTokens: number;
+  readonly contextWindow: number;
+}
+
+interface FakeEntry {
+  readonly type: "custom";
+  readonly customType: string;
+  data: unknown;
+}
+
+interface FakeContext {
+  readonly hasUI: boolean;
+  model: FakeModel;
+  readonly sessionManager: { readonly getBranch: () => FakeEntry[] };
+  readonly ui: {
+    readonly setStatus: (key: string, text: string | undefined) => void;
+    readonly notify: (text: string) => void;
+    readonly select: (title: string) => Promise<string | undefined>;
+  };
+}
+
+type FakeEventHandler = (event: unknown, ctx: FakeContext) => unknown;
+
+const requests: RecordedRequest[] = [];
 
 mock.module("@earendil-works/pi-ai/api/openai-codex-responses", () => ({
-  stream: (_model: any, _context: any, options: any) => requests.push({ fast: true, options }),
-  streamSimple: (_model: any, _context: any, options: any) => requests.push({ fast: false, options }),
+  stream: (_model: unknown, _context: unknown, options: Record<string, unknown>) =>
+    requests.push({ fast: true, options }),
+  streamSimple: (_model: unknown, _context: unknown, options: Record<string, unknown>) =>
+    requests.push({ fast: false, options }),
 }));
 
-const { default: extension } = await import("../agent-configuration/extensions/codex-fast-mode");
+const { default: extension } = await import("./index.ts");
 const codexDirectory = mkdtempSync(join(tmpdir(), "pi-fast-mode-"));
 const previousCodexHome = process.env.CODEX_HOME;
 const previousStateHome = process.env.XDG_STATE_HOME;
 const stateFile = join(codexDirectory, "pi", "codex-fast-mode.json");
+const ANSI_ESCAPE = String.fromCharCode(27);
+const ANSI_PATTERN = new RegExp(`${ANSI_ESCAPE}\\[[0-9;]*m`, "g");
 process.env.CODEX_HOME = codexDirectory;
 process.env.XDG_STATE_HOME = codexDirectory;
 writeFileSync(
@@ -38,24 +76,26 @@ afterAll(() => {
 });
 
 function runtime() {
-  const handlers = new Map<string, (event: any, ctx: any) => any>();
-  const entries: any[] = [];
-  let command: any;
-  let provider: any;
-  let shortcut: any;
+  const handlers = new Map<string, FakeEventHandler>();
+  const entries: FakeEntry[] = [];
+  let command: { handler: (args: string, ctx: FakeContext) => Promise<void> } | undefined;
+  let provider:
+    | { streamSimple: (model: FakeModel, context: unknown, options?: Record<string, unknown>) => unknown }
+    | undefined;
+  let shortcut: { handler: (ctx: FakeContext) => Promise<void> } | undefined;
   let shortcutKey: string | undefined;
   const notifications: string[] = [];
   let menuTitle: string | undefined;
   let status: string | undefined;
   let selection: string | undefined = "On";
-  const model = {
+  const model: FakeModel = {
     api: "openai-codex-responses",
     provider: "openai-codex",
     id: "test-fast-model",
     maxTokens: 8192,
     contextWindow: 32768,
   };
-  const ctx = {
+  const ctx: FakeContext = {
     hasUI: true,
     model,
     sessionManager: { getBranch: () => entries },
@@ -70,20 +110,26 @@ function runtime() {
       },
     },
   };
+  // The fake implements only the ExtensionAPI members this extension calls.
   extension({
-    on: (event: string, handler: any) => handlers.set(event, handler),
-    registerProvider: (_name: string, config: any) => {
+    on: (event: string, handler: FakeEventHandler) => handlers.set(event, handler),
+    registerProvider: (_name: string, config: typeof provider) => {
       provider = config;
     },
-    registerCommand: (_name: string, config: any) => {
+    registerCommand: (_name: string, config: typeof command) => {
       command = config;
     },
-    registerShortcut: (key: string, config: any) => {
+    registerShortcut: (key: string, config: typeof shortcut) => {
       shortcutKey = key;
       shortcut = config;
     },
     appendEntry: (customType: string, data: unknown) => entries.push({ type: "custom", customType, data }),
   } as unknown as ExtensionAPI);
+
+  function requireHandler<T>(value: T | undefined, name: string): T {
+    if (value === undefined) throw new Error(`${name} was not registered`);
+    return value;
+  }
 
   return {
     ctx,
@@ -92,21 +138,30 @@ function runtime() {
       return status;
     },
     get label() {
-      return status?.replace(/\u001b\[[0-9;]*m/g, "");
+      return status?.replace(ANSI_PATTERN, "");
     },
     get menuTitle() {
       return menuTitle;
     },
     shortcutKey,
     notifications,
-    toggle: () => shortcut.handler(ctx),
+    toggle: () => requireHandler(shortcut, "shortcut").handler(ctx),
     select: (value: string | undefined) => {
       selection = value;
     },
     emit: (event: string) => handlers.get(event)?.({}, ctx),
-    command: (args: string) => command.handler(args, ctx),
-    request: (options: any = { apiKey: "test-key" }) => provider.streamSimple(ctx.model, { messages: [] }, options),
+    command: (args: string) => requireHandler(command, "command").handler(args, ctx),
+    request: (options: Record<string, unknown> = { apiKey: "test-key" }) =>
+      requireHandler(provider, "provider").streamSimple(ctx.model, { messages: [] }, options),
   };
+}
+
+function codexModel(id: string): Model<Api> {
+  return { provider: "openai-codex", api: "openai-codex-responses", id } as unknown as Model<Api>;
+}
+
+function unsupportedModel(provider: string, api: string, id: string): Model<Api> {
+  return { provider, api, id } as unknown as Model<Api>;
 }
 
 test("fast capability detection validates cache tiers and provider API", () => {
@@ -120,15 +175,9 @@ test("fast capability detection validates cache tiers and provider API", () => {
     ],
   });
   expect([...models]).toEqual(["fast"]);
-  expect(supportsFastMode({ provider: "openai-codex", api: "openai-codex-responses", id: "fast" } as any, models)).toBe(
-    true,
-  );
-  expect(supportsFastMode({ provider: "openai", api: "openai-codex-responses", id: "fast" } as any, models)).toBe(
-    false,
-  );
-  expect(supportsFastMode({ provider: "openai-codex", api: "openai-responses", id: "fast" } as any, models)).toBe(
-    false,
-  );
+  expect(supportsFastMode(codexModel("fast"), models)).toBe(true);
+  expect(supportsFastMode(unsupportedModel("openai", "openai-codex-responses", "fast"), models)).toBe(false);
+  expect(supportsFastMode(unsupportedModel("openai-codex", "openai-responses", "fast"), models)).toBe(false);
 });
 
 test("the visible menu toggles priority options without usage notifications", async () => {
@@ -247,7 +296,7 @@ test("unsupported models never request priority, even with a saved on preference
   harness.emit("model_select");
   await harness.toggle();
   await harness.command("on");
-  expect(harness.entries.at(-1).data.enabled).toBe(false);
+  expect(harness.entries.at(-1)).toMatchObject({ data: { enabled: false } });
   harness.ctx.model.id = "test-fast-model";
   harness.emit("model_select");
   expect(harness.status).toBeUndefined();
