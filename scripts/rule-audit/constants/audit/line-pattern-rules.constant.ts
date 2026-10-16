@@ -3,7 +3,7 @@ import type { LinePatternRule } from "../../types/audit/line-pattern-rule.interf
 export const LINE_PATTERN_RULES: readonly LinePatternRule[] = [
   {
     rule: "nullable-union",
-    pattern: /\|\s*(undefined|null)\b|\b(undefined|null)\s*\|/,
+    pattern: /(?<!\|)\|(?!\|)\s*(undefined|null)\b|\b(undefined|null)\s*\|(?!\|)/,
     appliesInModuleClause: true,
   },
   { rule: "optional-chaining", pattern: /\?\.(?!\d)/, appliesInModuleClause: true },

@@ -27,6 +27,11 @@ describe("line pattern rules", () => {
     expect(rulesFound('const help = "use a?.b or x as Y"; // c | undefined')).toEqual([]);
   });
 
+  test("leave logical operators with undefined or null alone", () => {
+    expect(rulesFound("const home = undefined || fallback;")).toEqual([]);
+    expect(rulesFound("const ready = value === null || waiting;")).toEqual([]);
+  });
+
   test("leave ternaries alone", () => {
     expect(rulesFound("const label = ready ? first : second;")).toEqual([]);
   });
