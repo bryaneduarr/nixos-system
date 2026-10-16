@@ -13,7 +13,6 @@ import type { TaskProgress } from "../../../types/subagents/tasks/task-progress.
 import type { TaskRequest } from "../../../types/subagents/tasks/task-request.interface.ts";
 import type { TaskResult } from "../../../types/subagents/tasks/task-result.interface.ts";
 import type { TaskStatus } from "../../../types/subagents/tasks/task-status.interface.ts";
-import { presentValue } from "../../activity/value/present-value.service.ts";
 import { toValueState } from "../../activity/value/to-value-state.service.ts";
 import { buildTaskSystemPrompt } from "../roles/build-task-system-prompt.service.ts";
 import { resolveTaskRole } from "../roles/resolve-task-role.service.ts";
@@ -31,8 +30,8 @@ import { trackTaskProgress } from "./track-task-progress.service.ts";
 import { usageFromMessages } from "./usage-from-messages.service.ts";
 
 function taskPrompt(request: TaskRequest): string {
-  const context = presentValue(request.context);
-  const contextBlock = context ? `Context:\n${context}\n\n` : "";
+  const contextBlock =
+    request.context.state === "present" && request.context.value ? `Context:\n${request.context.value}\n\n` : "";
   return `${contextBlock}Mission:\n${request.mission}`;
 }
 
@@ -59,7 +58,7 @@ export async function runTask(
   const resourceLoader = await createTaskResourceLoader({
     cwd: ctx.cwd,
     systemPrompt: buildTaskSystemPrompt(resolvedRole),
-    skillNames: presentValue(request.skills) ?? [],
+    skillNames: request.skills.state === "present" ? request.skills.value : [],
   });
   const customTools = resolvedRole.tools.includes(APPROVED_COMMAND_TOOL)
     ? [createApprovedCommandTool(resolvedRole.verificationCommands)]
@@ -68,7 +67,10 @@ export async function runTask(
     cwd: ctx.cwd,
     model,
     runtime,
-    thinkingLevel: presentValue(request.reasoning) ?? ctx.thinkingLevel ?? DEFAULT_TASK_REASONING_LEVEL,
+    thinkingLevel:
+      request.reasoning.state === "present"
+        ? request.reasoning.value
+        : (ctx.thinkingLevel ?? DEFAULT_TASK_REASONING_LEVEL),
     tools: resolvedRole.tools,
     customTools,
     resourceLoader,
@@ -98,14 +100,18 @@ export async function runTask(
     const output = finalAssistantText(session.messages);
     const parsedOutput = parseTaskOutput(output);
     const assistant = readAssistantOutcome(session.messages);
-    const stopReason = presentValue(assistant.stopReason);
-    const promptErrorText = presentValue(promptOutcome.promptError);
+    const promptErrors =
+      promptOutcome.promptError.state === "present" && promptOutcome.promptError.value
+        ? [promptOutcome.promptError.value]
+        : [];
 
     const isAbortRequested = signal.aborted;
-    const isStoppedByAbort = stopReason === ABORTED_STOP_REASON;
+    const isStoppedByAbort =
+      assistant.stopReason.state === "present" && assistant.stopReason.value === ABORTED_STOP_REASON;
     const wasCancelled = isAbortRequested || promptOutcome.timedOut || isStoppedByAbort;
-    const hasPromptError = Boolean(promptErrorText);
-    const hasErrorStopReason = stopReason === ERROR_STOP_REASON;
+    const hasPromptError = promptErrors.length > 0;
+    const hasErrorStopReason =
+      assistant.stopReason.state === "present" && assistant.stopReason.value === ERROR_STOP_REASON;
     const hasNoOutput = output === "";
     const failed = hasPromptError || hasErrorStopReason || hasNoOutput;
 
@@ -113,12 +119,11 @@ export async function runTask(
     progress.currentTask = progress.status === "success" ? COMPLETED_TASK_LABEL : STOPPED_TASK_LABEL;
     publish();
 
-    const assistantErrorMessage = presentValue(assistant.errorMessage);
     const errors = [
       ...parsedOutput.errors,
       ...(promptOutcome.timedOut ? [TIMED_OUT_ERROR_MESSAGE] : []),
-      ...(promptErrorText ? [promptErrorText] : []),
-      ...(assistantErrorMessage === undefined ? [] : [assistantErrorMessage]),
+      ...promptErrors,
+      ...(assistant.errorMessage.state === "present" ? [assistant.errorMessage.value] : []),
     ];
 
     return {

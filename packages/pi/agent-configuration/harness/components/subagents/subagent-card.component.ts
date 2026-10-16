@@ -46,7 +46,7 @@ export function renderSubagentCard(
   progressLookup: TaskProgressLookup,
   lastComponent: ValueState<Component>,
 ): Component {
-  const activityLookup = readToolActivity(toolCallId);
+  const activityLookup = readToolActivity({ state: "present", value: toolCallId });
   const current = resolveCardProgress(progressLookup, activityLookup);
   const status = cardStatus(current, activityLookup);
   const label = resolveCardTitle(current, title, activityLookup);

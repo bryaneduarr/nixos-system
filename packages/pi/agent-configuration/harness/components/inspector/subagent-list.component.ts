@@ -3,9 +3,9 @@ import { truncateToWidth } from "@earendil-works/pi-tui";
 import { ROW_NUMBER_WIDTH } from "../../constants/inspector/format.constant.ts";
 import { EMPTY_VALUE_LABEL, TRUNCATION_MARK } from "../../constants/inspector/label.constant.ts";
 import { SELECTED_ROW_BACKGROUND } from "../../constants/inspector/theme-color.constant.ts";
-import { presentValue } from "../../services/activity/value/present-value.service.ts";
 import { formatDuration } from "../../services/inspector/detail/format-duration.service.ts";
 import { compactUsageLabel } from "../../services/inspector/labels/compact-usage-label.service.ts";
+import { contextWindowLabel } from "../../services/inspector/labels/context-window-label.service.ts";
 import { formatTokens } from "../../services/inspector/labels/format-tokens.service.ts";
 import { modelShortLabel } from "../../services/inspector/labels/model-short-label.service.ts";
 import { oneSentence } from "../../services/inspector/labels/one-sentence.service.ts";
@@ -23,11 +23,9 @@ function subagentTarget(row: ToolActivity): string {
 }
 
 function subagentLine(row: ToolActivity, rowNumber: number, width: number, theme: Theme): string {
-  const thinking = presentValue(row.thinkingLevel) ?? EMPTY_VALUE_LABEL;
-  const subagentModel = presentValue(row.model);
-  const contextWindow = subagentModel === undefined ? undefined : presentValue(subagentModel.contextWindow);
-  const windowLabel = contextWindow ? formatTokens(contextWindow) : EMPTY_VALUE_LABEL;
-  const endTime = presentValue(row.endedAt) ?? Date.now();
+  const thinking = row.thinkingLevel.state === "present" ? row.thinkingLevel.value : EMPTY_VALUE_LABEL;
+  const windowLabel = contextWindowLabel(row.model);
+  const endTime = row.endedAt.state === "present" ? row.endedAt.value : Date.now();
   const elapsed = formatDuration(Math.max(0, endTime - row.startedAt));
   const usage = compactUsageLabel(row.usage, row.model);
   const model = modelShortLabel(row.model);

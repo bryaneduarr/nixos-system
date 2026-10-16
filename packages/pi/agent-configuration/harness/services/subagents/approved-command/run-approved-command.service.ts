@@ -6,7 +6,6 @@ import {
 } from "../../../constants/subagents/approved-command.constant.ts";
 import type { ApprovedCommandOutcome } from "../../../types/subagents/approved-command/approved-command-outcome.interface.ts";
 import type { RunApprovedCommandInput } from "../../../types/subagents/approved-command/run-approved-command-input.interface.ts";
-import { presentValue } from "../../activity/value/present-value.service.ts";
 import { runCommand } from "../../tools/process/run-command.service.ts";
 import { toToolCancellation } from "../../tools/process/tool-cancellation.service.ts";
 import { clampLines } from "../../tools/text/clamp-lines.service.ts";
@@ -24,7 +23,7 @@ export async function runApprovedCommand(input: RunApprovedCommandInput): Promis
     command: { form: "shell", shellLine: input.command },
     cwd: input.cwd,
     timeoutMs: APPROVED_COMMAND_TIMEOUT_MS,
-    cancellation: toToolCancellation(presentValue(input.signal)),
+    cancellation: toToolCancellation(input.signal.state === "present" ? input.signal.value : undefined),
   });
   const outputParts = [result.stdout, result.stderr].filter(Boolean);
   const separator = result.stdout && result.stderr ? "\n" : "";

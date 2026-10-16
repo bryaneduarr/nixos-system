@@ -48,7 +48,7 @@ export function createHarnessRenderers(tool: HarnessTool) {
       const text = extractText(result.content);
       const state = resultVisualState(tool, text, options.isPartial, context.isError);
       const lines = presentationLines(resultPresentation(tool, context.args, text, state), theme);
-      const lookup = readToolActivity(context.toolCallId);
+      const lookup = readToolActivity({ state: "present", value: context.toolCallId });
       if (lookup.found) lines.push(elapsedLine(lookup.entry, theme));
 
       const box = reuseOrCreateToolBox(toValueState(context.lastComponent), theme, tool);

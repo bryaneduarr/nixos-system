@@ -3,15 +3,16 @@ import { renderActivitySummary } from "../../../components/activity/summary.comp
 import { ACTIVITY_WIDGET_KEY } from "../../../constants/activity/activity-keys.constant.ts";
 import { SPINNER_TICK_MS } from "../../../constants/activity/spinner.constant.ts";
 import type { ActivityPublisher } from "../../../types/activity/activity-publisher.interface.ts";
+import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 import { inspectRequestStore } from "../../inspector/request/shared-inspect-request-store.service.ts";
 import { countMessageEntries } from "../history/count-message-entries.service.ts";
 import { activitySummaryState } from "../summary/shared-activity-summary-state.service.ts";
 
 export function createActivityPublisher(): ActivityPublisher {
-  let currentContext: ExtensionContext | undefined;
+  let currentContext: ValueState<ExtensionContext> = { state: "absent" };
   let working = false;
   let frame = 0;
-  let ticker: ReturnType<typeof setInterval> | undefined;
+  let ticker: ValueState<ReturnType<typeof setInterval>> = { state: "absent" };
 
   const publish = (ctx: ExtensionContext): void => {
     if (ctx.mode !== "tui") return;
@@ -24,8 +25,8 @@ export function createActivityPublisher(): ActivityPublisher {
     );
   };
   const stopTicker = (): void => {
-    if (ticker !== undefined) clearInterval(ticker);
-    ticker = undefined;
+    if (ticker.state === "present") clearInterval(ticker.value);
+    ticker = { state: "absent" };
   };
   const stopWork = (): void => {
     working = false;
@@ -36,7 +37,7 @@ export function createActivityPublisher(): ActivityPublisher {
   return {
     publish,
     touch(ctx) {
-      currentContext = ctx;
+      currentContext = { state: "present", value: ctx };
       inspectRequestStore.setContext(ctx);
       publish(ctx);
     },
@@ -44,11 +45,14 @@ export function createActivityPublisher(): ActivityPublisher {
       working = nextWorking;
     },
     startTicker() {
-      if (ticker !== undefined) return;
-      ticker = setInterval(() => {
-        frame++;
-        if (currentContext) publish(currentContext);
-      }, SPINNER_TICK_MS);
+      if (ticker.state === "present") return;
+      ticker = {
+        state: "present",
+        value: setInterval(() => {
+          frame++;
+          if (currentContext.state === "present") publish(currentContext.value);
+        }, SPINNER_TICK_MS),
+      };
     },
     resetWork() {
       frame = 0;
@@ -57,7 +61,7 @@ export function createActivityPublisher(): ActivityPublisher {
     stopWork,
     close(ctx) {
       stopWork();
-      currentContext = undefined;
+      currentContext = { state: "absent" };
       ctx.ui.setWidget(ACTIVITY_WIDGET_KEY, undefined);
     },
   };

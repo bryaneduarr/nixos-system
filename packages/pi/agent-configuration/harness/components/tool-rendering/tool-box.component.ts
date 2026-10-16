@@ -50,8 +50,7 @@ export class ToolBox implements Component {
   render(width: number): string[] {
     if (!activityVisibility.isVisible()) return [];
 
-    const toolCall = this.content.toolCall;
-    const lookup = readToolActivity(toolCall.state === "present" ? toolCall.value : undefined);
+    const lookup = readToolActivity(this.content.toolCall);
     const isRunning = lookup.found && lookup.entry.status === "running";
     if (this.cache.state === "rendered" && this.cache.width === width && !isRunning) return this.cache.lines;
 

@@ -13,6 +13,7 @@ export function readThinkingTitles(messageNumber: number): string[] {
 
 function readLineTitle(line: string): string[] {
   const match = line.trim().match(TITLE_PATTERN);
-  const titleText = match?.[1] ?? match?.[2];
+  if (match === null) return [];
+  const titleText = match[1] ?? match[2];
   return titleText === undefined ? [] : [oneLine(titleText)];
 }

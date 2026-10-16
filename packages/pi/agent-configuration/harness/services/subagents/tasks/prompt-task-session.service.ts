@@ -1,7 +1,6 @@
 import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 import type { PromptTaskOutcome } from "../../../types/subagents/tasks/prompt-task-outcome.interface.ts";
 import type { PromptTaskSessionInput } from "../../../types/subagents/tasks/prompt-task-session-input.interface.ts";
-import { presentValue } from "../../activity/value/present-value.service.ts";
 
 export async function promptTaskSession(input: PromptTaskSessionInput): Promise<PromptTaskOutcome> {
   const { session, signal } = input;
@@ -13,13 +12,13 @@ export async function promptTaskSession(input: PromptTaskSessionInput): Promise<
   };
   signal.addEventListener("abort", abort, { once: true });
 
-  const timeoutMs = presentValue(input.timeoutMs);
-  const timer = timeoutMs
-    ? setTimeout(() => {
-        timedOut = true;
-        abort();
-      }, timeoutMs)
-    : undefined;
+  const timer =
+    input.timeoutMs.state === "present" && input.timeoutMs.value
+      ? setTimeout(() => {
+          timedOut = true;
+          abort();
+        }, input.timeoutMs.value)
+      : undefined;
 
   try {
     if (signal.aborted) {

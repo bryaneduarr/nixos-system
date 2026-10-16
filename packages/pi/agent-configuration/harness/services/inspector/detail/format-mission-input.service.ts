@@ -1,7 +1,6 @@
 import { INVALID_LIST_LABEL, NONE_LABEL } from "../../../constants/inspector/label.constant.ts";
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
 import type { ValueState } from "../../../types/activity/value-state.interface.ts";
-import { presentValue } from "../../activity/value/present-value.service.ts";
 import { toValueState } from "../../activity/value/to-value-state.service.ts";
 import { resolveTaskRole } from "../../subagents/roles/resolve-task-role.service.ts";
 import { readStringList } from "./read-string-list.service.ts";
@@ -43,9 +42,8 @@ export function formatMissionInput(args: Record<string, unknown>): string {
     lines.push(`context: ${args.context}`);
   }
 
-  const approvedCommands = presentValue(verificationCommands);
-  if (approvedCommands !== undefined && approvedCommands.length > 0) {
-    lines.push(`approved commands: ${approvedCommands.join("; ")}`);
+  if (verificationCommands.state === "present" && verificationCommands.value.length > 0) {
+    lines.push(`approved commands: ${verificationCommands.value.join("; ")}`);
   }
 
   const skills = isUnknownArray(args.skills) ? args.skills.join(", ") : NONE_LABEL;
