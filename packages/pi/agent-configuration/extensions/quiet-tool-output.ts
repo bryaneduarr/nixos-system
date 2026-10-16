@@ -20,11 +20,11 @@ const UNSAFE_FILE_NAME_CHARACTERS = /[^a-zA-Z0-9_-]/g;
 const UNSAFE_TIMESTAMP_CHARACTERS = /[:.]/g;
 const SHORTENED_PREVIEW_RESERVED_CHARACTERS = 24;
 
-/* Result of writing the full output of a tool call to a file. */
+/** Result of writing the full output of a tool call to a file. */
 type SavedOutput =
-  /* The full output was written to the file at the relative path. */
+  /** The full output was written to the file at the relative path. */
   | { readonly saved: true; readonly relativePath: string }
-  /* Writing the full output failed with the given message. */
+  /** Writing the full output failed with the given message. */
   | { readonly saved: false; readonly message: string };
 
 function previewOutput(output: string, headLines: number, tailLines: number): string {

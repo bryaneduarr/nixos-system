@@ -2,11 +2,11 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const UNAVAILABLE_IN_REGISTRATION_TESTS = "Not available while recording registrations.";
 
-/* Extension API that records registrations, with the list it fills. */
+/** Extension API that records registrations, with the list it fills. */
 export interface RecordingExtensionApi {
-  /* API passed to an extension entry point. */
+  /** API passed to an extension entry point. */
   readonly api: ExtensionAPI;
-  /* Registrations in call order, written as `<kind>:<name>`. */
+  /** Registrations in call order, written as `<kind>:<name>`. */
   readonly registrations: readonly string[];
 }
 

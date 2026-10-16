@@ -1,13 +1,13 @@
-/* Fields that start recording a tool call. */
+/** Fields that start recording a tool call. */
 export interface ActivityBeginInput {
-  /* Identifier of the tool call. */
+  /** Identifier of the tool call. */
   readonly id: string;
-  /* Name of the tool that runs. */
+  /** Name of the tool that runs. */
   readonly toolName: string;
-  /* Arguments the tool is called with. */
+  /** Arguments the tool is called with. */
   readonly args: Readonly<Record<string, unknown>>;
-  /* Working directory the call runs in. */
+  /** Working directory the call runs in. */
   readonly cwd: string;
-  /* Start time of the call, in milliseconds since the epoch. */
+  /** Start time of the call, in milliseconds since the epoch. */
   readonly startedAt: number;
 }

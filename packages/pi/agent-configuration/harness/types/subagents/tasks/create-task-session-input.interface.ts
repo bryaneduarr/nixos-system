@@ -7,20 +7,20 @@ import type {
 import type { SubagentTool } from "../roles/subagent-tool.interface.ts";
 import type { TaskModel } from "./task-model.interface.ts";
 
-/* Inputs that create an isolated worker session. */
+/** Inputs that create an isolated worker session. */
 export interface CreateTaskSessionInput {
-  /* Working directory of the worker. */
+  /** Working directory of the worker. */
   readonly cwd: string;
-  /* Model the worker runs on. */
+  /** Model the worker runs on. */
   readonly model: TaskModel;
-  /* Runtime that provides the model. */
+  /** Runtime that provides the model. */
   readonly runtime: ModelRuntime;
-  /* Reasoning level the worker runs with. */
+  /** Reasoning level the worker runs with. */
   readonly thinkingLevel: NonNullable<CreateAgentSessionOptions["thinkingLevel"]>;
-  /* Built-in tools the worker may call. */
+  /** Built-in tools the worker may call. */
   readonly tools: readonly SubagentTool[];
-  /* Extension tools the worker may call. */
+  /** Extension tools the worker may call. */
   readonly customTools: readonly ToolDefinition[];
-  /* Loader of the worker system prompt and skills. */
+  /** Loader of the worker system prompt and skills. */
   readonly resourceLoader: DefaultResourceLoader;
 }

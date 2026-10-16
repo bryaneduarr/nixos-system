@@ -5,9 +5,9 @@ import type { SessionMenuComponent } from "./session-menu-component.interface.ts
 import type { SessionMenuTerminal } from "./session-menu-terminal.interface.ts";
 import type { SessionMenuTheme } from "./session-menu-theme.interface.ts";
 
-/* Pi interface that shows the session menu as an overlay. */
+/** Pi interface that shows the session menu as an overlay. */
 export interface SessionMenuUi {
-  /* Shows the menu component and resolves with the selection that closes it. */
+  /** Shows the menu component and resolves with the selection that closes it. */
   readonly custom: (
     factory: (
       tui: SessionMenuTerminal,

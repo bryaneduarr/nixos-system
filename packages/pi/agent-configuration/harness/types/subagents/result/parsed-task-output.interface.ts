@@ -1,17 +1,17 @@
-/* Sections extracted from a worker's final text report. */
+/** Sections extracted from a worker's final text report. */
 export interface ParsedTaskOutput {
-  /* Summary section, or the full text when the section is missing. */
+  /** Summary section, or the full text when the section is missing. */
   readonly summary: string;
-  /* Items of the findings section. */
+  /** Items of the findings section. */
   readonly findings: string[];
-  /* Items of the unresolved questions section. */
+  /** Items of the unresolved questions section. */
   readonly unresolvedQuestions: string[];
-  /* Items of the checks section. */
+  /** Items of the checks section. */
   readonly checks: string[];
-  /* Items of the files changed section. */
+  /** Items of the files changed section. */
   readonly filesChanged: string[];
-  /* Items of the risks section. */
+  /** Items of the risks section. */
   readonly risks: string[];
-  /* Items of the errors section. */
+  /** Items of the errors section. */
   readonly errors: string[];
 }

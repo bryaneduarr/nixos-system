@@ -7,16 +7,16 @@ import type { ProjectSelection } from "./menu/project-selection.interface.ts";
 import type { LiveSession } from "./registry/live-session.interface.ts";
 import type { SessionRegistry } from "./registry/session-registry.interface.ts";
 
-/* External effects of the session commands, replaceable in tests. */
+/** External effects of the session commands, replaceable in tests. */
 export interface SessionDependencies {
-  /* Creates the Herdr session service for a registry and socket. */
+  /** Creates the Herdr session service for a registry and socket. */
   readonly herdr: (registry: SessionRegistry, socket: string) => HerdrSessions;
-  /* Shows the live session menu and returns the choice. */
+  /** Shows the live session menu and returns the choice. */
   readonly selectSession: (ctx: ExtensionContext, registry: SessionRegistry) => Promise<MenuSelection>;
-  /* Asks for a project directory for a new session. */
+  /** Asks for a project directory for a new session. */
   readonly selectProject: (ctx: ExtensionContext, registry: SessionRegistry) => Promise<ProjectSelection>;
-  /* Schedules the cleanup worker that closes a pane after a session is replaced. */
+  /** Schedules the cleanup worker that closes a pane after a session is replaced. */
   readonly scheduleCleanup: (row: LiveSession, socket: string) => Promise<CleanupCancellation>;
-  /* Effects of the explicit exit command. */
+  /** Effects of the explicit exit command. */
   readonly exit: ExitDependencies;
 }

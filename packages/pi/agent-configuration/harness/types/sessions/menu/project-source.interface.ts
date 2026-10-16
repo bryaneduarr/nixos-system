@@ -1,5 +1,5 @@
-/* Project directories that the project picker offers from past and live sessions. */
+/** Project directories that the project picker offers from past and live sessions. */
 export interface ProjectSource {
-  /* Lists canonical project directories that have live or past sessions. */
+  /** Lists canonical project directories that have live or past sessions. */
   projects(): Promise<string[]>;
 }

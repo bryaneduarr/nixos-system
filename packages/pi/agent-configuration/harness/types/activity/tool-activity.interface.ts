@@ -6,34 +6,34 @@ import type { SubagentModel } from "./subagent-model.interface.ts";
 import type { ToolActivityUsage } from "./tool-activity-usage.interface.ts";
 import type { ValueState } from "./value-state.interface.ts";
 
-/* A single tool call executed by the primary agent. */
+/** A single tool call executed by the primary agent. */
 export interface ToolActivity {
-  /* Identifier of the tool call. */
+  /** Identifier of the tool call. */
   readonly id: string;
-  /* Name of the tool that ran. */
+  /** Name of the tool that ran. */
   readonly toolName: string;
-  /* Arguments the tool was called with. */
+  /** Arguments the tool was called with. */
   readonly args: Readonly<Record<string, unknown>>;
-  /* Lifecycle state of the call. */
+  /** Lifecycle state of the call. */
   readonly status: ActivityStatus;
-  /* Provider-reported usage for a delegated worker. */
+  /** Provider-reported usage for a delegated worker. */
   readonly usage: ToolActivityUsage;
-  /* Model metadata captured for a delegated worker. */
+  /** Model metadata captured for a delegated worker. */
   readonly model: ValueState<SubagentModel>;
-  /* Effective thinking or reasoning level used by a delegated worker. */
+  /** Effective thinking or reasoning level used by a delegated worker. */
   readonly thinkingLevel: ValueState<string>;
-  /* Full, model-visible result text for this tool call. */
+  /** Full, model-visible result text for this tool call. */
   readonly text: string;
-  /* Task progress reported by a delegated worker, parsed from the result details. */
+  /** Task progress reported by a delegated worker, parsed from the result details. */
   readonly details: ValueState<TaskProgress>;
-  /* Working directory the call ran in. */
+  /** Working directory the call ran in. */
   readonly cwd: string;
-  /* Time the call started, in milliseconds since the epoch. */
+  /** Time the call started, in milliseconds since the epoch. */
   readonly startedAt: number;
-  /* Time the call ended, once it has ended. */
+  /** Time the call ended, once it has ended. */
   readonly endedAt: ValueState<number>;
-  /* Saved full-output artifact referenced by the result text. */
+  /** Saved full-output artifact referenced by the result text. */
   readonly artifactPath: ArtifactPathLookup;
-  /* Nested worker tool calls, only present for the `task` tool. */
+  /** Nested worker tool calls, only present for the `task` tool. */
   readonly sub: readonly SubToolActivity[];
 }
