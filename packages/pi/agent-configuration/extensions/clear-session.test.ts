@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { asExtensionApi } from "./clear-session.test-double.ts";
 import clearExtension from "./clear-session.ts";
-import lastModelExtension from "./last-model/index.ts";
+import lastModelExtension from "./last-model/last-model.extension.ts";
 
 const stateHome = mkdtempSync(join(tmpdir(), "pi-clear-test-"));
 process.env.XDG_STATE_HOME = stateHome;

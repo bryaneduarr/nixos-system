@@ -1,9 +1,9 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
-    "agent-configuration/harness/index.ts",
+    "agent-configuration/harness/harness.extension.ts",
     "agent-configuration/extensions/*.ts",
-    "agent-configuration/extensions/*/index.ts",
+    "agent-configuration/extensions/*/*.extension.ts",
     "pi-tools/*.ts",
     "**/*.test.ts"
   ],

@@ -2,10 +2,10 @@ import { describe, expect, test } from "bun:test";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { createRecordingExtensionApi } from "./extension-registrations.test-double.ts";
 import clearSessionExtension from "./extensions/clear-session.ts";
-import codexFastModeExtension from "./extensions/codex-fast-mode/index.ts";
-import lastModelExtension from "./extensions/last-model/index.ts";
+import codexFastModeExtension from "./extensions/codex-fast-mode/codex-fast-mode.extension.ts";
+import lastModelExtension from "./extensions/last-model/last-model.extension.ts";
 import quietToolOutputExtension from "./extensions/quiet-tool-output.ts";
-import harnessExtension from "./harness/index.ts";
+import harnessExtension from "./harness/harness.extension.ts";
 
 const HARNESS_REGISTRATIONS = [
   "tool:search",

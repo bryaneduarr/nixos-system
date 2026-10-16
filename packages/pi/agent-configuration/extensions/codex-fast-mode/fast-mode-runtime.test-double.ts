@@ -47,7 +47,7 @@ interface ProviderConfig {
 const ANSI_ESCAPE = String.fromCharCode(27);
 const ANSI_PATTERN = new RegExp(`${ANSI_ESCAPE}\\[[0-9;]*m`, "g");
 
-const { default: extension } = await import("./index.ts");
+const { default: extension } = await import("./codex-fast-mode.extension.ts");
 
 function registrationSlot<T>(name: string): { set: (value: T) => void; require: () => T } {
   const registrations: T[] = [];

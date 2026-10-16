@@ -1,6 +1,6 @@
 # Pi configuration
 
-- `agent-configuration/harness/` is the Pi harness. `index.ts` registers everything; code lives in `types/`, `schemas/`, `constants/`, `services/`, `tools/`, `commands/`, and `components/`, each divided by domain, such as `services/sessions/`.
+- `agent-configuration/harness/` is the Pi harness. `harness.extension.ts` registers everything, and `package.json` points Pi to it; code lives in `types/`, `schemas/`, `constants/`, `services/`, `tools/`, `commands/`, and `components/`, each divided by domain, such as `services/sessions/`.
 - `agent-configuration/extensions/` contains independent Pi extensions. Multi-file extensions use the same folders.
 - `agent-configuration/settings/` defines JSON settings installed by Home Manager.
 - `agent-configuration/themes/` contains themes.

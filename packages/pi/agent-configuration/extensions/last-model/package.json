@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "pi": {
+    "extensions": ["./last-model.extension.ts"]
+  }
+}
