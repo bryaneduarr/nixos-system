@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { ImplementationQueue } from "../agent-configuration/harness/subagents/implementation-queue.ts";
+import { createImplementationQueue } from "./create-implementation-queue.service.ts";
 
 test("implementation tasks run one at a time", async () => {
-  const queue = new ImplementationQueue();
+  const queue = createImplementationQueue();
   let active = 0;
   let peak = 0;
   let releaseFirst!: () => void;

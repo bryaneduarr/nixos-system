@@ -8,7 +8,8 @@ import {
 } from "../../constants/inspector/pseudo-tool.constant.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { presentValue } from "../../services/activity/value/present-value.service.ts";
-import { resolveTaskRole } from "../../subagents/roles.ts";
+import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
+import { resolveTaskRole } from "../../services/subagents/roles/resolve-task-role.service.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import type { SubToolActivity } from "../../types/activity/sub-tool-activity.interface.ts";
@@ -67,9 +68,9 @@ function formatMissionInput(args: Record<string, unknown>): string {
 
   try {
     const resolved = resolveTaskRole({
-      ...(args.role === undefined ? {} : { role: String(args.role) }),
-      ...(selectedTools ? { tools: selectedTools } : {}),
-      ...(verificationCommands ? { verificationCommands } : {}),
+      role: toValueState(args.role === undefined ? undefined : String(args.role)),
+      tools: toValueState(selectedTools),
+      verificationCommands: toValueState(verificationCommands),
     });
     const effectiveTools = resolved.tools.join(", ") || "none";
     roleAndTools = [`role: ${resolved.role}`, `effective tools: ${effectiveTools}`];

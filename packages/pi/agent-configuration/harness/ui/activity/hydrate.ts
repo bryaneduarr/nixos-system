@@ -7,7 +7,7 @@ import {
 } from "../../activity/parse.ts";
 import { activityStore } from "../../activity/store.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
-import { taskResultFailed } from "../../subagents/result.ts";
+import { taskResultFailed } from "../../services/subagents/tasks/task-result-failed.service.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import { extractText, resultFailed } from "../tool-renderer.ts";

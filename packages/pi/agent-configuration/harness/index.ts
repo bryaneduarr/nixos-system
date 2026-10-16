@@ -14,9 +14,12 @@ import { EditParamsSchema } from "./schemas/tools/edit/edit-parameters.schema.ts
 import { ReadParamsSchema } from "./schemas/tools/read/read-parameters.schema.ts";
 import { RunParamsSchema } from "./schemas/tools/run/run-parameters.schema.ts";
 import { SearchParamsSchema } from "./schemas/tools/search/search-parameters.schema.ts";
+import { registerSubagentCancelCommand } from "./commands/subagent-cancel/subagent-cancel.command.ts";
+import { registerSubagentStatusCommand } from "./commands/subagent-status/subagent-status.command.ts";
 import { toToolCancellation } from "./services/tools/process/tool-cancellation.service.ts";
+import { installSubagentEvents } from "./services/subagents/events/install-subagent-events.service.ts";
 import { installSessions } from "./sessions/install.ts";
-import { registerSubagentTool } from "./subagents/tool.ts";
+import { registerTaskTool } from "./tools/task/task.tool.ts";
 import { editFile, toEditRequest } from "./tools/edit.ts";
 import { readSource, toReadSelection } from "./tools/read.ts";
 import { runShell } from "./tools/run.ts";
@@ -128,7 +131,10 @@ export default function harnessExtension(pi: ExtensionAPI): void {
     },
   });
 
-  registerSubagentTool(pi);
+  registerTaskTool(pi);
+  registerSubagentStatusCommand(pi);
+  registerSubagentCancelCommand(pi);
+  installSubagentEvents(pi);
 
   installHarnessPresentation(pi);
   installSessions(pi);
