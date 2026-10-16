@@ -9,6 +9,7 @@ import {
   THINKING_LEVEL_CHANGE_ENTRY_TYPE,
 } from "../../constants/session-history/session-entry-type.constant.ts";
 import type { ModelSelection } from "../../types/model-selection/model-selection.interface.ts";
+import type { ExcludedSessionFile } from "../../types/session-history/session-file.interface.ts";
 import { recentSessionModel } from "../session-history/recent-session-model.service.ts";
 import { hasExplicitStartupSelection } from "./has-explicit-startup-selection.service.ts";
 import { readSavedModel } from "./read-saved-model.service.ts";
@@ -25,6 +26,11 @@ function isInScope(ctx: ExtensionContext, selection: ModelSelection): boolean {
     ctx.scopedModels.length === 0 ||
     ctx.scopedModels.some((scoped) => scoped.model.provider === selection.provider && scoped.model.id === selection.id)
   );
+}
+
+function excludedSessionFile(ctx: ExtensionContext): ExcludedSessionFile {
+  const sessionFile = ctx.sessionManager.getSessionFile();
+  return sessionFile === undefined ? { state: "none" } : { state: "excluded", path: sessionFile };
 }
 
 function isRestoreEligible(event: SessionStartEvent, ctx: ExtensionContext): boolean {
@@ -44,7 +50,7 @@ export async function restoreSavedModel(
   const saved = readSavedModel();
   const usesSavedModel = saved.found || event.reason !== STARTUP_SESSION_REASON;
   // Without a saved model, the first startup after installation uses the most recent session.
-  const lookup = usesSavedModel ? saved : recentSessionModel(ctx.sessionManager.getSessionFile());
+  const lookup = usesSavedModel ? saved : recentSessionModel(excludedSessionFile(ctx));
   if (!lookup.found) return;
   const selection = lookup.selection;
   const model = ctx.modelRegistry.find(selection.provider, selection.id);
