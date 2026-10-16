@@ -28,7 +28,7 @@ function finishToolCall(input: TrackTaskProgressInput, event: ToolExecutionEndEv
   const matchingCall = progress.activity.find((toolCall) => toolCall.id === event.toolCallId);
   if (matchingCall) {
     matchingCall.status = event.isError ? "error" : "success";
-    matchingCall.text = textContent(event.result?.content);
+    matchingCall.text = textContent(isRecord(event.result) ? event.result.content : undefined);
     matchingCall.endedAt = { state: "present", value: Date.now() };
   }
 

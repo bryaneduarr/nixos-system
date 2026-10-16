@@ -9,9 +9,12 @@ function sectionItems(text: string, name: string): string[] {
     "i",
   );
   const match = pattern.exec(text);
-  if (!match?.[1]) return [];
+  if (match === null) return [];
 
-  return match[1]
+  const body = match[1];
+  if (body === undefined) return [];
+
+  return body
     .split(/\r?\n/)
     .map((line) => line.replace(/^\s*[-*]\s*/, "").trim())
     .filter(Boolean);

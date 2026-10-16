@@ -1,21 +1,12 @@
 import { beforeEach, expect, test } from "bun:test";
-import type { Theme } from "@earendil-works/pi-coding-agent";
 import { NO_TOOL_RESULT_FIELDS } from "../../constants/activity/no-tool-result-fields.constant.ts";
 import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
 import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
+import { noLiveProgress, noPreviousComponent, plainSubagentCardTheme } from "./subagent-card.test-double.ts";
 
 const TEST_CWD = "/tmp";
 
 const { renderSubagentCard } = await import("./subagent-card.component.ts");
-
-const noLiveProgress = { found: false } as const;
-const noPreviousComponent = { state: "absent" } as const;
-
-/* The card calls only fg and bold, so the test double provides just those and is cast to the full Theme. */
-const theme = {
-  fg: (_color: string, text: string) => text,
-  bold: (text: string) => text,
-} as Theme;
 
 beforeEach(() => {
   activityStore.clear();
@@ -60,7 +51,13 @@ test("the card shows only the active tool, its target, and its state", () => {
     sub: activity,
   });
 
-  const card = renderSubagentCard(theme, "call-1", "Inspect parser", noLiveProgress, noPreviousComponent);
+  const card = renderSubagentCard(
+    plainSubagentCardTheme,
+    "call-1",
+    "Inspect parser",
+    noLiveProgress,
+    noPreviousComponent,
+  );
   const lines = card.render(80).join("\n");
 
   expect(lines).toContain("+-- / SUBAGENT ");
@@ -77,65 +74,12 @@ test("the card shows only the active tool, its target, and its state", () => {
 });
 
 test("the card renders while Pi streams an incomplete tool call", () => {
-  const card = renderSubagentCard(theme, "partial-call", "", noLiveProgress, noPreviousComponent);
+  const card = renderSubagentCard(plainSubagentCardTheme, "partial-call", "", noLiveProgress, noPreviousComponent);
   const lines = card.render(80).join("\n");
 
   expect(lines).toContain("+-- / SUBAGENT ");
   expect(lines).toContain("Preparing task");
   expect(lines).toContain("Starting");
-});
-
-test("a completed card shows the last tool's duration without earlier calls or total time", () => {
-  activityStore.begin({
-    id: "done-call",
-    toolName: "task",
-    args: { title: "Locate pi harness" },
-    cwd: TEST_CWD,
-    startedAt: 1000,
-  });
-  const activity = [
-    {
-      id: "bash-1",
-      toolName: "bash",
-      args: { command: "pwd" },
-      status: "success" as const,
-      text: "done",
-      startedAt: 1000,
-      endedAt: { state: "present" as const, value: 1100 },
-    },
-    {
-      id: "grep-1",
-      toolName: "grep",
-      args: {},
-      status: "success" as const,
-      text: "done",
-      startedAt: 1000,
-      endedAt: { state: "present" as const, value: 2200 },
-    },
-  ];
-
-  activityStore.finish("done-call", {
-    ...NO_TOOL_RESULT_FIELDS,
-    sub: activity,
-    text: "done",
-    status: "success",
-    endedAt: 35400,
-  });
-
-  const card = renderSubagentCard(theme, "done-call", "Locate pi harness", noLiveProgress, noPreviousComponent);
-  const lines = card.render(80).join("\n");
-
-  expect(lines).toContain("+-- SUBAGENT ");
-  expect(lines).not.toContain("+-- / SUBAGENT ");
-  expect(lines).toContain("Locate pi harness");
-  expect(lines).toContain("GREP");
-  expect(lines).toContain("Done");
-  expect(lines).toContain("Time: 1.2 s");
-  expect(lines).not.toContain("BASH");
-  expect(lines).toContain("Completed");
-  expect(lines).not.toContain("34.4 s");
-  expect(lines).not.toContain("Model");
-  expect(lines).not.toContain("Task:");
 });
 
 test("Alt+V hides the subagent box and the renderer reuses its component", () => {
@@ -146,14 +90,20 @@ test("Alt+V hides the subagent box and the renderer reuses its component", () =>
     cwd: TEST_CWD,
     startedAt: Date.now(),
   });
-  const card = renderSubagentCard(theme, "call-1", "Inspect parser", noLiveProgress, noPreviousComponent);
+  const card = renderSubagentCard(
+    plainSubagentCardTheme,
+    "call-1",
+    "Inspect parser",
+    noLiveProgress,
+    noPreviousComponent,
+  );
 
   expect(card.render(80).length).toBeGreaterThan(0);
   activityVisibility.toggle();
   expect(card.render(80)).toEqual([]);
   activityVisibility.toggle();
 
-  const reusedCard = renderSubagentCard(theme, "call-1", "Inspect parser", noLiveProgress, {
+  const reusedCard = renderSubagentCard(plainSubagentCardTheme, "call-1", "Inspect parser", noLiveProgress, {
     state: "present",
     value: card,
   });

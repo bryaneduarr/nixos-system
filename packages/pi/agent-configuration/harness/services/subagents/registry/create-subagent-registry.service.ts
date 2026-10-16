@@ -14,7 +14,8 @@ export function createSubagentRegistry(): SubagentRegistry {
 
   const cancel = (id: string): boolean => {
     const run = runsById.get(id);
-    if (run?.progress.status !== "running") return false;
+    if (run === undefined) return false;
+    if (run.progress.status !== "running") return false;
 
     run.controller.abort();
     return true;
