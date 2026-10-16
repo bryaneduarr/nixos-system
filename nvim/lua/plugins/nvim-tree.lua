@@ -1,4 +1,3 @@
--- Git signs reuse the statusline colors: green added, orange changed, red removed.
 local git_highlights = {
   NvimTreeGitStagedIcon = "StatuslineGitAdded",
   NvimTreeGitNewIcon = "StatuslineGitAdded",
@@ -7,6 +6,56 @@ local git_highlights = {
   NvimTreeGitDeletedIcon = "StatuslineGitRemoved",
   NvimTreeGitMergeIcon = "StatuslineGitRemoved",
 }
+
+---@param status nvim_tree.git.Status
+---@return boolean
+local function has_pending_changes(status)
+  if status.file and status.file ~= "!!" then
+    return true
+  end
+  for _, xys in pairs(status.dir or {}) do
+    for _, xy in ipairs(xys) do
+      if xy ~= "!!" then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+-- The builtin Git decorator lists every child status on a folder; folders only show one pending mark instead.
+local function create_git_folder_decorator()
+  ---@class (exact) GitFolderDecorator: nvim_tree.api.Decorator
+  ---@field private pending_icon nvim_tree.api.highlighted_string
+  local GitFolderDecorator = require("nvim-tree.api").Decorator:extend()
+
+  function GitFolderDecorator:new()
+    self.enabled = true
+    self.highlight_range = "name"
+    self.icon_placement = "right_align"
+    self.pending_icon = { str = "~", hl = { "NvimTreeGitDirtyIcon" } }
+  end
+
+  ---@param node nvim_tree.api.Node
+  ---@return boolean
+  local function is_pending_folder(node)
+    return node.type == "directory" and node.git_status ~= nil and has_pending_changes(node.git_status)
+  end
+
+  ---@param node nvim_tree.api.Node
+  ---@return nvim_tree.api.highlighted_string[]?
+  function GitFolderDecorator:icons(node)
+    return is_pending_folder(node) and { self.pending_icon } or nil
+  end
+
+  ---@param node nvim_tree.api.Node
+  ---@return string?
+  function GitFolderDecorator:highlight_group(node)
+    return is_pending_folder(node) and "NvimTreeGitFolderDirtyHL" or nil
+  end
+
+  return GitFolderDecorator
+end
 
 return {
   "nvim-tree/nvim-tree.lua",
@@ -25,6 +74,7 @@ return {
       vim.keymap.set("n", "h", api.node.navigate.parent_close, opts("Close"))
     end,
     filters = { dotfiles = false },
+    git = { show_on_dirs = false },
     disable_netrw = true,
     hijack_cursor = true,
     sync_root_with_cwd = true,
@@ -39,16 +89,27 @@ return {
     renderer = {
       root_folder_label = false,
       highlight_git = true,
-      indent_markers = { enable = true },
+      indent_markers = {
+        enable = true,
+        icons = { corner = "|", edge = "|", item = "|", bottom = "-" },
+      },
       icons = {
+        git_placement = "right_align",
+        show = { folder_arrow = false },
+        symlink_arrow = " -> ",
+        web_devicons = { file = { enable = false } },
         glyphs = {
-          default = "󰈚",
+          default = "-",
+          symlink = "@",
+          bookmark = "m",
+          modified = "*",
           folder = {
-            default = "",
-            empty = "",
-            empty_open = "",
-            open = "",
-            symlink = "",
+            default = "/",
+            empty = "/",
+            empty_open = "/",
+            open = "/",
+            symlink = "@",
+            symlink_open = "@",
           },
           git = {
             staged = "+",
@@ -64,6 +125,9 @@ return {
     },
   },
   config = function(_, opts)
+    -- The decorator class needs nvim-tree loaded, so it cannot be built in the spec table.
+    opts.renderer.decorators =
+      { "Git", create_git_folder_decorator(), "Open", "Hidden", "Modified", "Bookmark", "Diagnostics", "Copied", "Cut" }
     require("nvim-tree").setup(opts)
 
     -- gruvbox-material gives the sidebar its own background; clear it to match Normal.
