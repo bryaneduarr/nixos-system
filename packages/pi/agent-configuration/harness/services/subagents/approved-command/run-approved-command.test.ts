@@ -5,13 +5,14 @@ test("implementation and verification commands use an exact allowlist", async ()
   const command = "printf approved";
   const cwd = process.cwd();
 
-  const allowed = await runApprovedCommand({ approvedCommands: [command], command, cwd, signal: undefined });
+  const absentSignal = { state: "absent" } as const;
+  const allowed = await runApprovedCommand({ approvedCommands: [command], command, cwd, signal: absentSignal });
   const deniedCommand = `${command}; printf changed`;
   const denied = await runApprovedCommand({
     approvedCommands: [command],
     command: deniedCommand,
     cwd,
-    signal: undefined,
+    signal: absentSignal,
   });
 
   expect(allowed.text).toContain("approved");

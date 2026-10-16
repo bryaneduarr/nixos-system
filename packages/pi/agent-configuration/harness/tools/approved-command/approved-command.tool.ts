@@ -1,6 +1,7 @@
 import { defineTool } from "@earendil-works/pi-coding-agent";
 import { APPROVED_COMMAND_TOOL } from "../../constants/subagents/roles.constant.ts";
 import { ApprovedCommandParams } from "../../schemas/subagents/approved-command/approved-command-params.schema.ts";
+import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
 import { runApprovedCommand } from "../../services/subagents/approved-command/run-approved-command.service.ts";
 
 export function createApprovedCommandTool(approvedCommands: readonly string[]) {
@@ -16,7 +17,7 @@ export function createApprovedCommandTool(approvedCommands: readonly string[]) {
         approvedCommands,
         command: params.command,
         cwd: ctx.cwd,
-        signal,
+        signal: toValueState(signal),
       });
 
       return {

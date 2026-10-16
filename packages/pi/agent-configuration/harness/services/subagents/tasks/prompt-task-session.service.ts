@@ -3,10 +3,6 @@ import type { PromptTaskOutcome } from "../../../types/subagents/tasks/prompt-ta
 import type { PromptTaskSessionInput } from "../../../types/subagents/tasks/prompt-task-session-input.interface.ts";
 import { presentValue } from "../../activity/value/present-value.service.ts";
 
-function errorText(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 export async function promptTaskSession(input: PromptTaskSessionInput): Promise<PromptTaskOutcome> {
   const { session, signal } = input;
   let timedOut = false;
@@ -15,7 +11,7 @@ export async function promptTaskSession(input: PromptTaskSessionInput): Promise<
   const abort = () => {
     void session.abort();
   };
-  signal?.addEventListener("abort", abort, { once: true });
+  signal.addEventListener("abort", abort, { once: true });
 
   const timeoutMs = presentValue(input.timeoutMs);
   const timer = timeoutMs
@@ -26,19 +22,19 @@ export async function promptTaskSession(input: PromptTaskSessionInput): Promise<
     : undefined;
 
   try {
-    if (signal?.aborted) {
+    if (signal.aborted) {
       abort();
     } else {
       try {
         await session.prompt(input.prompt);
       } catch (error) {
-        promptError = { state: "present", value: errorText(error) };
+        promptError = { state: "present", value: error instanceof Error ? error.message : String(error) };
       }
     }
 
     return { timedOut, promptError };
   } finally {
     if (timer) clearTimeout(timer);
-    signal?.removeEventListener("abort", abort);
+    signal.removeEventListener("abort", abort);
   }
 }

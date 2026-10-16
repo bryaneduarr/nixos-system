@@ -2,12 +2,17 @@ import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
 import { REASONING_LEVELS } from "../../../constants/subagents/reasoning.constant.ts";
 import { SUBAGENT_TOOLS, TASK_ROLES } from "../../../constants/subagents/roles.constant.ts";
+import {
+  TASK_TIMEOUT_MAX_MS,
+  TASK_TIMEOUT_MIN_MS,
+  TASK_TITLE_MAX_LENGTH,
+} from "../../../constants/subagents/task-limit.constant.ts";
 
 export const TaskParams = Type.Object({
   /* Label shown for the worker in the conversation and status list. */
   title: Type.String({
     minLength: 1,
-    maxLength: 100,
+    maxLength: TASK_TITLE_MAX_LENGTH,
     description: "Short title shown in the conversation.",
   }),
   /* Instruction the isolated worker carries out. */
@@ -68,8 +73,8 @@ export const TaskParams = Type.Object({
   /* Maximum runtime of the worker before it is aborted. */
   timeoutMs: Type.Optional(
     Type.Integer({
-      minimum: 1000,
-      maximum: 3600000,
+      minimum: TASK_TIMEOUT_MIN_MS,
+      maximum: TASK_TIMEOUT_MAX_MS,
       description: "Maximum runtime in milliseconds.",
     }),
   ),

@@ -8,25 +8,25 @@ import type { TaskStatus } from "./task-status.interface.ts";
 /* Live state of a subagent run, published while it works. */
 export interface TaskProgress {
   /* Identifier of the subagent run. */
-  id: string;
+  readonly id: string;
   /* Title the parent gave the task. */
-  title: string;
+  readonly title: string;
   /* Role the worker runs with. */
-  role: TaskRole;
+  readonly role: TaskRole;
   /* Tools the worker may call. */
-  tools: string[];
+  readonly tools: readonly string[];
   /* Approved verification commands for the worker. */
-  verificationCommands: string[];
+  readonly verificationCommands: readonly string[];
   /* Description of the step the worker is on. */
   currentTask: string;
   /* Lifecycle state of the run. */
   status: TaskStatus;
   /* Model the worker runs on, once it has been resolved. */
-  model: ValueState<SubagentModel>;
+  readonly model: ValueState<SubagentModel>;
   /* Reasoning level the worker runs with, once it has been resolved. */
-  thinkingLevel: ValueState<string>;
+  readonly thinkingLevel: ValueState<string>;
   /* Tool calls the worker has made. */
-  activity: SubToolActivity[];
+  readonly activity: SubToolActivity[];
   /* Token usage of the worker, present once it has produced a response. */
   usage: ToolActivityUsage;
 }

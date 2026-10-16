@@ -1,9 +1,12 @@
 import { Value } from "typebox/value";
+import { LegacyTaskProgressSchema } from "../../../schemas/subagents/tasks/legacy-task-progress.schema.ts";
 import { TaskProgressSchema } from "../../../schemas/subagents/tasks/task-progress.schema.ts";
 import type { TaskProgressLookup } from "../../../types/subagents/tasks/task-progress-lookup.interface.ts";
+import { convertLegacyTaskProgress } from "./convert-legacy-task-progress.service.ts";
 
-export function readTaskProgress(value: unknown): TaskProgressLookup {
-  if (!Value.Check(TaskProgressSchema, value)) return { found: false };
+export function readTaskProgress(details: unknown): TaskProgressLookup {
+  if (Value.Check(TaskProgressSchema, details)) return { found: true, progress: details };
+  if (!Value.Check(LegacyTaskProgressSchema, details)) return { found: false };
 
-  return { found: true, progress: value };
+  return { found: true, progress: convertLegacyTaskProgress(details) };
 }

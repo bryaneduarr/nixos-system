@@ -11,4 +11,6 @@ export const SUBAGENT_TOOLS = [
 ] as const;
 export const LEGACY_SUBAGENT_TOOLS = [...READ_ONLY_SUBAGENT_TOOLS, "bash", ...EDITING_SUBAGENT_TOOLS] as const;
 
-export const TASK_ROLES = [TASK_TOOL_NAME, "explore", "implement", "verify"] as const;
+export const IMPLEMENT_TASK_ROLE = "implement" as const;
+
+export const TASK_ROLES = [TASK_TOOL_NAME, "explore", IMPLEMENT_TASK_ROLE, "verify"] as const;

@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { STOPPED_TASK_LABEL } from "../../../constants/subagents/progress.constant.ts";
+import { IMPLEMENT_TASK_ROLE } from "../../../constants/subagents/roles.constant.ts";
 import type { SubagentRegistry } from "../../../types/subagents/registry/subagent-registry.interface.ts";
 import type { SubagentRun } from "../../../types/subagents/registry/subagent-run.interface.ts";
 import { resolveTaskRole } from "../roles/resolve-task-role.service.ts";
-import { toTaskRoleInput } from "../roles/to-task-role-input.service.ts";
 import { createTaskProgress } from "../tasks/create-task-progress.service.ts";
 import { runTask } from "../tasks/run-task.service.ts";
 import { createImplementationQueue } from "./create-implementation-queue.service.ts";
@@ -21,21 +21,21 @@ export function createSubagentRegistry(): SubagentRegistry {
   };
 
   return {
-    create(input, ctx, onProgress) {
+    create(request, ctx, onProgress) {
       const id = randomUUID();
       const controller = new AbortController();
-      const resolvedRole = resolveTaskRole(toTaskRoleInput(input));
-      const progress = createTaskProgress(id, input.title, resolvedRole);
+      const resolvedRole = resolveTaskRole(request);
+      const progress = createTaskProgress(id, request.title, resolvedRole);
       const execute = () =>
-        runTask(id, input, ctx, controller.signal, (next) => {
+        runTask(id, request, ctx, controller.signal, (nextProgress) => {
           const run = runsById.get(id);
           if (!run) return;
 
-          run.progress = next;
-          onProgress(next);
+          run.progress = nextProgress;
+          onProgress(nextProgress);
         });
       const result =
-        resolvedRole.role === "implement" ? implementationQueue.run(execute) : Promise.resolve().then(execute);
+        resolvedRole.role === IMPLEMENT_TASK_ROLE ? implementationQueue.run(execute) : Promise.resolve().then(execute);
 
       runsById.set(id, { controller, progress, result });
       onProgress(progress);
