@@ -1,5 +1,5 @@
 /* Start offset and exclusive end offset of a selected span. */
-type TextRange = [number, number];
+export type TextRange = [number, number];
 
 /* A selected span exists. */
 interface FoundSelectionRange {

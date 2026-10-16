@@ -23,7 +23,7 @@ Press `Tab` to switch panes. In the list, use `j`, `k`, or the arrow keys to cho
 
 Press `v` to select characters or `V` to select whole lines, then move the cursor and press `y` to copy. Use `yy` to copy the current line or `ggyG` to copy the complete message. The footer reports clipboard success or failure. Copies retain original whitespace and line endings, without borders or display-wrap breaks. Escape cancels an active selection; a second Escape closes the modal. `Ctrl+C` closes immediately.
 
-After installing the configuration with `nrs`, run `/reload` in Pi. The implementation is in `agent-configuration/harness/ui/prompts/`. Run `bun test tests/prompt-previews.test.ts tests/prompt-browser.test.ts` from this directory to check previews, navigation, selection, and clipboard handling.
+After installing the configuration with `nrs`, run `/reload` in Pi. The implementation is in `agent-configuration/harness/services/prompts/`, `agent-configuration/harness/components/prompts/`, and `agent-configuration/harness/commands/prompts/`. Run `bun test agent-configuration/harness/services/prompts agent-configuration/harness/components/prompts` from this directory to check previews, navigation, selection, and clipboard handling.
 
 ## Live sessions in Herdr
 
