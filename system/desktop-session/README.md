@@ -77,7 +77,6 @@ Niri prevents applications from opening maximized to the screen edges because th
 1. Run `nrs` to install the bindings and their helper applications.
 2. Log out, then log in to apply the screen-reader session environment.
 3. Press `Super+Shift+/` to show the important-hotkeys overlay.
-4. Use the [Niri key binding reference](../../packages/niri/KEYBINDINGS.md) for the complete shortcut list and changes from the previous configuration.
 
 `Super` is the Windows key. Press `Super+D` for Rofi and `Super+R` to cycle column widths. Move windows with `Super+Ctrl` and an arrow key. `Super+Shift` and an arrow key now focus monitors.
 

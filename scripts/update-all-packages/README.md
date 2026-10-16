@@ -16,4 +16,4 @@ After a successful rebuild, `nfu` runs `bun update --global --latest --no-cache`
 
 The Bun update shares `~/.cache/bun-maintenance.lock` with Home Manager's installer and the daily cache-cleanup service. It runs `bun pm --global cache rm` after the update, even if the update fails. Cleanup removes Bun's disposable download cache, not installed packages, project dependencies, or credentials. A failed update stops `nfu` before its final version checks. `nfu` does not update project-local Bun dependencies.
 
-T3 Code is installed separately and is not updated by this script. See [Update T3 Code](../../home/packages/t3code/README.md).
+T3 Code is installed separately and is not updated by this script. Run `t3code-update` to update it.
