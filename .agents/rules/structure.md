@@ -49,7 +49,7 @@ nvim/                        Neovim Lua configuration, linked as-is by packages/
 - TypeScript: name files `<specific-responsibility>.<singular-role>.ts`, such as `read-session-registry.service.ts` or `exit.command.ts`, and place them in the role roots below. See [typescript.md](typescript.md).
 - Shell: name files `<action-or-responsibility>.sh`, such as `select-target.sh`.
 - Lua: follow the existing `nvim/lua/config/` and `nvim/lua/plugins/<plugin>.lua` layout.
-- Put each test file next to the file it tests, named after the file or behavior it checks: `<subject>.test.ts` or `<subject>.test.nix`. Test files follow the same comment rules as other code; their names state what they check. Never create a central `tests/` folder or a per-feature `tests/` subfolder; existing ones migrate when their subject is touched.
+- Put each test file next to the file it tests, named after the file or behavior it checks: `<subject>.test.ts` or `<subject>.test.nix`. Test files follow the same comment rules as other code; their names state what they check. Never create a central `tests/` folder or a per-feature `tests/` subfolder; existing ones migrate when their subject is touched. Typed fakes shared by several tests of one subject go in `<subject>.test-double.ts` beside them. Split test files over about 150 lines by the behavior they check.
 - Preserve filenames required by tools: `flake.nix`, `init.lua`, `package.json`, `stylua.toml`, and similar.
 - Apply naming rules to new files and files moved for the task. Do not rename unrelated files during another task.
 

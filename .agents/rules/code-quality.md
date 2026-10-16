@@ -74,7 +74,7 @@ These rules apply to `#`, `//`, `/** */`, and `--` comments alike.
 
 Agents cannot see editor diagnostics, so they run the command-line equivalent of every language server configured in `nvim/lua/plugins/lsp.lua` and the linters next to it:
 
-- TypeScript (`ts_ls`, Biome): `tsc --noEmit`, `biome ci`, and `knip` from the owning project.
+- TypeScript (`ts_ls`, Biome): `tsc --noEmit`, `biome ci`, and `knip` from the owning project, plus the rule audit described in [typescript.md](typescript.md).
 - Nix (`nil_ls`): `nil diagnostics <file>`, `statix check`, `deadnix`, and `nixfmt --check`.
 - Shell (`bashls`): `shellcheck` and `shfmt -d`.
 - Lua (`lua_ls`): `lua-language-server --check` as described in the verification guide, and `stylua --check`.
