@@ -2,16 +2,19 @@ import { execFile } from "node:child_process";
 import { realpath } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { promisify } from "node:util";
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { ContextUsage, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { getKeybindings } from "@earendil-works/pi-tui";
+import { NO_GIT_BRANCH, SESSION_IDENTITY_PATTERN } from "../constants/sessions/registry.constant.ts";
+import type { PaneIdentity } from "../types/sessions/herdr/pane-identity.interface.ts";
+import type { LiveSession } from "../types/sessions/registry/live-session.interface.ts";
+import type { SessionContext } from "../types/sessions/registry/session-context.interface.ts";
+import type { SessionDependencies } from "../types/sessions/session-dependencies.interface.ts";
 import { canCleanup, scheduleCleanup } from "./cleanup.ts";
-import { type ExitDependencies, installExit } from "./exit.ts";
+import { defaultExitDependencies, installExit } from "./exit.ts";
 import { HerdrSessions, scopedHerdr } from "./herdr.ts";
-import type { selectProject, selectSession } from "./menu.ts";
 import {
   canonicalDirectory,
   canReportSession,
-  type LiveSession,
   processSessionIdentity,
   processStartIdentity,
   registryDirectory,
@@ -27,26 +30,34 @@ export async function gitBranch(cwd: string): Promise<string> {
     const { stdout } = await execute("git", ["-C", cwd, "symbolic-ref", "--quiet", "--short", "HEAD"], {
       timeout: 2000,
     });
-    return stdout.trim() || "no git";
+    return stdout.trim() || NO_GIT_BRANCH;
   } catch {
     try {
       const { stdout } = await execute("git", ["-C", cwd, "rev-parse", "--short", "HEAD"], { timeout: 2000 });
       return `detached ${stdout.trim()}`;
     } catch {
-      return "no git";
+      return NO_GIT_BRANCH;
     }
   }
 }
 
-export interface SessionDependencies {
-  herdr?: (registry: SessionRegistry, socket: string) => HerdrSessions;
-  selectSession?: typeof selectSession;
-  selectProject?: typeof selectProject;
-  scheduleCleanup?: typeof scheduleCleanup;
-  exit?: ExitDependencies;
+function sessionContext(usage: ContextUsage | undefined): SessionContext {
+  if (!usage) return { usageState: "unavailable" };
+  if (usage.tokens === null || usage.percent === null) {
+    return { usageState: "tokens-unknown", contextWindow: usage.contextWindow };
+  }
+  return { usageState: "measured", tokens: usage.tokens, percent: usage.percent, contextWindow: usage.contextWindow };
 }
 
-export function installSessions(pi: ExtensionAPI, dependencies: SessionDependencies = {}): void {
+export const defaultSessionDependencies: SessionDependencies = {
+  herdr: (registry, socket) => new HerdrSessions(registry, scopedHerdr(socket)),
+  selectSession: async (ctx, registry) => (await import("./menu.ts")).selectSession(ctx, registry),
+  selectProject: async (ctx, registry) => (await import("./menu.ts")).selectProject(ctx, registry),
+  scheduleCleanup,
+  exit: defaultExitDependencies,
+};
+
+export function installSessions(pi: ExtensionAPI, dependencies: SessionDependencies = defaultSessionDependencies): void {
   installExit(pi, dependencies.exit);
 
   let context: ExtensionContext | undefined;
@@ -56,7 +67,7 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
   let identity = "";
   let cwd = "";
   let name = "";
-  let pane: Awaited<ReturnType<HerdrSessions["current"]>> | undefined;
+  let pane: PaneIdentity | undefined;
   let historyEver = false;
   let compacting = false;
   let agentActive = false;
@@ -65,7 +76,7 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
   let socket = "";
   let userBash = false;
   let latest: LiveSession | undefined;
-  let branch = "no git";
+  let branch = NO_GIT_BRANCH;
   let branchUpdatedAt = 0;
   let reported = "";
   let named = "";
@@ -107,9 +118,7 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
         name,
         branch,
         processStart: await processStartIdentity(process.pid),
-        percent: usage?.percent ?? null,
-        contextTokens: usage?.tokens ?? null,
-        contextWindow: usage?.contextWindow,
+        context: sessionContext(usage),
         status: sessionStatus(working, editor),
         owned: identity === process.env.PI_MANAGED_SESSION,
         historyEver,
@@ -165,9 +174,9 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
             : join(override, basename(scopedDirectory))
           : scopedDirectory,
       );
-      herdr = dependencies.herdr?.(registry, socket) ?? new HerdrSessions(registry, scopedHerdr(socket));
+      herdr = dependencies.herdr(registry, socket);
       pane = await herdr.current();
-      identity = /^[a-f0-9-]{36}$/.test(process.env.PI_MANAGED_SESSION || "")
+      identity = SESSION_IDENTITY_PATTERN.test(process.env.PI_MANAGED_SESSION || "")
         ? process.env.PI_MANAGED_SESSION!
         : await processSessionIdentity(socket, process.pid);
       cwd = await canonicalDirectory(ctx.cwd, ctx.cwd);
@@ -262,10 +271,7 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
       if (await select()) {
         await publish();
         if (latest && !historyEver && canCleanup(latest, ctx, compacting, userBash)) {
-          const cancel = await (dependencies.scheduleCleanup ?? scheduleCleanup)(
-            { ...latest, cleanupSafe: true },
-            socket,
-          );
+          const cancel = await dependencies.scheduleCleanup({ ...latest, cleanupSafe: true }, socket);
           if (!historyEver && canCleanup(latest, ctx, compacting, userBash)) ctx.shutdown();
           else cancel();
         }
@@ -279,14 +285,14 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
 
   const show = (ctx: ExtensionContext): Promise<void> =>
     switchSession(ctx, async () => {
-      const selection = await (dependencies.selectSession ?? (await import("./menu.ts")).selectSession)(ctx, registry!);
+      const selection = await dependencies.selectSession(ctx, registry!);
+      if (selection === "cancel") return false;
       if (selection === "new") {
-        const project = await (dependencies.selectProject ?? (await import("./menu.ts")).selectProject)(ctx, registry!);
-        if (!project) return false;
-        await herdr!.create(project, pane!);
+        const project = await dependencies.selectProject(ctx, registry!);
+        if (!project.selected) return false;
+        await herdr!.create(project.path, pane!);
         return true;
       }
-      if (!selection) return false;
       await herdr!.focus(selection);
       return selection.identity !== identity && selection.pane !== pane!.pane;
     });

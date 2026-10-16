@@ -5,12 +5,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getKeybindings, KeybindingsManager, setKeybindings } from "@earendil-works/pi-tui";
 import { HerdrSessions } from "../agent-configuration/harness/sessions/herdr.ts";
-import {
-  gitBranch,
-  installSessions,
-  type SessionDependencies,
-} from "../agent-configuration/harness/sessions/install.ts";
-import type { LiveSession, SessionRegistry } from "../agent-configuration/harness/sessions/registry.ts";
+import { defaultSessionDependencies, gitBranch, installSessions } from "../agent-configuration/harness/sessions/install.ts";
+import { processStartIdentity, type SessionRegistry } from "../agent-configuration/harness/sessions/registry.ts";
+import type { SessionDependencies } from "../agent-configuration/harness/types/sessions/session-dependencies.interface.ts";
+import type { LiveSession } from "../agent-configuration/harness/types/sessions/registry/live-session.interface.ts";
 
 test("non-Git projects do not show a conversation-tree branch", async () => {
   expect(await gitBranch(tmpdir())).toBe("no git");
@@ -44,6 +42,7 @@ test("publication renumbers the pane, agent, and live record after other session
   };
   try {
     installSessions(api, {
+      ...defaultSessionDependencies,
       herdr: (registry) => {
         store = registry;
         return new HerdrSessions(registry, async (args) => {
@@ -63,7 +62,8 @@ test("publication renumbers the pane, agent, and live record after other session
                   workspace: "w1",
                   sessionId: `other-${index}`,
                   branch: "no git",
-                  percent: null,
+                  processStart: await processStartIdentity(process.pid),
+                  context: { usageState: "unavailable" },
                   status: "idle",
                   owned: true,
                   historyEver: false,
@@ -168,6 +168,7 @@ test("install reports lifecycle and session identity, protects user history acro
   };
   try {
     const dependencies: SessionDependencies = {
+      ...defaultSessionDependencies,
       herdr: (registry) => {
         const herdr = new HerdrSessions(registry, async (args) => {
           commands.push(args);
@@ -200,7 +201,7 @@ test("install reports lifecycle and session identity, protects user history acro
       },
       selectProject: async () => {
         projectSelections++;
-        return root;
+        return { selected: true, path: root };
       },
       scheduleCleanup: async () => {
         cleanups++;

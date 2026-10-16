@@ -1,21 +1,30 @@
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
-import type { LiveSession, SessionRegistry } from "./registry.ts";
+import { Value } from "typebox/value";
+import {
+  AGENT_LAUNCH_PENDING_CODE,
+  HERDR_COMMAND_TIMEOUT_MS,
+  HERDR_MAX_BUFFER_BYTES,
+  PI_AGENT_NAME,
+  PI_HARNESS_SOURCE,
+  SILENT_HERDR_COMMANDS,
+} from "../constants/sessions/herdr.constant.ts";
+import { HerdrPaneSchema } from "../schemas/sessions/herdr-pane.schema.ts";
+import type { HerdrCommand } from "../types/sessions/herdr/herdr-command.interface.ts";
+import type { PaneIdentity } from "../types/sessions/herdr/pane-identity.interface.ts";
+import type { LiveSession } from "../types/sessions/registry/live-session.interface.ts";
+import type { SessionRegistry } from "./registry.ts";
 
 const execute = promisify(execFile);
-const PI_HARNESS_SOURCE = "pi:harness";
-const SILENT_COMMANDS = new Set(["report-agent", "report-agent-session", "release-agent"]);
-
-export type HerdrCommand = (args: string[]) => Promise<Record<string, unknown>>;
 
 async function executeHerdr(args: string[], env: NodeJS.ProcessEnv): Promise<Record<string, unknown>> {
   const binary = env.HERDR_BIN_PATH || "herdr";
   let stdout: string;
   try {
     ({ stdout } = await execute(binary, args, {
-      timeout: 45_000,
-      maxBuffer: 2 * 1024 * 1024,
+      timeout: HERDR_COMMAND_TIMEOUT_MS,
+      maxBuffer: HERDR_MAX_BUFFER_BYTES,
       env,
     }));
   } catch (error) {
@@ -32,7 +41,7 @@ async function executeHerdr(args: string[], env: NodeJS.ProcessEnv): Promise<Rec
     }
     throw error;
   }
-  if (!stdout.trim() && args[0] === "pane" && SILENT_COMMANDS.has(args[1]!)) return {};
+  if (!stdout.trim() && args[0] === "pane" && SILENT_HERDR_COMMANDS.has(args[1]!)) return {};
   const response = objectValue(JSON.parse(stdout));
   if (response.error) {
     throw herdrError(response.error);
@@ -57,32 +66,14 @@ function objectValue(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-export const runHerdr: HerdrCommand = (args) => executeHerdr(args, process.env);
-
-export interface PaneIdentity {
-  pane: string;
-  tab: string;
-  workspace: string;
-}
+const runHerdr: HerdrCommand = (args) => executeHerdr(args, process.env);
 
 export function paneIdentity(value: unknown): PaneIdentity {
   const row = objectValue(value);
-  const pane = row.pane_id;
-  const tab = row.tab_id;
-  const workspace = row.workspace_id;
-  if (
-    typeof pane !== "string" ||
-    typeof tab !== "string" ||
-    typeof workspace !== "string" ||
-    !/^w\d+:p\d+$/.test(pane) ||
-    !/^w\d+:t\d+$/.test(tab) ||
-    !/^w\d+$/.test(workspace)
-  ) {
-    throw new Error("Herdr returned an invalid pane identity");
-  }
-  if (!pane.startsWith(`${workspace}:`) || !tab.startsWith(`${workspace}:`))
+  if (!Value.Check(HerdrPaneSchema, row)) throw new Error("Herdr returned an invalid pane identity");
+  if (!row.pane_id.startsWith(`${row.workspace_id}:`) || !row.tab_id.startsWith(`${row.workspace_id}:`))
     throw new Error("Herdr pane belongs to another workspace");
-  return { pane, tab, workspace };
+  return { pane: row.pane_id, tab: row.tab_id, workspace: row.workspace_id };
 }
 
 export class HerdrSessions {
@@ -100,7 +91,7 @@ export class HerdrSessions {
 
   async report(row: LiveSession, path?: string): Promise<void> {
     const ref = path ? ["--agent-session-path", path] : ["--agent-session-id", row.sessionId];
-    const common = [row.pane, "--source", PI_HARNESS_SOURCE, "--agent", "pi", ...ref];
+    const common = [row.pane, "--source", PI_HARNESS_SOURCE, "--agent", PI_AGENT_NAME, ...ref];
     await this.command(["pane", "report-agent-session", ...common, "--seq", String(++this.reportSequence)]);
     const state = row.status === "working" ? "working" : "idle";
     await this.command(["pane", "report-agent", ...common, "--seq", String(++this.reportSequence), "--state", state]);
@@ -118,7 +109,7 @@ export class HerdrSessions {
       "--source",
       PI_HARNESS_SOURCE,
       "--agent",
-      "pi",
+      PI_AGENT_NAME,
       "--seq",
       String(++this.reportSequence),
     ]);
@@ -135,7 +126,7 @@ export class HerdrSessions {
     const processInfo = objectValue(processResult.process_info);
     const processes = processInfo.foreground_processes;
     const matchesProcess = Array.isArray(processes) && processes.some((item) => objectValue(item).pid === live.pid);
-    if (pane.agent !== "pi" || location.tab !== live.tab || !matchesProcess) {
+    if (pane.agent !== PI_AGENT_NAME || location.tab !== live.tab || !matchesProcess) {
       throw new Error("The destination pane no longer hosts this Pi session");
     }
     await this.command(["agent", "focus", live.pane]);
@@ -147,7 +138,7 @@ export class HerdrSessions {
       await this.command(["agent", "rename", location.pane, name]);
       return true;
     } catch (error) {
-      if ((error as { code?: string }).code === "agent_launch_pending") return false;
+      if ((error as { code?: string }).code === AGENT_LAUNCH_PENDING_CODE) return false;
       throw error;
     }
   }
@@ -192,7 +183,7 @@ export class HerdrSessions {
       throw new Error("Herdr did not create a sibling pane");
     }
     await this.command(["pane", "rename", target.pane, name]);
-    await this.command(["agent", "start", name, "--kind", "pi", "--pane", target.pane, "--timeout", "30000"]);
+    await this.command(["agent", "start", name, "--kind", PI_AGENT_NAME, "--pane", target.pane, "--timeout", "30000"]);
     const deadline = Date.now() + 10_000;
     while (Date.now() < deadline) {
       const ready = (await this.registry.list()).find(

@@ -9,7 +9,7 @@ const rows = [
     cwd: "/tmp/project-a",
     name: "First",
     branch: "main",
-    percent: 12,
+    context: { usageState: "measured", tokens: 120, percent: 12, contextWindow: 1000 },
     status: "idle",
   },
   {
@@ -18,10 +18,8 @@ const rows = [
     cwd: "/tmp/project-b",
     name: "Second",
     branch: "topic",
-    percent: null,
+    context: { usageState: "tokens-unknown", contextWindow: 1000 },
     status: "draft",
-    contextTokens: 100,
-    contextWindow: 1000,
   },
 ];
 
@@ -124,7 +122,7 @@ test("session menu uses Vim navigation and keeps command keys as text while filt
   component.handleInput("\x1b");
   expect(component.focused).toBe(false);
   component.handleInput("\x1b");
-  expect(await menu.selection).toBeUndefined();
+  expect(await menu.selection).toBe("cancel");
   component.dispose();
 
   menu = await open();
@@ -145,7 +143,7 @@ test("project picker includes the current folder and cancellation creates nothin
       },
     },
   };
-  expect(await selectProject(ctx, { projects: async () => [] } as any)).toBeUndefined();
+  expect(await selectProject(ctx, { projects: async () => [] } as any)).toEqual({ selected: false });
   expect(choices).toContain(process.cwd());
 });
 

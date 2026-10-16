@@ -3,53 +3,32 @@ import { constants } from "node:fs";
 import { access, chmod, mkdir, readdir, readFile, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
-
-export const SESSION_STALE_MS = 15_000;
-const RESERVATION_STALE_MS = 60_000;
-
-interface NameReservation {
-  identity: string;
-  project: string;
-  order: number;
-  updatedAt: number;
-  pid: number;
-  processStart: string;
-}
+import { Value } from "typebox/value";
+import {
+  PROJECT_NAME_MAX_LENGTH,
+  RESERVATION_STALE_MS,
+  SESSION_IDENTITY_PATTERN,
+  SESSION_STALE_MS,
+} from "../constants/sessions/registry.constant.ts";
+import { NameReservationSchema } from "../schemas/sessions/registry/name-reservation.schema.ts";
+import { SessionRowSchema } from "../schemas/sessions/registry/session-row.schema.ts";
+import type { NameReservation } from "../types/sessions/registry/name-reservation.interface.ts";
+import type { LiveSession, SessionStatus } from "../types/sessions/registry/live-session.interface.ts";
+import type { SessionRowParse } from "../types/sessions/registry/session-row-parse.interface.ts";
 
 function projectName(cwd: string): string {
   let project = basename(cwd)
     .toLowerCase()
     .replace(/[^a-z0-9_-]+/g, "-");
   if (!/^[a-z]/.test(project)) project = `project-${project}`;
-  return project.slice(0, 20);
-}
-
-export interface LiveSession {
-  identity: string;
-  pid: number;
-  processStart?: string;
-  updatedAt: number;
-  cwd: string;
-  pane: string;
-  tab: string;
-  workspace: string;
-  sessionId: string;
-  name: string;
-  branch: string;
-  percent: number | null;
-  contextTokens?: number | null;
-  contextWindow?: number;
-  status: "working" | "draft" | "idle";
-  owned: boolean;
-  historyEver: boolean;
-  cleanupSafe: boolean;
+  return project.slice(0, PROJECT_NAME_MAX_LENGTH);
 }
 
 export function canReportSession(mode: string, herdrEnvironment: string | undefined): boolean {
   return mode === "tui" && herdrEnvironment === "1";
 }
 
-export function sessionStatus(working: boolean, editor: string): LiveSession["status"] {
+export function sessionStatus(working: boolean, editor: string): SessionStatus {
   if (working) return "working";
   if (editor.length > 0) return "draft";
   return "idle";
@@ -68,22 +47,12 @@ export async function canonicalDirectory(path: string, cwd: string): Promise<str
   return canonical;
 }
 
-export function parseSession(value: unknown): LiveSession | undefined {
-  if (!value || typeof value !== "object") return;
-  const row = value as LiveSession;
-  const strings = [row.identity, row.cwd, row.pane, row.tab, row.workspace, row.sessionId, row.name, row.branch];
-  if (!strings.every((item) => typeof item === "string")) return;
-  if (!/^[a-f0-9-]{36}$/.test(row.identity) || !row.cwd.startsWith("/")) return;
-  if (!/^w\d+:p\d+$/.test(row.pane) || !/^w\d+:t\d+$/.test(row.tab) || !/^w\d+$/.test(row.workspace)) return;
-  if (!row.pane.startsWith(`${row.workspace}:`) || !row.tab.startsWith(`${row.workspace}:`)) return;
-  if (row.processStart !== undefined && typeof row.processStart !== "string") return;
-  if (row.contextTokens != null && (!Number.isFinite(row.contextTokens) || row.contextTokens < 0)) return;
-  if (row.contextWindow !== undefined && (!Number.isFinite(row.contextWindow) || row.contextWindow <= 0)) return;
-  if (!Number.isSafeInteger(row.pid) || row.pid < 1 || !Number.isFinite(row.updatedAt)) return;
-  if (row.percent !== null && (!Number.isFinite(row.percent) || row.percent < 0)) return;
-  if (!["working", "draft", "idle"].includes(row.status)) return;
-  if (![row.owned, row.historyEver, row.cleanupSafe].every((item) => typeof item === "boolean")) return;
-  return row;
+export function parseSession(value: unknown): SessionRowParse {
+  if (!Value.Check(SessionRowSchema, value)) return { valid: false };
+  const isPaneInWorkspace = value.pane.startsWith(`${value.workspace}:`);
+  const isTabInWorkspace = value.tab.startsWith(`${value.workspace}:`);
+  if (!isPaneInWorkspace || !isTabInWorkspace) return { valid: false };
+  return { valid: true, row: value };
 }
 
 export async function processStartIdentity(pid: number): Promise<string> {
@@ -111,11 +80,7 @@ export class SessionRegistry {
   async publish(row: LiveSession): Promise<void> {
     await this.prepare();
     const target = join(this.directory, `${row.identity}.json`);
-    await writeFile(
-      `${target}.tmp`,
-      JSON.stringify({ ...row, processStart: row.processStart ?? (await processStartIdentity(row.pid)) }),
-      { mode: 0o600 },
-    );
+    await writeFile(`${target}.tmp`, JSON.stringify(row), { mode: 0o600 });
     await rename(`${target}.tmp`, target);
     if (row.historyEver) await this.markUsed(row.identity);
     const key = createHash("sha256").update(row.cwd).digest("hex");
@@ -123,7 +88,7 @@ export class SessionRegistry {
   }
 
   async instanceName(cwd: string, identity: string): Promise<string> {
-    if (!/^[a-f0-9-]{36}$/.test(identity)) throw new Error("Invalid session identity");
+    if (!SESSION_IDENTITY_PATTERN.test(identity)) throw new Error("Invalid session identity");
     await this.prepare();
     const lock = join(this.directory, "names.lock");
     const deadline = Date.now() + 5000;
@@ -157,29 +122,20 @@ export class SessionRegistry {
       if (!/^[a-f0-9-]{36}\.reservation$/.test(file)) continue;
       const path = join(this.directory, file);
       try {
-        const row: NameReservation = JSON.parse(await readFile(path, "utf8"));
-        if (
-          `${row.identity}.reservation` !== file ||
-          typeof row.project !== "string" ||
-          !/^[a-z][a-z0-9_-]{0,19}$/.test(row.project) ||
-          !Number.isSafeInteger(row.order) ||
-          !Number.isFinite(row.updatedAt) ||
-          !Number.isSafeInteger(row.pid) ||
-          row.pid < 1 ||
-          typeof row.processStart !== "string"
-        ) {
+        const parsed: unknown = JSON.parse(await readFile(path, "utf8"));
+        if (!Value.Check(NameReservationSchema, parsed) || `${parsed.identity}.reservation` !== file) {
           await rm(path, { force: true });
           continue;
         }
         if (
-          !liveIdentities.has(row.identity) &&
-          (now - row.updatedAt > RESERVATION_STALE_MS ||
-            row.processStart !== (await processStartIdentity(row.pid).catch(() => "")))
+          !liveIdentities.has(parsed.identity) &&
+          (now - parsed.updatedAt > RESERVATION_STALE_MS ||
+            parsed.processStart !== (await processStartIdentity(parsed.pid).catch(() => "")))
         ) {
           await rm(path, { force: true });
           continue;
         }
-        reservations.push(row);
+        reservations.push(parsed);
       } catch {
         continue;
       }
@@ -193,7 +149,7 @@ export class SessionRegistry {
         order: ++order,
         updatedAt: now,
         pid: row.pid,
-        processStart: row.processStart!,
+        processStart: row.processStart,
       };
       reservations.push(reservation);
       await writeFile(join(this.directory, `${row.identity}.reservation`), JSON.stringify(reservation), {
@@ -223,13 +179,13 @@ export class SessionRegistry {
   }
 
   async markUsed(identity: string): Promise<void> {
-    if (!/^[a-f0-9-]{36}$/.test(identity)) throw new Error("Invalid session identity");
+    if (!SESSION_IDENTITY_PATTERN.test(identity)) throw new Error("Invalid session identity");
     await this.prepare();
     await writeFile(join(this.directory, `${identity}.history`), "used", { mode: 0o600 });
   }
 
   async hasHistory(identity: string): Promise<boolean> {
-    if (!/^[a-f0-9-]{36}$/.test(identity)) return true;
+    if (!SESSION_IDENTITY_PATTERN.test(identity)) return true;
     try {
       await stat(join(this.directory, `${identity}.history`));
       return true;
@@ -240,7 +196,7 @@ export class SessionRegistry {
   }
 
   async remove(identity: string, preserveName = false): Promise<void> {
-    if (!/^[a-f0-9-]{36}$/.test(identity)) return;
+    if (!SESSION_IDENTITY_PATTERN.test(identity)) return;
     await rm(join(this.directory, `${identity}.json`), { force: true });
     if (!preserveName) await rm(join(this.directory, `${identity}.reservation`), { force: true });
   }
@@ -251,8 +207,9 @@ export class SessionRegistry {
     for (const file of await readdir(this.directory)) {
       if (!/^[a-f0-9-]{36}\.json$/.test(file)) continue;
       try {
-        const row = parseSession(JSON.parse(await readFile(join(this.directory, file), "utf8")));
-        if (!row || `${row.identity}.json` !== file) continue;
+        const parsed = parseSession(JSON.parse(await readFile(join(this.directory, file), "utf8")));
+        if (!parsed.valid || `${parsed.row.identity}.json` !== file) continue;
+        const row = parsed.row;
         if (now - row.updatedAt > SESSION_STALE_MS) {
           await this.remove(row.identity);
           continue;

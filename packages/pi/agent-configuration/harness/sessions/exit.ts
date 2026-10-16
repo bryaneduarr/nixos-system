@@ -1,33 +1,28 @@
 import { realpath } from "node:fs/promises";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { EXIT_STATE_KEY, EXPLICIT_EXIT_MODE } from "../constants/sessions/exit.constant.ts";
+import type { CleanupCancellation } from "../types/sessions/cleanup-cancellation.interface.ts";
+import type { ExitDependencies } from "../types/sessions/exit/exit-dependencies.interface.ts";
+import type { ExitState } from "../types/sessions/exit/exit-state.interface.ts";
+import type { ExitTarget } from "../types/sessions/exit/exit-target.interface.ts";
+import type { HerdrCommand } from "../types/sessions/herdr/herdr-command.interface.ts";
 import { launchCleanupWorker } from "./cleanup.ts";
-import { type HerdrCommand, type PaneIdentity, paneIdentity, scopedHerdr } from "./herdr.ts";
+import { paneIdentity, scopedHerdr } from "./herdr.ts";
 import { processStartIdentity } from "./registry.ts";
 
-export interface ExitTarget extends PaneIdentity {
-  mode: "explicit-exit";
-  socket: string;
-  pid: number;
-  processStart: string;
-  shellPid: number;
-  shellStart: string;
-}
+export const defaultExitDependencies: ExitDependencies = {
+  command: scopedHerdr,
+  schedule: launchCleanupWorker,
+};
 
-export interface ExitDependencies {
-  command?: (socket: string) => HerdrCommand;
-  schedule?: (target: ExitTarget) => Promise<() => void>;
-}
-
-interface ExitState {
-  generation: number;
-  busy: boolean;
-  requested: boolean;
-  cancel?: () => void;
-}
-
-const stateKey = Symbol.for("pi.harness.explicitExit");
+const stateKey = Symbol.for(EXIT_STATE_KEY);
 const globals = globalThis as typeof globalThis & { [stateKey]?: ExitState };
-const state = (globals[stateKey] ??= { generation: 0, busy: false, requested: false });
+const state = (globals[stateKey] ??= {
+  generation: 0,
+  busy: false,
+  requested: false,
+  cancellation: { scheduled: false },
+});
 
 export async function exitTarget(socket: string, command: HerdrCommand): Promise<ExitTarget> {
   if (!socket.startsWith("/")) throw new Error("Herdr socket must be an absolute path");
@@ -58,7 +53,7 @@ export async function exitTarget(socket: string, command: HerdrCommand): Promise
     throw new Error("Current pane changed");
   return {
     ...current,
-    mode: "explicit-exit",
+    mode: EXPLICIT_EXIT_MODE,
     socket,
     pid: process.pid,
     processStart,
@@ -75,12 +70,12 @@ function discardReasons(ctx: ExtensionContext): string[] {
   return reasons;
 }
 
-export function installExit(pi: ExtensionAPI, dependencies: ExitDependencies = {}): void {
+export function installExit(pi: ExtensionAPI, dependencies: ExitDependencies = defaultExitDependencies): void {
   pi.on("session_shutdown", (event) => {
     if (event.reason === "quit") return;
     state.generation++;
-    state.cancel?.();
-    state.cancel = undefined;
+    if (state.cancellation.scheduled) state.cancellation.cancel();
+    state.cancellation = { scheduled: false };
     state.busy = false;
     state.requested = false;
   });
@@ -93,7 +88,7 @@ export function installExit(pi: ExtensionAPI, dependencies: ExitDependencies = {
     }
     state.busy = true;
     const generation = state.generation;
-    let cancel: (() => void) | undefined;
+    let cancel: CleanupCancellation | undefined;
     try {
       const reasons = discardReasons(ctx);
       if (
@@ -106,9 +101,9 @@ export function installExit(pi: ExtensionAPI, dependencies: ExitDependencies = {
         const socketPath = process.env.HERDR_SOCKET_PATH || process.env.HERDR_API_SOCKET;
         if (!socketPath) throw new Error("Herdr did not provide a socket");
         const socket = await realpath(socketPath);
-        const command = dependencies.command?.(socket) ?? scopedHerdr(socket);
+        const command = dependencies.command(socket);
         const target = await exitTarget(socket, command);
-        cancel = await (dependencies.schedule ?? launchCleanupWorker)(target);
+        cancel = await dependencies.schedule(target);
       }
       if (generation !== state.generation) {
         cancel?.();
@@ -123,7 +118,7 @@ export function installExit(pi: ExtensionAPI, dependencies: ExitDependencies = {
         cancel?.();
         return;
       }
-      state.cancel = cancel;
+      state.cancellation = cancel ? { scheduled: true, cancel } : { scheduled: false };
       if (cancel)
         ctx.ui.notify(
           "Exiting Pi. If the pane stays open, the helper could not verify safe closure. Check its processes before closing it manually.",
@@ -135,7 +130,7 @@ export function installExit(pi: ExtensionAPI, dependencies: ExitDependencies = {
     } catch (error) {
       cancel?.();
       if (generation !== state.generation) return;
-      state.cancel = undefined;
+      state.cancellation = { scheduled: false };
       state.requested = false;
       ctx.ui.notify(
         `Exit cancelled: ${String(error)}. Check the Herdr socket and pane process information, then retry /exit. Use Pi's built-in Ctrl+D to exit without closing the pane.`,

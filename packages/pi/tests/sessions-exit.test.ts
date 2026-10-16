@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { cleanupAfterExit, explicitExitAfterExit } from "../agent-configuration/harness/sessions/cleanup-worker.mjs";
 import { exitTarget, installExit } from "../agent-configuration/harness/sessions/exit.ts";
-import type { HerdrCommand } from "../agent-configuration/harness/sessions/herdr.ts";
+import type { HerdrCommand } from "../agent-configuration/harness/types/sessions/herdr/herdr-command.interface.ts";
 
 function harness() {
   const commands = new Map<string, any>();
