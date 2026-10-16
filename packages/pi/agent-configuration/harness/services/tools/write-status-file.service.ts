@@ -5,13 +5,13 @@ import { HARNESS_TOOLS } from "../../constants/tools/harness-tools.constant.ts";
 export async function writeStatusFile(pi: ExtensionAPI): Promise<void> {
   const target = process.env.PI_HARNESS_STATUS_FILE;
   if (!target) return;
-  const payload = {
+  const statusPayload = {
     active: pi.getActiveTools(),
     all: pi.getAllTools().map((tool) => tool.name),
     harness: [...HARNESS_TOOLS],
   };
   try {
-    await writeFile(target, JSON.stringify(payload, null, 2), "utf8");
+    await writeFile(target, JSON.stringify(statusPayload, null, 2), "utf8");
   } catch {
     return;
   }

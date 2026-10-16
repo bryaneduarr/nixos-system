@@ -4,14 +4,14 @@ import { splitLines } from "./split-lines.service.ts";
 export function clampLines(text: string, maxLines: number, maxChars: number): ClampedText {
   const lines = splitLines(text);
   const kept = lines.slice(0, maxLines);
-  let out = kept.join("\n");
+  let clampedText = kept.join("\n");
   let truncated = lines.length > maxLines;
-  if (out.length > maxChars) {
-    out = out.slice(0, maxChars);
+  if (clampedText.length > maxChars) {
+    clampedText = clampedText.slice(0, maxChars);
     truncated = true;
   }
   return {
-    text: out,
+    text: clampedText,
     omittedLines: Math.max(0, lines.length - maxLines),
     truncated,
   };
