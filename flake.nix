@@ -139,9 +139,17 @@
         '';
       };
 
-      checks.x86_64-linux.pi =
-        nixpkgs.legacyPackages.x86_64-linux.callPackage ./packages/pi/pi-check/pi-check.nix
-          { };
+      # aarch64 checks run only on aarch64 machines; nothing emulates them.
+      checks = lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          pi = pkgs.callPackage ./packages/pi/pi-check/pi-check.nix { };
+          rule-audit = pkgs.callPackage ./scripts/rule-audit/rule-audit-check.nix { };
+        }
+      );
 
       packages = {
         aarch64-linux.pi-tools =

@@ -1,5 +1,6 @@
 readonly TYPESCRIPT_EXTENSIONS=(ts tsx mts cts js jsx mjs cjs)
 readonly LOCAL_KNIP_COMMAND="node_modules/.bin/knip"
+readonly RULE_AUDIT_BOUNDARIES_FILE="rule-audit-boundaries.json"
 
 check_typescript_project() {
   local project="$1"
@@ -20,6 +21,10 @@ check_typescript_project() {
 
   if [[ $has_installed_dependencies == true && -e "$project/knip.json" ]]; then
     run_check "knip $project" run_in_directory "$project" "$LOCAL_KNIP_COMMAND"
+  fi
+
+  if [[ -e "$project/$RULE_AUDIT_BOUNDARIES_FILE" ]]; then
+    run_check "rule-audit $project" rule-audit "$project"
   fi
 }
 

@@ -1,5 +1,6 @@
 {
   biome,
+  callPackage,
   clang-tools,
   coreutils,
   deadnix,
@@ -18,6 +19,8 @@
   writeShellApplication,
 }:
 let
+  ruleAudit = callPackage ../rule-audit/rule-audit-package.nix { };
+
   scriptFiles = [
     ./modules/record-check-results.sh
     ./modules/collect-target-files.sh
@@ -43,6 +46,7 @@ writeShellApplication {
     nil
     nixfmt
     nodejs
+    ruleAudit
     shellcheck
     shfmt
     statix
