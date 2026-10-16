@@ -5,28 +5,27 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { canCleanup } from "../agent-configuration/harness/sessions/cleanup.ts";
 import { cleanupAfterExit, dedicatedShell } from "../agent-configuration/harness/sessions/cleanup-worker.mjs";
-import {
-  type HerdrCommand,
-  HerdrSessions,
-  paneIdentity,
-  scopedHerdr,
-} from "../agent-configuration/harness/sessions/herdr.ts";
+import { HerdrSessions, paneIdentity, scopedHerdr } from "../agent-configuration/harness/sessions/herdr.ts";
 import {
   canonicalDirectory,
   canReportSession,
-  type LiveSession,
   parseSession,
+  processStartIdentity,
   SessionRegistry,
   sessionStatus,
 } from "../agent-configuration/harness/sessions/registry.ts";
+import type { HerdrCommand } from "../agent-configuration/harness/types/sessions/herdr/herdr-command.interface.ts";
+import type { LiveSession } from "../agent-configuration/harness/types/sessions/registry/live-session.interface.ts";
 
 const temporary = await mkdtemp(join(tmpdir(), "pi-sessions-test-"));
 afterAll(() => rm(temporary, { recursive: true, force: true }));
+const processStart = await processStartIdentity(process.pid);
 
 function session(overrides: Partial<LiveSession> = {}): LiveSession {
   return {
     identity: randomUUID(),
     pid: process.pid,
+    processStart,
     updatedAt: Date.now(),
     cwd: temporary,
     pane: "w2:p3",
@@ -35,7 +34,7 @@ function session(overrides: Partial<LiveSession> = {}): LiveSession {
     sessionId: "session-a",
     name: "test",
     branch: "main",
-    percent: null,
+    context: { usageState: "unavailable" },
     status: "idle",
     owned: false,
     historyEver: false,
@@ -196,10 +195,15 @@ test("registry publishes private atomic records, preserves project paths and rem
 });
 
 test("invalid registry records cannot become focus targets", () => {
-  expect(parseSession({ ...session(), pane: "--current" })).toBeUndefined();
-  expect(parseSession({ ...session(), pid: -1 })).toBeUndefined();
-  expect(parseSession({ ...session(), percent: "20" })).toBeUndefined();
-  expect(parseSession({ ...session(), cleanupSafe: undefined })).toBeUndefined();
+  expect(parseSession({ ...session(), pane: "--current" }).valid).toBe(false);
+  expect(parseSession({ ...session(), pid: -1 }).valid).toBe(false);
+  expect(
+    parseSession({
+      ...session(),
+      context: { usageState: "measured", tokens: 1, percent: "20", contextWindow: 10 },
+    }).valid,
+  ).toBe(false);
+  expect(parseSession({ ...session(), cleanupSafe: undefined }).valid).toBe(false);
   expect(() => paneIdentity({ pane_id: "--current" })).toThrow();
 });
 

@@ -2,9 +2,10 @@ import { readdir } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Input, matchesKey, rgbColor, truncateToWidth } from "@earendil-works/pi-tui";
-import { canonicalDirectory, type LiveSession, type SessionRegistry } from "./registry.ts";
-
-export type MenuSelection = LiveSession | "new" | undefined;
+import type { MenuSelection } from "../types/sessions/menu/menu-selection.interface.ts";
+import type { ProjectSelection } from "../types/sessions/menu/project-selection.interface.ts";
+import type { LiveSession } from "../types/sessions/registry/live-session.interface.ts";
+import { canonicalDirectory, type SessionRegistry } from "./registry.ts";
 
 export function terminalLabel(text: string): string {
   return text.replace(/[\x00-\x1f\x7f-\x9f]/g, " ");
@@ -75,14 +76,14 @@ export async function selectSession(ctx: ExtensionContext, registry: SessionRegi
               }
             }
           } else if (matchesKey(data, "escape") || matchesKey(data, "ctrl+c")) {
-            done(undefined);
+            done("cancel");
           } else if (data === "n" || data === "N") {
             done("new");
           } else if (matchesKey(data, "i")) {
             filtering = true;
             filter.focused = true;
           } else if (matchesKey(data, "enter")) {
-            done(filtered().find((row) => row.identity === selectedId));
+            done(filtered().find((row) => row.identity === selectedId) ?? "cancel");
           } else {
             const visible = filtered();
             const index = visible.findIndex((row) => row.identity === selectedId);
@@ -110,7 +111,7 @@ export async function selectSession(ctx: ExtensionContext, registry: SessionRegi
             const prefix = row.identity === selectedId ? "> " : "  ";
             let status: string = row.status;
             if (row.status === "draft") status = theme.style("draft", { fg: rgbColor(255, 158, 68) });
-            const context = row.percent === null ? "unknown" : `${row.percent.toFixed(0)}%`;
+            const context = row.context.usageState === "measured" ? `${row.context.percent.toFixed(0)}%` : "unknown";
             const current = row.pid === process.pid ? " *" : "";
             lines.push(
               `${prefix}${terminalLabel(row.name)}${current}  ${status}  ${terminalLabel(row.branch)}  ${context}`,
@@ -137,7 +138,7 @@ export async function selectSession(ctx: ExtensionContext, registry: SessionRegi
   );
 }
 
-async function browse(ctx: ExtensionContext): Promise<string | undefined> {
+async function browse(ctx: ExtensionContext): Promise<ProjectSelection> {
   let cwd = await canonicalDirectory(ctx.cwd, ctx.cwd);
   while (true) {
     const children = (await readdir(cwd, { withFileTypes: true }))
@@ -150,8 +151,8 @@ async function browse(ctx: ExtensionContext): Promise<string | undefined> {
       "..",
       ...children.map((name) => `./${name}`),
     ]);
-    if (!choice) return;
-    if (choice === "Use this directory") return cwd;
+    if (!choice) return { selected: false };
+    if (choice === "Use this directory") return { selected: true, path: cwd };
     if (choice === "Enter path") {
       const path = await ctx.ui.input("Project directory", cwd);
       if (!path?.trim()) continue;
@@ -162,15 +163,15 @@ async function browse(ctx: ExtensionContext): Promise<string | undefined> {
   }
 }
 
-export async function selectProject(ctx: ExtensionContext, registry: SessionRegistry): Promise<string | undefined> {
+export async function selectProject(ctx: ExtensionContext, registry: SessionRegistry): Promise<ProjectSelection> {
   const paths = [...new Set([await canonicalDirectory(ctx.cwd, ctx.cwd), ...(await registry.projects())])];
   const choice = await ctx.ui.select("Which project? Choose a folder", ["Browse directories", "Enter path", ...paths]);
-  if (!choice) return;
+  if (!choice) return { selected: false };
   if (choice === "Browse directories") return browse(ctx);
   if (choice === "Enter path") {
     const path = await ctx.ui.input("Project directory", ctx.cwd);
-    if (!path?.trim()) return;
-    return canonicalDirectory(path, ctx.cwd);
+    if (!path?.trim()) return { selected: false };
+    return { selected: true, path: await canonicalDirectory(path, ctx.cwd) };
   }
-  return canonicalDirectory(choice, ctx.cwd);
+  return { selected: true, path: await canonicalDirectory(choice, ctx.cwd) };
 }
