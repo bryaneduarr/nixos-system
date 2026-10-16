@@ -12,7 +12,8 @@
     "rules": {
       "preset": "recommended",
       "complexity": {
-        "noExcessiveCognitiveComplexity": "error"
+        "noExcessiveCognitiveComplexity": "error",
+        "useOptionalChain": "off"
       },
       "style": {
         "noNonNullAssertion": "error",
