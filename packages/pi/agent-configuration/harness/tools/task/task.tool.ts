@@ -82,7 +82,8 @@ export function registerTaskTool(pi: ExtensionAPI): void {
       let latest: TaskProgressLookup = { found: false };
       const publish = (progress: TaskProgress) => {
         latest = { found: true, progress };
-        onUpdate?.({
+        if (onUpdate === undefined) return;
+        onUpdate({
           content: [{ type: "text", text: progress.currentTask }],
           details: progress,
         });
@@ -91,10 +92,10 @@ export function registerTaskTool(pi: ExtensionAPI): void {
       const abort = () => {
         subagentRegistry.cancel(handle.id);
       };
-      signal?.addEventListener("abort", abort, { once: true });
+      if (signal !== undefined) signal.addEventListener("abort", abort, { once: true });
 
       try {
-        if (signal?.aborted) abort();
+        if (signal !== undefined && signal.aborted) abort();
 
         const taskResult = await handle.result;
         return {
@@ -109,7 +110,7 @@ export function registerTaskTool(pi: ExtensionAPI): void {
           details: failedProgress,
         };
       } finally {
-        signal?.removeEventListener("abort", abort);
+        if (signal !== undefined) signal.removeEventListener("abort", abort);
       }
     },
   });
