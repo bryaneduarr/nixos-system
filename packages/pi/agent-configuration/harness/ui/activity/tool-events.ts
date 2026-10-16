@@ -4,11 +4,12 @@ import { readSubActivity, readSubagentMetadata, readSubagentUsage } from "../../
 import { activityStore } from "../../activity/store.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { RendererPayloadSchema } from "../../schemas/activity/renderer-payload.schema.ts";
+import { resultFailed } from "../../services/tool-rendering/presentation/result-failed.service.ts";
+import { extractText } from "../../services/tool-rendering/text/extract-text.service.ts";
 import { taskResultFailed } from "../../subagents/result.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import type { RendererResult } from "../../types/activity/renderer-result.interface.ts";
-import { extractText, resultFailed } from "../tool-renderer.ts";
 
 function rendererResult(value: unknown): RendererResult {
   if (!Value.Check(RendererPayloadSchema, value)) return { text: "", details: undefined };

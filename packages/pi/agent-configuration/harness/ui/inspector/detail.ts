@@ -8,6 +8,10 @@ import {
 } from "../../constants/inspector/pseudo-tool.constant.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { presentValue } from "../../services/activity/value/present-value.service.ts";
+import { renderBox } from "../../services/tool-rendering/box/render-box.service.ts";
+import { toolColor } from "../../services/tool-rendering/presentation/tool-color.service.ts";
+import { toolLabel } from "../../services/tool-rendering/presentation/tool-label.service.ts";
+import { toolTarget } from "../../services/tool-rendering/presentation/tool-target.service.ts";
 import { resolveTaskRole } from "../../subagents/roles.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
@@ -15,8 +19,6 @@ import type { SubToolActivity } from "../../types/activity/sub-tool-activity.int
 import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import type { DetailLine } from "../../types/inspector/detail/detail-line.interface.ts";
 import type { DetailOptions } from "../../types/inspector/detail/detail-options.interface.ts";
-import { renderBox } from "../formatting.ts";
-import { toolColor, toolLabel, toolTarget } from "../tool-renderer.ts";
 import { formatTokens, modelLabel, reportedUsageOf } from "./usage.ts";
 
 const TASK_DEFAULT_TOOLS = "search, read, run";
