@@ -22,16 +22,17 @@ export function createAssistantMessageRecorder(): AssistantMessageRecorder {
       updateId = `update-live-${sequence}`;
     },
     update(message, cwd) {
-      const trace = readAssistantActivity(message);
-      if (!trace.found) return trace;
-      if (thinkingId) recordThinking(thinkingId, trace.snapshot.thinking, cwd, Date.now());
-      if (updateId && trace.snapshot.hasToolCall) recordUpdate(updateId, trace.snapshot.response, cwd, Date.now());
-      return trace;
+      const assistantActivity = readAssistantActivity(message);
+      if (!assistantActivity.found) return assistantActivity;
+      if (thinkingId) recordThinking(thinkingId, assistantActivity.snapshot.thinking, cwd, Date.now());
+      if (updateId && assistantActivity.snapshot.hasToolCall)
+        recordUpdate(updateId, assistantActivity.snapshot.response, cwd, Date.now());
+      return assistantActivity;
     },
     end(message, cwd) {
-      const trace = readAssistantActivity(message);
-      if (!trace.found) return trace;
-      const { thinking, response, hasToolCall } = trace.snapshot;
+      const assistantActivity = readAssistantActivity(message);
+      if (!assistantActivity.found) return assistantActivity;
+      const { thinking, response, hasToolCall } = assistantActivity.snapshot;
       if (thinkingId && thinking) {
         recordThinking(thinkingId, thinking, cwd, Date.now());
         activityStore.finish(thinkingId, {
@@ -52,7 +53,7 @@ export function createAssistantMessageRecorder(): AssistantMessageRecorder {
         });
       }
       updateId = undefined;
-      return trace;
+      return assistantActivity;
     },
   };
 }

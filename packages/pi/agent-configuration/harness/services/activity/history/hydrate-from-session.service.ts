@@ -12,12 +12,11 @@ export function hydrateFromSession(ctx: ExtensionContext): void {
     if (entry.type !== "message" || !isRecord(entry.message)) continue;
     const startedAt = parseTimestamp(entry.timestamp);
     const message: Readonly<Record<string, unknown>> = entry.message;
-    const role: unknown = message.role;
-    if (role === "user") {
+    if (message.role === "user") {
       recordUserMessage(`message-${entry.id}`, message.content, ctx.cwd, startedAt);
-    } else if (role === "assistant" && Array.isArray(message.content)) {
+    } else if (message.role === "assistant" && Array.isArray(message.content)) {
       hydrateAssistantMessage({ entryId: entry.id, message, cwd: ctx.cwd, startedAt });
-    } else if (role === "toolResult" && typeof message.toolCallId === "string") {
+    } else if (message.role === "toolResult" && typeof message.toolCallId === "string") {
       hydrateToolResult({ id: message.toolCallId, message, cwd: ctx.cwd, startedAt });
     }
   }

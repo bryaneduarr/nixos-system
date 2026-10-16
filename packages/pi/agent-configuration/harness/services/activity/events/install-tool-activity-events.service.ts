@@ -1,11 +1,6 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
-import type { ActivityStatus } from "../../../types/activity/activity-status.interface.ts";
-import { taskResultFailed } from "../../subagents/tasks/task-result-failed.service.ts";
-import { resultFailed } from "../../tool-rendering/presentation/result-failed.service.ts";
-import { isHarnessTool } from "../../tools/is-harness-tool.service.ts";
 import { isRecord } from "../parsing/is-record.service.ts";
-import { readToolResultFields } from "../parsing/read-tool-result-fields.service.ts";
+import { readToolResultStatus } from "../parsing/read-tool-result-status.service.ts";
 import { activityStore } from "../store/shared-activity-store.service.ts";
 import { readRendererResult } from "./read-renderer-result.service.ts";
 
@@ -31,7 +26,7 @@ export function installToolActivityEvents(
     touch(ctx);
     const partial = readRendererResult(event.partialResult);
     activityStore.update(event.toolCallId, {
-      ...readToolResultFields(partial.details),
+      ...partial.fields,
       text: partial.text,
       status: { state: "present", value: "running" },
     });
@@ -40,14 +35,15 @@ export function installToolActivityEvents(
   pi.on("tool_execution_end", (event, ctx) => {
     touch(ctx);
     const result = readRendererResult(event.result);
-    const failedTask = event.toolName === TASK_TOOL_NAME && taskResultFailed(result.details);
-    const failedHarnessTool = isHarnessTool(event.toolName) && resultFailed(event.toolName, result.text);
-    const isErrorResult = event.isError || failedTask || failedHarnessTool;
-    const status: ActivityStatus = isErrorResult ? "error" : "success";
     activityStore.finish(event.toolCallId, {
-      ...readToolResultFields(result.details),
+      ...result.fields,
       text: result.text,
-      status,
+      status: readToolResultStatus({
+        toolName: event.toolName,
+        text: result.text,
+        isError: event.isError,
+        taskFailed: result.taskFailed,
+      }),
       endedAt: Date.now(),
     });
     publish(ctx);
