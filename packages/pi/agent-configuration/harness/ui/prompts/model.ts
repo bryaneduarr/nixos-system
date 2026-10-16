@@ -1,7 +1,7 @@
-const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+import type { Grapheme } from "../../types/prompts/grapheme.interface.ts";
+import type { SelectedTextLookup, SelectionRangeLookup } from "../../types/prompts/selection.interface.ts";
 
-export type PromptItem = { text: string; label: string };
-export type Grapheme = { text: string; start: number; end: number };
+const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
 export function graphemes(text: string): Grapheme[] {
   return Array.from(segmenter.segment(text), (part) => ({
@@ -33,17 +33,17 @@ export class PromptNavigation {
     return [start, newline < 0 ? this.text.length : newline + 1];
   }
 
-  range(): [number, number] | undefined {
-    if (this.anchor === undefined) return undefined;
+  range(): SelectionRangeLookup {
+    if (this.anchor === undefined) return { found: false };
     const low = Math.min(this.anchor, this.cursor);
     const high = Math.max(this.anchor, this.cursor);
-    if (this.selection === "line") return [this.lineRange(low)[0], this.lineRange(high)[1]];
-    return [this.units[low]?.start ?? 0, this.units[high]?.end ?? 0];
+    if (this.selection === "line") return { found: true, range: [this.lineRange(low)[0], this.lineRange(high)[1]] };
+    return { found: true, range: [this.units[low]?.start ?? 0, this.units[high]?.end ?? 0] };
   }
 
-  selectedText(): string | undefined {
-    const range = this.range();
-    return range ? this.text.slice(...range) : undefined;
+  selectedText(): SelectedTextLookup {
+    const selection = this.range();
+    return selection.found ? { found: true, text: this.text.slice(...selection.range) } : { found: false };
   }
 
   toggleSelection(mode: "character" | "line"): void {

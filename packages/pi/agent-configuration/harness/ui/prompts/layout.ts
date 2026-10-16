@@ -1,12 +1,15 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
-import type { Grapheme, PromptNavigation } from "./model.ts";
-
-export type DisplayCell = { index: number; text: string; column: number; width: number };
-export type DisplayRow = DisplayCell[];
+import { REPLACEMENT_CHARACTER } from "../../constants/prompts/layout.constant.ts";
+import { THEME_ACCENT, THEME_BORDER_MUTED, THEME_SELECTED_BACKGROUND } from "../../constants/prompts/theme.constant.ts";
+import type { DisplayRow } from "../../types/prompts/display-row.interface.ts";
+import type { Grapheme } from "../../types/prompts/grapheme.interface.ts";
+import type { PromptNavigation } from "./model.ts";
 
 export function safeDisplay(text: string): string {
-  return text.replace(/[\x00-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]/g, (char) => (char === "\t" ? "    " : "�"));
+  return text.replace(/[\x00-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069]/g, (char) =>
+    char === "\t" ? "    " : REPLACEMENT_CHARACTER,
+  );
 }
 
 export function wrapPrompt(units: Grapheme[], width: number): DisplayRow[] {
@@ -25,7 +28,7 @@ export function wrapPrompt(units: Grapheme[], width: number): DisplayRow[] {
     let text = safeDisplay(unit.text);
     let size = visibleWidth(text);
     if (size > width) {
-      text = "�";
+      text = REPLACEMENT_CHARACTER;
       size = 1;
     }
     if (column + size > width && row.length > 0) {
@@ -57,15 +60,15 @@ export function moveVertical(navigation: PromptNavigation, rows: DisplayRow[], d
 }
 
 export function renderRow(row: DisplayRow, navigation: PromptNavigation, focused: boolean, theme: Theme): string {
-  const range = navigation.range();
+  const selection = navigation.range();
   return row
     .map((cell) => {
       const unit = navigation.units[cell.index];
-      const selected = range && unit.start < range[1] && unit.end > range[0];
+      const selected = selection.found && unit.start < selection.range[1] && unit.end > selection.range[0];
       const cursor = focused && cell.index === navigation.cursor;
       const text = cell.text || (selected || cursor ? " " : "");
-      if (selected) return theme.bg("selectedBg", text);
-      if (cursor) return theme.bg("selectedBg", theme.fg("accent", text));
+      if (selected) return theme.bg(THEME_SELECTED_BACKGROUND, text);
+      if (cursor) return theme.bg(THEME_SELECTED_BACKGROUND, theme.fg(THEME_ACCENT, text));
       return text;
     })
     .join("");
@@ -79,7 +82,7 @@ export function fit(text: string, width: number): string {
 
 export function frame(lines: string[], width: number, theme: Theme): string[] {
   if (width < 2) return lines.map((line) => fit(line, width));
-  const border = (text: string) => theme.fg("borderMuted", text);
+  const border = (text: string) => theme.fg(THEME_BORDER_MUTED, text);
   return [
     border(`╭${"─".repeat(width - 2)}╮`),
     ...lines.map((line) => `${border("│")}${fit(line, width - 2)}${border("│")}`),

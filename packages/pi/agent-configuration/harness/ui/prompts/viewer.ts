@@ -1,9 +1,20 @@
 import { copyToClipboard, type ExtensionContext, type Theme } from "@earendil-works/pi-coding-agent";
 import { matchesKey, type TUI } from "@earendil-works/pi-tui";
-import { cursorRow, type DisplayRow, fit, frame, moveVertical, renderRow, safeDisplay, wrapPrompt } from "./layout.ts";
-import { type PromptItem, PromptNavigation } from "./model.ts";
-
-export type ClipboardWriter = (text: string) => void | Promise<void>;
+import { THEME_ACCENT, THEME_BORDER_MUTED, THEME_MUTED } from "../../constants/prompts/theme.constant.ts";
+import {
+  BROWSER_CHROME_ROWS,
+  BROWSER_HEIGHT_RATIO,
+  LIST_MIN_WIDTH,
+  LIST_WIDTH_RATIO,
+  RENDER_CACHE_LIMIT,
+  STACKED_LAYOUT_BELOW_WIDTH,
+  STACKED_LIST_MAX_ROWS,
+} from "../../constants/prompts/viewer.constant.ts";
+import type { ClipboardWriter } from "../../types/prompts/clipboard-writer.interface.ts";
+import type { DisplayRow } from "../../types/prompts/display-row.interface.ts";
+import type { PromptItem } from "../../types/prompts/prompt-item.interface.ts";
+import { cursorRow, fit, frame, moveVertical, renderRow, safeDisplay, wrapPrompt } from "./layout.ts";
+import { PromptNavigation } from "./model.ts";
 
 export class PromptBrowser {
   focus: "list" | "detail" = "detail";
@@ -36,7 +47,7 @@ export class PromptBrowser {
     let rows = this.cache.get(this.detailWidth);
     if (!rows) {
       rows = wrapPrompt(this.navigation.units, this.detailWidth);
-      if (this.cache.size >= 4) this.cache.clear();
+      if (this.cache.size >= RENDER_CACHE_LIMIT) this.cache.clear();
       this.cache.set(this.detailWidth, rows);
     }
     return rows;
@@ -44,12 +55,15 @@ export class PromptBrowser {
 
   render(width: number): string[] {
     width = Math.max(0, Math.floor(width));
-    const height = Math.max(1, Math.min(this.tui.terminal.rows, Math.floor(this.tui.terminal.rows * 0.88)));
+    const height = Math.max(
+      1,
+      Math.min(this.tui.terminal.rows, Math.floor(this.tui.terminal.rows * BROWSER_HEIGHT_RATIO)),
+    );
     const inner = Math.max(0, width - 2);
-    const body = Math.max(1, height - 4);
-    const stacked = width < 64;
-    const listWidth = stacked ? inner : Math.max(16, Math.floor(inner * 0.3));
-    const listHeight = stacked ? Math.min(3, Math.max(1, Math.floor(body / 3))) : body;
+    const body = Math.max(1, height - BROWSER_CHROME_ROWS);
+    const stacked = width < STACKED_LAYOUT_BELOW_WIDTH;
+    const listWidth = stacked ? inner : Math.max(LIST_MIN_WIDTH, Math.floor(inner * LIST_WIDTH_RATIO));
+    const listHeight = stacked ? Math.min(STACKED_LIST_MAX_ROWS, Math.max(1, Math.floor(body / 3))) : body;
     this.detailWidth = Math.max(1, stacked ? inner : inner - listWidth - 3);
     this.pageSize = Math.max(1, stacked ? body - listHeight - 1 : body);
     const rows = this.rows();
@@ -64,24 +78,29 @@ export class PromptBrowser {
     const list = this.summaries.slice(listStart, listStart + listHeight).map((summary, index) => {
       const active = listStart + index === this.selected;
       const label = `${active ? ">" : " "} ${summary}`;
-      return this.theme.fg(active ? "accent" : "muted", fit(label, listWidth));
+      return this.theme.fg(active ? THEME_ACCENT : THEME_MUTED, fit(label, listWidth));
     });
     const heading = this.theme.fg(
-      "accent",
+      THEME_ACCENT,
       `Prompts | ${this.focus === "list" ? "[list]" : "list"} | ${this.focus === "detail" ? "[detail]" : "detail"}`,
     );
     const lines = [heading];
     if (stacked) {
       for (let index = 0; index < listHeight; index++) lines.push(list[index] ?? "");
-      lines.push(this.theme.fg("borderMuted", "─".repeat(inner)));
+      lines.push(this.theme.fg(THEME_BORDER_MUTED, "─".repeat(inner)));
       for (let index = 0; index < this.pageSize; index++) lines.push(detail[index] ?? "");
     } else {
       for (let index = 0; index < body; index++) {
-        lines.push(`${fit(list[index] ?? "", listWidth)} ${this.theme.fg("borderMuted", "│")} ${detail[index] ?? ""}`);
+        lines.push(
+          `${fit(list[index] ?? "", listWidth)} ${this.theme.fg(THEME_BORDER_MUTED, "│")} ${detail[index] ?? ""}`,
+        );
       }
     }
     lines.push(
-      this.theme.fg("muted", this.status || "Tab focus · hjkl/wb/0/$/gg/G · v/V select · y/yy/ggyG copy · Esc close"),
+      this.theme.fg(
+        THEME_MUTED,
+        this.status || "Tab focus · hjkl/wb/0/$/gg/G · v/V select · y/yy/ggyG copy · Esc close",
+      ),
     );
     return frame(lines, width, this.theme).slice(0, height);
   }
@@ -143,7 +162,7 @@ export class PromptBrowser {
       else navigation.pending = "g";
     } else if (matchesKey(data, "y")) {
       const selection = navigation.selectedText();
-      if (selection !== undefined) void this.copy(selection);
+      if (selection.found) void this.copy(selection.text);
       else if (pending === "y") void this.copy(navigation.text.slice(...navigation.lineRange()));
       else navigation.pending = "y";
     } else if (matchesKey(data, "shift+g") && pending === "y") {

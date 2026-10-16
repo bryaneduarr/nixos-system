@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { PROMPT_BROWSER_DESCRIPTION } from "../../constants/prompts/registration.constant.ts";
 import { collectPrompts } from "./collection.ts";
 import { previewPrompt } from "./preview.ts";
 import { viewPrompt } from "./viewer.ts";
@@ -27,11 +28,11 @@ export function installPromptPreviews(pi: ExtensionAPI): void {
   };
 
   pi.registerShortcut("ctrl+alt+u", {
-    description: "Browse user prompts and the unsent draft",
+    description: PROMPT_BROWSER_DESCRIPTION,
     handler: openPrompt,
   });
   pi.registerCommand("prompts", {
-    description: "Browse user prompts and the unsent draft",
+    description: PROMPT_BROWSER_DESCRIPTION,
     handler: (_args, ctx) => openPrompt(ctx),
   });
 }
