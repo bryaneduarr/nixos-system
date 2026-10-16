@@ -139,6 +139,10 @@
         '';
       };
 
+      checks.x86_64-linux.pi =
+        nixpkgs.legacyPackages.x86_64-linux.callPackage ./packages/pi/pi-check/pi-check.nix
+          { };
+
       packages = {
         aarch64-linux.pi-tools =
           nixpkgs.legacyPackages.aarch64-linux.callPackage ./packages/pi/pi-tools/pi-tools.nix
