@@ -2,9 +2,9 @@ import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { activityStore } from "../../activity/store.ts";
 import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/elapsed-label.constant.ts";
+import { inspectRequestStore } from "../../services/inspector/request/inspect-request-store.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
 import { isActivityVisible } from "../../ui/activity/visibility.ts";
-import { requestInspection } from "../../ui/inspector/request.ts";
 
 export class ToolBox implements Component {
   private cached: string[] | undefined;
@@ -43,7 +43,7 @@ export class ToolBox implements Component {
 
   handleMouse(event: TuiMouseEvent): TuiMouseEventResult | undefined {
     if (!this.toolCallId || event.type !== "click" || event.button !== "left") return undefined;
-    requestInspection(this.toolCallId);
+    inspectRequestStore.requestInspection(this.toolCallId);
     return { handled: true, focus: true };
   }
 
