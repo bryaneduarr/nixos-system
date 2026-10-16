@@ -15,7 +15,7 @@ export class ToolBox implements Component {
   private cache: ToolBoxCache = { state: "stale" };
 
   constructor(
-    private readonly theme: Theme,
+    private readonly theme: Pick<Theme, "fg">,
     title: string,
     lines: readonly string[],
     color: ThemeColor,
