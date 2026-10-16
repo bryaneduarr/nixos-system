@@ -13,7 +13,7 @@ Record every item before the first worker starts (baseline) and again before han
 
 - Evaluate every target: `nixos`, `wsl-x86_64`, `wsl-aarch64`.
 - Build every affected package. For refactors, compare outputs with the baseline build (`diff -r`); identical output proves the packaged result did not change.
-- Inspect installed trees that changed: required entry files present, tests absent.
+- Inspect installed trees that changed: required entry files present, tests and test doubles absent, and the installed file count equal to the source runtime file count.
 
 ## Behavior evidence
 

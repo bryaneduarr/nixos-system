@@ -11,6 +11,9 @@ Problems met in earlier runs, each with its fix. Add new ones before handing off
 - **Duplicates.** Two areas each wrote the same reader. Assign shared contracts to one area, and search exported names after each merge.
 - **Broad cross-area edits.** One area's worker edited many other areas' files, causing large conflicts. Merge contracts first and keep cross-area edits to imports and call sites.
 - **Unrequested documentation edits.** Workers updated README lines. Allowed only when a statement became wrong; the coordinator reviews them.
+- **Unassigned files.** An area table built from folder globs missed a file with findings, so no worker fixed it. Build the area table from the actual finding or file list and check that every listed file has exactly one owner.
+- **Misread check results.** A worker reported a failing check because Biome printed a warning, but `biome ci` exited 0. Re-run any reported failure yourself and judge by the exit code.
+- **Unconstructible library types.** End-to-end tests of whole extensions need fakes of APIs with per-event overloads or classes with private members; no narrow interface fits. Keep those casts in `.test-double.ts` files, allowlisted with the reason, and keep tests cast-free.
 - **Claimed behavior equivalence.** Workers describe changes as equivalent without proof. Require the behavior evidence from the checklist.
 
 ## Merging
@@ -27,6 +30,12 @@ Problems met in earlier runs, each with its fix. Add new ones before handing off
 - **Nix sandbox has no `/usr/bin/env`.** Run package scripts with `node <script>` instead of their shebang.
 - **Fixed-output dependencies** cannot reference store paths, must keep `node_modules` as a nested folder for type resolution, and use `bun install --cpu='*' --os=linux` so one hash fits every system.
 
+## Rule audit
+
+- **Linters that contradict the audit.** Biome's `useOptionalChain` suggested the `?.` the audit forbids. Turn off any linter rule that pushes code against a project rule.
+- **Module-level state breaks test order.** An extension read `XDG_STATE_HOME` when its module loaded, so a new test that imported it first broke another test. Resolve environment-dependent paths when used, not at import.
+- **Pattern false positives.** The first `nullable-union` pattern also matched `undefined ||`. When a worker rewrites correct code only to satisfy the audit, fix the audit pattern and add a test instead.
+
 ## Shell and tooling in agent sessions
 
 - **zsh does not split `$VARIABLE`** into words; use arrays or `find -exec`.
@@ -35,4 +44,4 @@ Problems met in earlier runs, each with its fix. Add new ones before handing off
 
 ## Not verified in earlier runs
 
-- Real application runtime before activation, aarch64 builds, and interactive terminal behavior.
+- Real application runtime before activation, aarch64 builds, interactive terminal behavior, and extension load time after splitting code into many small files.
