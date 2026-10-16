@@ -37,7 +37,7 @@ test("the card shows only the active tool, its target, and its state", () => {
       status: "success" as const,
       text: "done",
       startedAt: 1000,
-      endedAt: 2400,
+      endedAt: { state: "present" as const, value: 2400 },
     },
     {
       id: "bash-1",
@@ -46,10 +46,12 @@ test("the card shows only the active tool, its target, and its state", () => {
       status: "running" as const,
       text: "",
       startedAt: startedAt - 500,
+      endedAt: { state: "absent" as const },
     },
   ];
 
   activityStore.update("call-1", {
+    sub: activity,
     details: {
       id: "worker-1",
       title: "Inspect parser",
@@ -101,7 +103,7 @@ test("a completed card shows the last tool's duration without earlier calls or t
       status: "success" as const,
       text: "done",
       startedAt: 1000,
-      endedAt: 1100,
+      endedAt: { state: "present" as const, value: 1100 },
     },
     {
       id: "grep-1",
@@ -110,11 +112,12 @@ test("a completed card shows the last tool's duration without earlier calls or t
       status: "success" as const,
       text: "done",
       startedAt: 1000,
-      endedAt: 2200,
+      endedAt: { state: "present" as const, value: 2200 },
     },
   ];
 
   activityStore.finish("done-call", {
+    sub: activity,
     text: "done",
     status: "success",
     endedAt: 35400,

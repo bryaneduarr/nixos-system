@@ -1,7 +1,8 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { readAssistantActivity } from "../../activity/parse.ts";
+import { ACTIVITY_COMPLETION_ENTRY } from "../../constants/activity/activity-keys.constant.ts";
 import { safeParseTimestamp } from "./records.ts";
-import { ACTIVITY_COMPLETION_ENTRY, setActivityCompletion } from "./summary-state.ts";
+import { setActivityCompletion } from "./summary-state.ts";
 
 export function restoreCompletions(ctx: ExtensionContext): void {
   let messageNumber = 0;

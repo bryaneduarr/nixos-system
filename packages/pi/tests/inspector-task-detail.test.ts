@@ -22,7 +22,7 @@ test("task detail shows current context, call count, and reasoning without redun
     status: "success" as const,
     text: "",
     startedAt: 1000,
-    endedAt: 1100,
+    endedAt: { state: "present", value: 1100 } as const,
   }));
 
   activityStore.finish(entry.id, {
@@ -30,21 +30,29 @@ test("task detail shows current context, call count, and reasoning without redun
     status: "success",
     endedAt: 2000,
     usage: {
-      inputTokens: 1000,
-      outputTokens: 1000,
-      cacheReadTokens: 17000,
-      cacheWriteTokens: 0,
-      reasoningTokens: 0,
-      totalTokens: 19000,
-      contextTokens: 12000,
+      usageState: "reported",
+      usage: {
+        inputTokens: 1000,
+        outputTokens: 1000,
+        cacheReadTokens: 17000,
+        cacheWriteTokens: 0,
+        reasoningTokens: 0,
+        totalTokens: 19000,
+        contextTokens: { state: "present", value: 12000 },
+        maxContextTokens: { state: "absent" },
+      },
     },
     model: {
-      provider: "test",
-      id: "sample",
-      reasoning: true,
-      contextWindow: 272000,
+      state: "present",
+      value: {
+        provider: "test",
+        id: "sample",
+        name: { state: "absent" },
+        reasoning: { state: "present", value: true },
+        contextWindow: { state: "present", value: 272000 },
+      },
     },
-    thinkingLevel: "low",
+    thinkingLevel: { state: "present", value: "low" },
     sub: subagentCalls,
   });
 

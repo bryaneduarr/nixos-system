@@ -1,21 +1,21 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { readAssistantActivity } from "../../activity/parse.ts";
 import { activityStore } from "../../activity/store.ts";
+import { MESSAGE_ACTIVITY_NAME, UPDATE_ACTIVITY_NAME } from "../../constants/activity/activity-entry.constant.ts";
+import {
+  ACTIVITY_COMPLETION_ENTRY,
+  ACTIVITY_SUMMARY_ENTRY,
+  ACTIVITY_WIDGET_KEY,
+} from "../../constants/activity/activity-keys.constant.ts";
+import { SPINNER_TICK_MS } from "../../constants/activity/spinner.constant.ts";
 import { openInspector } from "../inspector/index.ts";
 import { setInspectContext, setInspectOpener } from "../inspector/request.ts";
 import { INSPECT_SHORTCUT } from "../tool-renderer.ts";
 import { hydrateFromSession } from "./hydrate.ts";
 import { recordThinking, recordUpdate, recordUserMessage } from "./records.ts";
 import { restoreCompletions } from "./restore.ts";
-import {
-  ACTIVITY_COMPLETION_ENTRY,
-  ACTIVITY_SUMMARY_ENTRY,
-  ACTIVITY_WIDGET_KEY,
-  clearActivityCompletions,
-  renderActivitySummary,
-  setActivityCompletion,
-  setActivitySummaryState,
-} from "./summary.ts";
+import { renderActivitySummary } from "./summary.ts";
+import { clearActivityCompletions, setActivityCompletion, setActivitySummaryState } from "./summary-state.ts";
 import { registerToolActivity } from "./tool-events.ts";
 import { resetActivityVisibility, setAgentWorking, toggleActivityVisibility } from "./visibility.ts";
 
@@ -37,7 +37,9 @@ export function installActivity(pi: ExtensionAPI): void {
     // Pi's transformer has no message ID or stop reason. Keep streaming text
     // out of the transcript until we know whether this turn calls a tool.
     if (context.isStreaming) return "";
-    return activityStore.all().some((entry) => entry.toolName === "update" && entry.text.trim() === markdown.trim())
+    return activityStore
+      .all()
+      .some((entry) => entry.toolName === UPDATE_ACTIVITY_NAME && entry.text.trim() === markdown.trim())
       ? ""
       : markdown;
   });
@@ -49,7 +51,7 @@ export function installActivity(pi: ExtensionAPI): void {
   const publish = (ctx: ExtensionContext): void => {
     if (ctx.mode !== "tui") return;
     setActivitySummaryState(working, frame);
-    const messageNumber = activityStore.all().filter((entry) => entry.toolName === "message").length;
+    const messageNumber = activityStore.all().filter((entry) => entry.toolName === MESSAGE_ACTIVITY_NAME).length;
     ctx.ui.setWidget(
       ACTIVITY_WIDGET_KEY,
       messageNumber > 0 ? (_tui, theme) => renderActivitySummary({ messageNumber }, theme) : undefined,
@@ -65,7 +67,7 @@ export function installActivity(pi: ExtensionAPI): void {
     ticker = setInterval(() => {
       frame++;
       if (currentContext) publish(currentContext);
-    }, 180);
+    }, SPINNER_TICK_MS);
   };
   let thinkingId: string | undefined;
   let updateId: string | undefined;
@@ -73,7 +75,7 @@ export function installActivity(pi: ExtensionAPI): void {
   let messageSequence = 0;
 
   setInspectOpener((ctx, toolCallId) => {
-    void openInspector(ctx, { selectId: toolCallId });
+    void openInspector(ctx, toolCallId === undefined ? {} : { selectId: toolCallId });
   });
 
   const touch = (ctx: ExtensionContext): void => {
@@ -112,7 +114,7 @@ export function installActivity(pi: ExtensionAPI): void {
 
   pi.on("message_start", (event, ctx) => {
     if (event.message.role === "user") {
-      recordUserMessage(`message-live-${++messageSequence}`, event.message.content, ctx.cwd);
+      recordUserMessage(`message-live-${++messageSequence}`, event.message.content, ctx.cwd, Date.now());
       publish(ctx);
       return;
     }
@@ -124,8 +126,8 @@ export function installActivity(pi: ExtensionAPI): void {
   pi.on("message_update", (event, ctx) => {
     const trace = readAssistantActivity(event.message);
     if (!trace) return;
-    if (thinkingId) recordThinking(thinkingId, trace.thinking, ctx.cwd);
-    if (updateId && trace.hasToolCall) recordUpdate(updateId, trace.response, ctx.cwd);
+    if (thinkingId) recordThinking(thinkingId, trace.thinking, ctx.cwd, Date.now());
+    if (updateId && trace.hasToolCall) recordUpdate(updateId, trace.response, ctx.cwd, Date.now());
     touch(ctx);
     activityStore.updateAgent({
       phase: phaseForAssistantEvent(event.assistantMessageEvent.type, trace.hasToolCall),
@@ -140,7 +142,7 @@ export function installActivity(pi: ExtensionAPI): void {
     const trace = readAssistantActivity(event.message);
     if (!trace) return;
     if (thinkingId && trace.thinking) {
-      recordThinking(thinkingId, trace.thinking, ctx.cwd);
+      recordThinking(thinkingId, trace.thinking, ctx.cwd, Date.now());
       activityStore.finish(thinkingId, {
         text: trace.thinking,
         status: "success",
@@ -148,7 +150,7 @@ export function installActivity(pi: ExtensionAPI): void {
     }
     thinkingId = undefined;
     if (updateId && trace.hasToolCall && trace.response.trim()) {
-      recordUpdate(updateId, trace.response, ctx.cwd);
+      recordUpdate(updateId, trace.response, ctx.cwd, Date.now());
       activityStore.finish(updateId, {
         text: trace.response,
         status: "success",
@@ -171,7 +173,7 @@ export function installActivity(pi: ExtensionAPI): void {
     setAgentWorking(false);
     working = false;
     stopTicker();
-    const messageNumber = activityStore.all().filter((entry) => entry.toolName === "message").length;
+    const messageNumber = activityStore.all().filter((entry) => entry.toolName === MESSAGE_ACTIVITY_NAME).length;
     if (messageNumber > 0) {
       const completedAt = Date.now();
       setActivityCompletion(messageNumber, completedAt);

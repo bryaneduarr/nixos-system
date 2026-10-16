@@ -1,5 +1,5 @@
 import { matchesKey, type TuiMouseEvent, type TuiMouseEventResult, visibleWidth } from "@earendil-works/pi-tui";
-import type { ToolActivity } from "../../activity/store.ts";
+import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import type { InspectorRow } from "./detail.ts";
 
 export type InspectorPage = "tools" | "subagents" | "messages";

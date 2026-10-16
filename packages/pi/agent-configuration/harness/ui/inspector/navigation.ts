@@ -1,4 +1,5 @@
-import { activityStore, type ToolActivity } from "../../activity/store.ts";
+import { activityStore } from "../../activity/store.ts";
+import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import type { InspectorRow } from "./detail.ts";
 import type { InspectorPage } from "./input.ts";
 

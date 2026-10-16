@@ -1,10 +1,12 @@
-import type { SubagentUsage } from "./store.ts";
+import { presentValue } from "../services/activity/value/present-value.service.ts";
+import type { SubagentUsage } from "../types/activity/subagent-usage.interface.ts";
 
 export function addSubagentUsage(current: SubagentUsage | undefined, next: SubagentUsage): SubagentUsage {
-  const nextContextTokens = next.contextTokens ?? next.totalTokens;
-  const currentContextTokens = current?.contextTokens;
-  const currentMaxContextTokens = current?.maxContextTokens ?? currentContextTokens ?? 0;
-  const nextMaxContextTokens = next.maxContextTokens ?? nextContextTokens;
+  const nextContextTokens = presentValue(next.contextTokens) ?? next.totalTokens;
+  const currentContextTokens = current === undefined ? undefined : presentValue(current.contextTokens);
+  const currentMaxContextTokens =
+    (current === undefined ? undefined : presentValue(current.maxContextTokens)) ?? currentContextTokens ?? 0;
+  const nextMaxContextTokens = presentValue(next.maxContextTokens) ?? nextContextTokens;
   return {
     inputTokens: (current?.inputTokens ?? 0) + next.inputTokens,
     outputTokens: (current?.outputTokens ?? 0) + next.outputTokens,
@@ -12,7 +14,7 @@ export function addSubagentUsage(current: SubagentUsage | undefined, next: Subag
     cacheWriteTokens: (current?.cacheWriteTokens ?? 0) + next.cacheWriteTokens,
     reasoningTokens: (current?.reasoningTokens ?? 0) + next.reasoningTokens,
     totalTokens: (current?.totalTokens ?? 0) + next.totalTokens,
-    contextTokens: nextContextTokens,
-    maxContextTokens: Math.max(currentMaxContextTokens, nextMaxContextTokens),
+    contextTokens: { state: "present", value: nextContextTokens },
+    maxContextTokens: { state: "present", value: Math.max(currentMaxContextTokens, nextMaxContextTokens) },
   };
 }

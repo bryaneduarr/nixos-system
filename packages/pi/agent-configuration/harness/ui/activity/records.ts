@@ -1,4 +1,9 @@
 import { activityStore } from "../../activity/store.ts";
+import {
+  MESSAGE_ACTIVITY_NAME,
+  THINKING_ACTIVITY_NAME,
+  UPDATE_ACTIVITY_NAME,
+} from "../../constants/activity/activity-entry.constant.ts";
 
 export function safeParseTimestamp(timestamp: unknown): number {
   if (typeof timestamp !== "string") return Date.now();
@@ -6,7 +11,7 @@ export function safeParseTimestamp(timestamp: unknown): number {
   return Number.isNaN(parsed) ? Date.now() : parsed;
 }
 
-export function recordUserMessage(id: string, content: unknown, cwd: string, startedAt?: number): void {
+export function recordUserMessage(id: string, content: unknown, cwd: string, startedAt: number): void {
   const text = Array.isArray(content)
     ? content
         .filter(
@@ -23,19 +28,19 @@ export function recordUserMessage(id: string, content: unknown, cwd: string, sta
     : typeof content === "string"
       ? content
       : "";
-  const number = activityStore.all().filter((entry) => entry.toolName === "message").length + 1;
-  activityStore.begin({ id, toolName: "message", args: { number }, cwd, startedAt });
+  const number = activityStore.all().filter((entry) => entry.toolName === MESSAGE_ACTIVITY_NAME).length + 1;
+  activityStore.begin({ id, toolName: MESSAGE_ACTIVITY_NAME, args: { number }, cwd, startedAt });
   activityStore.finish(id, { text, status: "success", endedAt: startedAt });
 }
 
-export function recordUpdate(id: string, text: string, cwd: string, startedAt?: number): void {
+export function recordUpdate(id: string, text: string, cwd: string, startedAt: number): void {
   if (!text.trim()) return;
-  activityStore.begin({ id, toolName: "update", args: {}, cwd, startedAt });
+  activityStore.begin({ id, toolName: UPDATE_ACTIVITY_NAME, args: {}, cwd, startedAt });
   activityStore.update(id, { text });
 }
 
-export function recordThinking(id: string, text: string, cwd: string, startedAt?: number): void {
+export function recordThinking(id: string, text: string, cwd: string, startedAt: number): void {
   if (!text) return;
-  activityStore.begin({ id, toolName: "thinking", args: {}, cwd, startedAt });
+  activityStore.begin({ id, toolName: THINKING_ACTIVITY_NAME, args: {}, cwd, startedAt });
   activityStore.update(id, { text });
 }

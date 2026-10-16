@@ -1,6 +1,8 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
-import { activityStore, type SubToolActivity } from "../activity/store.ts";
+import { activityStore } from "../activity/store.ts";
+import { presentValue } from "../services/activity/value/present-value.service.ts";
+import type { SubToolActivity } from "../types/activity/sub-tool-activity.interface.ts";
 import { oneLine } from "../ui/formatting.ts";
 import { EMPTY, ToolBox } from "../ui/tool-renderer.ts";
 import type { TaskProgress } from "./runner.ts";
@@ -53,7 +55,7 @@ export function renderSubagentCard(
     candidateTitles.find((value): value is string => typeof value === "string" && value.trim().length > 0) ??
     "Preparing task";
   const status = current?.status ?? entry?.status ?? "running";
-  const calls = current?.activity ?? entry?.sub ?? [];
+  const calls = progress?.activity ?? entry?.sub ?? [];
   const lines = [theme.fg("text", oneLine(label))];
   const call = calls.findLast((item) => item.status === "running") ?? calls.at(-1);
 
@@ -64,8 +66,9 @@ export function renderSubagentCard(
     lines.push(theme.fg("text", toolLabel));
     lines.push(theme.fg(toolStatusColor(call.status), toolStatusLabel(call.status)));
 
-    if (call.endedAt !== undefined) {
-      lines.push(theme.fg("muted", `Time: ${duration(call.startedAt, call.endedAt)}`));
+    const callEndedAt = presentValue(call.endedAt);
+    if (callEndedAt !== undefined) {
+      lines.push(theme.fg("muted", `Time: ${duration(call.startedAt, callEndedAt)}`));
     }
   } else {
     const startLabel = status === "running" ? "Starting" : "No tool calls";

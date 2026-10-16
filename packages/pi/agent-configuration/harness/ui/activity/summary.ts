@@ -2,40 +2,35 @@ import type { Theme } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { activityStore } from "../../activity/store.ts";
-import { type ActivitySummaryData, actionsForMessage, activitySummaryState } from "./summary-state.ts";
-
-export type { ActivitySummaryData } from "./summary-state.ts";
-export {
-  ACTIVITY_COMPLETION_ENTRY,
-  ACTIVITY_SUMMARY_ENTRY,
-  ACTIVITY_WIDGET_KEY,
-  clearActivityCompletion,
-  clearActivityCompletions,
-  setActivityCompletion,
-  setActivitySummaryState,
-  summarizeActivity,
-} from "./summary-state.ts";
-
+import {
+  MESSAGE_ACTIVITY_NAME,
+  THINKING_ACTIVITY_NAME,
+  UPDATE_ACTIVITY_NAME,
+} from "../../constants/activity/activity-entry.constant.ts";
+import { SPINNER_FRAMES } from "../../constants/activity/spinner.constant.ts";
 import { isHarnessTool } from "../../tools/config.ts";
+import type { ActivitySummaryData } from "../../types/activity/activity-summary.interface.ts";
 import { oneLine } from "../formatting.ts";
 import { toolLabel, toolTarget } from "../tool-renderer.ts";
 import { formatElapsed } from "./elapsed.ts";
+import { actionsForMessage, activitySummaryState } from "./summary-state.ts";
 import { isActivityVisible, toggleActivityVisibility } from "./visibility.ts";
-
-const SPINNER_FRAMES = ["/", "-", "\\", "|"] as const;
 
 function thinkingTitles(messageNumber: number): string[] {
   const entries = activityStore.all();
-  const start = entries.findIndex((entry) => entry.toolName === "message" && entry.args.number === messageNumber);
+  const start = entries.findIndex(
+    (entry) => entry.toolName === MESSAGE_ACTIVITY_NAME && entry.args.number === messageNumber,
+  );
   if (start < 0) return [];
-  const next = entries.findIndex((entry, index) => index > start && entry.toolName === "message");
+  const next = entries.findIndex((entry, index) => index > start && entry.toolName === MESSAGE_ACTIVITY_NAME);
   const titles = entries
     .slice(start + 1, next < 0 ? undefined : next)
-    .filter((entry) => entry.toolName === "thinking")
+    .filter((entry) => entry.toolName === THINKING_ACTIVITY_NAME)
     .flatMap((entry) =>
       entry.text.split("\n").flatMap((line) => {
         const title = line.trim().match(/^(?:\*\*(.+?)\*\*|#{1,6}\s+(.+))$/);
-        return title ? [oneLine(title[1] ?? title[2])] : [];
+        const titleText = title?.[1] ?? title?.[2];
+        return titleText === undefined ? [] : [oneLine(titleText)];
       }),
     );
   return titles.filter((title, index) => titles.indexOf(title) === index);
@@ -54,7 +49,9 @@ class ActivitySummaryComponent implements Component {
     const count = actions.length;
     const startedAt = activityStore
       .all()
-      .find((entry) => entry.toolName === "message" && entry.args.number === this.data.messageNumber)?.startedAt;
+      .find(
+        (entry) => entry.toolName === MESSAGE_ACTIVITY_NAME && entry.args.number === this.data.messageNumber,
+      )?.startedAt;
     const duration =
       startedAt === undefined
         ? ""
@@ -65,9 +62,9 @@ class ActivitySummaryComponent implements Component {
     const trailing = `${countLabel}${duration ? ` | ${duration}` : ""} | ${details}`;
     const entries = activityStore.all();
     const start = entries.findIndex(
-      (entry) => entry.toolName === "message" && entry.args.number === this.data.messageNumber,
+      (entry) => entry.toolName === MESSAGE_ACTIVITY_NAME && entry.args.number === this.data.messageNumber,
     );
-    const next = entries.findIndex((entry, index) => index > start && entry.toolName === "message");
+    const next = entries.findIndex((entry, index) => index > start && entry.toolName === MESSAGE_ACTIVITY_NAME);
     const current = entries.slice(start + 1, next < 0 ? undefined : next);
     const lastTool = current.filter((entry) => isHarnessTool(entry.toolName)).at(-1);
     const toolTitle =
@@ -76,7 +73,7 @@ class ActivitySummaryComponent implements Component {
         : "";
     const latest =
       thinkingTitles(this.data.messageNumber).at(-1) ||
-      oneLine(current.filter((entry) => entry.toolName === "update").at(-1)?.text ?? "") ||
+      oneLine(current.filter((entry) => entry.toolName === UPDATE_ACTIVITY_NAME).at(-1)?.text ?? "") ||
       toolTitle;
     const runningTools = current.filter((entry) => isHarnessTool(entry.toolName) && entry.status === "running");
     const mark =
@@ -113,16 +110,12 @@ class ActivitySummaryComponent implements Component {
         }
       }
       footer.push(footerLine);
-      for (let index = 0; index < footer.length; index++) {
-        footer[index] = this.divider(
-          this.theme.fg("muted", footer[index]),
-          width,
-          index === footer.length - 1 ? "└ " : "│ ",
-        );
+      for (const [index, part] of footer.entries()) {
+        footer[index] = this.divider(this.theme.fg("muted", part), width, index === footer.length - 1 ? "└ " : "│ ");
       }
     }
     if (!expanded) return [header, ...footer];
-    const updates = current.filter((entry) => entry.toolName === "update" && entry.text.trim());
+    const updates = current.filter((entry) => entry.toolName === UPDATE_ACTIVITY_NAME && entry.text.trim());
     const lines = updates.flatMap((entry) =>
       entry.text
         .trim()

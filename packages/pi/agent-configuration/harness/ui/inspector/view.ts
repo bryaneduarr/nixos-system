@@ -1,6 +1,7 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
-import { activityStore, type ToolActivity } from "../../activity/store.ts";
+import { activityStore } from "../../activity/store.ts";
+import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import { buildDetail, type InspectorRow } from "./detail.ts";
 import { footer, frameModal, padCell } from "./frame.ts";
 import type { InspectorLayout, InspectorPage } from "./input.ts";

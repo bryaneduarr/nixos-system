@@ -1,10 +1,14 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
-import { type ActivityStatus, activityStore, type SubToolActivity, type ToolActivity } from "../../activity/store.ts";
+import { activityStore } from "../../activity/store.ts";
+import { presentValue } from "../../services/activity/value/present-value.service.ts";
 import { resolveTaskRole, TASK_TOOL_NAME } from "../../subagents/roles.ts";
 import { isHarnessTool } from "../../tools/config.ts";
+import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
+import type { SubToolActivity } from "../../types/activity/sub-tool-activity.interface.ts";
+import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import { renderBox } from "../formatting.ts";
 import { toolColor, toolLabel, toolTarget } from "../tool-renderer.ts";
-import { formatTokens, modelLabel } from "./usage.ts";
+import { formatTokens, modelLabel, reportedUsageOf } from "./usage.ts";
 
 const TASK_DEFAULT_TOOLS = "search, read, run";
 
@@ -146,7 +150,7 @@ export function buildDetail({ row, width, artifactText }: DetailOptions): Detail
   const args = sub?.args ?? entry.args;
   const status = sub?.status ?? entry.status;
   const startedAt = sub?.startedAt ?? entry.startedAt;
-  const endedAt = sub?.endedAt ?? entry.endedAt;
+  const endedAt = (sub === undefined ? undefined : presentValue(sub.endedAt)) ?? presentValue(entry.endedAt);
   const rawText = artifactText ?? sub?.text ?? entry.text;
   const output = formatOutput(rawText);
   const lines: DetailLine[] = [];
@@ -209,14 +213,16 @@ export function buildDetail({ row, width, artifactText }: DetailOptions): Detail
   }
 
   if (!sub && tool === TASK_TOOL_NAME) {
-    const usage = entry.usage;
-    const modelWindow = entry.model?.contextWindow;
-    const reasoning = entry.thinkingLevel ?? "—";
-    const currentContext = usage?.contextTokens === undefined ? "—" : formatTokens(usage.contextTokens);
+    const usage = reportedUsageOf(entry.usage);
+    const model = presentValue(entry.model);
+    const modelWindow = model === undefined ? undefined : presentValue(model.contextWindow);
+    const reasoning = presentValue(entry.thinkingLevel) ?? "—";
+    const currentTokens = usage === undefined ? undefined : presentValue(usage.contextTokens);
+    const currentContext = currentTokens === undefined ? "—" : formatTokens(currentTokens);
     const contextWindow = modelWindow ? formatTokens(modelWindow) : "—";
     const callCount = entry.sub.length;
 
-    lines.push({ text: `MODEL ${modelLabel(entry.model)}`, color: "accent", bold: true });
+    lines.push({ text: `MODEL ${modelLabel(model)}`, color: "accent", bold: true });
     lines.push({ text: `REASONING ${reasoning}`, color: "accent" });
     lines.push({
       text: `CONTEXT ${currentContext}/${contextWindow} | ${callCount} calls`,
@@ -231,10 +237,10 @@ export function buildDetail({ row, width, artifactText }: DetailOptions): Detail
   lines.push(...boxDetails("input", formatInput(tool, args), color, width));
   lines.push({ text: "" });
 
-  if (entry.artifactPath) {
+  if (entry.artifactPath.found) {
     const artifactAction = artifactText ? "· open" : "· press a";
     lines.push({
-      text: `artifact ${artifactAction} · ${entry.artifactPath}`,
+      text: `artifact ${artifactAction} · ${entry.artifactPath.path}`,
       color: "muted",
     });
     lines.push({ text: "" });

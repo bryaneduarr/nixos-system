@@ -8,9 +8,12 @@ import {
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 import type { Static } from "typebox";
-import type { SubagentModel, SubagentUsage, SubToolActivity } from "../activity/store.ts";
+import { toValueState } from "../services/activity/value/to-value-state.service.ts";
+import type { SubToolActivity } from "../types/activity/sub-tool-activity.interface.ts";
+import type { SubagentModel } from "../types/activity/subagent-model.interface.ts";
+import type { SubagentUsage } from "../types/activity/subagent-usage.interface.ts";
 import { createApprovedCommandTool } from "./approved-command.ts";
-import { TaskParams } from "./parameters.ts";
+import type { TaskParams } from "./parameters.ts";
 import { parseTaskOutput } from "./result.ts";
 import { APPROVED_COMMAND_TOOL, buildTaskSystemPrompt, resolveTaskRole, type TaskRole } from "./roles.ts";
 
@@ -67,6 +70,8 @@ function usageFromMessages(messages: readonly unknown[], contextTokens?: number 
     cacheWriteTokens: 0,
     reasoningTokens: 0,
     totalTokens: 0,
+    contextTokens: { state: "absent" },
+    maxContextTokens: { state: "absent" },
   };
 
   for (const message of messages) {
@@ -86,7 +91,7 @@ function usageFromMessages(messages: readonly unknown[], contextTokens?: number 
 
   usage.totalTokens = usage.inputTokens + usage.outputTokens + usage.cacheReadTokens + usage.cacheWriteTokens;
   if (typeof contextTokens === "number" && Number.isFinite(contextTokens)) {
-    usage.contextTokens = contextTokens;
+    usage.contextTokens = { state: "present", value: contextTokens };
   }
 
   return usage;
@@ -192,9 +197,9 @@ export async function runTask(
     model: {
       provider: model.provider,
       id: model.id,
-      name: model.name,
-      reasoning: model.reasoning,
-      contextWindow: model.contextWindow,
+      name: toValueState(model.name),
+      reasoning: toValueState(model.reasoning),
+      contextWindow: toValueState(model.contextWindow),
     },
     thinkingLevel: session.thinkingLevel,
     activity: [],
@@ -211,6 +216,7 @@ export async function runTask(
         status: "running",
         text: "",
         startedAt: Date.now(),
+        endedAt: { state: "absent" },
       });
       publish();
       return;
@@ -221,7 +227,7 @@ export async function runTask(
       if (call) {
         call.status = event.isError ? "error" : "success";
         call.text = textContent(event.result?.content);
-        call.endedAt = Date.now();
+        call.endedAt = { state: "present", value: Date.now() };
       }
 
       const runningCall = progress.activity.findLast((item) => item.status === "running");
