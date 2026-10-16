@@ -50,8 +50,17 @@ export async function fdMatches(
   signal: AbortSignal | undefined,
 ): Promise<string[]> {
   const argv = [
-    "fd", "--type", "f", "--hidden", "--exclude", ".git", "--exclude", "node_modules",
-    "--fixed-strings", query, scope ?? ".",
+    "fd",
+    "--type",
+    "f",
+    "--hidden",
+    "--exclude",
+    ".git",
+    "--exclude",
+    "node_modules",
+    "--fixed-strings",
+    query,
+    scope ?? ".",
   ];
   const result = await runCommand({ argv, cwd, signal });
   if (result.code !== 0) return [];
@@ -110,8 +119,5 @@ export async function gitHistory(
   }
   const lines = result.stdout.trim().split("\n").filter(Boolean);
   if (lines.length === 0) return `History:\nno commits touching "${query}"`;
-  return `History:\n${lines.join("\n")}\n\nAdditional commits omitted: ${Math.max(
-    0,
-    lines.length - limit,
-  )}`;
+  return `History:\n${lines.join("\n")}\n\nAdditional commits omitted: ${Math.max(0, lines.length - limit)}`;
 }

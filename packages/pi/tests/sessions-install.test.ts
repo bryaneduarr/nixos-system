@@ -1,12 +1,16 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, rm } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { installSessions, gitBranch, type SessionDependencies } from "../agent-configuration/harness/sessions/install.ts";
-import { HerdrSessions } from "../agent-configuration/harness/sessions/herdr.ts";
-import type { LiveSession, SessionRegistry } from "../agent-configuration/harness/sessions/registry.ts";
 import { getKeybindings, KeybindingsManager, setKeybindings } from "@earendil-works/pi-tui";
+import { HerdrSessions } from "../agent-configuration/harness/sessions/herdr.ts";
+import {
+  gitBranch,
+  installSessions,
+  type SessionDependencies,
+} from "../agent-configuration/harness/sessions/install.ts";
+import type { LiveSession, SessionRegistry } from "../agent-configuration/harness/sessions/registry.ts";
 
 test("non-Git projects do not show a conversation-tree branch", async () => {
   expect(await gitBranch(tmpdir())).toBe("no git");
@@ -25,14 +29,18 @@ test("publication renumbers the pane, agent, and live record after other session
   process.env.PI_SESSION_REGISTRY = root;
   const token = process.env.PI_MANAGED_SESSION;
   const ctx: any = {
-    mode: "tui", cwd: root, isIdle: () => true, hasPendingMessages: () => false,
+    mode: "tui",
+    cwd: root,
+    isIdle: () => true,
+    hasPendingMessages: () => false,
     getContextUsage: () => undefined,
     ui: { getEditorText: () => "", onTerminalInput: () => () => {}, notify: () => {} },
     sessionManager: { getEntries: () => [], getSessionId: () => "current", getSessionFile: () => undefined },
   };
   const api: any = {
     on: (name: string, handler: any) => events.set(name, handler),
-    registerShortcut: () => {}, registerCommand: () => {},
+    registerShortcut: () => {},
+    registerCommand: () => {},
   };
   try {
     installSessions(api, {
@@ -45,10 +53,21 @@ test("publication renumbers the pane, agent, and live record after other session
                 const identity = randomUUID();
                 const name = await registry.instanceName(root, identity);
                 const row: LiveSession = {
-                  identity, name, cwd: root, pid: process.pid, updatedAt: Date.now(),
-                  pane: `w1:p${index + 2}`, tab: "w1:t1", workspace: "w1",
-                  sessionId: `other-${index}`, branch: "no git", percent: null,
-                  status: "idle", owned: true, historyEver: false, cleanupSafe: false,
+                  identity,
+                  name,
+                  cwd: root,
+                  pid: process.pid,
+                  updatedAt: Date.now(),
+                  pane: `w1:p${index + 2}`,
+                  tab: "w1:t1",
+                  workspace: "w1",
+                  sessionId: `other-${index}`,
+                  branch: "no git",
+                  percent: null,
+                  status: "idle",
+                  owned: true,
+                  historyEver: false,
+                  cleanupSafe: false,
                 };
                 otherSessions.push(row);
                 await registry.publish(row);
@@ -73,7 +92,8 @@ test("publication renumbers the pane, agent, and live record after other session
   } finally {
     await events.get("session_shutdown")?.({ reason: "quit" }, ctx);
     for (const key of ["HERDR_ENV", "HERDR_SOCKET_PATH", "PI_MANAGED_SESSION", "PI_SESSION_REGISTRY"]) {
-      if (previous[key] === undefined) delete process.env[key]; else process.env[key] = previous[key];
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
     }
     await rm(root, { recursive: true, force: true });
   }
@@ -83,9 +103,14 @@ test("install reports lifecycle and session identity, protects user history acro
   const root = await mkdtemp(join(tmpdir(), "pi-install-test-"));
   const previous = { ...process.env };
   const previousKeybindings = getKeybindings();
-  setKeybindings(new KeybindingsManager({
-    "app.clipboard.pasteImage": { description: "Paste", defaultKeys: "ctrl+v" },
-  }, { "app.clipboard.pasteImage": "ctrl+y" }));
+  setKeybindings(
+    new KeybindingsManager(
+      {
+        "app.clipboard.pasteImage": { description: "Paste", defaultKeys: "ctrl+v" },
+      },
+      { "app.clipboard.pasteImage": "ctrl+y" },
+    ),
+  );
   const events = new Map<string, any>();
   const commands: string[][] = [];
   const shortcuts = new Map<string, any>();
@@ -112,15 +137,29 @@ test("install reports lifecycle and session identity, protects user history acro
   process.env.PI_MANAGED_SESSION = token;
   process.env.PI_SESSION_REGISTRY = root;
   const ctx: any = {
-    mode: "tui", cwd: root, signal: undefined,
-    isIdle: () => idle, hasPendingMessages: () => false, getContextUsage: () => undefined,
-    shutdown: () => { shutdowns++; },
+    mode: "tui",
+    cwd: root,
+    signal: undefined,
+    isIdle: () => idle,
+    hasPendingMessages: () => false,
+    getContextUsage: () => undefined,
+    shutdown: () => {
+      shutdowns++;
+    },
     ui: {
       getEditorText: () => editor,
       notify: (message: string) => notifications.push(message),
-      onTerminalInput: (handler: any) => { terminalInput = handler; return () => {}; },
+      onTerminalInput: (handler: any) => {
+        terminalInput = handler;
+        return () => {};
+      },
     },
-    sessionManager: { getEntries: () => entries, getSessionId: () => "session", getSessionName: () => "test", getSessionFile: () => join(root, "session.jsonl") },
+    sessionManager: {
+      getEntries: () => entries,
+      getSessionId: () => "session",
+      getSessionName: () => "test",
+      getSessionFile: () => join(root, "session.jsonl"),
+    },
   };
   const api: any = {
     on: (name: string, handler: any) => events.set(name, handler),
@@ -137,7 +176,16 @@ test("install reports lifecycle and session identity, protects user history acro
             pendingRenames--;
             throw Object.assign(new Error("startup pending"), { code: "agent_launch_pending" });
           }
-          if (args[1] === "current" || args[1] === "get") return { pane: { pane_id: "w1:p1", tab_id: "w1:t1", workspace_id: "w1", agent: "pi", agent_session: { source: `pi-${token}` } } };
+          if (args[1] === "current" || args[1] === "get")
+            return {
+              pane: {
+                pane_id: "w1:p1",
+                tab_id: "w1:t1",
+                workspace_id: "w1",
+                agent: "pi",
+                agent_session: { source: `pi-${token}` },
+              },
+            };
           return { process_info: { foreground_processes: [{ pid: process.pid }] } };
         });
         herdr.create = async (cwd, source) => {
@@ -150,8 +198,14 @@ test("install reports lifecycle and session identity, protects user history acro
         menuSelections++;
         return selection === "self" ? (await registry.list())[0] : selection;
       },
-      selectProject: async () => { projectSelections++; return root; },
-      scheduleCleanup: async () => { cleanups++; return () => {}; },
+      selectProject: async () => {
+        projectSelections++;
+        return root;
+      },
+      scheduleCleanup: async () => {
+        cleanups++;
+        return () => {};
+      },
     };
     installSessions(api, dependencies);
     expect([...shortcuts.keys()]).toEqual(["ctrl+alt+q", "ctrl+alt+s", "ctrl+alt+n"]);
@@ -159,7 +213,9 @@ test("install reports lifecycle and session identity, protects user history acro
     expect(created).toEqual([]);
     expect(notifications.at(-1)).toContain("interactive Pi");
     await events.get("session_start")({}, ctx);
-    expect(commands.some((args) => args[1] === "report-agent-session" && args.includes(join(root, "session.jsonl")))).toBe(true);
+    expect(
+      commands.some((args) => args[1] === "report-agent-session" && args.includes(join(root, "session.jsonl"))),
+    ).toBe(true);
     expect(commands.some((args) => args[1] === "report-agent" && args.includes("idle"))).toBe(true);
     expect(commands.filter((args) => args[0] === "notification")).toHaveLength(0);
     expect(commands.some((args) => args[0] === "pane" && args[1] === "rename" && /-pi-1$/.test(args[3]!))).toBe(true);
@@ -266,7 +322,9 @@ test("install reports lifecycle and session identity, protects user history acro
       ...dependencies,
       scheduleCleanup: async () => {
         await events.get("before_agent_start")({}, ctx);
-        return () => { canceled++; };
+        return () => {
+          canceled++;
+        };
       },
     });
     await events.get("session_start")({}, ctx);
@@ -292,7 +350,8 @@ test("install reports lifecycle and session identity, protects user history acro
     await events.get("session_shutdown")?.({}, ctx);
     setKeybindings(previousKeybindings);
     for (const key of ["HERDR_ENV", "HERDR_SOCKET_PATH", "PI_MANAGED_SESSION", "PI_SESSION_REGISTRY"]) {
-      if (previous[key] === undefined) delete process.env[key]; else process.env[key] = previous[key];
+      if (previous[key] === undefined) delete process.env[key];
+      else process.env[key] = previous[key];
     }
     await rm(root, { recursive: true, force: true });
   }

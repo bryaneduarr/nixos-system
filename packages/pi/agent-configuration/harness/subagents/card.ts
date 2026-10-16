@@ -49,9 +49,9 @@ export function renderSubagentCard(
   const details = entry?.details as TaskProgress | undefined;
   const current = progress ?? details;
   const candidateTitles = [current?.title, title, entry?.args.title];
-  const label = candidateTitles.find(
-    (value): value is string => typeof value === "string" && value.trim().length > 0,
-  ) ?? "Preparing task";
+  const label =
+    candidateTitles.find((value): value is string => typeof value === "string" && value.trim().length > 0) ??
+    "Preparing task";
   const status = current?.status ?? entry?.status ?? "running";
   const calls = current?.activity ?? entry?.sub ?? [];
   const lines = [theme.fg("text", oneLine(label))];
@@ -80,13 +80,9 @@ export function renderSubagentCard(
     lines.push(theme.fg(finalColor, finalLabel));
   }
 
-  const box = lastComponent instanceof ToolBox
-    ? lastComponent
-    : new ToolBox(theme, "", [], "accent", false);
+  const box = lastComponent instanceof ToolBox ? lastComponent : new ToolBox(theme, "", [], "accent", false);
   const boxTitle = theme.fg("toolTitle", theme.bold("SUBAGENT"));
-  const titleLine = status === "running"
-    ? `${theme.fg("accent", "/")} ${boxTitle}`
-    : boxTitle;
+  const titleLine = status === "running" ? `${theme.fg("accent", "/")} ${boxTitle}` : boxTitle;
   const color = status === "error" ? "error" : "accent";
   const elapsedStartedAt = call?.status === "running" ? call.startedAt : undefined;
 

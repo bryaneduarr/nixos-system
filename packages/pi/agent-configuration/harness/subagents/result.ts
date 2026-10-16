@@ -12,10 +12,7 @@ const RESULT_SECTIONS = "status|summary|findings|unresolved_questions|checks|fil
 const FAILED_TASK_STATUSES = new Set(["error", "cancelled"]);
 
 function section(text: string, name: string): string[] {
-  const pattern = new RegExp(
-    `(?:^|\\r?\\n)${name}:[ \\t]*([\\s\\S]*?)(?=\\r?\\n(?:${RESULT_SECTIONS}):|$)`,
-    "i",
-  );
+  const pattern = new RegExp(`(?:^|\\r?\\n)${name}:[ \\t]*([\\s\\S]*?)(?=\\r?\\n(?:${RESULT_SECTIONS}):|$)`, "i");
   const match = pattern.exec(text);
   if (!match?.[1]) return [];
 

@@ -22,12 +22,7 @@ async function nextId(dir: string): Promise<string> {
   return String(max + 1).padStart(4, "0");
 }
 
-export async function writeArtifact(
-  cwd: string,
-  kind: string,
-  extension: string,
-  content: string,
-): Promise<string> {
+export async function writeArtifact(cwd: string, kind: string, extension: string, content: string): Promise<string> {
   const dir = join(cwd, WORK_DIR, kind);
   const id = await nextId(dir);
   const path = join(dir, `${id}.${extension}`);

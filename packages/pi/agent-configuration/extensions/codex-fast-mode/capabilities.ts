@@ -34,7 +34,5 @@ export function loadFastModels(): Set<string> {
 }
 
 export function supportsFastMode(model: Model<Api> | undefined, models: Set<string>): boolean {
-  return model?.provider === "openai-codex"
-    && model.api === "openai-codex-responses"
-    && models.has(model.id);
+  return model?.provider === "openai-codex" && model.api === "openai-codex-responses" && models.has(model.id);
 }

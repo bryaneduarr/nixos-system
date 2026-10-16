@@ -3,8 +3,26 @@ import { rgbColor, visibleWidth } from "@earendil-works/pi-tui";
 import { selectProject, selectSession, terminalLabel } from "../agent-configuration/harness/sessions/menu.ts";
 
 const rows = [
-  { identity: "one", pid: process.pid, cwd: "/tmp/project-a", name: "First", branch: "main", percent: 12, status: "idle" },
-  { identity: "two", pid: 1, cwd: "/tmp/project-b", name: "Second", branch: "topic", percent: null, status: "draft", contextTokens: 100, contextWindow: 1000 },
+  {
+    identity: "one",
+    pid: process.pid,
+    cwd: "/tmp/project-a",
+    name: "First",
+    branch: "main",
+    percent: 12,
+    status: "idle",
+  },
+  {
+    identity: "two",
+    pid: 1,
+    cwd: "/tmp/project-b",
+    name: "Second",
+    branch: "topic",
+    percent: null,
+    status: "draft",
+    contextTokens: 100,
+    contextWindow: 1000,
+  },
 ];
 
 test("session menu filters groups, uses one status, and bounds terminal widths", async () => {
@@ -12,18 +30,19 @@ test("session menu filters groups, uses one status, and bounds terminal widths",
   const colors: unknown[] = [];
   const ctx: any = {
     ui: {
-      custom: (factory: any) => new Promise((resolve) => {
-        const tui = { terminal: { rows: 40 }, requestRender: () => {} };
-        const theme = {
-          fg: (_color: string, text: string) => text,
-          bold: (text: string) => text,
-          style: (text: string, options: any) => {
-            colors.push(options.fg);
-            return `\x1b[38;2;255;158;68m${text}\x1b[0m`;
-          },
-        };
-        component = factory(tui, theme, {}, resolve);
-      }),
+      custom: (factory: any) =>
+        new Promise((resolve) => {
+          const tui = { terminal: { rows: 40 }, requestRender: () => {} };
+          const theme = {
+            fg: (_color: string, text: string) => text,
+            bold: (text: string) => text,
+            style: (text: string, options: any) => {
+              colors.push(options.fg);
+              return `\x1b[38;2;255;158;68m${text}\x1b[0m`;
+            },
+          };
+          component = factory(tui, theme, {}, resolve);
+        }),
     },
   };
   const selection = selectSession(ctx, { list: async () => rows } as any);
@@ -63,15 +82,16 @@ test("session menu uses Vim navigation and keeps command keys as text while filt
   let component: any;
   const ctx: any = {
     ui: {
-      custom: (factory: any) => new Promise((resolve) => {
-        const tui = { terminal: { rows: 40 }, requestRender: () => {} };
-        const theme = {
-          fg: (_color: string, text: string) => text,
-          bold: (text: string) => text,
-          style: (text: string) => text,
-        };
-        component = factory(tui, theme, {}, resolve);
-      }),
+      custom: (factory: any) =>
+        new Promise((resolve) => {
+          const tui = { terminal: { rows: 40 }, requestRender: () => {} };
+          const theme = {
+            fg: (_color: string, text: string) => text,
+            bold: (text: string) => text,
+            style: (text: string) => text,
+          };
+          component = factory(tui, theme, {}, resolve);
+        }),
     },
   };
   const registry: any = { list: async () => rows };
@@ -117,11 +137,13 @@ test("project picker includes the current folder and cancellation creates nothin
   let choices: string[] = [];
   const ctx: any = {
     cwd: process.cwd(),
-    ui: { select: async (title: string, options: string[]) => {
-      expect(title).toBe("Which project? Choose a folder");
-      choices = options;
-      return undefined;
-    } },
+    ui: {
+      select: async (title: string, options: string[]) => {
+        expect(title).toBe("Which project? Choose a folder");
+        choices = options;
+        return undefined;
+      },
+    },
   };
   expect(await selectProject(ctx, { projects: async () => [] } as any)).toBeUndefined();
   expect(choices).toContain(process.cwd());

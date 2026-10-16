@@ -3,10 +3,16 @@ import type { HarnessTool } from "../tools/config.ts";
 import { oneLine } from "./formatting.ts";
 
 const TITLES: Record<HarnessTool, string> = {
-  search: "SEARCH", read: "READ", edit: "EDIT", run: "RUN",
+  search: "SEARCH",
+  read: "READ",
+  edit: "EDIT",
+  run: "RUN",
 };
 const TOOL_COLORS: Record<HarnessTool, ThemeColor> = {
-  search: "accent", read: "success", edit: "warning", run: "toolTitle",
+  search: "accent",
+  read: "success",
+  edit: "warning",
+  run: "toolTitle",
 };
 
 export type HarnessVisualState = "running" | "success" | "error";
@@ -45,28 +51,35 @@ export function toolTarget(tool: HarnessTool, args: Record<string, unknown>): st
       const kind = stringArg(args, "kind");
       return kind && kind !== "auto" ? `${query} (${kind})` : query;
     }
-    case "read": return oneLine(stringArg(args, "path"));
+    case "read":
+      return oneLine(stringArg(args, "path"));
     case "edit": {
       const from = stringArg(args, "from") || stringArg(args, "path");
       const to = stringArg(args, "to");
       return to ? `${from} -> ${to}` : oneLine(from);
     }
-    case "run": return oneLine(stringArg(args, "command"));
-    default: return "";
+    case "run":
+      return oneLine(stringArg(args, "command"));
+    default:
+      return "";
   }
 }
 
-const SECTION_TITLES = new Set([
-  "Definition:", "Files:", "Tests:", "References:", "History:", "Symbols:", "Head:",
-]);
+const SECTION_TITLES = new Set(["Definition:", "Files:", "Tests:", "References:", "History:", "Symbols:", "Head:"]);
 
 function countSearchEntries(text: string): number {
   let count = 0;
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.trim();
-    if (!line || line.startsWith("search ") || SECTION_TITLES.has(line) ||
-        line.startsWith("Additional ") || line.startsWith("Full output:") ||
-        (line.startsWith("[") && line.endsWith("]"))) continue;
+    if (
+      !line ||
+      line.startsWith("search ") ||
+      SECTION_TITLES.has(line) ||
+      line.startsWith("Additional ") ||
+      line.startsWith("Full output:") ||
+      (line.startsWith("[") && line.endsWith("]"))
+    )
+      continue;
     count += 1;
   }
   return count;
@@ -102,12 +115,16 @@ function runDetail(text: string): string {
 
 export function resultFailed(tool: HarnessTool, text: string): boolean {
   switch (tool) {
-    case "read": return text.startsWith("Unable to read") || /not found in /.test(firstLine(text));
-    case "edit": return /^(?:Create|Delete|Move|Replace) failed:/.test(text);
-    case "run": return /^exit:\s*(?!0\b)/.test(text);
-    case "search": return text.startsWith("No query provided.") ||
-      text.startsWith("Limit must be greater than zero.");
-    default: return false;
+    case "read":
+      return text.startsWith("Unable to read") || /not found in /.test(firstLine(text));
+    case "edit":
+      return /^(?:Create|Delete|Move|Replace) failed:/.test(text);
+    case "run":
+      return /^exit:\s*(?!0\b)/.test(text);
+    case "search":
+      return text.startsWith("No query provided.") || text.startsWith("Limit must be greater than zero.");
+    default:
+      return false;
   }
 }
 
@@ -120,10 +137,14 @@ function successDetail(tool: HarnessTool, text: string): string[] {
       const kind = header?.[1] && !header[1].includes("fallback") ? ` (${header[1]})` : "";
       return [`${count} match${count === 1 ? "" : "es"}${kind}`];
     }
-    case "read": return [readDetail(text)];
-    case "edit": return [editDetail(text)];
-    case "run": return [runDetail(text)];
-    default: return ["Done"];
+    case "read":
+      return [readDetail(text)];
+    case "edit":
+      return [editDetail(text)];
+    case "run":
+      return [runDetail(text)];
+    default:
+      return ["Done"];
   }
 }
 

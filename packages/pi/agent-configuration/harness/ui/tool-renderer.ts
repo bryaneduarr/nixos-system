@@ -8,14 +8,15 @@ import { requestInspection } from "./inspector/request.ts";
 import {
   boxTitle,
   extractText,
+  type HarnessVisualState,
   presentationLines,
   resultFailed,
   resultPresentation,
   runningPresentation,
   toolColor,
-  type HarnessVisualState,
 } from "./tool-presentation.ts";
 
+export type { HarnessPresentation, HarnessVisualState } from "./tool-presentation.ts";
 export {
   extractText,
   presentationLines,
@@ -26,7 +27,6 @@ export {
   toolLabel,
   toolTarget,
 } from "./tool-presentation.ts";
-export type { HarnessPresentation, HarnessVisualState } from "./tool-presentation.ts";
 export { phaseForTool, workingMessageFor } from "./tool-status.ts";
 
 export const INSPECT_SHORTCUT = "alt+i";
@@ -128,18 +128,13 @@ export function createHarnessRenderers(tool: HarnessTool) {
     renderShell: "self" as const,
     renderCall(args: Record<string, unknown>, theme: Theme, context: RendererContextLike): Component {
       if (context.isPartial === false) return EMPTY;
-      const box = context.lastComponent instanceof ToolBox
-        ? context.lastComponent : new ToolBox(theme, "", [], toolColor(tool));
+      const box =
+        context.lastComponent instanceof ToolBox ? context.lastComponent : new ToolBox(theme, "", [], toolColor(tool));
       const presentation = runningPresentation(tool, args);
       const title = `${theme.fg("accent", "/")} ${boxTitle(tool, theme)}`;
       const lines = presentationLines(presentation, theme);
 
-      box.setContent(
-        title,
-        lines,
-        context.toolCallId,
-        toolColor(tool),
-      );
+      box.setContent(title, lines, context.toolCallId, toolColor(tool));
       return box;
     },
     renderResult(
@@ -159,24 +154,15 @@ export function createHarnessRenderers(tool: HarnessTool) {
       const entry = context.toolCallId ? activityStore.get(context.toolCallId) : undefined;
       if (entry) {
         const elapsedMs = Math.max(0, (entry.endedAt ?? Date.now()) - entry.startedAt);
-        const elapsedLabel = elapsedMs < 1000
-          ? `${elapsedMs} ms`
-          : `${(elapsedMs / 1000).toFixed(1)} s`;
+        const elapsedLabel = elapsedMs < 1000 ? `${elapsedMs} ms` : `${(elapsedMs / 1000).toFixed(1)} s`;
         lines.push(theme.fg("muted", `Time: ${elapsedLabel}`));
       }
 
-      const box = context.lastComponent instanceof ToolBox
-        ? context.lastComponent : new ToolBox(theme, "", [], toolColor(tool));
-      const title = state === "running"
-        ? `${theme.fg("accent", "/")} ${boxTitle(tool, theme)}`
-        : boxTitle(tool, theme);
+      const box =
+        context.lastComponent instanceof ToolBox ? context.lastComponent : new ToolBox(theme, "", [], toolColor(tool));
+      const title = state === "running" ? `${theme.fg("accent", "/")} ${boxTitle(tool, theme)}` : boxTitle(tool, theme);
 
-      box.setContent(
-        title,
-        lines,
-        context.toolCallId,
-        toolColor(tool),
-      );
+      box.setContent(title, lines, context.toolCallId, toolColor(tool));
       return box;
     },
   };

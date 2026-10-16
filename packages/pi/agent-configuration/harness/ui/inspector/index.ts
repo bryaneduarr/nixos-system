@@ -89,8 +89,12 @@ class ActivityInspector implements Component {
         this.requestRender();
       },
       collapse: (direction) => this.navigation.adjustSubagentCollapse(direction),
-      copy: () => { void this.copySelection(); },
-      toggleArtifact: () => { void this.toggleArtifact(); },
+      copy: () => {
+        void this.copySelection();
+      },
+      toggleArtifact: () => {
+        void this.toggleArtifact();
+      },
       pageSize: () => this.pageSize(),
       step: (delta) => this.navigation.step(delta),
       jump: (where) => this.navigation.jump(where),
@@ -180,9 +184,7 @@ class ActivityInspector implements Component {
       await copyToClipboard(text);
       this.setStatus(`copied ${text.length} chars`);
     } catch (error) {
-      this.setStatus(
-        `copy failed: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      this.setStatus(`copy failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -218,19 +220,14 @@ class ActivityInspector implements Component {
   private requestRender(): void {
     this.tui.requestRender();
   }
-
 }
 
-export async function openInspector(
-  ctx: ExtensionContext,
-  options: { selectId?: string } = {},
-): Promise<void> {
+export async function openInspector(ctx: ExtensionContext, options: { selectId?: string } = {}): Promise<void> {
   if (inspectorOpen) return;
   inspectorOpen = true;
   try {
     await ctx.ui.custom<void>(
-      (tui, theme, _keybindings, done) =>
-        new ActivityInspector({ tui, theme, done, selectId: options.selectId }),
+      (tui, theme, _keybindings, done) => new ActivityInspector({ tui, theme, done, selectId: options.selectId }),
       {
         overlay: true,
         overlayOptions: {

@@ -2,13 +2,7 @@ export const READ_ONLY_SUBAGENT_TOOLS = ["read", "grep", "find", "ls"] as const;
 export const APPROVED_COMMAND_TOOL = "approved_command" as const;
 export const TASK_TOOL_NAME = "task" as const;
 
-export const SUBAGENT_TOOLS = [
-  ...READ_ONLY_SUBAGENT_TOOLS,
-  "bash",
-  "edit",
-  "write",
-  APPROVED_COMMAND_TOOL,
-] as const;
+export const SUBAGENT_TOOLS = [...READ_ONLY_SUBAGENT_TOOLS, "bash", "edit", "write", APPROVED_COMMAND_TOOL] as const;
 export const DEFAULT_SUBAGENT_TOOLS = READ_ONLY_SUBAGENT_TOOLS;
 const LEGACY_SUBAGENT_TOOLS = [...READ_ONLY_SUBAGENT_TOOLS, "bash", "edit", "write"] as const;
 
@@ -138,9 +132,7 @@ export function buildTaskSystemPrompt(resolved: ResolvedTaskRole): string {
 
   let commandInstructions = "No verification commands are approved. Do not run shell commands.";
   if (resolved.verificationCommands.length > 0) {
-    const approvedCommands = resolved.verificationCommands
-      .map((command) => `- ${command}`)
-      .join("\n");
+    const approvedCommands = resolved.verificationCommands.map((command) => `- ${command}`).join("\n");
     commandInstructions = [
       `You may run only these exact approved commands with ${APPROVED_COMMAND_TOOL}:`,
       approvedCommands,

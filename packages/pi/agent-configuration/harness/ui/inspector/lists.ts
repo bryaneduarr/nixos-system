@@ -1,8 +1,8 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import type { ActivityStatus, ToolActivity } from "../../activity/store.ts";
-import { isHarnessTool } from "../../tools/config.ts";
 import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { isHarnessTool } from "../../tools/config.ts";
 import { toolLabel, toolTarget } from "../tool-renderer.ts";
 import { formatDuration, formatValue, type InspectorRow } from "./detail.ts";
 import { compactUsageLabel, formatTokens, modelShortLabel, usageLabel } from "./usage.ts";
@@ -48,7 +48,13 @@ interface ToolListOptions {
 }
 
 export function renderToolList({
-  rows, width, height, scroll, selected, expandedTasks, theme,
+  rows,
+  width,
+  height,
+  scroll,
+  selected,
+  expandedTasks,
+  theme,
 }: ToolListOptions): string[] {
   const out: string[] = [];
   for (let index = 0; index < height; index += 1) {
@@ -62,22 +68,20 @@ export function renderToolList({
     const status = row.sub?.status ?? row.entry.status;
     const target = targetForTool(tool, args, row.entry.text);
     const hasChildren = !row.sub && row.entry.sub.length > 0;
-    const disclosure = hasChildren
-      ? expandedTasks.has(row.entry.id) ? "▾ " : "▸ "
-      : row.sub ? "  ↳ " : "  ";
+    const disclosure = hasChildren ? (expandedTasks.has(row.entry.id) ? "▾ " : "▸ ") : row.sub ? "  ↳ " : "  ";
     const startedAt = row.sub?.startedAt ?? row.entry.startedAt;
     const endedAt = row.sub?.endedAt ?? row.entry.endedAt ?? Date.now();
     const elapsed = formatDuration(Math.max(0, endedAt - startedAt));
-    const usage = !row.sub && tool === TASK_TOOL_NAME
-      ? ` · ${usageLabel(row.entry.usage, row.entry.model)}`
-      : "";
+    const usage = !row.sub && tool === TASK_TOOL_NAME ? ` · ${usageLabel(row.entry.usage, row.entry.model)}` : "";
     const isSelected = scroll + index === selected;
-    const label = tool === "message"
-      ? `◆ MESSAGE ${String(args.number ?? "")} · ${target || "(no text)"}`
-      : `${tool === TASK_TOOL_NAME || row.sub ? "SUBAGENT " : ""}${toolLabel(tool)} · ${elapsed}${usage} · ${target}`;
-    const text = tool === "message"
-      ? theme.fg("accent", label)
-      : `${statusGlyph(status, theme)} ${disclosure}${theme.fg(isSelected ? "accent" : "text", label)}`;
+    const label =
+      tool === "message"
+        ? `◆ MESSAGE ${String(args.number ?? "")} · ${target || "(no text)"}`
+        : `${tool === TASK_TOOL_NAME || row.sub ? "SUBAGENT " : ""}${toolLabel(tool)} · ${elapsed}${usage} · ${target}`;
+    const text =
+      tool === "message"
+        ? theme.fg("accent", label)
+        : `${statusGlyph(status, theme)} ${disclosure}${theme.fg(isSelected ? "accent" : "text", label)}`;
     const cell = padCell(truncateToWidth(text, width, "…", true), width);
     out.push(isSelected ? theme.bg("selectedBg", cell) : cell);
   }
@@ -93,14 +97,11 @@ interface SubagentListOptions {
   theme: Theme;
 }
 
-export function renderSubagentList({
-  rows, width, height, scroll, selectedId, theme,
-}: SubagentListOptions): string[] {
+export function renderSubagentList({ rows, width, height, scroll, selectedId, theme }: SubagentListOptions): string[] {
   const totalTokens = rows.reduce((total, row) => total + (row.usage?.totalTokens ?? 0), 0);
-  const output = [theme.fg(
-    "muted",
-    `${rows.length} subagents · spent ${formatTokens(totalTokens)} · ↑/↓ move · → open`,
-  )];
+  const output = [
+    theme.fg("muted", `${rows.length} subagents · spent ${formatTokens(totalTokens)} · ↑/↓ move · → open`),
+  ];
   for (const [index, row] of rows.slice(scroll, scroll + height).entries()) {
     const actualIndex = scroll + index;
     let target = "";

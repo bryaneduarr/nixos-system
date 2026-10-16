@@ -1,7 +1,10 @@
 import type { SearchMatch } from "./matches.ts";
 
 function formatLocations(matches: SearchMatch[], limit: number): string {
-  return matches.slice(0, limit).map((match) => `${match.file}:${match.line}`).join("\n");
+  return matches
+    .slice(0, limit)
+    .map((match) => `${match.file}:${match.line}`)
+    .join("\n");
 }
 
 export function formatSearchResult(
@@ -39,17 +42,18 @@ export function formatSearchResult(
     push("Tests", testFiles.join("\n"));
   }
 
-  const uniqueReferences = references.filter(
-    (match) => !shownIds.has(`${match.file}:${match.line}`),
-  );
+  const uniqueReferences = references.filter((match) => !shownIds.has(`${match.file}:${match.line}`));
   if (uniqueReferences.length > 0) {
     push("References", formatLocations(uniqueReferences, limit));
   }
 
   if (sections.length === 0) return `No matches for: ${query}`;
 
-  const shownCount = Math.min(definitions.length, limit) + Math.min(files.length, limit) +
-    Math.min(tests.length, limit) + Math.min(uniqueReferences.length, limit);
+  const shownCount =
+    Math.min(definitions.length, limit) +
+    Math.min(files.length, limit) +
+    Math.min(tests.length, limit) +
+    Math.min(uniqueReferences.length, limit);
   const totalCount = definitions.length + files.length + tests.length + uniqueReferences.length;
   const omitted = Math.max(0, totalCount - shownCount);
   if (omitted > 0) sections.push(`Additional matches omitted: ${omitted}`);

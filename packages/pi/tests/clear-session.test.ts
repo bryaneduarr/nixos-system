@@ -23,7 +23,9 @@ function runtime(model: Model, thinkingLevel: string, availableModels: Model[] =
   let selectedThinkingLevel = thinkingLevel;
   const pi = {
     on: (name: string, handler: Handler) => handlers.set(name, handler),
-    registerCommand: (_name: string, command: { handler: typeof clear }) => { clear = command.handler; },
+    registerCommand: (_name: string, command: { handler: typeof clear }) => {
+      clear = command.handler;
+    },
     getThinkingLevel: () => {
       if (stale) throw new Error("stale pi");
       return selectedThinkingLevel;
@@ -41,15 +43,25 @@ function runtime(model: Model, thinkingLevel: string, availableModels: Model[] =
   clearExtension(pi as unknown as ExtensionAPI);
   lastModelExtension(pi as unknown as ExtensionAPI);
   const ctx = () => ({
-    mode: "tui", model: selectedModel, scopedModels: [],
-    modelRegistry: { find: (provider: string, id: string) =>
-      availableModels.find((candidate) => candidate.provider === provider && candidate.id === id) },
+    mode: "tui",
+    model: selectedModel,
+    scopedModels: [],
+    modelRegistry: {
+      find: (provider: string, id: string) =>
+        availableModels.find((candidate) => candidate.provider === provider && candidate.id === id),
+    },
     sessionManager: { getEntries: () => [], getSessionFile: () => undefined },
   });
   return {
-    get model() { return selectedModel; },
-    get thinkingLevel() { return selectedThinkingLevel; },
-    invalidate() { stale = true; },
+    get model() {
+      return selectedModel;
+    },
+    get thinkingLevel() {
+      return selectedThinkingLevel;
+    },
+    invalidate() {
+      stale = true;
+    },
     emit: (name: string, event: any) => handlers.get(name)?.(event, ctx()),
     clear: (context: any) => clear!("", context),
   };
@@ -64,14 +76,17 @@ test("/clear preserves the active model and thinking level without accessing sta
       await previous.emit("session_before_switch", { reason: "new" });
       previous.invalidate();
       replacement = runtime({ provider: "example", id: "default" }, "low", [
-        { provider: "example", id: "default" }, chosen,
+        { provider: "example", id: "default" },
+        chosen,
       ]);
       await replacement.emit("session_start", { reason: "new" });
       return { cancelled: false };
     },
   });
   expect(JSON.parse(readFileSync(join(stateHome, "pi", "last-model.json"), "utf8"))).toEqual({
-    provider: "example", id: "chosen", thinkingLevel: "high",
+    provider: "example",
+    id: "chosen",
+    thinkingLevel: "high",
   });
   expect(replacement?.model).toEqual(chosen);
   expect(replacement?.thinkingLevel).toBe("high");

@@ -8,16 +8,11 @@ import {
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 import type { Static } from "typebox";
-import type { SubToolActivity, SubagentModel, SubagentUsage } from "../activity/store.ts";
+import type { SubagentModel, SubagentUsage, SubToolActivity } from "../activity/store.ts";
 import { createApprovedCommandTool } from "./approved-command.ts";
 import { TaskParams } from "./parameters.ts";
-import {
-  APPROVED_COMMAND_TOOL,
-  buildTaskSystemPrompt,
-  resolveTaskRole,
-  type TaskRole,
-} from "./roles.ts";
 import { parseTaskOutput } from "./result.ts";
+import { APPROVED_COMMAND_TOOL, buildTaskSystemPrompt, resolveTaskRole, type TaskRole } from "./roles.ts";
 
 const USAGE_FIELDS = [
   ["inputTokens", "input"],
@@ -56,20 +51,15 @@ export interface TaskResult extends TaskProgress {
 function textContent(content: unknown): string {
   if (!Array.isArray(content)) return "";
 
-  const textParts = content.filter((part): part is { type: "text"; text: string } =>
-    typeof part === "object" &&
-    part !== null &&
-    part.type === "text" &&
-    typeof part.text === "string",
+  const textParts = content.filter(
+    (part): part is { type: "text"; text: string } =>
+      typeof part === "object" && part !== null && part.type === "text" && typeof part.text === "string",
   );
 
   return textParts.map((part) => part.text).join("\n");
 }
 
-function usageFromMessages(
-  messages: readonly unknown[],
-  contextTokens?: number | null,
-): SubagentUsage {
+function usageFromMessages(messages: readonly unknown[], contextTokens?: number | null): SubagentUsage {
   const usage: SubagentUsage = {
     inputTokens: 0,
     outputTokens: 0,
@@ -284,11 +274,7 @@ export async function runTask(
     const parsedOutput = parseTaskOutput(output);
     const assistant = lastAssistant(session.messages);
     const wasCancelled = signal?.aborted || timedOut || assistant?.stopReason === "aborted";
-    const failed = Boolean(
-      promptError ||
-      assistant?.stopReason === "error" ||
-      !output,
-    );
+    const failed = Boolean(promptError || assistant?.stopReason === "error" || !output);
 
     if (wasCancelled) {
       progress.status = "cancelled";

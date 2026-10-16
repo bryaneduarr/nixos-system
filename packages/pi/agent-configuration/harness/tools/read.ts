@@ -1,11 +1,6 @@
 import { readFile, stat } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
-import {
-  DEFAULT_READ_LINES,
-  LARGE_FILE_BYTES,
-  LARGE_FILE_LINES,
-  STRUCTURE_SYMBOL_LIMIT,
-} from "./config.ts";
+import { DEFAULT_READ_LINES, LARGE_FILE_BYTES, LARGE_FILE_LINES, STRUCTURE_SYMBOL_LIMIT } from "./config.ts";
 import { splitLines, stripAtPrefix, withLineNumbers } from "./format.ts";
 
 export interface ReadOptions {
@@ -28,10 +23,7 @@ function declarationPattern(symbol: string): RegExp {
   );
 }
 
-function findSymbolRange(
-  lines: string[],
-  symbol: string,
-): { start: number; end: number } | undefined {
+function findSymbolRange(lines: string[], symbol: string): { start: number; end: number } | undefined {
   const pattern = declarationPattern(symbol);
   const start = lines.findIndex((line) => pattern.test(line));
   if (start === -1) return undefined;
@@ -117,9 +109,7 @@ export async function readSource(options: ReadOptions): Promise<string> {
     const slice = lines.slice(startIndex, endIndex);
     const remaining = total - endIndex;
     const note =
-      remaining > 0
-        ? `\n\n[${remaining} more lines. Use read with offset=${endIndex + 1} to continue.]`
-        : "";
+      remaining > 0 ? `\n\n[${remaining} more lines. Use read with offset=${endIndex + 1} to continue.]` : "";
     return [
       `${rawPath} (lines ${startIndex + 1}-${endIndex} of ${total})`,
       withLineNumbers(slice, startIndex + 1) + note,
@@ -134,18 +124,12 @@ export async function readSource(options: ReadOptions): Promise<string> {
   }
 
   if (total <= LARGE_FILE_LINES && size <= LARGE_FILE_BYTES) {
-    return [
-      `${rawPath} (${total} lines)`,
-      withLineNumbers(lines, 1),
-    ].join("\n\n");
+    return [`${rawPath} (${total} lines)`, withLineNumbers(lines, 1)].join("\n\n");
   }
 
   const symbols = listSymbols(lines);
   const head = lines.slice(0, 30);
-  const symbolSection =
-    symbols.length > 0
-      ? `Symbols:\n${symbols.join("\n")}`
-      : "Symbols:\nnone detected";
+  const symbolSection = symbols.length > 0 ? `Symbols:\n${symbols.join("\n")}` : "Symbols:\nnone detected";
   return [
     `${rawPath} (${total} lines, ${size} bytes) - large file, showing structure only`,
     symbolSection,

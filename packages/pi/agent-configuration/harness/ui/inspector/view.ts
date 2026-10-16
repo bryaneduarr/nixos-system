@@ -48,10 +48,7 @@ export function detailWidth(width: number): number {
   const contentWidth = Math.max(8, width - 4);
   if (width < MIN_TWO_PANE_WIDTH) return contentWidth;
 
-  const leftWidth = Math.max(
-    MIN_LEFT_WIDTH,
-    Math.min(MAX_LEFT_WIDTH, Math.round(contentWidth * 0.34)),
-  );
+  const leftWidth = Math.max(MIN_LEFT_WIDTH, Math.min(MAX_LEFT_WIDTH, Math.round(contentWidth * 0.34)));
   return Math.max(1, contentWidth - leftWidth - 3);
 }
 
@@ -72,9 +69,7 @@ export function wrappedDetail(
       continue;
     }
 
-    let styledText = detail.color
-      ? theme.fg(detail.color, detail.text)
-      : detail.text;
+    let styledText = detail.color ? theme.fg(detail.color, detail.text) : detail.text;
     if (detail.bold) styledText = theme.bold(styledText);
 
     const wrappedLines = wrapTextWithAnsi(styledText, width);
@@ -84,12 +79,7 @@ export function wrappedDetail(
   return lines;
 }
 
-export function computeListScroll(
-  previous: number,
-  length: number,
-  height: number,
-  selected: number,
-): number {
+export function computeListScroll(previous: number, length: number, height: number, selected: number): number {
   const maxScroll = Math.max(0, length - height);
   let scroll = Math.min(previous, maxScroll);
 
@@ -138,9 +128,7 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
 
   const activityEntries = activityStore.all();
   const totalCalls = activityEntries.filter(
-    (entry) => entry.toolName !== "thinking" &&
-      entry.toolName !== "message" &&
-      entry.toolName !== "update",
+    (entry) => entry.toolName !== "thinking" && entry.toolName !== "message" && entry.toolName !== "update",
   ).length;
   const phase = activityStore.currentAgent().phase;
   const active = phase === "thinking" || phase === "working" || phase === "responding";
@@ -156,8 +144,7 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
     if (subagents.length === 0) {
       lines.push(theme.fg("dim", "  No subagents have been spawned yet."));
     } else {
-      const selectionIsAvailable = subagentSelectedId &&
-        subagents.some((row) => row.id === subagentSelectedId);
+      const selectionIsAvailable = subagentSelectedId && subagents.some((row) => row.id === subagentSelectedId);
       if (!selectionIsAvailable) {
         subagentSelectedId = subagents[subagents.length - 1]?.id;
       }
@@ -201,19 +188,12 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
         theme,
       });
       const selectedRow = rows[state.selected];
-      const detail = wrappedDetail(
-        selectedRow,
-        Math.max(1, rightWidth),
-        theme,
-        state.artifactText,
-      );
+      const detail = wrappedDetail(selectedRow, Math.max(1, rightWidth), theme, state.artifactText);
       const maxDetailScroll = Math.max(0, detail.length - detailHeight);
       detailScroll = Math.max(0, Math.min(detailScroll, maxDetailScroll));
 
       const visibleDetail = detail.slice(detailScroll, detailScroll + detailHeight);
-      const detailLines = visibleDetail.map((line) =>
-        truncateToWidth(line, rightWidth, "", true),
-      );
+      const detailLines = visibleDetail.map((line) => truncateToWidth(line, rightWidth, "", true));
 
       if (twoPane) {
         for (let index = 0; index < height; index += 1) {
@@ -225,10 +205,7 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
         }
       } else {
         lines.push(...listLines);
-        const detailTitle = theme.bold(theme.fg(
-          focus === "detail" ? "accent" : "muted",
-          "DETAIL",
-        ));
+        const detailTitle = theme.bold(theme.fg(focus === "detail" ? "accent" : "muted", "DETAIL"));
         lines.push(detailTitle);
         lines.push(...detailLines);
       }

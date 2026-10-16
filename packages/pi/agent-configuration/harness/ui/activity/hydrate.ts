@@ -1,14 +1,14 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { type ActivityStatus, activityStore } from "../../activity/store.ts";
 import {
   readAssistantActivity,
   readSubActivity,
   readSubagentMetadata,
   readSubagentUsage,
 } from "../../activity/parse.ts";
-import { isHarnessTool } from "../../tools/config.ts";
-import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { type ActivityStatus, activityStore } from "../../activity/store.ts";
 import { taskResultFailed } from "../../subagents/result.ts";
+import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { isHarnessTool } from "../../tools/config.ts";
 import { extractText, resultFailed } from "../tool-renderer.ts";
 import { recordThinking, recordUpdate, recordUserMessage, safeParseTimestamp } from "./records.ts";
 
@@ -85,19 +85,14 @@ export function hydrateFromSession(ctx: ExtensionContext): void {
     }
     const id = message.toolCallId;
     const existing = activityStore.get(id);
-    const toolName = typeof message.toolName === "string"
-      ? message.toolName : existing?.toolName;
+    const toolName = typeof message.toolName === "string" ? message.toolName : existing?.toolName;
     if (!toolName) continue;
     const text = extractText(
-      Array.isArray(message.content)
-        ? (message.content as Array<{ type: string; text?: string }>)
-        : [],
+      Array.isArray(message.content) ? (message.content as Array<{ type: string; text?: string }>) : [],
     );
     const failedTask = toolName === TASK_TOOL_NAME && taskResultFailed(message.details);
     const failedHarnessTool = isHarnessTool(toolName) && resultFailed(toolName, text);
-    const status: ActivityStatus = message.isError === true || failedTask || failedHarnessTool
-      ? "error"
-      : "success";
+    const status: ActivityStatus = message.isError === true || failedTask || failedHarnessTool ? "error" : "success";
     activityStore.begin({
       id,
       toolName,

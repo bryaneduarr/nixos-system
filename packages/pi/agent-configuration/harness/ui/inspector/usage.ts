@@ -9,15 +9,10 @@ function formatTokens(tokens: number): string {
 }
 
 function contextLimitLabel(model: ToolActivity["model"]): string {
-  return model?.contextWindow && model.contextWindow > 0
-    ? `/${formatTokens(model.contextWindow)}`
-    : "";
+  return model?.contextWindow && model.contextWindow > 0 ? `/${formatTokens(model.contextWindow)}` : "";
 }
 
-function contextPercentLabel(
-  tokens: number | undefined,
-  model: ToolActivity["model"],
-): string {
+function contextPercentLabel(tokens: number | undefined, model: ToolActivity["model"]): string {
   if (tokens === undefined || !model?.contextWindow || model.contextWindow <= 0) {
     return "";
   }
@@ -28,9 +23,7 @@ function contextPercentLabel(
 export function modelLabel(model: ToolActivity["model"]): string {
   if (!model) return "model —";
   const qualified = `${model.provider}/${model.id}`;
-  return model.name && model.name !== model.id
-    ? `${model.name} (${qualified})`
-    : qualified;
+  return model.name && model.name !== model.id ? `${model.name} (${qualified})` : qualified;
 }
 
 export function modelShortLabel(model: ToolActivity["model"]): string {
@@ -38,29 +31,20 @@ export function modelShortLabel(model: ToolActivity["model"]): string {
   return model.name ?? model.id;
 }
 
-export function usageLabel(
-  usage: SubagentUsage | undefined,
-  model: ToolActivity["model"],
-): string {
+export function usageLabel(usage: SubagentUsage | undefined, model: ToolActivity["model"]): string {
   if (!usage) return "spent — · max ctx —";
   const peak = usage.maxContextTokens ?? usage.contextTokens;
   const peakLabel = peak === undefined ? "—" : formatTokens(peak);
   return `spent ${formatTokens(usage.totalTokens)} · max ctx ${peakLabel}${contextLimitLabel(model)}${contextPercentLabel(peak, model)}`;
 }
 
-export function compactUsageLabel(
-  usage: SubagentUsage | undefined,
-  model: ToolActivity["model"],
-): string {
+export function compactUsageLabel(usage: SubagentUsage | undefined, model: ToolActivity["model"]): string {
   if (!usage) return "spent — · peak —";
   const peak = usage.maxContextTokens ?? usage.contextTokens;
   return `spent ${formatTokens(usage.totalTokens)} · peak ${peak === undefined ? "—" : formatTokens(peak)}${contextLimitLabel(model)}`;
 }
 
-export function contextUsageLabel(
-  usage: SubagentUsage | undefined,
-  model: ToolActivity["model"],
-): string {
+export function contextUsageLabel(usage: SubagentUsage | undefined, model: ToolActivity["model"]): string {
   const current = usage?.contextTokens;
   const peak = usage?.maxContextTokens ?? current;
   const limit = contextLimitLabel(model);

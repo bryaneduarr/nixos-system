@@ -1,15 +1,9 @@
 import { expect, test } from "bun:test";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-
-import {
-  buildTaskSystemPrompt,
-  resolveTaskRole,
-} from "../agent-configuration/harness/subagents/roles.ts";
 import { parseTaskOutput } from "../agent-configuration/harness/subagents/result.ts";
+import { buildTaskSystemPrompt, resolveTaskRole } from "../agent-configuration/harness/subagents/roles.ts";
 
-const { createApprovedCommandTool } = await import(
-  "../agent-configuration/harness/subagents/approved-command.ts"
-);
+const { createApprovedCommandTool } = await import("../agent-configuration/harness/subagents/approved-command.ts");
 
 test("omitting the role keeps the generic task defaults", () => {
   const role = resolveTaskRole({});
@@ -43,12 +37,13 @@ test("roles select different default tools and instructions", () => {
 });
 
 test("role overrides reject tools that exceed the role", () => {
-  expect(() => resolveTaskRole({ role: "explore", tools: ["read", "edit"] }))
-    .toThrow('Role "explore" cannot use tool(s): edit.');
-  expect(() => resolveTaskRole({ role: "verify", tools: ["read", "bash"] }))
-    .toThrow('Role "verify" cannot use tool(s): bash.');
-  expect(() => resolveTaskRole({ role: "unknown" }))
-    .toThrow("Unknown task role: unknown");
+  expect(() => resolveTaskRole({ role: "explore", tools: ["read", "edit"] })).toThrow(
+    'Role "explore" cannot use tool(s): edit.',
+  );
+  expect(() => resolveTaskRole({ role: "verify", tools: ["read", "bash"] })).toThrow(
+    'Role "verify" cannot use tool(s): bash.',
+  );
+  expect(() => resolveTaskRole({ role: "unknown" })).toThrow("Unknown task role: unknown");
 });
 
 test("implementation and verification commands use an exact allowlist", async () => {
@@ -63,13 +58,7 @@ test("implementation and verification commands use an exact allowlist", async ()
   const context = { cwd: process.cwd() } as ExtensionContext;
   const allowed = await tool.execute("allowed", { command }, undefined, undefined, context);
   const deniedCommand = `${command}; printf changed`;
-  const denied = await tool.execute(
-    "denied",
-    { command: deniedCommand },
-    undefined,
-    undefined,
-    context,
-  );
+  const denied = await tool.execute("denied", { command: deniedCommand }, undefined, undefined, context);
 
   expect(allowed.content[0]).toMatchObject({
     type: "text",
@@ -99,10 +88,7 @@ test("a verifier reports failed and unverified checks without reporting edits", 
   expect(verify.tools).not.toContain("edit");
   expect(verify.tools).not.toContain("write");
   expect(buildTaskSystemPrompt(verify)).toContain("without repairing it");
-  expect(report.checks).toEqual([
-    "FAIL: bun test failed in parser.test.ts.",
-    "UNVERIFIED: the Nix build was not run.",
-  ]);
+  expect(report.checks).toEqual(["FAIL: bun test failed in parser.test.ts.", "UNVERIFIED: the Nix build was not run."]);
   expect(report.filesChanged).toEqual([]);
   expect(report.risks).toEqual(["The parser regression remains."]);
 });

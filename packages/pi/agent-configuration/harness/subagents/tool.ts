@@ -1,9 +1,9 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { TaskParams } from "./parameters.ts";
 import { hiddenSubagentCall, renderSubagentCard } from "./card.ts";
-import type { TaskInput, TaskProgress, TaskResult } from "./runner.ts";
+import { TaskParams } from "./parameters.ts";
 import { subagentRegistry } from "./registry.ts";
 import { TASK_TOOL_NAME } from "./roles.ts";
+import type { TaskInput, TaskProgress, TaskResult } from "./runner.ts";
 
 const TASK_TOOL_DESCRIPTION = [
   "Run an isolated subagent with a mission, optional role, context, model, reasoning, tools, and skills.",
@@ -53,11 +53,7 @@ function errorResultContent(id: string, title: string, message: string): string 
   return JSON.stringify(content);
 }
 
-function errorProgress(
-  progress: TaskProgress | undefined,
-  handleId: string,
-  params: TaskInput,
-): TaskProgress {
+function errorProgress(progress: TaskProgress | undefined, handleId: string, params: TaskInput): TaskProgress {
   return {
     id: progress?.id ?? handleId,
     title: params.title,
@@ -86,13 +82,7 @@ export function registerSubagentTool(pi: ExtensionAPI): void {
     renderCall(args, theme, context) {
       if (!context.isPartial || context.executionStarted) return hiddenSubagentCall();
 
-      return renderSubagentCard(
-        theme,
-        context.toolCallId,
-        args.title,
-        undefined,
-        context.lastComponent,
-      );
+      return renderSubagentCard(theme, context.toolCallId, args.title, undefined, context.lastComponent);
     },
     renderResult(result, _options, theme, context) {
       return renderSubagentCard(
@@ -162,9 +152,7 @@ export function registerSubagentTool(pi: ExtensionAPI): void {
     description: "Cancel an active subagent by ID",
     handler: async (args, ctx) => {
       const cancelled = subagentRegistry.cancel(args.trim());
-      const status = cancelled
-        ? "Subagent cancellation requested."
-        : "No running subagent with that ID.";
+      const status = cancelled ? "Subagent cancellation requested." : "No running subagent with that ID.";
       ctx.ui.notify(status, "info");
     },
   });

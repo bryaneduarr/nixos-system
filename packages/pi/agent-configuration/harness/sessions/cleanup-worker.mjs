@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
-import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 
 const execute = promisify(execFile);
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -24,24 +24,54 @@ async function startIdentity(pid) {
 }
 
 export async function cleanupAfterExit(row, command, identity = startIdentity, wait = sleep) {
-  if (!row.owned || row.historyEver || !row.cleanupSafe || !row.processStart || !Number.isSafeInteger(row.pid) || row.pid < 1 || typeof row.socket !== "string" || !row.socket.startsWith("/") || !/^w\d+:p\d+$/.test(row.pane) || !/^w\d+:t\d+$/.test(row.tab)) return false;
+  if (
+    !row.owned ||
+    row.historyEver ||
+    !row.cleanupSafe ||
+    !row.processStart ||
+    !Number.isSafeInteger(row.pid) ||
+    row.pid < 1 ||
+    typeof row.socket !== "string" ||
+    !row.socket.startsWith("/") ||
+    !/^w\d+:p\d+$/.test(row.pane) ||
+    !/^w\d+:t\d+$/.test(row.tab)
+  )
+    return false;
   return closeAfterExit(row, command, identity, wait);
 }
 
 export async function explicitExitAfterExit(row, command, identity = startIdentity, wait = sleep) {
-  if (row.mode !== "explicit-exit" || !row.processStart || !Number.isSafeInteger(row.pid) || row.pid < 1 ||
-      !Number.isSafeInteger(row.shellPid) || row.shellPid < 1 || row.shellPid === row.pid || !row.shellStart ||
-      typeof row.socket !== "string" || !row.socket.startsWith("/") || !/^w\d+:p\d+$/.test(row.pane) ||
-      !/^w\d+:t\d+$/.test(row.tab) || !/^w\d+$/.test(row.workspace) ||
-      !row.pane.startsWith(`${row.workspace}:`) || !row.tab.startsWith(`${row.workspace}:`)) return false;
+  if (
+    row.mode !== "explicit-exit" ||
+    !row.processStart ||
+    !Number.isSafeInteger(row.pid) ||
+    row.pid < 1 ||
+    !Number.isSafeInteger(row.shellPid) ||
+    row.shellPid < 1 ||
+    row.shellPid === row.pid ||
+    !row.shellStart ||
+    typeof row.socket !== "string" ||
+    !row.socket.startsWith("/") ||
+    !/^w\d+:p\d+$/.test(row.pane) ||
+    !/^w\d+:t\d+$/.test(row.tab) ||
+    !/^w\d+$/.test(row.workspace) ||
+    !row.pane.startsWith(`${row.workspace}:`) ||
+    !row.tab.startsWith(`${row.workspace}:`)
+  )
+    return false;
   return closeAfterExit(row, command, identity, wait);
 }
 
 async function closeAfterExit(row, command, identity, wait) {
   let exited = false;
   for (let i = 0; i < 120; i++) {
-    try { if (await identity(row.pid) !== row.processStart) return false; }
-    catch (error) { if (error.code !== "ENOENT" && error.code !== "ESRCH") return false; exited = true; break; }
+    try {
+      if ((await identity(row.pid)) !== row.processStart) return false;
+    } catch (error) {
+      if (error.code !== "ENOENT" && error.code !== "ESRCH") return false;
+      exited = true;
+      break;
+    }
     await wait(500);
   }
   if (!exited) return false;
@@ -55,8 +85,11 @@ async function closeAfterExit(row, command, identity, wait) {
       const currentProcesses = (await command(["pane", "process-info", "--pane", row.pane])).process_info;
       if (!dedicatedShell(check, current, row, currentProcesses)) return false;
       if (row.mode === "explicit-exit") {
-        try { if (await identity(row.shellPid) !== row.shellStart) return false; }
-        catch { return false; }
+        try {
+          if ((await identity(row.shellPid)) !== row.shellStart) return false;
+        } catch {
+          return false;
+        }
       }
       await command(["pane", "close", row.pane]);
       return true;

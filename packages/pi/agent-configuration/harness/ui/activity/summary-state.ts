@@ -1,6 +1,6 @@
-import { activityStore, type ActivityStatus, type ToolActivity } from "../../activity/store.ts";
-import { isHarnessTool } from "../../tools/config.ts";
+import { type ActivityStatus, activityStore, type ToolActivity } from "../../activity/store.ts";
 import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { isHarnessTool } from "../../tools/config.ts";
 
 export const ACTIVITY_SUMMARY_ENTRY = "harness-activity-summary";
 export const ACTIVITY_WIDGET_KEY = "harness-activity";
@@ -50,9 +50,7 @@ export function summarizeActivity(entries: readonly ToolActivity[]): ActivityAct
 
 export function actionsForMessage(messageNumber: number): ActivityActionSummary[] {
   const entries = activityStore.all();
-  const start = entries.findIndex(
-    (entry) => entry.toolName === "message" && entry.args.number === messageNumber,
-  );
+  const start = entries.findIndex((entry) => entry.toolName === "message" && entry.args.number === messageNumber);
   if (start < 0) return [];
 
   const next = entries.findIndex((entry, index) => index > start && entry.toolName === "message");

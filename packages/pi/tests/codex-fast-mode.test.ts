@@ -20,9 +20,12 @@ const previousStateHome = process.env.XDG_STATE_HOME;
 const stateFile = join(codexDirectory, "pi", "codex-fast-mode.json");
 process.env.CODEX_HOME = codexDirectory;
 process.env.XDG_STATE_HOME = codexDirectory;
-writeFileSync(join(codexDirectory, "models_cache.json"), JSON.stringify({
-  models: [{ slug: "test-fast-model", service_tiers: [{ id: "priority" }] }],
-}));
+writeFileSync(
+  join(codexDirectory, "models_cache.json"),
+  JSON.stringify({
+    models: [{ slug: "test-fast-model", service_tiers: [{ id: "priority" }] }],
+  }),
+);
 
 beforeEach(() => rmSync(join(codexDirectory, "pi"), { recursive: true, force: true }));
 
@@ -32,7 +35,7 @@ afterAll(() => {
   if (previousStateHome === undefined) delete process.env.XDG_STATE_HOME;
   else process.env.XDG_STATE_HOME = previousStateHome;
   rmSync(codexDirectory, { recursive: true, force: true });
-} );
+});
 
 function runtime() {
   const handlers = new Map<string, (event: any, ctx: any) => any>();
@@ -46,34 +49,60 @@ function runtime() {
   let status: string | undefined;
   let selection: string | undefined = "On";
   const model = {
-    api: "openai-codex-responses", provider: "openai-codex", id: "test-fast-model",
-    maxTokens: 8192, contextWindow: 32768,
+    api: "openai-codex-responses",
+    provider: "openai-codex",
+    id: "test-fast-model",
+    maxTokens: 8192,
+    contextWindow: 32768,
   };
   const ctx = {
-    hasUI: true, model,
+    hasUI: true,
+    model,
     sessionManager: { getBranch: () => entries },
     ui: {
-      setStatus: (_key: string, text: string | undefined) => { status = text; },
+      setStatus: (_key: string, text: string | undefined) => {
+        status = text;
+      },
       notify: (text: string) => notifications.push(text),
-      select: async (title: string) => { menuTitle = title; return selection; },
+      select: async (title: string) => {
+        menuTitle = title;
+        return selection;
+      },
     },
   };
   extension({
     on: (event: string, handler: any) => handlers.set(event, handler),
-    registerProvider: (_name: string, config: any) => { provider = config; },
-    registerCommand: (_name: string, config: any) => { command = config; },
-    registerShortcut: (key: string, config: any) => { shortcutKey = key; shortcut = config; },
+    registerProvider: (_name: string, config: any) => {
+      provider = config;
+    },
+    registerCommand: (_name: string, config: any) => {
+      command = config;
+    },
+    registerShortcut: (key: string, config: any) => {
+      shortcutKey = key;
+      shortcut = config;
+    },
     appendEntry: (customType: string, data: unknown) => entries.push({ type: "custom", customType, data }),
   } as unknown as ExtensionAPI);
 
   return {
-    ctx, entries,
-    get status() { return status; },
-    get label() { return status?.replace(/\u001b\[[0-9;]*m/g, ""); },
-    get menuTitle() { return menuTitle; },
-    shortcutKey, notifications,
+    ctx,
+    entries,
+    get status() {
+      return status;
+    },
+    get label() {
+      return status?.replace(/\u001b\[[0-9;]*m/g, "");
+    },
+    get menuTitle() {
+      return menuTitle;
+    },
+    shortcutKey,
+    notifications,
     toggle: () => shortcut.handler(ctx),
-    select: (value: string | undefined) => { selection = value; },
+    select: (value: string | undefined) => {
+      selection = value;
+    },
     emit: (event: string) => handlers.get(event)?.({}, ctx),
     command: (args: string) => command.handler(args, ctx),
     request: (options: any = { apiKey: "test-key" }) => provider.streamSimple(ctx.model, { messages: [] }, options),
@@ -84,14 +113,22 @@ test("fast capability detection validates cache tiers and provider API", () => {
   for (const value of [null, {}, { models: null }, { models: [null, 2, {}] }]) {
     expect(fastModelsFromCache(value).size).toBe(0);
   }
-  const models = fastModelsFromCache({ models: [
-    { slug: "fast", service_tiers: [null, { id: "priority" }] },
-    { slug: "slow", service_tiers: [{ id: "default" }] },
-  ] });
+  const models = fastModelsFromCache({
+    models: [
+      { slug: "fast", service_tiers: [null, { id: "priority" }] },
+      { slug: "slow", service_tiers: [{ id: "default" }] },
+    ],
+  });
   expect([...models]).toEqual(["fast"]);
-  expect(supportsFastMode({ provider: "openai-codex", api: "openai-codex-responses", id: "fast" } as any, models)).toBe(true);
-  expect(supportsFastMode({ provider: "openai", api: "openai-codex-responses", id: "fast" } as any, models)).toBe(false);
-  expect(supportsFastMode({ provider: "openai-codex", api: "openai-responses", id: "fast" } as any, models)).toBe(false);
+  expect(supportsFastMode({ provider: "openai-codex", api: "openai-codex-responses", id: "fast" } as any, models)).toBe(
+    true,
+  );
+  expect(supportsFastMode({ provider: "openai", api: "openai-codex-responses", id: "fast" } as any, models)).toBe(
+    false,
+  );
+  expect(supportsFastMode({ provider: "openai-codex", api: "openai-responses", id: "fast" } as any, models)).toBe(
+    false,
+  );
 });
 
 test("the visible menu toggles priority options without usage notifications", async () => {
@@ -103,9 +140,15 @@ test("the visible menu toggles priority options without usage notifications", as
   await harness.command("");
   expect(harness.label).toBe("fast");
   harness.request({ apiKey: "test-key", reasoning: "off", sessionId: "test-session", transport: "sse" });
-  expect(requests.at(-1)).toMatchObject({ fast: true, options: {
-    serviceTier: "priority", sessionId: "test-session", transport: "sse", maxTokens: 8192,
-  } });
+  expect(requests.at(-1)).toMatchObject({
+    fast: true,
+    options: {
+      serviceTier: "priority",
+      sessionId: "test-session",
+      transport: "sse",
+      maxTokens: 8192,
+    },
+  });
   expect(requests.at(-1)?.options.reasoningEffort).toBeUndefined();
   harness.emit("session_start");
   expect(harness.label).toBe("fast");

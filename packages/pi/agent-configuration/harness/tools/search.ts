@@ -1,20 +1,8 @@
 import { DEFAULT_SEARCH_LIMIT } from "./config.ts";
-import {
-  fdMatches,
-  gitHistory,
-  rgMatches,
-  structuralMatches,
-  type SearchMatch,
-} from "./search/matches.ts";
+import { fdMatches, gitHistory, rgMatches, type SearchMatch, structuralMatches } from "./search/matches.ts";
 import { formatSearchResult } from "./search/result.ts";
 
-export type SearchKind =
-  | "auto"
-  | "text"
-  | "file"
-  | "symbol"
-  | "structural"
-  | "history";
+export type SearchKind = "auto" | "text" | "file" | "symbol" | "structural" | "history";
 
 export interface SearchOptions {
   cwd: string;
@@ -52,10 +40,7 @@ function escapeRegExp(value: string): string {
 }
 
 function isTestFile(file: string): boolean {
-  return (
-    /(^|\/)(__tests__|tests?|spec)\//i.test(file) ||
-    /\.(test|spec)\.[cm]?[jt]sx?$/i.test(file)
-  );
+  return /(^|\/)(__tests__|tests?|spec)\//i.test(file) || /\.(test|spec)\.[cm]?[jt]sx?$/i.test(file);
 }
 
 function isDefinitionLine(line: string, query: string): boolean {
@@ -124,16 +109,12 @@ export async function searchRepo(options: SearchOptions): Promise<string> {
     matches = await rgMatches(cwd, query, scope, signal);
   }
 
-  const files = kind === "text" || kind === "symbol"
-    ? []
-    : await fdMatches(cwd, query, scope, signal);
+  const files = kind === "text" || kind === "symbol" ? [] : await fdMatches(cwd, query, scope, signal);
 
   matches = uniqueByLocation(matches);
 
   if (kind === "symbol") {
-    const definitions = matches.filter((match) =>
-      isDefinitionLine(match.text, query),
-    );
+    const definitions = matches.filter((match) => isDefinitionLine(match.text, query));
     const fallback = definitions.length > 0 ? definitions : matches;
     return formatSearchResult(
       query,
@@ -145,21 +126,9 @@ export async function searchRepo(options: SearchOptions): Promise<string> {
     );
   }
 
-  const definitions = matches.filter((match) =>
-    isDefinitionLine(match.text, query),
-  );
+  const definitions = matches.filter((match) => isDefinitionLine(match.text, query));
   const tests = matches.filter((match) => isTestFile(match.file));
-  const references = matches.filter(
-    (match) => !isDefinitionLine(match.text, query) && !isTestFile(match.file),
-  );
+  const references = matches.filter((match) => !isDefinitionLine(match.text, query) && !isTestFile(match.file));
 
-  return formatSearchResult(
-    query,
-    kind,
-    files,
-    tests,
-    references,
-    limit,
-    definitions,
-  );
+  return formatSearchResult(query, kind, files, tests, references, limit, definitions);
 }

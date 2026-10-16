@@ -23,7 +23,11 @@ async function executeHerdr(args: string[], env: NodeJS.ProcessEnv): Promise<Rec
     for (const text of [output.stdout, output.stderr]) {
       if (!text) continue;
       let response: Record<string, unknown>;
-      try { response = objectValue(JSON.parse(text)); } catch { continue; }
+      try {
+        response = objectValue(JSON.parse(text));
+      } catch {
+        continue;
+      }
       if (response.error) throw herdrError(response.error);
     }
     throw error;
@@ -38,7 +42,9 @@ async function executeHerdr(args: string[], env: NodeJS.ProcessEnv): Promise<Rec
 
 function herdrError(value: unknown): Error {
   const error = objectValue(value);
-  return Object.assign(new Error(typeof error.message === "string" ? error.message : "Herdr command failed"), { code: error.code });
+  return Object.assign(new Error(typeof error.message === "string" ? error.message : "Herdr command failed"), {
+    code: error.code,
+  });
 }
 
 export function scopedHerdr(socket: string): HerdrCommand {
@@ -64,17 +70,28 @@ export function paneIdentity(value: unknown): PaneIdentity {
   const pane = row.pane_id;
   const tab = row.tab_id;
   const workspace = row.workspace_id;
-  if (typeof pane !== "string" || typeof tab !== "string" || typeof workspace !== "string" || !/^w\d+:p\d+$/.test(pane) || !/^w\d+:t\d+$/.test(tab) || !/^w\d+$/.test(workspace)) {
+  if (
+    typeof pane !== "string" ||
+    typeof tab !== "string" ||
+    typeof workspace !== "string" ||
+    !/^w\d+:p\d+$/.test(pane) ||
+    !/^w\d+:t\d+$/.test(tab) ||
+    !/^w\d+$/.test(workspace)
+  ) {
     throw new Error("Herdr returned an invalid pane identity");
   }
-  if (!pane.startsWith(`${workspace}:`) || !tab.startsWith(`${workspace}:`)) throw new Error("Herdr pane belongs to another workspace");
+  if (!pane.startsWith(`${workspace}:`) || !tab.startsWith(`${workspace}:`))
+    throw new Error("Herdr pane belongs to another workspace");
   return { pane, tab, workspace };
 }
 
 export class HerdrSessions {
   private reportSequence = Date.now() * 1000;
 
-  constructor(private readonly registry: SessionRegistry, private readonly command: HerdrCommand = runHerdr) {}
+  constructor(
+    private readonly registry: SessionRegistry,
+    private readonly command: HerdrCommand = runHerdr,
+  ) {}
 
   async current(): Promise<PaneIdentity> {
     const result = await this.command(["pane", "current", "--current"]);
@@ -86,30 +103,31 @@ export class HerdrSessions {
     const common = [row.pane, "--source", PI_HARNESS_SOURCE, "--agent", "pi", ...ref];
     await this.command(["pane", "report-agent-session", ...common, "--seq", String(++this.reportSequence)]);
     const state = row.status === "working" ? "working" : "idle";
-    await this.command([
-      "pane", "report-agent", ...common,
-      "--seq", String(++this.reportSequence), "--state", state,
-    ]);
+    await this.command(["pane", "report-agent", ...common, "--seq", String(++this.reportSequence), "--state", state]);
   }
 
   async notifyCompletion(name: string): Promise<void> {
-    await this.command([
-      "notification", "show", "Pi finished",
-      "--body", name, "--sound", "done",
-    ]);
+    await this.command(["notification", "show", "Pi finished", "--body", name, "--sound", "done"]);
   }
 
   async release(row: LiveSession): Promise<void> {
     await this.command([
-      "pane", "release-agent", row.pane,
-      "--source", PI_HARNESS_SOURCE, "--agent", "pi",
-      "--seq", String(++this.reportSequence),
+      "pane",
+      "release-agent",
+      row.pane,
+      "--source",
+      PI_HARNESS_SOURCE,
+      "--agent",
+      "pi",
+      "--seq",
+      String(++this.reportSequence),
     ]);
   }
 
   async focus(row: LiveSession): Promise<void> {
     const live = (await this.registry.list()).find((item) => item.identity === row.identity);
-    if (!live || live.pane !== row.pane || live.sessionId !== row.sessionId) throw new Error("Session is no longer live");
+    if (!live || live.pane !== row.pane || live.sessionId !== row.sessionId)
+      throw new Error("Session is no longer live");
     const result = await this.command(["pane", "get", live.pane]);
     const pane = objectValue(result.pane);
     const location = paneIdentity(pane);
@@ -149,15 +167,25 @@ export class HerdrSessions {
   private async createReserved(cwd: string, source: PaneIdentity, token: string, name: string): Promise<void> {
     const env = ["--env", `PI_MANAGED_SESSION=${token}`, "--env", `PI_SESSION_REGISTRY=${this.registry.directory}`];
     const layout = objectValue((await this.command(["pane", "layout", "--pane", source.pane])).layout);
-    const sourcePane = Array.isArray(layout.panes) ? layout.panes.find((item) => objectValue(item).pane_id === source.pane) : undefined;
+    const sourcePane = Array.isArray(layout.panes)
+      ? layout.panes.find((item) => objectValue(item).pane_id === source.pane)
+      : undefined;
     const rect = objectValue(objectValue(sourcePane).rect);
     if (typeof rect.width !== "number" || typeof rect.height !== "number" || rect.width <= 0 || rect.height <= 0) {
       throw new Error("Herdr returned invalid pane dimensions");
     }
     const direction = rect.width >= rect.height * 2 ? "right" : "down";
     const result = await this.command([
-      "pane", "split", "--pane", source.pane, "--direction", direction,
-      "--cwd", cwd, ...env, "--no-focus",
+      "pane",
+      "split",
+      "--pane",
+      source.pane,
+      "--direction",
+      direction,
+      "--cwd",
+      cwd,
+      ...env,
+      "--no-focus",
     ]);
     const target = paneIdentity(result.pane);
     if (target.tab !== source.tab || target.workspace !== source.workspace || target.pane === source.pane) {
@@ -167,7 +195,9 @@ export class HerdrSessions {
     await this.command(["agent", "start", name, "--kind", "pi", "--pane", target.pane, "--timeout", "30000"]);
     const deadline = Date.now() + 10_000;
     while (Date.now() < deadline) {
-      const ready = (await this.registry.list()).find((row) => row.identity === token && row.pane === target.pane && row.cwd === cwd);
+      const ready = (await this.registry.list()).find(
+        (row) => row.identity === token && row.pane === target.pane && row.cwd === cwd,
+      );
       if (ready) {
         await this.focus(ready);
         return;

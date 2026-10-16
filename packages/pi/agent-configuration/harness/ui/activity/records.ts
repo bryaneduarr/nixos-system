@@ -6,12 +6,7 @@ export function safeParseTimestamp(timestamp: unknown): number {
   return Number.isNaN(parsed) ? Date.now() : parsed;
 }
 
-export function recordUserMessage(
-  id: string,
-  content: unknown,
-  cwd: string,
-  startedAt?: number,
-): void {
+export function recordUserMessage(id: string, content: unknown, cwd: string, startedAt?: number): void {
   const text = Array.isArray(content)
     ? content
         .filter(
@@ -25,7 +20,9 @@ export function recordUserMessage(
         )
         .map((part) => part.text)
         .join("\n")
-    : typeof content === "string" ? content : "";
+    : typeof content === "string"
+      ? content
+      : "";
   const number = activityStore.all().filter((entry) => entry.toolName === "message").length + 1;
   activityStore.begin({ id, toolName: "message", args: { number }, cwd, startedAt });
   activityStore.finish(id, { text, status: "success", endedAt: startedAt });

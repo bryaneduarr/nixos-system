@@ -31,10 +31,7 @@ export function workingMessageFor(tool: HarnessTool, args: Record<string, unknow
   }
 }
 
-export function phaseForTool(
-  tool: HarnessTool,
-  args: Record<string, unknown>,
-): "DISCOVER" | "IMPLEMENT" | "VERIFY" {
+export function phaseForTool(tool: HarnessTool, args: Record<string, unknown>): "DISCOVER" | "IMPLEMENT" | "VERIFY" {
   switch (tool) {
     case "search":
     case "read":
@@ -42,8 +39,7 @@ export function phaseForTool(
       return "IMPLEMENT";
     case "run": {
       const command = stringArg(args, "command");
-      return /\bbiome\b|\btsc\b|typecheck|type-check|\blint\b|\bcheck\b/.test(command)
-        ? "VERIFY" : "IMPLEMENT";
+      return /\bbiome\b|\btsc\b|typecheck|type-check|\blint\b|\bcheck\b/.test(command) ? "VERIFY" : "IMPLEMENT";
     }
     default:
       return "DISCOVER";

@@ -2,10 +2,16 @@ import { randomUUID } from "node:crypto";
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { clampThinkingLevel, type Api, type Model, type SimpleStreamOptions, type TranscriptContext } from "@earendil-works/pi-ai";
+import {
+  type Api,
+  clampThinkingLevel,
+  type Model,
+  type SimpleStreamOptions,
+  type TranscriptContext,
+} from "@earendil-works/pi-ai";
 import { stream, streamSimple } from "@earendil-works/pi-ai/api/openai-codex-responses";
 import { buildBaseOptions } from "@earendil-works/pi-ai/api/simple-options";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { rainbow } from "pi-powerline-footer/theme.ts";
 import { loadFastModels, supportsFastMode } from "./capabilities.ts";
 
@@ -140,7 +146,10 @@ export default function codexFastMode(pi: ExtensionAPI): void {
 
       if (!action || action === "status") {
         updateStatus(ctx);
-        ctx.ui.notify(`Fast mode is ${enabled ? "on" : "off"}. ${supportsFastMode(ctx.model, fastModels) ? "Current model supports priority." : "Current model does not support priority."}`, "info");
+        ctx.ui.notify(
+          `Fast mode is ${enabled ? "on" : "off"}. ${supportsFastMode(ctx.model, fastModels) ? "Current model supports priority." : "Current model does not support priority."}`,
+          "info",
+        );
         return;
       }
 

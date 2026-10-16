@@ -1,38 +1,24 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  CONFIG_DIR_NAME,
-  type ExtensionAPI,
-  isToolCallEventType,
-} from "@earendil-works/pi-coding-agent";
+import { CONFIG_DIR_NAME, type ExtensionAPI, isToolCallEventType } from "@earendil-works/pi-coding-agent";
 
 const MAX_CHARS = 12_000;
 const MAX_LINES = 240;
 const READ_LIMIT = 120;
 const PREVIEW_CHAR_LIMIT = 12_000;
 
-function previewOutput(
-  output: string,
-  headLines: number,
-  tailLines: number,
-): string {
+function previewOutput(output: string, headLines: number, tailLines: number): string {
   const lines = output.split(/\r?\n/);
   const omittedLines = Math.max(0, lines.length - headLines - tailLines);
   const omissionMarker = `... ${omittedLines} lines omitted ...`;
   const previewLines =
     omittedLines > 0
-      ? [
-          ...lines.slice(0, headLines),
-          omissionMarker,
-          ...lines.slice(-tailLines),
-        ]
+      ? [...lines.slice(0, headLines), omissionMarker, ...lines.slice(-tailLines)]
       : [...lines, omissionMarker];
 
   let text = previewLines.join("\n");
   if (text.length > PREVIEW_CHAR_LIMIT) {
-    const half = Math.floor(
-      (PREVIEW_CHAR_LIMIT - omissionMarker.length - 24) / 2,
-    );
+    const half = Math.floor((PREVIEW_CHAR_LIMIT - omissionMarker.length - 24) / 2);
     text = `${text.slice(0, half)}\n${omissionMarker}\n... preview shortened ...\n${text.slice(-half)}`;
   }
 

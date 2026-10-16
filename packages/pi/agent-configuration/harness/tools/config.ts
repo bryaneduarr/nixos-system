@@ -1,9 +1,4 @@
-export const HARNESS_TOOLS = [
-  "search",
-  "read",
-  "edit",
-  "run",
-] as const;
+export const HARNESS_TOOLS = ["search", "read", "edit", "run"] as const;
 
 export type HarnessTool = (typeof HARNESS_TOOLS)[number];
 

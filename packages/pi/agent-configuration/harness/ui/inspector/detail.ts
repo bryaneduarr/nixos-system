@@ -1,12 +1,7 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
-import {
-  activityStore,
-  type ActivityStatus,
-  type SubToolActivity,
-  type ToolActivity,
-} from "../../activity/store.ts";
+import { type ActivityStatus, activityStore, type SubToolActivity, type ToolActivity } from "../../activity/store.ts";
+import { resolveTaskRole, TASK_TOOL_NAME } from "../../subagents/roles.ts";
 import { isHarnessTool } from "../../tools/config.ts";
-import { TASK_TOOL_NAME, resolveTaskRole } from "../../subagents/roles.ts";
 import { renderBox } from "../formatting.ts";
 import { toolColor, toolLabel, toolTarget } from "../tool-renderer.ts";
 import { formatTokens, modelLabel } from "./usage.ts";
@@ -88,11 +83,7 @@ function formatMissionInput(args: Record<string, unknown>): string {
     roleAndTools = [`role: ${role}`, `tools: ${tools}`];
   }
 
-  const lines = [
-    `title: ${String(args.title ?? "")}`,
-    ...roleAndTools,
-    `mission: ${args.mission}`,
-  ];
+  const lines = [`title: ${String(args.title ?? "")}`, ...roleAndTools, `mission: ${args.mission}`];
 
   if (typeof args.context === "string") {
     lines.push(`context: ${args.context}`);
@@ -167,9 +158,10 @@ export function buildDetail({ row, width, artifactText }: DetailOptions): Detail
   const elapsed = formatDuration(Math.max(0, (endedAt ?? Date.now()) - startedAt));
   const runningLabel = endedAt === undefined ? " · running" : "";
   const timing = `${formatTime(startedAt)} · ${elapsed}${runningLabel}`;
-  const heading = tool === "message"
-    ? `USER MESSAGE ${String(args.number ?? "")} · ${formatTime(startedAt)}`
-    : `${toolLabel(tool)} · ${status.toUpperCase()} · ${formatTime(startedAt)}`;
+  const heading =
+    tool === "message"
+      ? `USER MESSAGE ${String(args.number ?? "")} · ${formatTime(startedAt)}`
+      : `${toolLabel(tool)} · ${status.toUpperCase()} · ${formatTime(startedAt)}`;
 
   lines.push({
     text: heading,
@@ -220,9 +212,7 @@ export function buildDetail({ row, width, artifactText }: DetailOptions): Detail
     const usage = entry.usage;
     const modelWindow = entry.model?.contextWindow;
     const reasoning = entry.thinkingLevel ?? "—";
-    const currentContext = usage?.contextTokens === undefined
-      ? "—"
-      : formatTokens(usage.contextTokens);
+    const currentContext = usage?.contextTokens === undefined ? "—" : formatTokens(usage.contextTokens);
     const contextWindow = modelWindow ? formatTokens(modelWindow) : "—";
     const callCount = entry.sub.length;
 

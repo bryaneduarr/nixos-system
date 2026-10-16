@@ -20,14 +20,7 @@ export interface ExecOptions {
 const MAX_CAPTURE_BYTES = 32 * 1024 * 1024;
 
 export async function runCommand(options: ExecOptions): Promise<ExecResult> {
-  const {
-    command,
-    argv,
-    cwd,
-    timeoutMs = 0,
-    signal,
-    env,
-  } = options;
+  const { command, argv, cwd, timeoutMs = 0, signal, env } = options;
 
   return await new Promise<ExecResult>((resolve) => {
     const useArgv = Array.isArray(argv) && argv.length > 0;

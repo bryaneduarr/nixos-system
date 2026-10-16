@@ -1,7 +1,7 @@
 import { defineTool } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
-import { clampLines } from "../tools/format.ts";
 import { runCommand } from "../tools/exec.ts";
+import { clampLines } from "../tools/format.ts";
 import { APPROVED_COMMAND_TOOL } from "./roles.ts";
 
 const APPROVED_COMMAND_TIMEOUT_MS = 120_000;
@@ -21,9 +21,7 @@ export function createApprovedCommandTool(approvedCommands: readonly string[]) {
     label: "Approved command",
     description: "Run one exact command approved by the parent for this assignment.",
     promptSnippet: "Run only an exact parent-approved verification command",
-    promptGuidelines: [
-      "Pass an approved command exactly as listed. Do not add flags or shell operators.",
-    ],
+    promptGuidelines: ["Pass an approved command exactly as listed. Do not add flags or shell operators."],
     parameters: ApprovedCommandParams,
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
       if (!approvedCommands.includes(params.command)) {

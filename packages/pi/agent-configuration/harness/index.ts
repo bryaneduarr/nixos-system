@@ -1,16 +1,16 @@
 import { writeFile } from "node:fs/promises";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { installSessions } from "./sessions/install.ts";
+import { TASK_TOOL_NAME } from "./subagents/roles.ts";
+import { registerSubagentTool } from "./subagents/tool.ts";
 import { HARNESS_TOOLS, type HarnessTool } from "./tools/config.ts";
 import { editFile } from "./tools/edit.ts";
+import { EditParams, ReadParams, RunParams, SearchParams } from "./tools/parameters.ts";
 import { readSource } from "./tools/read.ts";
 import { runShell } from "./tools/run.ts";
 import { searchRepo } from "./tools/search.ts";
-import { EditParams, ReadParams, RunParams, SearchParams } from "./tools/parameters.ts";
 import { installHarnessPresentation } from "./ui/install.ts";
 import { createHarnessRenderers } from "./ui/tool-renderer.ts";
-import { registerSubagentTool } from "./subagents/tool.ts";
-import { TASK_TOOL_NAME } from "./subagents/roles.ts";
-import { installSessions } from "./sessions/install.ts";
 
 const SEARCH_TOOL_DESCRIPTION = [
   "Find filenames, text, symbols, definitions, references, tests, structural matches, or git history.",
@@ -30,17 +30,8 @@ const RUN_TOOL_DESCRIPTION = [
   "Captures exit code, compresses large output, and stores the full output under .agent/runs.",
 ].join(" ");
 
-const WEB_TOOLS = [
-  "web_search",
-  "fetch_content",
-  "get_search_content",
-  "source_check",
-] as const;
-const ALLOWED_TOOL_SET = new Set<string>([
-  ...HARNESS_TOOLS,
-  TASK_TOOL_NAME,
-  ...WEB_TOOLS,
-]);
+const WEB_TOOLS = ["web_search", "fetch_content", "get_search_content", "source_check"] as const;
+const ALLOWED_TOOL_SET = new Set<string>([...HARNESS_TOOLS, TASK_TOOL_NAME, ...WEB_TOOLS]);
 
 function enforceActiveTools(pi: ExtensionAPI): void {
   const registered = new Set(pi.getAllTools().map((tool) => tool.name));
@@ -114,9 +105,7 @@ export default function harnessExtension(pi: ExtensionAPI): void {
     label: "Edit",
     description: EDIT_TOOL_DESCRIPTION,
     promptSnippet: "Apply precise file edits and report a compact diff",
-    promptGuidelines: [
-      "Use edit for code changes; prefer exact-text replacements over rewriting whole files.",
-    ],
+    promptGuidelines: ["Use edit for code changes; prefer exact-text replacements over rewriting whole files."],
     parameters: EditParams,
     ...createHarnessRenderers("edit"),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {

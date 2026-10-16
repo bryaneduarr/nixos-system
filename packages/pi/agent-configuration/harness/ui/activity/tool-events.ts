@@ -1,9 +1,9 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { type ActivityStatus, activityStore } from "../../activity/store.ts";
 import { readSubActivity, readSubagentMetadata, readSubagentUsage } from "../../activity/parse.ts";
-import { isHarnessTool } from "../../tools/config.ts";
-import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { type ActivityStatus, activityStore } from "../../activity/store.ts";
 import { taskResultFailed } from "../../subagents/result.ts";
+import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { isHarnessTool } from "../../tools/config.ts";
 import { extractText, resultFailed } from "../tool-renderer.ts";
 
 interface RendererContent {
@@ -52,9 +52,7 @@ export function registerToolActivity(
     const text = extractText(result.content ?? []);
     const failedTask = event.toolName === TASK_TOOL_NAME && taskResultFailed(result.details);
     const failedHarnessTool = isHarnessTool(event.toolName) && resultFailed(event.toolName, text);
-    const status: ActivityStatus = event.isError || failedTask || failedHarnessTool
-      ? "error"
-      : "success";
+    const status: ActivityStatus = event.isError || failedTask || failedHarnessTool ? "error" : "success";
     activityStore.finish(event.toolCallId, {
       text,
       details: result.details,

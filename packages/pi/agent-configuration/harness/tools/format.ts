@@ -28,22 +28,14 @@ export function clampLines(
   };
 }
 
-export function headTail(
-  text: string,
-  head: number,
-  tail: number,
-): { text: string; omittedLines: number } {
+export function headTail(text: string, head: number, tail: number): { text: string; omittedLines: number } {
   const lines = splitLines(text);
   if (lines.length <= head + tail) {
     return { text: lines.join("\n"), omittedLines: 0 };
   }
   const omitted = lines.length - head - tail;
   return {
-    text: [
-      ...lines.slice(0, head),
-      `... ${omitted} lines omitted ...`,
-      ...lines.slice(-tail),
-    ].join("\n"),
+    text: [...lines.slice(0, head), `... ${omitted} lines omitted ...`, ...lines.slice(-tail)].join("\n"),
     omittedLines: omitted,
   };
 }
@@ -56,10 +48,7 @@ export function uniqueLines(values: string[]): string[] {
   return [...new Set(values.filter((value) => value.trim().length > 0))];
 }
 
-export function withLineNumbers(
-  lines: string[],
-  startLine: number,
-): string {
+export function withLineNumbers(lines: string[], startLine: number): string {
   const width = String(startLine + lines.length - 1).length;
   return lines
     .map((line, index) => {

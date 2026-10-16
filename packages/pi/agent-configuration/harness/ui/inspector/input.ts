@@ -40,7 +40,9 @@ export function handleInspectorKey(data: string, inspector: InspectorInput): voi
     return;
   }
   const destinations: Record<string, InspectorPage> = {
-    "1": "tools", "2": "subagents", "3": "messages",
+    "1": "tools",
+    "2": "subagents",
+    "3": "messages",
   };
   if (destinations[data]) {
     inspector.switchPage(destinations[data]);
@@ -60,20 +62,38 @@ export function handleInspectorKey(data: string, inspector: InspectorInput): voi
     inspector.switchFocus();
     return;
   }
-  if (data === "c") { inspector.copy(); return; }
-  if (data === "a") { inspector.toggleArtifact(); return; }
-  if (matchesKey(data, "pageDown")) { inspector.step(inspector.pageSize()); return; }
-  if (matchesKey(data, "pageUp")) { inspector.step(-inspector.pageSize()); return; }
-  if (matchesKey(data, "down") || data === "j") { inspector.step(1); return; }
-  if (matchesKey(data, "up") || data === "k") { inspector.step(-1); return; }
-  if (data === "g") { inspector.jump("start"); return; }
+  if (data === "c") {
+    inspector.copy();
+    return;
+  }
+  if (data === "a") {
+    inspector.toggleArtifact();
+    return;
+  }
+  if (matchesKey(data, "pageDown")) {
+    inspector.step(inspector.pageSize());
+    return;
+  }
+  if (matchesKey(data, "pageUp")) {
+    inspector.step(-inspector.pageSize());
+    return;
+  }
+  if (matchesKey(data, "down") || data === "j") {
+    inspector.step(1);
+    return;
+  }
+  if (matchesKey(data, "up") || data === "k") {
+    inspector.step(-1);
+    return;
+  }
+  if (data === "g") {
+    inspector.jump("start");
+    return;
+  }
   if (data === "G") inspector.jump("end");
 }
 
-export function handleInspectorMouse(
-  event: TuiMouseEvent,
-  inspector: InspectorInput,
-): TuiMouseEventResult | undefined {
+export function handleInspectorMouse(event: TuiMouseEvent, inspector: InspectorInput): TuiMouseEventResult | undefined {
   if (event.type !== "click" || event.button !== "left") return undefined;
   if (event.y === inspector.footerY) {
     const destinations: { page: InspectorPage; width: number }[] = [
@@ -101,8 +121,7 @@ export function handleInspectorMouse(
   if (!layout) return undefined;
   const rowOffset = event.y - layout.bodyTop;
   if (rowOffset < 0 || rowOffset >= layout.bodyHeight) return undefined;
-  if ((layout.twoPane && event.x >= layout.leftWidth + 3) ||
-    (!layout.twoPane && rowOffset >= layout.listHeight)) {
+  if ((layout.twoPane && event.x >= layout.leftWidth + 3) || (!layout.twoPane && rowOffset >= layout.listHeight)) {
     inspector.focusDetail();
     return { handled: true, focus: true };
   }

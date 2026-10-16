@@ -1,10 +1,4 @@
-import {
-  mkdir,
-  readFile,
-  rename,
-  unlink,
-  writeFile,
-} from "node:fs/promises";
+import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { addDiff, countLines, emptyDiff, formatDiffStats, replacementDiff } from "./diff.ts";
 import { stripAtPrefix } from "./format.ts";

@@ -1,12 +1,5 @@
-import {
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  renameSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
 import { randomUUID } from "node:crypto";
+import { mkdirSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -17,14 +10,9 @@ interface SavedModel {
   thinkingLevel?: ReturnType<ExtensionAPI["getThinkingLevel"]>;
 }
 
-const stateDirectory = join(
-  process.env.XDG_STATE_HOME || join(homedir(), ".local", "state"),
-  "pi",
-);
+const stateDirectory = join(process.env.XDG_STATE_HOME || join(homedir(), ".local", "state"), "pi");
 const stateFile = join(stateDirectory, "last-model.json");
-const thinkingLevels = new Set([
-  "off", "minimal", "low", "medium", "high", "xhigh", "max",
-]);
+const thinkingLevels = new Set(["off", "minimal", "low", "medium", "high", "xhigh", "max"]);
 
 function isThinkingLevel(value: unknown): value is ReturnType<ExtensionAPI["getThinkingLevel"]> {
   return typeof value === "string" && thinkingLevels.has(value);
@@ -35,9 +23,8 @@ function savedModel(value: unknown): SavedModel | undefined {
   if (!("provider" in value) || typeof value.provider !== "string") return undefined;
   if (!("id" in value) || typeof value.id !== "string") return undefined;
   if (!value.provider || !value.id) return undefined;
-  const thinkingLevel = "thinkingLevel" in value && isThinkingLevel(value.thinkingLevel)
-    ? value.thinkingLevel
-    : undefined;
+  const thinkingLevel =
+    "thinkingLevel" in value && isThinkingLevel(value.thinkingLevel) ? value.thinkingLevel : undefined;
   return { provider: value.provider, id: value.id, thinkingLevel };
 }
 
@@ -86,8 +73,12 @@ function recentSessionModel(currentSessionFile: string | undefined): SavedModel 
         const entry: unknown = JSON.parse(lines[index]);
         if (typeof entry !== "object" || entry === null || !("type" in entry)) continue;
         if (entry.type === "message") hasMessage = true;
-        if (entry.type === "thinking_level_change" && thinkingLevel === undefined &&
-            "thinkingLevel" in entry && isThinkingLevel(entry.thinkingLevel)) {
+        if (
+          entry.type === "thinking_level_change" &&
+          thinkingLevel === undefined &&
+          "thinkingLevel" in entry &&
+          isThinkingLevel(entry.thinkingLevel)
+        ) {
           thinkingLevel = entry.thinkingLevel;
         }
         if (entry.type === "model_change") {
@@ -109,10 +100,26 @@ function recentSessionModel(currentSessionFile: string | undefined): SavedModel 
 }
 
 function explicitStartupSelection(): boolean {
-  return process.argv.slice(2).some((argument) =>
-    ["--model", "--provider", "--models", "--continue", "-c", "--resume", "-r", "--session", "--session-id", "--fork"].includes(argument) ||
-    ["--model=", "--provider=", "--models=", "--session=", "--session-id="].some((prefix) => argument.startsWith(prefix))
-  );
+  return process.argv
+    .slice(2)
+    .some(
+      (argument) =>
+        [
+          "--model",
+          "--provider",
+          "--models",
+          "--continue",
+          "-c",
+          "--resume",
+          "-r",
+          "--session",
+          "--session-id",
+          "--fork",
+        ].includes(argument) ||
+        ["--model=", "--provider=", "--models=", "--session=", "--session-id="].some((prefix) =>
+          argument.startsWith(prefix),
+        ),
+    );
 }
 
 export default function lastModelExtension(pi: ExtensionAPI): void {
@@ -131,19 +138,25 @@ export default function lastModelExtension(pi: ExtensionAPI): void {
   pi.on("session_start", async (event, ctx) => {
     if (ctx.mode !== "tui" || (event.reason !== "startup" && event.reason !== "new")) return;
     if (event.reason === "startup" && explicitStartupSelection()) return;
-    if (ctx.sessionManager.getEntries().some((entry) =>
-      entry.type !== "model_change" && entry.type !== "thinking_level_change"
-    )) return;
+    if (
+      ctx.sessionManager
+        .getEntries()
+        .some((entry) => entry.type !== "model_change" && entry.type !== "thinking_level_change")
+    )
+      return;
     const saved = readSavedModel();
-    const selection = saved ?? (event.reason === "startup"
-      ? recentSessionModel(ctx.sessionManager.getSessionFile())
-      : undefined);
+    const selection =
+      saved ?? (event.reason === "startup" ? recentSessionModel(ctx.sessionManager.getSessionFile()) : undefined);
     if (!selection) return;
     const model = ctx.modelRegistry.find(selection.provider, selection.id);
     if (!model) return;
-    if (ctx.scopedModels.length > 0 && !ctx.scopedModels.some(
-      (scoped) => scoped.model.provider === selection.provider && scoped.model.id === selection.id,
-    )) return;
+    if (
+      ctx.scopedModels.length > 0 &&
+      !ctx.scopedModels.some(
+        (scoped) => scoped.model.provider === selection.provider && scoped.model.id === selection.id,
+      )
+    )
+      return;
     restoring = true;
     try {
       if (await pi.setModel(model)) {

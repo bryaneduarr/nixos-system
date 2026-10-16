@@ -79,10 +79,7 @@ export interface ToolActivity {
   sub: SubToolActivity[];
 }
 
-const ARTIFACT_PATTERNS = [
-  /^\s*Full output:\s*(\S+)\s*$/m,
-  /^\s*artifact:\s*(\S+)\s*$/m,
-];
+const ARTIFACT_PATTERNS = [/^\s*Full output:\s*(\S+)\s*$/m, /^\s*artifact:\s*(\S+)\s*$/m];
 
 /** Extracts a referenced full-output artifact path from tool result text. */
 export function findArtifactPath(text: string): string | undefined {
@@ -120,9 +117,7 @@ export class ActivityStore {
     this.emit();
   }
 
-  updateAgent(
-    patch: Partial<Omit<AgentActivity, "updatedAt">> & { updatedAt?: number },
-  ): void {
+  updateAgent(patch: Partial<Omit<AgentActivity, "updatedAt">> & { updatedAt?: number }): void {
     this.agent = {
       ...this.agent,
       ...patch,
@@ -162,18 +157,7 @@ export class ActivityStore {
 
   update(
     id: string,
-    patch: Partial<
-      Pick<
-        ToolActivity,
-        | "text"
-        | "details"
-        | "sub"
-        | "status"
-        | "usage"
-        | "model"
-        | "thinkingLevel"
-      >
-    >,
+    patch: Partial<Pick<ToolActivity, "text" | "details" | "sub" | "status" | "usage" | "model" | "thinkingLevel">>,
   ): void {
     const entry = this.byId.get(id);
     if (!entry) return;

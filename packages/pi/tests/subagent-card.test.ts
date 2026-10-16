@@ -5,8 +5,9 @@ import { activityStore } from "../agent-configuration/harness/activity/store.ts"
 const TEST_CWD = "/tmp";
 
 const { renderSubagentCard } = await import("../agent-configuration/harness/subagents/card.ts");
-const { resetActivityVisibility, toggleActivityVisibility, setAgentWorking } =
-  await import("../agent-configuration/harness/ui/activity/visibility.ts");
+const { resetActivityVisibility, toggleActivityVisibility, setAgentWorking } = await import(
+  "../agent-configuration/harness/ui/activity/visibility.ts"
+);
 
 const theme = {
   fg: (_color: string, text: string) => text,

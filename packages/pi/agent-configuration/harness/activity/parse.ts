@@ -87,8 +87,8 @@ export function readSubagentMetadata(details: unknown): SubagentMetadata {
       };
     }
   }
-  const thinkingLevel = typeof details.thinkingLevel === "string" && details.thinkingLevel.length > 0
-    ? details.thinkingLevel : undefined;
+  const thinkingLevel =
+    typeof details.thinkingLevel === "string" && details.thinkingLevel.length > 0 ? details.thinkingLevel : undefined;
   return {
     ...(model === undefined ? {} : { model }),
     ...(thinkingLevel === undefined ? {} : { thinkingLevel }),
@@ -101,7 +101,6 @@ export function readSubActivity(details: unknown): SubToolActivity[] {
   if (!Array.isArray(value)) return [];
   return value.filter(
     (item): item is SubToolActivity =>
-      typeof item === "object" && item !== null &&
-      typeof (item as { toolName?: unknown }).toolName === "string",
+      typeof item === "object" && item !== null && typeof (item as { toolName?: unknown }).toolName === "string",
   );
 }

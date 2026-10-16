@@ -1,9 +1,6 @@
 import type { SubagentUsage } from "./store.ts";
 
-export function addSubagentUsage(
-  current: SubagentUsage | undefined,
-  next: SubagentUsage,
-): SubagentUsage {
+export function addSubagentUsage(current: SubagentUsage | undefined, next: SubagentUsage): SubagentUsage {
   const nextContextTokens = next.contextTokens ?? next.totalTokens;
   const currentContextTokens = current?.contextTokens;
   const currentMaxContextTokens = current?.maxContextTokens ?? currentContextTokens ?? 0;

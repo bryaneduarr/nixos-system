@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { constants } from "node:fs";
-import { access, chmod, mkdir, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
+import { access, chmod, mkdir, readdir, readFile, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, join, resolve } from "node:path";
 
@@ -17,7 +17,9 @@ interface NameReservation {
 }
 
 function projectName(cwd: string): string {
-  let project = basename(cwd).toLowerCase().replace(/[^a-z0-9_-]+/g, "-");
+  let project = basename(cwd)
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-");
   if (!/^[a-z]/.test(project)) project = `project-${project}`;
   return project.slice(0, 20);
 }
@@ -109,7 +111,11 @@ export class SessionRegistry {
   async publish(row: LiveSession): Promise<void> {
     await this.prepare();
     const target = join(this.directory, `${row.identity}.json`);
-    await writeFile(`${target}.tmp`, JSON.stringify({ ...row, processStart: row.processStart ?? await processStartIdentity(row.pid) }), { mode: 0o600 });
+    await writeFile(
+      `${target}.tmp`,
+      JSON.stringify({ ...row, processStart: row.processStart ?? (await processStartIdentity(row.pid)) }),
+      { mode: 0o600 },
+    );
     await rename(`${target}.tmp`, target);
     if (row.historyEver) await this.markUsed(row.identity);
     const key = createHash("sha256").update(row.cwd).digest("hex");
@@ -127,7 +133,9 @@ export class SessionRegistry {
         break;
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-        const age = await stat(lock).then((info) => Date.now() - info.mtimeMs).catch(() => 0);
+        const age = await stat(lock)
+          .then((info) => Date.now() - info.mtimeMs)
+          .catch(() => 0);
         if (age > RESERVATION_STALE_MS) await rm(lock, { recursive: true, force: true });
         if (Date.now() >= deadline) throw new Error("Session name allocation timed out");
         await new Promise((resolve) => setTimeout(resolve, 10));
@@ -150,36 +158,57 @@ export class SessionRegistry {
       const path = join(this.directory, file);
       try {
         const row: NameReservation = JSON.parse(await readFile(path, "utf8"));
-        if (`${row.identity}.reservation` !== file || typeof row.project !== "string" || !/^[a-z][a-z0-9_-]{0,19}$/.test(row.project) ||
-            !Number.isSafeInteger(row.order) || !Number.isFinite(row.updatedAt) ||
-            !Number.isSafeInteger(row.pid) || row.pid < 1 || typeof row.processStart !== "string") {
+        if (
+          `${row.identity}.reservation` !== file ||
+          typeof row.project !== "string" ||
+          !/^[a-z][a-z0-9_-]{0,19}$/.test(row.project) ||
+          !Number.isSafeInteger(row.order) ||
+          !Number.isFinite(row.updatedAt) ||
+          !Number.isSafeInteger(row.pid) ||
+          row.pid < 1 ||
+          typeof row.processStart !== "string"
+        ) {
           await rm(path, { force: true });
           continue;
         }
-        if (!liveIdentities.has(row.identity) &&
-            (now - row.updatedAt > RESERVATION_STALE_MS ||
-             row.processStart !== await processStartIdentity(row.pid).catch(() => ""))) {
+        if (
+          !liveIdentities.has(row.identity) &&
+          (now - row.updatedAt > RESERVATION_STALE_MS ||
+            row.processStart !== (await processStartIdentity(row.pid).catch(() => "")))
+        ) {
           await rm(path, { force: true });
           continue;
         }
         reservations.push(row);
-      } catch { continue; }
+      } catch {
+        continue;
+      }
     }
     let order = Math.max(now, ...reservations.map((row) => row.order));
     for (const row of live) {
       if (reservations.some((item) => item.identity === row.identity)) continue;
       const reservation: NameReservation = {
-        identity: row.identity, project: projectName(row.cwd), order: ++order,
-        updatedAt: now, pid: row.pid, processStart: row.processStart!,
+        identity: row.identity,
+        project: projectName(row.cwd),
+        order: ++order,
+        updatedAt: now,
+        pid: row.pid,
+        processStart: row.processStart!,
       };
       reservations.push(reservation);
-      await writeFile(join(this.directory, `${row.identity}.reservation`), JSON.stringify(reservation), { mode: 0o600 });
+      await writeFile(join(this.directory, `${row.identity}.reservation`), JSON.stringify(reservation), {
+        mode: 0o600,
+      });
     }
     let current = reservations.find((row) => row.identity === identity);
     if (!current) {
       current = {
-        identity, project: projectName(cwd), order: ++order, updatedAt: now,
-        pid: process.pid, processStart: await processStartIdentity(process.pid),
+        identity,
+        project: projectName(cwd),
+        order: ++order,
+        updatedAt: now,
+        pid: process.pid,
+        processStart: await processStartIdentity(process.pid),
       };
       reservations.push(current);
     }
@@ -230,10 +259,18 @@ export class SessionRegistry {
         }
         try {
           process.kill(row.pid, 0);
-          if (!row.processStart || row.processStart !== await processStartIdentity(row.pid)) { await this.remove(row.identity); continue; }
-        } catch { await this.remove(row.identity); continue; }
+          if (!row.processStart || row.processStart !== (await processStartIdentity(row.pid))) {
+            await this.remove(row.identity);
+            continue;
+          }
+        } catch {
+          await this.remove(row.identity);
+          continue;
+        }
         result.push(row);
-      } catch { continue; }
+      } catch {
+        continue;
+      }
     }
     return result.sort((a, b) => a.cwd.localeCompare(b.cwd) || a.name.localeCompare(b.name));
   }
@@ -245,7 +282,9 @@ export class SessionRegistry {
       if (!/^[a-f0-9]{64}\.project$/.test(file)) continue;
       try {
         paths.add(await canonicalDirectory(await readFile(join(this.directory, file), "utf8"), "/"));
-      } catch { continue; }
+      } catch {
+        continue;
+      }
     }
     return [...paths].sort();
   }

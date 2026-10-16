@@ -16,9 +16,7 @@ const MAX_INLINE_LINES = 160;
 function summarize(output: string): string | undefined {
   const lines = splitLines(output);
   const tsErrors = lines.filter((line) => /error TS\d+/.test(line)).length;
-  const genericErrors = lines.filter((line) =>
-    /(^|\s)(error|failed|exception):/i.test(line),
-  ).length;
+  const genericErrors = lines.filter((line) => /(^|\s)(error|failed|exception):/i.test(line)).length;
   const parts: string[] = [];
   if (tsErrors > 0) parts.push(`TypeScript errors: ${tsErrors}`);
   if (genericErrors > 0) parts.push(`error lines: ${genericErrors}`);

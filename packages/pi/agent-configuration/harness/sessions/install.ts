@@ -1,27 +1,40 @@
 import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-import { basename, join, resolve } from "node:path";
 import { realpath } from "node:fs/promises";
+import { basename, join, resolve } from "node:path";
+import { promisify } from "node:util";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { getKeybindings } from "@earendil-works/pi-tui";
-import { HerdrSessions, scopedHerdr } from "./herdr.ts";
 import { canCleanup, scheduleCleanup } from "./cleanup.ts";
-import { installExit, type ExitDependencies } from "./exit.ts";
+import { type ExitDependencies, installExit } from "./exit.ts";
+import { HerdrSessions, scopedHerdr } from "./herdr.ts";
 import type { selectProject, selectSession } from "./menu.ts";
-import { canReportSession, canonicalDirectory, processStartIdentity, processSessionIdentity, registryDirectory, SessionRegistry, sessionStatus, type LiveSession } from "./registry.ts";
+import {
+  canonicalDirectory,
+  canReportSession,
+  type LiveSession,
+  processSessionIdentity,
+  processStartIdentity,
+  registryDirectory,
+  SessionRegistry,
+  sessionStatus,
+} from "./registry.ts";
 
 const execute = promisify(execFile);
 const usedProcesses = new Set<string>();
 
 export async function gitBranch(cwd: string): Promise<string> {
   try {
-    const { stdout } = await execute("git", ["-C", cwd, "symbolic-ref", "--quiet", "--short", "HEAD"], { timeout: 2000 });
+    const { stdout } = await execute("git", ["-C", cwd, "symbolic-ref", "--quiet", "--short", "HEAD"], {
+      timeout: 2000,
+    });
     return stdout.trim() || "no git";
   } catch {
     try {
       const { stdout } = await execute("git", ["-C", cwd, "rev-parse", "--short", "HEAD"], { timeout: 2000 });
       return `detached ${stdout.trim()}`;
-    } catch { return "no git"; }
+    } catch {
+      return "no git";
+    }
   }
 }
 
@@ -112,8 +125,10 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
         reported = reportKey;
       }
       await registry!.publish(row);
-      if (named !== name && await herdr!.name(pane!, name)) named = name;
-    })().finally(() => { publishing = undefined; });
+      if (named !== name && (await herdr!.name(pane!, name))) named = name;
+    })().finally(() => {
+      publishing = undefined;
+    });
     return publishing;
   };
 
@@ -143,12 +158,20 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
       socket = await realpath(resolve(socket)).catch(() => resolve(socket));
       const scopedDirectory = registryDirectory(socket);
       const override = process.env.PI_SESSION_REGISTRY;
-      registry = new SessionRegistry(override ? (basename(override) === basename(scopedDirectory) ? override : join(override, basename(scopedDirectory))) : scopedDirectory);
+      registry = new SessionRegistry(
+        override
+          ? basename(override) === basename(scopedDirectory)
+            ? override
+            : join(override, basename(scopedDirectory))
+          : scopedDirectory,
+      );
       herdr = dependencies.herdr?.(registry, socket) ?? new HerdrSessions(registry, scopedHerdr(socket));
       pane = await herdr.current();
-      identity = /^[a-f0-9-]{36}$/.test(process.env.PI_MANAGED_SESSION || "") ? process.env.PI_MANAGED_SESSION! : await processSessionIdentity(socket, process.pid);
+      identity = /^[a-f0-9-]{36}$/.test(process.env.PI_MANAGED_SESSION || "")
+        ? process.env.PI_MANAGED_SESSION!
+        : await processSessionIdentity(socket, process.pid);
       cwd = await canonicalDirectory(ctx.cwd, ctx.cwd);
-      historyEver ||= usedProcesses.has(identity) || await registry.hasHistory(identity);
+      historyEver ||= usedProcesses.has(identity) || (await registry.hasHistory(identity));
       context = ctx;
       compacting = false;
       removeInputListener = ctx.ui.onTerminalInput((data) => {
@@ -168,12 +191,18 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
 
   pi.on("before_agent_start", async (_event, ctx) => {
     latch();
-    if (context) { context = ctx; await publish(); }
+    if (context) {
+      context = ctx;
+      await publish();
+    }
   });
   pi.on("message_start", async (event, ctx) => {
     if (event.message.role !== "user") return;
     latch();
-    if (context) { context = ctx; await publish(); }
+    if (context) {
+      context = ctx;
+      await publish();
+    }
   });
   pi.on("user_bash", () => {
     userBash = true;
@@ -233,35 +262,46 @@ export function installSessions(pi: ExtensionAPI, dependencies: SessionDependenc
       if (await select()) {
         await publish();
         if (latest && !historyEver && canCleanup(latest, ctx, compacting, userBash)) {
-          const cancel = await (dependencies.scheduleCleanup ?? scheduleCleanup)({ ...latest, cleanupSafe: true }, socket);
+          const cancel = await (dependencies.scheduleCleanup ?? scheduleCleanup)(
+            { ...latest, cleanupSafe: true },
+            socket,
+          );
           if (!historyEver && canCleanup(latest, ctx, compacting, userBash)) ctx.shutdown();
           else cancel();
         }
       }
-    } catch (error) { ctx.ui.notify(`Session operation failed: ${String(error)}`, "error"); }
-    finally { open = false; }
+    } catch (error) {
+      ctx.ui.notify(`Session operation failed: ${String(error)}`, "error");
+    } finally {
+      open = false;
+    }
   };
 
-  const show = (ctx: ExtensionContext): Promise<void> => switchSession(ctx, async () => {
-    const selection = await (dependencies.selectSession ?? (await import("./menu.ts")).selectSession)(ctx, registry!);
-    if (selection === "new") {
-      const project = await (dependencies.selectProject ?? (await import("./menu.ts")).selectProject)(ctx, registry!);
-      if (!project) return false;
+  const show = (ctx: ExtensionContext): Promise<void> =>
+    switchSession(ctx, async () => {
+      const selection = await (dependencies.selectSession ?? (await import("./menu.ts")).selectSession)(ctx, registry!);
+      if (selection === "new") {
+        const project = await (dependencies.selectProject ?? (await import("./menu.ts")).selectProject)(ctx, registry!);
+        if (!project) return false;
+        await herdr!.create(project, pane!);
+        return true;
+      }
+      if (!selection) return false;
+      await herdr!.focus(selection);
+      return selection.identity !== identity && selection.pane !== pane!.pane;
+    });
+
+  const createHere = (ctx: ExtensionContext): Promise<void> =>
+    switchSession(ctx, async () => {
+      const project = await canonicalDirectory(ctx.cwd, ctx.cwd);
       await herdr!.create(project, pane!);
       return true;
-    }
-    if (!selection) return false;
-    await herdr!.focus(selection);
-    return selection.identity !== identity && selection.pane !== pane!.pane;
-  });
-
-  const createHere = (ctx: ExtensionContext): Promise<void> => switchSession(ctx, async () => {
-    const project = await canonicalDirectory(ctx.cwd, ctx.cwd);
-    await herdr!.create(project, pane!);
-    return true;
-  });
+    });
 
   pi.registerShortcut("ctrl+alt+s", { description: "Manage live Pi sessions", handler: show });
-  pi.registerShortcut("ctrl+alt+n", { description: "Start Pi in a sibling pane for the current project", handler: createHere });
+  pi.registerShortcut("ctrl+alt+n", {
+    description: "Start Pi in a sibling pane for the current project",
+    handler: createHere,
+  });
   pi.registerCommand("sessions", { description: "Manage live Pi sessions", handler: async (_args, ctx) => show(ctx) });
 }

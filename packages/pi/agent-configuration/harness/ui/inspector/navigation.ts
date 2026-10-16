@@ -80,13 +80,14 @@ export class InspectorNavigation {
   stepSubagents(delta: number): void {
     const rows = this.subagentEntries();
     if (rows.length === 0) return;
-    const current = Math.max(0, rows.findIndex((row) => row.id === this.subagentSelectedId));
+    const current = Math.max(
+      0,
+      rows.findIndex((row) => row.id === this.subagentSelectedId),
+    );
     const next = Math.max(0, Math.min(rows.length - 1, current + delta));
     this.subagentSelectedId = rows[next]?.id;
     const height = Math.max(1, this.bodyHeight() - 2);
-    this.subagentScroll = Math.max(0, Math.min(
-      Math.max(0, rows.length - height), Math.max(0, next - height + 1),
-    ));
+    this.subagentScroll = Math.max(0, Math.min(Math.max(0, rows.length - height), Math.max(0, next - height + 1)));
     this.changed();
   }
 
