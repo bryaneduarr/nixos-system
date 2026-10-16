@@ -1,5 +1,6 @@
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
-import { resolveTaskRole } from "../../../subagents/roles.ts";
+import { toValueState } from "../../activity/value/to-value-state.service.ts";
+import { resolveTaskRole } from "../../subagents/roles/resolve-task-role.service.ts";
 import { stringValues } from "./string-values.service.ts";
 
 export function formatMissionInput(args: Record<string, unknown>): string {
@@ -9,9 +10,9 @@ export function formatMissionInput(args: Record<string, unknown>): string {
 
   try {
     const resolved = resolveTaskRole({
-      ...(args.role === undefined ? {} : { role: String(args.role) }),
-      ...(selectedTools ? { tools: selectedTools } : {}),
-      ...(verificationCommands ? { verificationCommands } : {}),
+      role: toValueState(args.role === undefined ? undefined : String(args.role)),
+      tools: toValueState(selectedTools),
+      verificationCommands: toValueState(verificationCommands),
     });
     const effectiveTools = resolved.tools.join(", ") || "none";
     roleAndTools = [`role: ${resolved.role}`, `effective tools: ${effectiveTools}`];

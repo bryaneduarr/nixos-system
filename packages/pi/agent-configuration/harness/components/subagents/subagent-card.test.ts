@@ -1,12 +1,12 @@
 import { beforeEach, expect, test } from "bun:test";
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import { activityStore } from "../agent-configuration/harness/activity/store.ts";
+import { activityStore } from "../../activity/store.ts";
 
 const TEST_CWD = "/tmp";
 
-const { renderSubagentCard } = await import("../agent-configuration/harness/subagents/card.ts");
+const { renderSubagentCard } = await import("./subagent-card.component.ts");
 const { resetActivityVisibility, toggleActivityVisibility, setAgentWorking } = await import(
-  "../agent-configuration/harness/ui/activity/visibility.ts"
+  "../../ui/activity/visibility.ts"
 );
 
 const theme = {

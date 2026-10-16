@@ -1,15 +1,18 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { registerSubagentCancelCommand } from "./commands/subagent-cancel/subagent-cancel.command.ts";
+import { registerSubagentStatusCommand } from "./commands/subagent-status/subagent-status.command.ts";
 import { TASK_TOOL_NAME } from "./constants/subagents/roles.constant.ts";
 import { HARNESS_TOOLS, WEB_TOOLS } from "./constants/tools/harness-tools.constant.ts";
+import { installSubagentEvents } from "./services/subagents/events/install-subagent-events.service.ts";
 import { installHarnessPresentation } from "./services/tool-rendering/install-harness-presentation.service.ts";
 import { enforceActiveTools } from "./services/tools/enforce-active-tools.service.ts";
 import { writeStatusFile } from "./services/tools/write-status-file.service.ts";
 import { installSessions } from "./sessions/install.ts";
-import { registerSubagentTool } from "./subagents/tool.ts";
 import { registerEditTool } from "./tools/edit/edit.tool.ts";
 import { registerReadTool } from "./tools/read/read.tool.ts";
 import { registerRunTool } from "./tools/run/run.tool.ts";
 import { registerSearchTool } from "./tools/search/search.tool.ts";
+import { registerTaskTool } from "./tools/task/task.tool.ts";
 
 const ALLOWED_TOOL_SET = new Set<string>([...HARNESS_TOOLS, TASK_TOOL_NAME, ...WEB_TOOLS]);
 
@@ -19,7 +22,10 @@ export default function harnessExtension(pi: ExtensionAPI): void {
   registerEditTool(pi);
   registerRunTool(pi);
 
-  registerSubagentTool(pi);
+  registerTaskTool(pi);
+  registerSubagentStatusCommand(pi);
+  registerSubagentCancelCommand(pi);
+  installSubagentEvents(pi);
 
   installHarnessPresentation(pi);
   installSessions(pi);
