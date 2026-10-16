@@ -174,7 +174,44 @@ Done when: zero tsc errors, zero Biome diagnostics, and zero knip findings in yo
 
 ### Phase C: review
 
-You review another area's diff (given in your prompt) against this brief and the rule files. Fix every violation you find in that area directly, run the checks, and commit.
+Phases A and B are merged and `bun run check` passes (tsc 0 errors, `biome ci` clean, knip clean, 86 tests). Your job is the rules no tool checks. Review every file of your area (paths below) against this brief and the rule files, fix each violation directly, keep `bun run check` passing, and commit.
+
+Area paths (relative to `agent-configuration/harness/` unless noted). An area owns every file whose path contains its domain folder:
+
+- activity: `*/activity/**`
+- sessions: `*/sessions/**`, `commands/exit/`
+- subagents: `*/subagents/**`, `tools/task/`, `tools/approved-command/`, `commands/subagent-*/`
+- tools: `*/tools/**` except `tools/task/` and `tools/approved-command/`; plus `tools/{read,edit,run,search}/`
+- inspector: `*/inspector/**`
+- prompts: `*/prompts/**`
+- tool-rendering: `*/tool-rendering/**`, and `index.ts`
+- extensions: `agent-configuration/extensions/**`, `pi-tools/*.ts`
+
+Checklist, in order:
+
+1. Names: every file, folder, function, variable, and constant says exactly what it is or does. Rename vague ones (`data`, `item`, `value`, `info`, `result` when a specific name exists, single letters outside tiny lambdas).
+2. One exported function per service file, named after the file. Shared-instance files (`shared-*.service.ts`) may export one value.
+3. Long or compound conditions: replace with named booleans or named check functions.
+4. Repeated literals: move to `constants/`. Magic numbers get a named constant.
+5. Comments: none above functions; every interface, type alias, member, and schema field has a short `/* ... */` comment that states meaning. Remove comments that restate code.
+6. No `?:`, `| undefined`, or `| null` in contracts or function signatures you own; use the existing unions (`ValueState<T>`, lookup unions). Pi library types may stay optional only at the boundary where they are converted.
+7. No `as` casts except `as const`. Test fakes: prefer narrowing the function under test to a small interface of what it uses (as the prompts area did) and pass a plain object; if that is not practical, keep the cast with a one-line comment naming why, and list it in your report.
+8. `unknown` only as the raw value passed into a schema check or narrowed immediately in a `catch`.
+9. `const` and `readonly` by default; no class unless a pi-tui `Component` or `Error` requires one.
+10. Files above about 150 lines: split by responsibility.
+11. Tests: next to the subject, grouped with `describe`, names state behavior.
+
+Known items to settle:
+
+- subagents: there are two task progress readers, `services/subagents/tasks/read-task-progress.service.ts` and `services/activity/parsing/read-task-progress.service.ts`. Keep one, owned by subagents (it owns `TaskProgress`), and make activity import it. Keep the schema in `schemas/subagents/tasks/`.
+- tool-rendering: `ToolBox.setContent` optional parameters and `lastComponent: Component | undefined`; convert at the boundary.
+- activity: `RendererResult.details` is still `unknown`; `services/activity/events/install-activity-events.service.ts` is about 190 lines.
+- inspector: `components/inspector/inspector-overlay.component.ts` is 215 lines; `formatValue(value: unknown)` displays arbitrary tool arguments (narrowing with `typeof` is acceptable if it is the first thing it does).
+- prompts: `components/prompts/prompt-browser.component.ts` is 171 lines.
+- extensions: `as unknown as ExtensionAPI` and `Model` casts in tests; `extensions/codex-fast-mode/types/pi-powerline-footer/theme.d.ts` is an intentional type declaration for a third-party import, leave it.
+- sessions: test doubles cast to `ExtensionAPI`/`ExtensionContext`; `usedSessionIdentities` is a module-level mutable `Set`.
+
+Do not change behavior. If a fix would change behavior, leave it and report it.
 
 ## Report
 
