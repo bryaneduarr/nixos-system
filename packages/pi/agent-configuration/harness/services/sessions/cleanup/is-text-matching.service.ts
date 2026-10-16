@@ -1,3 +1,3 @@
-export function isTextMatching(value: unknown, pattern: RegExp): value is string {
-  return typeof value === "string" && pattern.test(value);
+export function isTextMatching(candidate: unknown, pattern: RegExp): candidate is string {
+  return typeof candidate === "string" && pattern.test(candidate);
 }

@@ -1,4 +1,5 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { PI_MANAGED_SESSION_VARIABLE } from "../../../constants/sessions/environment.constant.ts";
 import { BRANCH_REFRESH_INTERVAL_MS } from "../../../constants/sessions/monitor.constant.ts";
 import {
   CONVERSATION_ENTRY_TYPES,
@@ -60,7 +61,7 @@ async function publishSessionRow(
     processStart,
     context: readSessionContext(ctx),
     status: sessionStatus(working, editor),
-    owned: session.identity === process.env.PI_MANAGED_SESSION,
+    owned: session.identity === process.env[PI_MANAGED_SESSION_VARIABLE],
     historyEver: state.historyEver,
     cleanupSafe: false,
   };

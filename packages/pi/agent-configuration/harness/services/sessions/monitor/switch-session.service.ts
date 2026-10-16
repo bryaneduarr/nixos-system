@@ -1,4 +1,5 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { PI_INTERACTIVE_MODE } from "../../../constants/sessions/environment.constant.ts";
 import type { MonitoredSession } from "../../../types/sessions/monitor/monitored-session.interface.ts";
 import type { SessionMonitorState } from "../../../types/sessions/monitor/session-monitor-state.interface.ts";
 import type { SessionDependencies } from "../../../types/sessions/session-dependencies.interface.ts";
@@ -12,7 +13,7 @@ export async function switchSession(
   select: (session: MonitoredSession) => Promise<boolean>,
 ): Promise<void> {
   if (state.open) return;
-  if (ctx.mode !== "tui" || state.session.state === "absent") {
+  if (ctx.mode !== PI_INTERACTIVE_MODE || state.session.state === "absent") {
     ctx.ui.notify("Sessions require an interactive Pi session inside Herdr", "warning");
     return;
   }

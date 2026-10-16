@@ -10,7 +10,7 @@ import { removeSessionRow } from "./remove-session-row.service.ts";
 
 export async function listLiveSessions(directory: string, now: number): Promise<LiveSession[]> {
   await prepareRegistryDirectory(directory);
-  const result: LiveSession[] = [];
+  const liveSessions: LiveSession[] = [];
   for (const file of await readdir(directory)) {
     if (!LIVE_SESSION_FILE_PATTERN.test(file)) continue;
     try {
@@ -25,10 +25,10 @@ export async function listLiveSessions(directory: string, now: number): Promise<
         await removeSessionRow(directory, row.identity, false);
         continue;
       }
-      result.push(row);
+      liveSessions.push(row);
     } catch {}
   }
-  return result.sort((a, b) => a.cwd.localeCompare(b.cwd) || a.name.localeCompare(b.name));
+  return liveSessions.sort((a, b) => a.cwd.localeCompare(b.cwd) || a.name.localeCompare(b.name));
 }
 
 async function isRunningProcess(row: LiveSession): Promise<boolean> {

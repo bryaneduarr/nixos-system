@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { PI_INTERACTIVE_MODE } from "../../../constants/sessions/environment.constant.ts";
 import type { MonitoredSession } from "../../../types/sessions/monitor/monitored-session.interface.ts";
 import type { SessionMonitorState } from "../../../types/sessions/monitor/session-monitor-state.interface.ts";
 import { latchSessionHistory } from "../monitor/latch-session-history.service.ts";
@@ -19,13 +20,13 @@ export function installSessionActivityEvents(pi: ExtensionAPI, state: SessionMon
     latchSessionHistory(state);
   });
   pi.on("agent_start", async (_event, ctx) => {
-    if (state.session.state === "absent" || ctx.mode !== "tui") return;
+    if (state.session.state === "absent" || ctx.mode !== PI_INTERACTIVE_MODE) return;
     state.session.value.context = ctx;
     state.agentActive = true;
     await publishSessionMonitor(state);
   });
   pi.on("agent_settled", async (event, ctx) => {
-    if (state.session.state === "absent" || ctx.mode !== "tui") return;
+    if (state.session.state === "absent" || ctx.mode !== PI_INTERACTIVE_MODE) return;
     const session = state.session.value;
     session.context = ctx;
     const shouldNotify = state.agentActive && !event.aborted;

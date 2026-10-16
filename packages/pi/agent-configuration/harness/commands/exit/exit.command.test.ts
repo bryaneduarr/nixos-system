@@ -45,12 +45,12 @@ function harness() {
       confirm: (title: string, text: string) => confirm(title, text),
       notify: (message: string) => notifications.push(message),
     },
-  } as unknown as ExtensionContext;
+  } as unknown as ExtensionContext; // Test double implements only the members the exit command reads.
   const api = {
     on: (name: string, handler: EventHandler) => events.set(name, handler),
     registerCommand: (name: string, spec: { handler: CommandHandler }) => commands.set(name, spec.handler),
     registerShortcut: (name: string, spec: { handler: ShortcutHandler }) => shortcuts.set(name, spec.handler),
-  } as unknown as ExtensionAPI;
+  } as unknown as ExtensionAPI; // Test double implements only the registration methods the exit command uses.
   return {
     api,
     ctx,

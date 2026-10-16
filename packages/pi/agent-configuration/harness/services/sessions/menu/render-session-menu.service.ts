@@ -12,7 +12,7 @@ import type { LiveSession } from "../../../types/sessions/registry/live-session.
 import { terminalLabel } from "./terminal-label.service.ts";
 
 export function renderSessionMenu(view: SessionMenuView): string[] {
-  const selected = view.rows.findIndex((row) => row.identity === view.selectedId);
+  const selected = view.rows.findIndex((row) => isHighlighted(view, row));
   const lines = [view.theme.bold(view.theme.fg("accent", "Pi sessions")), ...view.filterLines, ""];
   const count = Math.max(
     1,
@@ -21,7 +21,7 @@ export function renderSessionMenu(view: SessionMenuView): string[] {
   const start = Math.max(0, selected - Math.floor(count / 2));
   lines.push(...renderRows(view, view.rows.slice(start, start + count)));
   if (view.rows.length === 0) lines.push("No matching live Pi sessions");
-  if (view.error) lines.push("", terminalLabel(view.error));
+  if (view.refreshError.state === "present") lines.push("", terminalLabel(view.refreshError.value));
   lines.push("", MENU_FOOTER);
   return frameLines(view, lines);
 }
@@ -34,14 +34,20 @@ function renderRows(view: SessionMenuView, rows: readonly LiveSession[]): string
       cwd = row.cwd;
       lines.push(view.theme.fg("muted", terminalLabel(basename(cwd) || cwd)));
     }
-    const prefix = row.identity === view.selectedId ? "> " : "  ";
+    const prefix = isHighlighted(view, row) ? "> " : "  ";
     const status =
       row.status === "draft" ? view.theme.style("draft", { fg: rgbColor(...DRAFT_STATUS_RGB) }) : row.status;
     const context = row.context.usageState === "measured" ? `${row.context.percent.toFixed(0)}%` : "unknown";
-    const current = row.pid === view.pid ? " *" : "";
-    lines.push(`${prefix}${terminalLabel(row.name)}${current}  ${status}  ${terminalLabel(row.branch)}  ${context}`);
+    const currentMarker = row.pid === view.pid ? " *" : "";
+    lines.push(
+      `${prefix}${terminalLabel(row.name)}${currentMarker}  ${status}  ${terminalLabel(row.branch)}  ${context}`,
+    );
   }
   return lines;
+}
+
+function isHighlighted(view: SessionMenuView, row: LiveSession): boolean {
+  return view.selection.state === "present" && view.selection.value === row.identity;
 }
 
 function frameLines(view: SessionMenuView, lines: readonly string[]): string[] {

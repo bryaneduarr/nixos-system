@@ -20,7 +20,7 @@ const firstRow = {
   branch: "main",
   context: { usageState: "measured", tokens: 120, percent: 12, contextWindow: 1000 },
   status: "idle",
-} as unknown as LiveSession;
+} as unknown as LiveSession; // Test row omits the fields the menu does not render.
 
 const secondRow = {
   identity: "two",
@@ -30,11 +30,11 @@ const secondRow = {
   branch: "topic",
   context: { usageState: "tokens-unknown", contextWindow: 1000 },
   status: "draft",
-} as unknown as LiveSession;
+} as unknown as LiveSession; // Test row omits the fields the menu does not render.
 
 const rows = [firstRow, secondRow];
 
-const menuRegistry = { list: async () => rows } as unknown as SessionRegistry;
+const menuRegistry = { list: async () => rows } as unknown as SessionRegistry; // Test double implements only list().
 
 function menuContext(style: (text: string, options: { fg: unknown }) => string, colors: unknown[]) {
   let component: MenuComponent | undefined;
@@ -54,7 +54,7 @@ function menuContext(style: (text: string, options: { fg: unknown }) => string, 
           component = factory(tui, theme, {}, resolve);
         }),
     },
-  } as unknown as ExtensionContext;
+  } as unknown as ExtensionContext; // Test double implements only the UI members the menu uses.
   return {
     ctx,
     component: () => {

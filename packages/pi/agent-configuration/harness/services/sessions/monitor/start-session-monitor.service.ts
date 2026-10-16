@@ -2,7 +2,13 @@ import { realpath } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { getKeybindings } from "@earendil-works/pi-tui";
-import { HERDR_ENVIRONMENT_ENABLED } from "../../../constants/sessions/environment.constant.ts";
+import {
+  HERDR_API_SOCKET_VARIABLE,
+  HERDR_ENVIRONMENT_ENABLED,
+  HERDR_ENVIRONMENT_VARIABLE,
+  HERDR_SOCKET_PATH_VARIABLE,
+  PI_MANAGED_SESSION_VARIABLE,
+} from "../../../constants/sessions/environment.constant.ts";
 import { SESSION_REFRESH_INTERVAL_MS } from "../../../constants/sessions/monitor.constant.ts";
 import { PASTE_IMAGE_KEYBINDING } from "../../../constants/sessions/monitor-events.constant.ts";
 import type { MonitoredSession } from "../../../types/sessions/monitor/monitored-session.interface.ts";
@@ -16,8 +22,8 @@ import { processSessionIdentity } from "../registry/process-session-identity.ser
 import { latchSessionHistory } from "./latch-session-history.service.ts";
 import { publishSessionMonitor } from "./publish-session-monitor.service.ts";
 import { resolveSessionRegistryDirectory } from "./resolve-session-registry-directory.service.ts";
+import { usedSessionIdentities } from "./shared-used-session-identities.service.ts";
 import { stopSessionMonitor } from "./stop-session-monitor.service.ts";
-import { usedSessionIdentities } from "./used-session-identities.service.ts";
 
 export async function startSessionMonitor(
   state: SessionMonitorState,
@@ -25,7 +31,7 @@ export async function startSessionMonitor(
   dependencies: SessionDependencies,
 ): Promise<void> {
   await stopSessionMonitor(state, true);
-  if (!canReportSession(ctx.mode, process.env.HERDR_ENV === HERDR_ENVIRONMENT_ENABLED)) return;
+  if (!canReportSession(ctx.mode, process.env[HERDR_ENVIRONMENT_VARIABLE] === HERDR_ENVIRONMENT_ENABLED)) return;
   try {
     const socket = await readSessionSocket();
     const registry = createSessionRegistry(resolveSessionRegistryDirectory(socket));
@@ -74,13 +80,13 @@ export async function startSessionMonitor(
 }
 
 async function readSessionSocket(): Promise<string> {
-  const configured = process.env.HERDR_SOCKET_PATH || process.env.HERDR_API_SOCKET || "";
+  const configured = process.env[HERDR_SOCKET_PATH_VARIABLE] || process.env[HERDR_API_SOCKET_VARIABLE] || "";
   if (!configured) throw new Error("Herdr did not provide a session socket");
   return realpath(resolve(configured)).catch(() => resolve(configured));
 }
 
 async function resolveSessionIdentity(socket: string): Promise<string> {
-  const managed = process.env.PI_MANAGED_SESSION;
+  const managed = process.env[PI_MANAGED_SESSION_VARIABLE];
   if (managed !== undefined && isSessionIdentity(managed)) return managed;
   return processSessionIdentity(socket, process.pid);
 }

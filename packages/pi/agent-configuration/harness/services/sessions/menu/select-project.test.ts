@@ -15,8 +15,8 @@ describe("selectProject", () => {
           return undefined;
         },
       },
-    } as unknown as ExtensionContext;
-    const registry = { projects: async () => [] } as unknown as SessionRegistry;
+    } as unknown as ExtensionContext; // Test double implements only the UI and cwd members that project selection reads.
+    const registry = { projects: async () => [] } as unknown as SessionRegistry; // Test double implements only projects().
     expect(await selectProject(ctx, registry)).toEqual({ selected: false });
     expect(choices).toContain(process.cwd());
   });

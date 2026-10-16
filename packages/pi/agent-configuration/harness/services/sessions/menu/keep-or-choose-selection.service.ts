@@ -1,9 +1,15 @@
+import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 import type { LiveSession } from "../../../types/sessions/registry/live-session.interface.ts";
 
-export function keepOrChooseSelection(visible: readonly LiveSession[], selectedId: string, pid: number): string {
-  if (visible.some((row) => row.identity === selectedId)) return selectedId;
+export function keepOrChooseSelection(
+  visible: readonly LiveSession[],
+  selection: ValueState<string>,
+  pid: number,
+): ValueState<string> {
+  const isSelectionVisible = selection.state === "present" && visible.some((row) => row.identity === selection.value);
+  if (isSelectionVisible) return selection;
   const current = visible.find((row) => row.pid === pid);
-  if (current) return current.identity;
+  if (current) return { state: "present", value: current.identity };
   const first = visible[0];
-  return first ? first.identity : "";
+  return first ? { state: "present", value: first.identity } : { state: "absent" };
 }

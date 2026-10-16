@@ -1,10 +1,15 @@
 import { matchesKey } from "@earendil-works/pi-tui";
+import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 import type { LiveSession } from "../../../types/sessions/registry/live-session.interface.ts";
 
-export function moveSessionSelection(visible: readonly LiveSession[], selectedId: string, key: string): string {
-  const index = visible.findIndex((row) => row.identity === selectedId);
+export function moveSessionSelection(
+  visible: readonly LiveSession[],
+  selection: ValueState<string>,
+  key: string,
+): ValueState<string> {
+  const index = selection.state === "present" ? visible.findIndex((row) => row.identity === selection.value) : -1;
   const target = visible[nextSelectionIndex(index, visible.length, key)];
-  return target ? target.identity : "";
+  return target ? { state: "present", value: target.identity } : { state: "absent" };
 }
 
 function nextSelectionIndex(index: number, length: number, key: string): number {
