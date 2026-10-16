@@ -80,7 +80,8 @@ describe("createSessionRegistry", () => {
     for (const row of rows.slice(0, 3)) await store.remove(row.identity, false);
     const fourth = rows.at(3);
     const fifth = rows.at(4);
-    if (fourth === undefined || fifth === undefined) throw new Error("Expected five published sessions");
+    if (fourth === undefined) throw new Error("Expected five published sessions");
+    if (fifth === undefined) throw new Error("Expected five published sessions");
     expect(await store.instanceName(cwd, fourth.identity)).toBe("sample-project-pi-1");
     expect(await store.instanceName(cwd, fifth.identity)).toBe("sample-project-pi-2");
     expect(await store.instanceName(cwd, randomUUID())).toBe("sample-project-pi-3");

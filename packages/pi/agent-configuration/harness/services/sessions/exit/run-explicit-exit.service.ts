@@ -1,5 +1,5 @@
-import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { HERDR_ENVIRONMENT_VARIABLE, PI_INTERACTIVE_MODE } from "../../../constants/sessions/environment.constant.ts";
+import type { ExitContext } from "../../../types/sessions/exit/exit-context.interface.ts";
 import type { ExitDependencies } from "../../../types/sessions/exit/exit-dependencies.interface.ts";
 import type { ExitCancellation, UnscheduledCleanup } from "../../../types/sessions/exit/exit-state.interface.ts";
 import { confirmAdditionalDiscard } from "./confirm-additional-discard.service.ts";
@@ -10,7 +10,7 @@ import { scheduleHerdrExit } from "./schedule-herdr-exit.service.ts";
 
 const UNSCHEDULED: UnscheduledCleanup = { scheduled: false };
 
-export async function runExplicitExit(ctx: ExtensionContext, dependencies: ExitDependencies): Promise<void> {
+export async function runExplicitExit(ctx: ExitContext, dependencies: ExitDependencies): Promise<void> {
   const state = readExitState();
   if (state.busy || state.requested) return;
   if (ctx.mode !== PI_INTERACTIVE_MODE) {

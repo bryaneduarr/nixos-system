@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { CleanupContext } from "../../../types/sessions/cleanup/cleanup-context.interface.ts";
 import type { LiveSession } from "../../../types/sessions/registry/live-session.interface.ts";
 import { canCleanup } from "./can-cleanup.service.ts";
 
@@ -25,14 +25,14 @@ function session(overrides: Partial<LiveSession> = {}): LiveSession {
   };
 }
 
-function idleContext(overrides: Partial<ExtensionContext> = {}): ExtensionContext {
+function idleContext(overrides: Partial<CleanupContext> = {}): CleanupContext {
   return {
     signal: undefined,
     isIdle: () => true,
     hasPendingMessages: () => false,
     ui: { getEditorText: () => "" },
     ...overrides,
-  } as ExtensionContext; // Test double implements only the members that cleanup rules read.
+  };
 }
 
 describe("canCleanup", () => {
@@ -47,13 +47,8 @@ describe("canCleanup", () => {
     expect(canCleanup(row, idleContext({ signal: new AbortController().signal }), false, false)).toBe(false);
     expect(canCleanup(row, idleContext({ isIdle: () => false }), false, false)).toBe(false);
     expect(canCleanup(row, idleContext({ hasPendingMessages: () => true }), false, false)).toBe(false);
-    expect(
-      canCleanup(
-        row,
-        idleContext({ ui: { getEditorText: () => "/tmp/attached-image.png" } as ExtensionContext["ui"] }),
-        false,
-        false,
-      ),
-    ).toBe(false);
+    expect(canCleanup(row, idleContext({ ui: { getEditorText: () => "/tmp/attached-image.png" } }), false, false)).toBe(
+      false,
+    );
   });
 });
