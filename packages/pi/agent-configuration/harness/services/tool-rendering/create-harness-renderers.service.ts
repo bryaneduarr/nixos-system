@@ -2,6 +2,7 @@ import type { Theme } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
 import { EMPTY } from "../../components/tool-rendering/empty.component.ts";
 import { ToolBox } from "../../components/tool-rendering/tool-box.component.ts";
+import type { ValueState } from "../../types/activity/value-state.interface.ts";
 import type {
   RendererContext,
   RendererOptions,
@@ -9,6 +10,7 @@ import type {
 } from "../../types/tool-rendering/renderer.interface.ts";
 import type { HarnessTool } from "../../types/tools/harness-tool.interface.ts";
 import { readToolActivity } from "../activity/store/read-tool-activity.service.ts";
+import { toValueState } from "../activity/value/to-value-state.service.ts";
 import { boxTitle } from "./presentation/box-title.service.ts";
 import { elapsedLine } from "./presentation/elapsed-line.service.ts";
 import { presentationLines } from "./presentation/presentation-lines.service.ts";
@@ -18,8 +20,9 @@ import { runningPresentation } from "./presentation/running-presentation.service
 import { toolColor } from "./presentation/tool-color.service.ts";
 import { extractText } from "./text/extract-text.service.ts";
 
-function reuseOrCreateToolBox(lastComponent: Component | undefined, theme: Theme, tool: HarnessTool): ToolBox {
-  return lastComponent instanceof ToolBox ? lastComponent : new ToolBox(theme, "", [], toolColor(tool), true);
+function reuseOrCreateToolBox(lastComponent: ValueState<Component>, theme: Theme, tool: HarnessTool): ToolBox {
+  if (lastComponent.state === "present" && lastComponent.value instanceof ToolBox) return lastComponent.value;
+  return new ToolBox(theme, "", [], toolColor(tool), true);
 }
 
 function runningBoxTitle(tool: HarnessTool, theme: Theme): string {
@@ -31,7 +34,7 @@ export function createHarnessRenderers(tool: HarnessTool) {
     renderShell: "self" as const,
     renderCall(args: Record<string, unknown>, theme: Theme, context: RendererContext): Component {
       if (context.isPartial === false) return EMPTY;
-      const box = reuseOrCreateToolBox(context.lastComponent, theme, tool);
+      const box = reuseOrCreateToolBox(toValueState(context.lastComponent), theme, tool);
       box.setContent({
         title: runningBoxTitle(tool, theme),
         lines: presentationLines(runningPresentation(tool, args), theme),
@@ -48,7 +51,7 @@ export function createHarnessRenderers(tool: HarnessTool) {
       const lookup = readToolActivity(context.toolCallId);
       if (lookup.found) lines.push(elapsedLine(lookup.entry, theme));
 
-      const box = reuseOrCreateToolBox(context.lastComponent, theme, tool);
+      const box = reuseOrCreateToolBox(toValueState(context.lastComponent), theme, tool);
       box.setContent({
         title: state === "running" ? runningBoxTitle(tool, theme) : boxTitle(tool, theme),
         lines,
