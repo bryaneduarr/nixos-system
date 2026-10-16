@@ -3,11 +3,11 @@ import { HerdrPaneSchema } from "../../../schemas/sessions/herdr-pane.schema.ts"
 import type { PaneIdentity } from "../../../types/sessions/herdr/pane-identity.interface.ts";
 import { readObjectValue } from "./read-object-value.service.ts";
 
-export function paneIdentity(value: unknown): PaneIdentity {
-  const row = readObjectValue(value);
-  if (!Value.Check(HerdrPaneSchema, row)) throw new Error("Herdr returned an invalid pane identity");
-  const isPaneInWorkspace = row.pane_id.startsWith(`${row.workspace_id}:`);
-  const isTabInWorkspace = row.tab_id.startsWith(`${row.workspace_id}:`);
+export function paneIdentity(candidate: unknown): PaneIdentity {
+  const paneRecord = readObjectValue(candidate);
+  if (!Value.Check(HerdrPaneSchema, paneRecord)) throw new Error("Herdr returned an invalid pane identity");
+  const isPaneInWorkspace = paneRecord.pane_id.startsWith(`${paneRecord.workspace_id}:`);
+  const isTabInWorkspace = paneRecord.tab_id.startsWith(`${paneRecord.workspace_id}:`);
   if (!isPaneInWorkspace || !isTabInWorkspace) throw new Error("Herdr pane belongs to another workspace");
-  return { pane: row.pane_id, tab: row.tab_id, workspace: row.workspace_id };
+  return { pane: paneRecord.pane_id, tab: paneRecord.tab_id, workspace: paneRecord.workspace_id };
 }

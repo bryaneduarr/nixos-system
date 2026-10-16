@@ -32,7 +32,7 @@ function idleContext(overrides: Partial<ExtensionContext> = {}): ExtensionContex
     hasPendingMessages: () => false,
     ui: { getEditorText: () => "" },
     ...overrides,
-  } as ExtensionContext;
+  } as ExtensionContext; // Test double implements only the members that cleanup rules read.
 }
 
 describe("canCleanup", () => {

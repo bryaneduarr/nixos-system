@@ -13,7 +13,7 @@ export async function allocateSessionName(directory: string, cwd: string, identi
   const reservations = await readNameReservations(directory, now, new Set(live.map((row) => row.identity)));
   let order = Math.max(now, ...reservations.map((row) => row.order));
   for (const row of live) {
-    if (reservations.some((item) => item.identity === row.identity)) continue;
+    if (reservations.some((reservation) => reservation.identity === row.identity)) continue;
     const reservation: NameReservation = {
       identity: row.identity,
       project: deriveProjectName(row.cwd),
@@ -35,6 +35,6 @@ export async function allocateSessionName(directory: string, cwd: string, identi
     : { identity, project: deriveProjectName(cwd), order: ++order, updatedAt: now, pid: process.pid, processStart };
   await writeFile(join(directory, `${identity}.reservation`), JSON.stringify(current), { mode: PRIVATE_FILE_MODE });
   const group = [...others, current].filter((row) => row.project === current.project).sort((a, b) => a.order - b.order);
-  const number = group.findIndex((row) => row.identity === identity) + 1;
-  return `${current.project}-pi-${number}`;
+  const position = group.findIndex((row) => row.identity === identity) + 1;
+  return `${current.project}-pi-${position}`;
 }

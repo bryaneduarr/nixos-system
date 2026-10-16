@@ -5,19 +5,19 @@ import { isSessionCleanupTarget } from "./is-session-cleanup-target.service.ts";
 import { sleep } from "./sleep.service.ts";
 
 export async function cleanupAfterExit(
-  row: unknown,
+  sessionRow: unknown,
   command: HerdrCommand,
   identity: (pid: number) => Promise<string> = processStartIdentity,
   wait: (milliseconds: number) => Promise<void> = sleep,
 ): Promise<boolean> {
-  if (!isSessionCleanupTarget(row)) return false;
+  if (!isSessionCleanupTarget(sessionRow)) return false;
   return closeAfterExit(
     {
-      pid: row.pid,
-      processStart: row.processStart,
-      pane: row.pane,
-      tab: row.tab,
-      workspace: row.workspace,
+      pid: sessionRow.pid,
+      processStart: sessionRow.processStart,
+      pane: sessionRow.pane,
+      tab: sessionRow.tab,
+      workspace: sessionRow.workspace,
       shell: { required: false },
     },
     command,

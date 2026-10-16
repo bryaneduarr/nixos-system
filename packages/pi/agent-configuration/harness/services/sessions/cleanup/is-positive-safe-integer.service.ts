@@ -1,3 +1,3 @@
-export function isPositiveSafeInteger(value: unknown): value is number {
-  return typeof value === "number" && Number.isSafeInteger(value) && value >= 1;
+export function isPositiveSafeInteger(candidate: unknown): candidate is number {
+  return typeof candidate === "number" && Number.isSafeInteger(candidate) && candidate >= 1;
 }

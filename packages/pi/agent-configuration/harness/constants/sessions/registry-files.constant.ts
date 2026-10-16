@@ -17,3 +17,7 @@ export const RESERVATION_FILE_PATTERN = /^[a-f0-9-]{36}\.reservation$/;
 export const PROJECT_MARKER_FILE_PATTERN = /^[a-f0-9]{64}\.project$/;
 
 export const PROJECT_FALLBACK_PREFIX = "project-";
+
+export const MISSING_FILE_CODE = "ENOENT";
+
+export const EXISTING_FILE_CODE = "EEXIST";

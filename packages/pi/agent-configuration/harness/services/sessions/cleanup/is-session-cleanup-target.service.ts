@@ -6,17 +6,17 @@ import { isObjectRecord } from "../herdr/is-object-record.service.ts";
 import { isPositiveSafeInteger } from "./is-positive-safe-integer.service.ts";
 import { isTextMatching } from "./is-text-matching.service.ts";
 
-export function isSessionCleanupTarget(value: unknown): value is SessionCleanupTarget {
-  if (!isObjectRecord(value)) return false;
-  const isOwnedSession = value.owned === true;
-  const hasNoHistory = value.historyEver === false;
-  const isCleanupSafe = value.cleanupSafe === true;
-  const hasProcessStart = isTextMatching(value.processStart, NON_EMPTY_TEXT_PATTERN);
-  const hasProcessId = isPositiveSafeInteger(value.pid);
-  const hasSocket = isTextMatching(value.socket, ABSOLUTE_PATH_PATTERN);
-  const hasPane = isTextMatching(value.pane, PANE_ID_PATTERN);
-  const hasTab = isTextMatching(value.tab, TAB_ID_PATTERN);
-  const hasWorkspace = typeof value.workspace === "string";
+export function isSessionCleanupTarget(candidate: unknown): candidate is SessionCleanupTarget {
+  if (!isObjectRecord(candidate)) return false;
+  const isOwnedSession = candidate.owned === true;
+  const hasNoHistory = candidate.historyEver === false;
+  const isCleanupSafe = candidate.cleanupSafe === true;
+  const hasProcessStart = isTextMatching(candidate.processStart, NON_EMPTY_TEXT_PATTERN);
+  const hasProcessId = isPositiveSafeInteger(candidate.pid);
+  const hasSocket = isTextMatching(candidate.socket, ABSOLUTE_PATH_PATTERN);
+  const hasPane = isTextMatching(candidate.pane, PANE_ID_PATTERN);
+  const hasTab = isTextMatching(candidate.tab, TAB_ID_PATTERN);
+  const hasWorkspace = typeof candidate.workspace === "string";
   return (
     isOwnedSession &&
     hasNoHistory &&

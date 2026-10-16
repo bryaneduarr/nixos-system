@@ -1,3 +1,3 @@
-export function isUnknownArray(value: unknown): value is readonly unknown[] {
-  return Array.isArray(value);
+export function isUnknownArray(candidate: unknown): candidate is readonly unknown[] {
+  return Array.isArray(candidate);
 }

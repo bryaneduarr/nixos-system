@@ -5,20 +5,20 @@ import { isExplicitExitTarget } from "./is-explicit-exit-target.service.ts";
 import { sleep } from "./sleep.service.ts";
 
 export async function explicitExitAfterExit(
-  row: unknown,
+  explicitExitRow: unknown,
   command: HerdrCommand,
   identity: (pid: number) => Promise<string> = processStartIdentity,
   wait: (milliseconds: number) => Promise<void> = sleep,
 ): Promise<boolean> {
-  if (!isExplicitExitTarget(row)) return false;
+  if (!isExplicitExitTarget(explicitExitRow)) return false;
   return closeAfterExit(
     {
-      pid: row.pid,
-      processStart: row.processStart,
-      pane: row.pane,
-      tab: row.tab,
-      workspace: row.workspace,
-      shell: { required: true, pid: row.shellPid, start: row.shellStart },
+      pid: explicitExitRow.pid,
+      processStart: explicitExitRow.processStart,
+      pane: explicitExitRow.pane,
+      tab: explicitExitRow.tab,
+      workspace: explicitExitRow.workspace,
+      shell: { required: true, pid: explicitExitRow.shellPid, start: explicitExitRow.shellStart },
     },
     command,
     identity,

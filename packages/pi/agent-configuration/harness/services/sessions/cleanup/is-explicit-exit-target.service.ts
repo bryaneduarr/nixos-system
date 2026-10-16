@@ -7,20 +7,24 @@ import { isObjectRecord } from "../herdr/is-object-record.service.ts";
 import { isPositiveSafeInteger } from "./is-positive-safe-integer.service.ts";
 import { isTextMatching } from "./is-text-matching.service.ts";
 
-export function isExplicitExitTarget(value: unknown): value is ExitTarget {
-  if (!isObjectRecord(value)) return false;
-  const isExplicitMode = value.mode === EXPLICIT_EXIT_MODE;
-  const hasProcessStart = isTextMatching(value.processStart, NON_EMPTY_TEXT_PATTERN);
-  const hasShellStart = isTextMatching(value.shellStart, NON_EMPTY_TEXT_PATTERN);
-  const hasProcessId = isPositiveSafeInteger(value.pid);
-  const hasShellProcessId = isPositiveSafeInteger(value.shellPid);
-  const isShellOtherThanProcess = value.shellPid !== value.pid;
-  const hasSocket = isTextMatching(value.socket, ABSOLUTE_PATH_PATTERN);
-  const hasWorkspace = isTextMatching(value.workspace, WORKSPACE_ID_PATTERN);
+export function isExplicitExitTarget(candidate: unknown): candidate is ExitTarget {
+  if (!isObjectRecord(candidate)) return false;
+  const isExplicitMode = candidate.mode === EXPLICIT_EXIT_MODE;
+  const hasProcessStart = isTextMatching(candidate.processStart, NON_EMPTY_TEXT_PATTERN);
+  const hasShellStart = isTextMatching(candidate.shellStart, NON_EMPTY_TEXT_PATTERN);
+  const hasProcessId = isPositiveSafeInteger(candidate.pid);
+  const hasShellProcessId = isPositiveSafeInteger(candidate.shellPid);
+  const isShellOtherThanProcess = candidate.shellPid !== candidate.pid;
+  const hasSocket = isTextMatching(candidate.socket, ABSOLUTE_PATH_PATTERN);
+  const hasWorkspace = isTextMatching(candidate.workspace, WORKSPACE_ID_PATTERN);
   const hasPaneInWorkspace =
-    isTextMatching(value.pane, PANE_ID_PATTERN) && hasWorkspace && value.pane.startsWith(`${value.workspace}:`);
+    hasWorkspace &&
+    isTextMatching(candidate.pane, PANE_ID_PATTERN) &&
+    candidate.pane.startsWith(`${candidate.workspace}:`);
   const hasTabInWorkspace =
-    isTextMatching(value.tab, TAB_ID_PATTERN) && hasWorkspace && value.tab.startsWith(`${value.workspace}:`);
+    hasWorkspace &&
+    isTextMatching(candidate.tab, TAB_ID_PATTERN) &&
+    candidate.tab.startsWith(`${candidate.workspace}:`);
   return (
     isExplicitMode &&
     hasProcessStart &&

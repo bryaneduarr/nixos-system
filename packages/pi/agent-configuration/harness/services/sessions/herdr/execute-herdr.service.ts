@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { HERDR_BIN_PATH_VARIABLE } from "../../../constants/sessions/environment.constant.ts";
 import {
   HERDR_COMMAND_TIMEOUT_MS,
   HERDR_MAX_BUFFER_BYTES,
@@ -12,7 +13,7 @@ import { throwStructuredHerdrError } from "./throw-structured-herdr-error.servic
 const execute = promisify(execFile);
 
 export async function executeHerdr(args: string[], env: NodeJS.ProcessEnv): Promise<Record<string, unknown>> {
-  const binary = env.HERDR_BIN_PATH || "herdr";
+  const binary = env[HERDR_BIN_PATH_VARIABLE] || "herdr";
   let stdout: string;
   try {
     ({ stdout } = await execute(binary, args, {

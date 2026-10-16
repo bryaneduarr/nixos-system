@@ -1,4 +1,5 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { HERDR_ENVIRONMENT_VARIABLE, PI_INTERACTIVE_MODE } from "../../../constants/sessions/environment.constant.ts";
 import type { ExitDependencies } from "../../../types/sessions/exit/exit-dependencies.interface.ts";
 import type { ExitCancellation, UnscheduledCleanup } from "../../../types/sessions/exit/exit-state.interface.ts";
 import { confirmAdditionalDiscard } from "./confirm-additional-discard.service.ts";
@@ -12,7 +13,7 @@ const UNSCHEDULED: UnscheduledCleanup = { scheduled: false };
 export async function runExplicitExit(ctx: ExtensionContext, dependencies: ExitDependencies): Promise<void> {
   const state = readExitState();
   if (state.busy || state.requested) return;
-  if (ctx.mode !== "tui") {
+  if (ctx.mode !== PI_INTERACTIVE_MODE) {
     ctx.ui.notify("/exit requires interactive Pi", "warning");
     return;
   }
@@ -27,7 +28,7 @@ export async function runExplicitExit(ctx: ExtensionContext, dependencies: ExitD
     const reasons = listDiscardReasons(ctx);
     if (!(await confirmExit(ctx, reasons))) return;
     if (isStale()) return;
-    if (process.env.HERDR_ENV) cancellation = await scheduleHerdrExit(dependencies);
+    if (process.env[HERDR_ENVIRONMENT_VARIABLE]) cancellation = await scheduleHerdrExit(dependencies);
     if (isStale()) {
       cancelScheduledCleanup();
       return;

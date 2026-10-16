@@ -12,15 +12,15 @@ export function readExitState(): ExitState {
   return created;
 }
 
-function isExitState(value: unknown): value is ExitState {
-  if (!isObjectRecord(value)) return false;
-  const hasCounters = typeof value.generation === "number";
-  const hasFlags = typeof value.busy === "boolean" && typeof value.requested === "boolean";
-  return hasCounters && hasFlags && isExitCancellation(value.cancellation);
+function isExitState(candidate: unknown): candidate is ExitState {
+  if (!isObjectRecord(candidate)) return false;
+  const hasCounters = typeof candidate.generation === "number";
+  const hasFlags = typeof candidate.busy === "boolean" && typeof candidate.requested === "boolean";
+  return hasCounters && hasFlags && isExitCancellation(candidate.cancellation);
 }
 
-function isExitCancellation(value: unknown): value is ExitCancellation {
-  if (!isObjectRecord(value)) return false;
-  if (value.scheduled === false) return true;
-  return value.scheduled === true && typeof value.cancel === "function";
+function isExitCancellation(candidate: unknown): candidate is ExitCancellation {
+  if (!isObjectRecord(candidate)) return false;
+  if (candidate.scheduled === false) return true;
+  return candidate.scheduled === true && typeof candidate.cancel === "function";
 }

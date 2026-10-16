@@ -2,6 +2,7 @@ import { mkdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { RESERVATION_STALE_MS } from "../../../constants/sessions/registry.constant.ts";
 import {
+  EXISTING_FILE_CODE,
   INVALID_SESSION_IDENTITY_MESSAGE,
   NAME_LOCK_DIRECTORY,
   NAME_LOCK_RETRY_MS,
@@ -32,9 +33,9 @@ async function acquireNameLock(lock: string): Promise<void> {
       await mkdir(lock, { mode: PRIVATE_DIRECTORY_MODE });
       return;
     } catch (error) {
-      if (!hasErrorCode(error, "EEXIST")) throw error;
+      if (!hasErrorCode(error, EXISTING_FILE_CODE)) throw error;
       const age = await stat(lock)
-        .then((info) => Date.now() - info.mtimeMs)
+        .then((lockStats) => Date.now() - lockStats.mtimeMs)
         .catch(() => 0);
       if (age > RESERVATION_STALE_MS) await rm(lock, { recursive: true, force: true });
       if (Date.now() >= deadline) throw new Error("Session name allocation timed out");

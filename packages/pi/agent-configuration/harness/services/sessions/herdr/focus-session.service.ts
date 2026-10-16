@@ -7,7 +7,7 @@ import { paneIdentity } from "./pane-identity.service.ts";
 import { readObjectValue } from "./read-object-value.service.ts";
 
 export async function focusSession(command: HerdrCommand, registry: SessionRegistry, row: LiveSession): Promise<void> {
-  const live = (await registry.list()).find((item) => item.identity === row.identity);
+  const live = (await registry.list()).find((candidate) => candidate.identity === row.identity);
   if (!live || live.pane !== row.pane || live.sessionId !== row.sessionId) {
     throw new Error("Session is no longer live");
   }
@@ -15,7 +15,9 @@ export async function focusSession(command: HerdrCommand, registry: SessionRegis
   const location = paneIdentity(pane);
   const processInfo = readObjectValue((await command(["pane", "process-info", "--pane", live.pane])).process_info);
   const processes = processInfo.foreground_processes;
-  const matchesProcess = isUnknownArray(processes) && processes.some((item) => readObjectValue(item).pid === live.pid);
+  const matchesProcess =
+    isUnknownArray(processes) &&
+    processes.some((foregroundProcess) => readObjectValue(foregroundProcess).pid === live.pid);
   if (pane.agent !== PI_AGENT_NAME || location.tab !== live.tab || !matchesProcess) {
     throw new Error("The destination pane no longer hosts this Pi session");
   }
