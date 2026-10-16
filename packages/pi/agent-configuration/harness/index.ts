@@ -3,11 +3,11 @@ import { registerSubagentCancelCommand } from "./commands/subagent-cancel/subage
 import { registerSubagentStatusCommand } from "./commands/subagent-status/subagent-status.command.ts";
 import { TASK_TOOL_NAME } from "./constants/subagents/roles.constant.ts";
 import { HARNESS_TOOLS, WEB_TOOLS } from "./constants/tools/harness-tools.constant.ts";
+import { installSessions } from "./services/sessions/install/install-sessions.service.ts";
 import { installSubagentEvents } from "./services/subagents/events/install-subagent-events.service.ts";
 import { installHarnessPresentation } from "./services/tool-rendering/install-harness-presentation.service.ts";
 import { enforceActiveTools } from "./services/tools/enforce-active-tools.service.ts";
 import { writeStatusFile } from "./services/tools/write-status-file.service.ts";
-import { installSessions } from "./sessions/install.ts";
 import { registerEditTool } from "./tools/edit/edit.tool.ts";
 import { registerReadTool } from "./tools/read/read.tool.ts";
 import { registerRunTool } from "./tools/run/run.tool.ts";

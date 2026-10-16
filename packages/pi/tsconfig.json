@@ -11,7 +11,12 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+    "paths": {
+      "pi-powerline-footer/theme.ts": [
+        "./agent-configuration/extensions/codex-fast-mode/types/pi-powerline-footer/theme.d.ts"
+      ]
+    }
   },
-  "include": ["agent-configuration/**/*.ts", "pi-tools/**/*.ts", "tests/**/*.ts"]
+  "include": ["agent-configuration/**/*.ts", "pi-tools/**/*.ts"]
 }

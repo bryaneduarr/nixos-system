@@ -4,10 +4,10 @@
     "agent-configuration/harness/index.ts",
     "agent-configuration/extensions/*.ts",
     "agent-configuration/extensions/*/index.ts",
-    "pi-tools/*.{mjs,ts}",
+    "pi-tools/*.ts",
     "**/*.test.ts"
   ],
-  "project": ["agent-configuration/**/*.{ts,mjs}", "pi-tools/**/*.{ts,mjs}", "tests/**/*.ts"],
+  "project": ["agent-configuration/**/*.ts", "pi-tools/**/*.ts"],
   "ignoreBinaries": ["tsc", "biome"],
   "ignoreDependencies": [
     "@earendil-works/pi-agent-core",
