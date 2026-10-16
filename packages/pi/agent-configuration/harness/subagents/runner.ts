@@ -7,7 +7,6 @@ import {
   SessionManager,
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
-import type { Static } from "typebox";
 import {
   COMPLETED_TASK_LABEL,
   STARTING_TASK_LABEL,
@@ -18,8 +17,6 @@ import {
 import { APPROVED_COMMAND_TOOL } from "../constants/subagents/roles.constant.ts";
 import { USAGE_FIELDS } from "../constants/subagents/usage.constant.ts";
 import { toValueState } from "../services/activity/value/to-value-state.service.ts";
-import type { SubToolActivity } from "../types/activity/sub-tool-activity.interface.ts";
-import type { SubagentModel } from "../types/activity/subagent-model.interface.ts";
 import type { SubagentUsage } from "../types/activity/subagent-usage.interface.ts";
 import type { TaskInput } from "../types/subagents/tasks/task-input.interface.ts";
 import type { TaskProgress } from "../types/subagents/tasks/task-progress.interface.ts";
@@ -172,14 +169,18 @@ export async function runTask(
     currentTask: STARTING_TASK_LABEL,
     status: "running",
     model: {
-      provider: model.provider,
-      id: model.id,
-      name: toValueState(model.name),
-      reasoning: toValueState(model.reasoning),
-      contextWindow: toValueState(model.contextWindow),
+      state: "present",
+      value: {
+        provider: model.provider,
+        id: model.id,
+        name: toValueState(model.name),
+        reasoning: toValueState(model.reasoning),
+        contextWindow: toValueState(model.contextWindow),
+      },
     },
-    thinkingLevel: session.thinkingLevel,
+    thinkingLevel: toValueState(session.thinkingLevel),
     activity: [],
+    usage: { usageState: "unreported" },
   };
   const publish = () => onProgress({ ...progress, activity: [...progress.activity] });
   const unsubscribe = session.subscribe((event) => {
@@ -217,7 +218,7 @@ export async function runTask(
 
     if (event.type === "message_end" && event.message.role === "assistant") {
       const contextTokens = session.getContextUsage()?.tokens;
-      progress.usage = usageFromMessages(session.messages, contextTokens);
+      progress.usage = { usageState: "reported", usage: usageFromMessages(session.messages, contextTokens) };
       publish();
     }
   });
@@ -252,7 +253,7 @@ export async function runTask(
     }
 
     const contextTokens = session.getContextUsage()?.tokens;
-    progress.usage = usageFromMessages(session.messages, contextTokens);
+    progress.usage = { usageState: "reported", usage: usageFromMessages(session.messages, contextTokens) };
     const output = finalText(session.messages);
     const parsedOutput = parseTaskOutput(output);
     const assistant = lastAssistant(session.messages);

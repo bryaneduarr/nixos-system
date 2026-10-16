@@ -3,7 +3,7 @@ import { isAbsolute, resolve } from "node:path";
 import type { ExtensionContext, Theme } from "@earendil-works/pi-coding-agent";
 import { copyToClipboard } from "@earendil-works/pi-coding-agent";
 import type { Component, TUI, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
-import { activityStore } from "../../activity/store.ts";
+import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
 import type { DetailArtifact } from "../../types/inspector/detail/detail-artifact.interface.ts";
 import type { DetailLine } from "../../types/inspector/detail/detail-line.interface.ts";
 import type { InspectorRow } from "../../types/inspector/detail/inspector-row.interface.ts";

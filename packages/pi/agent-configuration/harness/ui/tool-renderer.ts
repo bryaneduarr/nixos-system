@@ -1,12 +1,12 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
-import { activityStore } from "../activity/store.ts";
 import { ELAPSED_TIME_LABEL } from "../constants/tool-rendering/elapsed-label.constant.ts";
+import { readToolActivity } from "../services/activity/store/read-tool-activity.service.ts";
 import { presentValue } from "../services/activity/value/present-value.service.ts";
+import { activityVisibility } from "../services/activity/visibility/shared-activity-visibility.service.ts";
 import type { HarnessVisualState } from "../types/tool-rendering/harness-presentation.interface.ts";
 import type { RendererContext, RendererOptions, RendererResult } from "../types/tool-rendering/renderer.interface.ts";
 import type { HarnessTool } from "../types/tools/harness-tool.interface.ts";
-import { isActivityVisible } from "./activity/visibility.ts";
 import { boxLines } from "./formatting.ts";
 import { requestInspection } from "./inspector/request.ts";
 import {
@@ -85,9 +85,10 @@ export class ToolBox implements Component {
   }
 
   render(width: number): string[] {
-    if (!isActivityVisible()) return [];
+    if (!activityVisibility.isVisible()) return [];
 
-    const entry = this.toolCallId ? activityStore.get(this.toolCallId) : undefined;
+    const lookup = readToolActivity(this.toolCallId);
+    const entry = lookup.found ? lookup.entry : undefined;
     const running = entry?.status === "running";
     if (this.cached && this.cachedWidth === width && !running) return this.cached;
 
@@ -129,7 +130,8 @@ export function createHarnessRenderers(tool: HarnessTool) {
           : "success";
       const presentation = resultPresentation(tool, context.args, text, state);
       const lines = presentationLines(presentation, theme);
-      const entry = context.toolCallId ? activityStore.get(context.toolCallId) : undefined;
+      const lookup = readToolActivity(context.toolCallId);
+      const entry = lookup.found ? lookup.entry : undefined;
       if (entry) {
         const elapsedMs = Math.max(0, (presentValue(entry.endedAt) ?? Date.now()) - entry.startedAt);
         const elapsedLabel = elapsedMs < 1000 ? `${elapsedMs} ms` : `${(elapsedMs / 1000).toFixed(1)} s`;

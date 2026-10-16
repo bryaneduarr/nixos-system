@@ -1,10 +1,9 @@
 import { beforeEach, expect, test } from "bun:test";
-import {
-  readAssistantActivity,
-  readSubagentMetadata,
-  readSubagentUsage,
-} from "../agent-configuration/harness/activity/parse.ts";
-import { activityStore } from "../agent-configuration/harness/activity/store.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../agent-configuration/harness/constants/activity/no-tool-result-fields.constant.ts";
+import { readAssistantActivity } from "../agent-configuration/harness/services/activity/parsing/read-assistant-activity.service.ts";
+import { readSubagentMetadata } from "../agent-configuration/harness/services/activity/parsing/read-subagent-metadata.service.ts";
+import { readSubagentUsage } from "../agent-configuration/harness/services/activity/parsing/read-subagent-usage.service.ts";
+import { activityStore } from "../agent-configuration/harness/services/activity/store/shared-activity-store.service.ts";
 import { InspectorNavigation } from "../agent-configuration/harness/ui/inspector/navigation.ts";
 
 beforeEach(() => activityStore.clear());
@@ -15,8 +14,11 @@ test("navigation follows the selected tool and its child calls", () => {
     () => 0,
     () => {},
   );
-  activityStore.begin({ id: "task-1", toolName: "task", args: {}, cwd: "/tmp" });
+  activityStore.begin({ id: "task-1", toolName: "task", args: {}, cwd: "/tmp", startedAt: 0 });
   activityStore.update("task-1", {
+    ...NO_TOOL_RESULT_FIELDS,
+    text: "",
+    status: { state: "absent" },
     sub: [
       {
         id: "read-1",
@@ -56,7 +58,7 @@ test("navigation bounds scrolling to the detail viewport", () => {
 });
 
 test("activity parsers reject malformed data and preserve reported usage", () => {
-  expect(readAssistantActivity({ role: "user", content: [] })).toBeUndefined();
+  expect(readAssistantActivity({ role: "user", content: [] })).toEqual({ found: false });
   expect(
     readAssistantActivity({
       role: "assistant",
@@ -66,7 +68,10 @@ test("activity parsers reject malformed data and preserve reported usage", () =>
         { type: "toolCall" },
       ],
     }),
-  ).toEqual({ thinking: "reason", thinkingRedacted: true, response: "answer", hasToolCall: true });
+  ).toEqual({
+    found: true,
+    snapshot: { thinking: "reason", thinkingRedacted: true, response: "answer", hasToolCall: true },
+  });
   expect(readSubagentUsage({ usage: { inputTokens: 2, outputTokens: 3, contextTokens: 4 } })).toMatchObject({
     usageState: "reported",
     usage: {

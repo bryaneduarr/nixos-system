@@ -65,10 +65,10 @@ function errorProgress(progress: TaskProgress | undefined, handleId: string, par
     verificationCommands: progress?.verificationCommands ?? params.verificationCommands ?? [],
     currentTask: STOPPED_TASK_LABEL,
     status: "error",
-    model: progress?.model,
-    thinkingLevel: progress?.thinkingLevel,
+    model: progress === undefined ? { state: "absent" } : progress.model,
+    thinkingLevel: progress === undefined ? { state: "absent" } : progress.thinkingLevel,
     activity: progress?.activity ?? [],
-    usage: progress?.usage,
+    usage: progress === undefined ? { usageState: "unreported" } : progress.usage,
   };
 }
 

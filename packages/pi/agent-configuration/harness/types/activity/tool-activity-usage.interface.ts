@@ -1,7 +1,7 @@
 import type { SubagentUsage } from "./subagent-usage.interface.ts";
 
 /* Usage reported by a delegated worker. */
-export interface ReportedUsage {
+interface ReportedUsage {
   /* Marks that the worker reported usage. */
   readonly usageState: "reported";
   /* Token and cost totals of the run. */
@@ -9,7 +9,7 @@ export interface ReportedUsage {
 }
 
 /* The worker has not reported usage. */
-export interface UnreportedUsage {
+interface UnreportedUsage {
   /* Marks that no usage was reported. */
   readonly usageState: "unreported";
 }

@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
-import { activityStore } from "../agent-configuration/harness/activity/store.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../agent-configuration/harness/constants/activity/no-tool-result-fields.constant.ts";
+import { activityStore } from "../agent-configuration/harness/services/activity/store/shared-activity-store.service.ts";
 
 const TEST_CWD = "/tmp";
 
@@ -26,6 +27,7 @@ test("task detail shows current context, call count, and reasoning without redun
   }));
 
   activityStore.finish(entry.id, {
+    ...NO_TOOL_RESULT_FIELDS,
     text: "done",
     status: "success",
     endedAt: 2000,
@@ -56,9 +58,13 @@ test("task detail shows current context, call count, and reasoning without redun
     sub: subagentCalls,
   });
 
-  const lines = buildDetail({ row: { level: "entry", entry }, width: 80, artifact: { kind: "tool-result" } }).map(
-    (line) => line.text,
-  );
+  const current = activityStore.lookup(entry.id);
+  if (!current.found) throw new Error("task entry was not recorded");
+  const lines = buildDetail({
+    row: { level: "entry", entry: current.entry },
+    width: 80,
+    artifact: { kind: "tool-result" },
+  }).map((line) => line.text);
   const text = lines.join("\n");
 
   expect(lines[0]).toMatch(/^TASK · SUCCESS · /);
@@ -86,6 +92,7 @@ test("task input shows the effective role and default tools", () => {
     startedAt: 1000,
   });
   activityStore.finish(entry.id, {
+    ...NO_TOOL_RESULT_FIELDS,
     text: "done",
     status: "success",
     endedAt: 2000,

@@ -1,5 +1,4 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
-import { activityStore } from "../../activity/store.ts";
 import { BLANK_DETAIL_LINE } from "../../constants/inspector/detail-line.constant.ts";
 import {
   THINKING_TOOL_NAME,
@@ -7,12 +6,11 @@ import {
   USER_MESSAGE_TOOL_NAME,
 } from "../../constants/inspector/pseudo-tool.constant.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
+import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
 import { presentValue } from "../../services/activity/value/present-value.service.ts";
 import { resolveTaskRole } from "../../subagents/roles.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
-import type { SubToolActivity } from "../../types/activity/sub-tool-activity.interface.ts";
-import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import type { DetailLine } from "../../types/inspector/detail/detail-line.interface.ts";
 import type { DetailOptions } from "../../types/inspector/detail/detail-options.interface.ts";
 import { renderBox } from "../formatting.ts";

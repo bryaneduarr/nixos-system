@@ -25,6 +25,9 @@ export class SubagentRegistry {
       verificationCommands: [...resolvedRole.verificationCommands],
       currentTask: STARTING_TASK_LABEL,
       status: "running",
+      model: { state: "absent" },
+      thinkingLevel: { state: "absent" },
+      usage: { usageState: "unreported" },
       activity: [],
     };
     const execute = () =>

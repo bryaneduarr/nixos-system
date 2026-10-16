@@ -1,6 +1,7 @@
 import type { SubToolActivity } from "../../activity/sub-tool-activity.interface.ts";
 import type { SubagentModel } from "../../activity/subagent-model.interface.ts";
-import type { SubagentUsage } from "../../activity/subagent-usage.interface.ts";
+import type { ToolActivityUsage } from "../../activity/tool-activity-usage.interface.ts";
+import type { ValueState } from "../../activity/value-state.interface.ts";
 import type { TaskRole } from "../roles/task-role.interface.ts";
 import type { TaskStatus } from "./task-status.interface.ts";
 
@@ -20,12 +21,12 @@ export interface TaskProgress {
   currentTask: string;
   /* Lifecycle state of the run. */
   status: TaskStatus;
-  /* Model the worker runs on, when it has been resolved. */
-  model?: SubagentModel;
-  /* Reasoning level the worker runs with, when it has been resolved. */
-  thinkingLevel?: string;
+  /* Model the worker runs on, present once it has been resolved. */
+  model: ValueState<SubagentModel>;
+  /* Reasoning level the worker runs with, present once it has been resolved. */
+  thinkingLevel: ValueState<string>;
   /* Tool calls the worker has made. */
   activity: SubToolActivity[];
-  /* Token usage reported so far, when the worker has produced a response. */
-  usage?: SubagentUsage;
+  /* Token usage reported so far, once the worker has produced a response. */
+  usage: ToolActivityUsage;
 }

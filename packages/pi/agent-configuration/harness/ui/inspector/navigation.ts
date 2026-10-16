@@ -1,9 +1,9 @@
-import { activityStore } from "../../activity/store.ts";
 import {
   THINKING_TOOL_NAME,
   UPDATE_TOOL_NAME,
   USER_MESSAGE_TOOL_NAME,
 } from "../../constants/inspector/pseudo-tool.constant.ts";
+import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
 import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import type { DetailArtifact } from "../../types/inspector/detail/detail-artifact.interface.ts";
 import type { InspectorRow } from "../../types/inspector/detail/inspector-row.interface.ts";

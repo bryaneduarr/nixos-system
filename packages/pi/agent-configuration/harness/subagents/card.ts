@@ -1,7 +1,7 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
-import { activityStore } from "../activity/store.ts";
 import { COMPLETED_TASK_LABEL, STARTING_TASK_LABEL } from "../constants/subagents/progress.constant.ts";
+import { readToolActivity } from "../services/activity/store/read-tool-activity.service.ts";
 import { presentValue } from "../services/activity/value/present-value.service.ts";
 import type { SubToolActivity } from "../types/activity/sub-tool-activity.interface.ts";
 import type { TaskProgress } from "../types/subagents/tasks/task-progress.interface.ts";
@@ -48,8 +48,9 @@ export function renderSubagentCard(
   progress?: TaskProgress,
   lastComponent?: Component,
 ): Component {
-  const entry = toolCallId ? activityStore.get(toolCallId) : undefined;
-  const details = entry?.details as TaskProgress | undefined;
+  const lookup = readToolActivity(toolCallId);
+  const entry = lookup.found ? lookup.entry : undefined;
+  const details = entry === undefined ? undefined : presentValue(entry.details);
   const current = progress ?? details;
   const candidateTitles = [current?.title, title, entry?.args.title];
   const label =
