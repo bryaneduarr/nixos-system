@@ -1,5 +1,6 @@
 import { basename } from "node:path";
 import type { HarnessTool } from "../tools/config.ts";
+import type { ToolPhase } from "../types/tool-rendering/tool-phase.interface.ts";
 import { oneLine } from "./formatting.ts";
 
 function stringArg(args: Record<string, unknown>, key: string): string {
@@ -31,7 +32,7 @@ export function workingMessageFor(tool: HarnessTool, args: Record<string, unknow
   }
 }
 
-export function phaseForTool(tool: HarnessTool, args: Record<string, unknown>): "DISCOVER" | "IMPLEMENT" | "VERIFY" {
+export function phaseForTool(tool: HarnessTool, args: Record<string, unknown>): ToolPhase {
   switch (tool) {
     case "search":
     case "read":

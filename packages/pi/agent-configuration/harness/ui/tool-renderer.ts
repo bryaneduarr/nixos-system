@@ -1,14 +1,16 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { activityStore } from "../activity/store.ts";
+import { ELAPSED_TIME_LABEL } from "../constants/tool-rendering/elapsed-label.constant.ts";
 import type { HarnessTool } from "../tools/config.ts";
+import type { HarnessVisualState } from "../types/tool-rendering/harness-presentation.interface.ts";
+import type { RendererContext, RendererOptions, RendererResult } from "../types/tool-rendering/renderer.interface.ts";
 import { isActivityVisible } from "./activity/visibility.ts";
 import { boxLines } from "./formatting.ts";
 import { requestInspection } from "./inspector/request.ts";
 import {
   boxTitle,
   extractText,
-  type HarnessVisualState,
   presentationLines,
   resultFailed,
   resultPresentation,
@@ -16,7 +18,6 @@ import {
   toolColor,
 } from "./tool-presentation.ts";
 
-export type { HarnessPresentation, HarnessVisualState } from "./tool-presentation.ts";
 export {
   extractText,
   presentationLines,
@@ -28,8 +29,6 @@ export {
   toolTarget,
 } from "./tool-presentation.ts";
 export { phaseForTool, workingMessageFor } from "./tool-status.ts";
-
-export const INSPECT_SHORTCUT = "alt+i";
 
 class EmptyComponent implements Component {
   render(): string[] {
@@ -94,9 +93,9 @@ export class ToolBox implements Component {
     const timerStart = this.elapsedStartedAt ?? (running && this.showElapsed ? entry?.startedAt : undefined);
     let lines = this.lines;
     if (timerStart !== undefined) {
-      const displayLines = this.lines.filter((line) => !line.includes("Time: "));
+      const displayLines = this.lines.filter((line) => !line.includes(ELAPSED_TIME_LABEL));
       const elapsedSeconds = ((Date.now() - timerStart) / 1000).toFixed(1);
-      const timeLine = this.theme.fg("muted", `Time: ${elapsedSeconds} s`);
+      const timeLine = this.theme.fg("muted", `${ELAPSED_TIME_LABEL}${elapsedSeconds} s`);
       lines = [...displayLines, timeLine];
     }
 
@@ -106,27 +105,10 @@ export class ToolBox implements Component {
   }
 }
 
-interface RendererContextLike {
-  args: Record<string, unknown>;
-  toolCallId?: string;
-  lastComponent: Component | undefined;
-  isPartial: boolean;
-  isError: boolean;
-  expanded: boolean;
-}
-interface RendererResultLike {
-  content: Array<{ type: string; text?: string }>;
-  details?: unknown;
-}
-interface RendererOptionsLike {
-  expanded: boolean;
-  isPartial: boolean;
-}
-
 export function createHarnessRenderers(tool: HarnessTool) {
   return {
     renderShell: "self" as const,
-    renderCall(args: Record<string, unknown>, theme: Theme, context: RendererContextLike): Component {
+    renderCall(args: Record<string, unknown>, theme: Theme, context: RendererContext): Component {
       if (context.isPartial === false) return EMPTY;
       const box =
         context.lastComponent instanceof ToolBox ? context.lastComponent : new ToolBox(theme, "", [], toolColor(tool));
@@ -137,12 +119,7 @@ export function createHarnessRenderers(tool: HarnessTool) {
       box.setContent(title, lines, context.toolCallId, toolColor(tool));
       return box;
     },
-    renderResult(
-      result: RendererResultLike,
-      options: RendererOptionsLike,
-      theme: Theme,
-      context: RendererContextLike,
-    ): Component {
+    renderResult(result: RendererResult, options: RendererOptions, theme: Theme, context: RendererContext): Component {
       const text = extractText(result.content);
       const state: HarnessVisualState = options.isPartial
         ? "running"
@@ -155,7 +132,7 @@ export function createHarnessRenderers(tool: HarnessTool) {
       if (entry) {
         const elapsedMs = Math.max(0, (entry.endedAt ?? Date.now()) - entry.startedAt);
         const elapsedLabel = elapsedMs < 1000 ? `${elapsedMs} ms` : `${(elapsedMs / 1000).toFixed(1)} s`;
-        lines.push(theme.fg("muted", `Time: ${elapsedLabel}`));
+        lines.push(theme.fg("muted", `${ELAPSED_TIME_LABEL}${elapsedLabel}`));
       }
 
       const box =

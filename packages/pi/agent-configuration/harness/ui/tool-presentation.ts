@@ -1,5 +1,12 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
-import type { HarnessTool } from "../tools/config.ts";
+import { Value } from "typebox/value";
+import { TextContentSchema } from "../schemas/tool-rendering/text-content.schema.ts";
+import { type HarnessTool, isHarnessTool } from "../tools/config.ts";
+import type {
+  HarnessPresentation,
+  HarnessVisualState,
+} from "../types/tool-rendering/harness-presentation.interface.ts";
+import type { TextContent } from "../types/tool-rendering/text-content.interface.ts";
 import { oneLine } from "./formatting.ts";
 
 const TITLES: Record<HarnessTool, string> = {
@@ -15,18 +22,10 @@ const TOOL_COLORS: Record<HarnessTool, ThemeColor> = {
   run: "toolTitle",
 };
 
-export type HarnessVisualState = "running" | "success" | "error";
-export interface HarnessPresentation {
-  title: string;
-  target: string;
-  state: HarnessVisualState;
-  details: string[];
-}
-
-export function extractText(content: Array<{ type: string; text?: string }>): string {
+export function extractText(content: readonly unknown[]): string {
   return content
-    .filter((block) => block.type === "text" && typeof block.text === "string")
-    .map((block) => block.text ?? "")
+    .filter((block): block is TextContent => Value.Check(TextContentSchema, block))
+    .map((block) => block.text)
     .join("\n")
     .trim();
 }
@@ -41,7 +40,7 @@ function stringArg(args: Record<string, unknown>, key: string): string {
 }
 
 export function toolLabel(name: string): string {
-  return (TITLES as Record<string, string>)[name] ?? name.toUpperCase();
+  return isHarnessTool(name) ? TITLES[name] : name.toUpperCase();
 }
 
 export function toolTarget(tool: HarnessTool, args: Record<string, unknown>): string {
