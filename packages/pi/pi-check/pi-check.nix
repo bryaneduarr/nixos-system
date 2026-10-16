@@ -1,12 +1,15 @@
 {
   biome,
   bun,
+  callPackage,
   lib,
   nodejs_24,
   stdenvNoCC,
   typescript,
 }:
 let
+  ruleAudit = callPackage ../../../scripts/rule-audit/rule-audit-package.nix { };
+
   dependencies = stdenvNoCC.mkDerivation {
     pname = "pi-check-dependencies";
     version = "0.1.0";
@@ -54,12 +57,14 @@ stdenvNoCC.mkDerivation {
       ../tsconfig.json
       ../biome.json
       ../knip.json
+      ../rule-audit-boundaries.json
     ];
   };
   nativeBuildInputs = [
     biome
     bun
     nodejs_24
+    ruleAudit
     typescript
   ];
   dontConfigure = true;
@@ -73,6 +78,7 @@ stdenvNoCC.mkDerivation {
     biome ci .
     node node_modules/.bin/knip
     bun test
+    rule-audit .
     runHook postBuild
   '';
 

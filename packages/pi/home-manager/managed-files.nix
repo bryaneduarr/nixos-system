@@ -23,7 +23,9 @@ let
     directory:
     lib.fileset.toSource {
       root = directory;
-      fileset = lib.fileset.fileFilter (file: !(lib.hasSuffix ".test.ts" file.name)) directory;
+      fileset = lib.fileset.fileFilter (
+        file: !(lib.hasSuffix ".test.ts" file.name || lib.hasSuffix ".test-double.ts" file.name)
+      ) directory;
     };
 in
 lib.mkIf config.custom.pi.enable {
