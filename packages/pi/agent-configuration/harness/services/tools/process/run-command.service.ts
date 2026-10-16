@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
-import { MAX_CAPTURE_BYTES, NO_TIMEOUT_MS } from "../constants/tools/process.constant.ts";
-import type { ExecRequest } from "../types/tools/process/exec-request.interface.ts";
-import type { ExecResult } from "../types/tools/process/exec-result.interface.ts";
+import { MAX_CAPTURE_BYTES, NO_TIMEOUT_MS } from "../../../constants/tools/process.constant.ts";
+import type { ExecRequest } from "../../../types/tools/process/exec-request.interface.ts";
+import type { ExecResult } from "../../../types/tools/process/exec-result.interface.ts";
 
 export async function runCommand(request: ExecRequest): Promise<ExecResult> {
   const { command, cwd, timeoutMs, cancellation } = request;

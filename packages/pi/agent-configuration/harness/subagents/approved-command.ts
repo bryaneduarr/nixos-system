@@ -7,8 +7,8 @@ import {
 import { APPROVED_COMMAND_TOOL } from "../constants/subagents/roles.constant.ts";
 import { ApprovedCommandParams } from "../schemas/subagents/approved-command/approved-command-params.schema.ts";
 import { toToolCancellation } from "../services/tools/process/tool-cancellation.service.ts";
-import { runCommand } from "../tools/exec.ts";
-import { clampLines } from "../tools/format.ts";
+import { runCommand } from "../services/tools/process/run-command.service.ts";
+import { clampLines } from "../services/tools/text/clamp-lines.service.ts";
 
 export function createApprovedCommandTool(approvedCommands: readonly string[]) {
   return defineTool({

@@ -10,7 +10,7 @@ export interface EditRequest {
 type EditChange = ReplaceChange | CreateChange | DeleteChange | MoveChange;
 
 /* Exact text replacements applied to an existing file. */
-interface ReplaceChange {
+export interface ReplaceChange {
   /* Marks a replacement. */
   readonly op: "replace";
   /* Target file as the caller wrote it. */
@@ -22,7 +22,7 @@ interface ReplaceChange {
 }
 
 /* Writes a new file. */
-interface CreateChange {
+export interface CreateChange {
   /* Marks a file creation. */
   readonly op: "create";
   /* Target file as the caller wrote it. */
@@ -34,7 +34,7 @@ interface CreateChange {
 }
 
 /* Removes a file. */
-interface DeleteChange {
+export interface DeleteChange {
   /* Marks a deletion. */
   readonly op: "delete";
   /* Target file as the caller wrote it. */
@@ -42,7 +42,7 @@ interface DeleteChange {
 }
 
 /* Renames or relocates a file. */
-interface MoveChange {
+export interface MoveChange {
   /* Marks a move. */
   readonly op: "move";
   /* Source file as the caller wrote it. */

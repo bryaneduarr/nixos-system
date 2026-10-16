@@ -8,7 +8,7 @@ import {
   UPDATE_ACTIVITY_NAME,
 } from "../../constants/activity/activity-entry.constant.ts";
 import { SPINNER_FRAMES } from "../../constants/activity/spinner.constant.ts";
-import { isHarnessTool } from "../../tools/config.ts";
+import { isHarnessTool } from "../../services/tools/is-harness-tool.service.ts";
 import type { ActivitySummaryData } from "../../types/activity/activity-summary.interface.ts";
 import { oneLine } from "../formatting.ts";
 import { toolLabel, toolTarget } from "../tool-renderer.ts";

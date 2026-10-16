@@ -1,7 +1,7 @@
 import { activityStore } from "../../activity/store.ts";
 import { MESSAGE_ACTIVITY_NAME } from "../../constants/activity/activity-entry.constant.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
-import { isHarnessTool } from "../../tools/config.ts";
+import { isHarnessTool } from "../../services/tools/is-harness-tool.service.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import type { ActivityActionSummary } from "../../types/activity/activity-summary.interface.ts";
 import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";

@@ -9,7 +9,7 @@ import {
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { presentValue } from "../../services/activity/value/present-value.service.ts";
 import { resolveTaskRole } from "../../subagents/roles.ts";
-import { isHarnessTool } from "../../tools/config.ts";
+import { isHarnessTool } from "../../services/tools/is-harness-tool.service.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import type { SubToolActivity } from "../../types/activity/sub-tool-activity.interface.ts";
 import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";

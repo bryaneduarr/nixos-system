@@ -1,7 +1,7 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import { Value } from "typebox/value";
 import { TextContentSchema } from "../schemas/tool-rendering/text-content.schema.ts";
-import { isHarnessTool } from "../tools/config.ts";
+import { isHarnessTool } from "../services/tools/is-harness-tool.service.ts";
 import type {
   HarnessPresentation,
   HarnessVisualState,

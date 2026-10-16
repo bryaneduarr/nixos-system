@@ -8,7 +8,7 @@ import {
 import { activityStore } from "../../activity/store.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { taskResultFailed } from "../../subagents/result.ts";
-import { isHarnessTool } from "../../tools/config.ts";
+import { isHarnessTool } from "../../services/tools/is-harness-tool.service.ts";
 import type { ActivityStatus } from "../../types/activity/activity-status.interface.ts";
 import { extractText, resultFailed } from "../tool-renderer.ts";
 import { recordThinking, recordUpdate, recordUserMessage, safeParseTimestamp } from "./records.ts";
