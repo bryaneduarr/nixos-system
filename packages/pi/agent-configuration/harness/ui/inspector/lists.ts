@@ -1,7 +1,7 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import type { ActivityStatus, ToolActivity } from "../../activity/store.ts";
-import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import { toolLabel, toolTarget } from "../tool-renderer.ts";
 import { formatDuration, formatValue, type InspectorRow } from "./detail.ts";

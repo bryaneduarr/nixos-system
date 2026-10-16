@@ -7,46 +7,22 @@ import {
   SessionManager,
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
-import type { Static } from "typebox";
-import type { SubagentModel, SubagentUsage, SubToolActivity } from "../activity/store.ts";
+import type { SubagentUsage } from "../activity/store.ts";
+import {
+  COMPLETED_TASK_LABEL,
+  STARTING_TASK_LABEL,
+  STOPPED_TASK_LABEL,
+  TIMED_OUT_ERROR_MESSAGE,
+  WRITING_RESULT_TASK_LABEL,
+} from "../constants/subagents/progress.constant.ts";
+import { APPROVED_COMMAND_TOOL } from "../constants/subagents/roles.constant.ts";
+import { USAGE_FIELDS } from "../constants/subagents/usage.constant.ts";
+import type { TaskInput } from "../types/subagents/tasks/task-input.interface.ts";
+import type { TaskProgress } from "../types/subagents/tasks/task-progress.interface.ts";
+import type { TaskResult } from "../types/subagents/tasks/task-result.interface.ts";
 import { createApprovedCommandTool } from "./approved-command.ts";
-import { TaskParams } from "./parameters.ts";
 import { parseTaskOutput } from "./result.ts";
-import { APPROVED_COMMAND_TOOL, buildTaskSystemPrompt, resolveTaskRole, type TaskRole } from "./roles.ts";
-
-const USAGE_FIELDS = [
-  ["inputTokens", "input"],
-  ["outputTokens", "output"],
-  ["cacheReadTokens", "cacheRead"],
-  ["cacheWriteTokens", "cacheWrite"],
-  ["reasoningTokens", "reasoning"],
-] as const;
-
-export type TaskInput = Static<typeof TaskParams>;
-
-export interface TaskProgress {
-  id: string;
-  title: string;
-  role: TaskRole;
-  tools: string[];
-  verificationCommands: string[];
-  currentTask: string;
-  status: "running" | "success" | "error" | "cancelled";
-  model?: SubagentModel;
-  thinkingLevel?: string;
-  activity: SubToolActivity[];
-  usage?: SubagentUsage;
-}
-
-export interface TaskResult extends TaskProgress {
-  summary: string;
-  findings: string[];
-  unresolvedQuestions: string[];
-  checks: string[];
-  filesChanged: string[];
-  risks: string[];
-  errors: string[];
-}
+import { buildTaskSystemPrompt, resolveTaskRole } from "./roles.ts";
 
 function textContent(content: unknown): string {
   if (!Array.isArray(content)) return "";
@@ -187,7 +163,7 @@ export async function runTask(
     role: resolvedRole.role,
     tools: [...resolvedRole.tools],
     verificationCommands: [...resolvedRole.verificationCommands],
-    currentTask: "Starting",
+    currentTask: STARTING_TASK_LABEL,
     status: "running",
     model: {
       provider: model.provider,
@@ -227,7 +203,7 @@ export async function runTask(
       const runningCall = progress.activity.findLast((item) => item.status === "running");
       progress.currentTask = runningCall
         ? describeToolActivity(runningCall.toolName, runningCall.args)
-        : "Writing result";
+        : WRITING_RESULT_TASK_LABEL;
       publish();
       return;
     }
@@ -284,12 +260,12 @@ export async function runTask(
       progress.status = "success";
     }
 
-    progress.currentTask = progress.status === "success" ? "Completed" : "Stopped";
+    progress.currentTask = progress.status === "success" ? COMPLETED_TASK_LABEL : STOPPED_TASK_LABEL;
     publish();
 
     const errors = [
       ...parsedOutput.errors,
-      ...(timedOut ? ["Timed out"] : []),
+      ...(timedOut ? [TIMED_OUT_ERROR_MESSAGE] : []),
       ...(promptError ? [promptError] : []),
       ...(typeof assistant?.errorMessage === "string" ? [assistant.errorMessage] : []),
     ];

@@ -1,6 +1,7 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
 import { type ActivityStatus, activityStore, type SubToolActivity, type ToolActivity } from "../../activity/store.ts";
-import { resolveTaskRole, TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
+import { resolveTaskRole } from "../../subagents/roles.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import { renderBox } from "../formatting.ts";
 import { toolColor, toolLabel, toolTarget } from "../tool-renderer.ts";
@@ -71,9 +72,9 @@ function formatMissionInput(args: Record<string, unknown>): string {
 
   try {
     const resolved = resolveTaskRole({
-      role: args.role,
-      tools: selectedTools,
-      verificationCommands,
+      ...(args.role === undefined ? {} : { role: String(args.role) }),
+      ...(selectedTools ? { tools: selectedTools } : {}),
+      ...(verificationCommands ? { verificationCommands } : {}),
     });
     const effectiveTools = resolved.tools.join(", ") || "none";
     roleAndTools = [`role: ${resolved.role}`, `effective tools: ${effectiveTools}`];

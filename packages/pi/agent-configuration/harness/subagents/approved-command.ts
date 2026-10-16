@@ -1,19 +1,13 @@
 import { defineTool } from "@earendil-works/pi-coding-agent";
-import { Type } from "typebox";
+import {
+  APPROVED_COMMAND_MAX_OUTPUT_CHARS,
+  APPROVED_COMMAND_MAX_OUTPUT_LINES,
+  APPROVED_COMMAND_TIMEOUT_MS,
+} from "../constants/subagents/approved-command.constant.ts";
+import { APPROVED_COMMAND_TOOL } from "../constants/subagents/roles.constant.ts";
+import { ApprovedCommandParams } from "../schemas/subagents/approved-command/approved-command-params.schema.ts";
 import { runCommand } from "../tools/exec.ts";
 import { clampLines } from "../tools/format.ts";
-import { APPROVED_COMMAND_TOOL } from "./roles.ts";
-
-const APPROVED_COMMAND_TIMEOUT_MS = 120_000;
-const MAX_OUTPUT_CHARS = 6000;
-const MAX_OUTPUT_LINES = 160;
-
-const ApprovedCommandParams = Type.Object({
-  command: Type.String({
-    minLength: 1,
-    description: "An exact command from the parent-approved list.",
-  }),
-});
 
 export function createApprovedCommandTool(approvedCommands: readonly string[]) {
   return defineTool({
@@ -41,7 +35,7 @@ export function createApprovedCommandTool(approvedCommands: readonly string[]) {
       const outputParts = [result.stdout, result.stderr].filter(Boolean);
       const separator = result.stdout && result.stderr ? "\n" : "";
       const rawOutput = outputParts.join(separator).trimEnd();
-      const bounded = clampLines(rawOutput, MAX_OUTPUT_LINES, MAX_OUTPUT_CHARS);
+      const bounded = clampLines(rawOutput, APPROVED_COMMAND_MAX_OUTPUT_LINES, APPROVED_COMMAND_MAX_OUTPUT_CHARS);
       const outputLines = [`exit: ${result.code}`];
 
       if (result.timedOut) outputLines.push("timed out");

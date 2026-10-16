@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { TASK_TOOL_NAME } from "./constants/subagents/roles.constant.ts";
 import { installSessions } from "./sessions/install.ts";
-import { TASK_TOOL_NAME } from "./subagents/roles.ts";
 import { registerSubagentTool } from "./subagents/tool.ts";
 import { HARNESS_TOOLS, type HarnessTool } from "./tools/config.ts";
 import { editFile } from "./tools/edit.ts";
