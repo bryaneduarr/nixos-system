@@ -1,5 +1,5 @@
 import { wrapTextWithAnsi } from "@earendil-works/pi-tui";
-import { PREVIEW_LINES, PREVIEW_SOURCE_LIMIT } from "../../constants/prompts/preview.constant.ts";
+import { PREVIEW_LINES, PREVIEW_SOURCE_LIMIT } from "../../../constants/prompts/preview.constant.ts";
 
 export function previewPrompt(text: string, width: number): string {
   const contentWidth = Math.max(1, width - 4);

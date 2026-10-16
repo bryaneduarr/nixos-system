@@ -1,5 +1,5 @@
 /* One terminal cell of a wrapped prompt line. */
-interface DisplayCell {
+export interface DisplayCell {
   /* Index of the grapheme the cell displays. */
   readonly index: number;
   /* Text drawn in the cell after unsafe characters are replaced. */
