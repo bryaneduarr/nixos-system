@@ -1,9 +1,9 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { readAssistantActivity } from "../../activity/parse.ts";
 import { activityStore } from "../../activity/store.ts";
+import { INSPECT_SHORTCUT } from "../../constants/tool-rendering/inspect-shortcut.constant.ts";
 import { openInspector } from "../inspector/index.ts";
 import { setInspectContext, setInspectOpener } from "../inspector/request.ts";
-import { INSPECT_SHORTCUT } from "../tool-renderer.ts";
 import { hydrateFromSession } from "./hydrate.ts";
 import { recordThinking, recordUpdate, recordUserMessage } from "./records.ts";
 import { restoreCompletions } from "./restore.ts";
