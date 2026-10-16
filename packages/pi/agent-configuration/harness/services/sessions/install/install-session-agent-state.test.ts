@@ -6,20 +6,23 @@ import { join } from "node:path";
 import { installSessions } from "./install-sessions.service.ts";
 import {
   applyEnvironment,
-  commandNamed,
   createInstallContext,
-  createInstallDependencies,
   ENVIRONMENT_KEYS,
   environmentFor,
   handlerNamed,
   type InstallFlags,
   type InstallState,
-  lastReport,
-  lastReportState,
   registerFakeApi,
   restoreEnvironment,
+} from "./install-sessions.test-double.ts";
+import {
+  commandNamed,
+  createInstallDependencies,
+  lastCommandArgument,
+  lastReport,
+  lastReportState,
   stateFlagOf,
-} from "./install-test-doubles.ts";
+} from "./install-sessions-herdr.test-double.ts";
 
 describe("installSessions agent state", () => {
   test("agent state and completion notifications follow the active run", async () => {
@@ -56,7 +59,7 @@ describe("installSessions agent state", () => {
       state.idle = true;
       await handlerNamed(events, "agent_settled")({}, ctx);
       expect(lastReportState(sentCommands)).toBe("idle");
-      const completionName = sentCommands.findLast((args) => args[0] === "pane" && args[1] === "rename")?.[3] ?? "";
+      const completionName = lastCommandArgument(sentCommands, "pane", "rename", 3);
       expect(commandNamed(sentCommands, "notification", "show")).toEqual([
         ["notification", "show", "Pi finished", "--body", completionName, "--sound", "done"],
       ]);

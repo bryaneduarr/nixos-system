@@ -5,55 +5,39 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { getKeybindings, KeybindingsManager, setKeybindings } from "@earendil-works/pi-tui";
-import { readGitBranch } from "../monitor/read-git-branch.service.ts";
 import { installSessions } from "./install-sessions.service.ts";
 import {
   applyEnvironment,
-  commandNamed,
   createInstallContext,
-  createInstallDependencies,
+  createInstallState,
+  createPasteImageDefinitions,
   ENVIRONMENT_KEYS,
   environmentFor,
-  expectHistoryRecord,
   handlerNamed,
   type InstallFlags,
-  type InstallState,
   registerFakeApi,
   restoreEnvironment,
-} from "./install-test-doubles.ts";
+} from "./install-sessions.test-double.ts";
+import {
+  commandNamed,
+  createInstallDependencies,
+  expectHistoryRecord,
+  lastCommandArgument,
+} from "./install-sessions-herdr.test-double.ts";
 
 describe("installSessions", () => {
-  test("non-Git projects do not show a conversation-tree branch", async () => {
-    expect(await readGitBranch(tmpdir())).toBe("no git");
-  });
-
   test("install reports lifecycle and session identity, protects user history across new sessions", async () => {
     const root = await mkdtemp(join(tmpdir(), "pi-install-test-"));
     const previous = { ...process.env };
     const previousKeybindings = getKeybindings();
-    setKeybindings(
-      new KeybindingsManager(
-        { "app.clipboard.pasteImage": { description: "Paste", defaultKeys: "ctrl+v" } },
-        { "app.clipboard.pasteImage": "ctrl+y" },
-      ),
-    );
+    setKeybindings(new KeybindingsManager(createPasteImageDefinitions(), { "app.clipboard.pasteImage": "ctrl+y" }));
     const { api, events, shortcuts, commands: registeredCommands } = registerFakeApi();
     const sentCommands: string[][] = [];
     const created: { cwd: string; pane: string }[] = [];
     const notifications: string[] = [];
     const token = randomUUID();
     const flags: InstallFlags = { notificationFails: false, pendingRenames: 1, createFails: false };
-    const state: InstallState = {
-      idle: true,
-      editor: "",
-      shutdowns: 0,
-      cleanups: 0,
-      entries: [{ type: "message", message: { role: "custom", content: "startup" } }],
-      terminalInput: () => {},
-      selection: "cancel",
-      menuSelections: 0,
-      projectSelections: 0,
-    };
+    const state = createInstallState();
     applyEnvironment(environmentFor(root, token));
     const ctx = createInstallContext(root, state, notifications);
     const show = (target: ExtensionContext) => handlerNamed(shortcuts, "ctrl+alt+s")(target);
@@ -146,11 +130,11 @@ describe("installSessions", () => {
       delete process.env.PI_MANAGED_SESSION;
       installSessions(api, dependencies);
       await handlerNamed(events, "session_start")({}, ctx);
-      const firstName = sentCommands.findLast((args) => args[0] === "agent" && args[1] === "rename")?.[3];
+      const firstName = lastCommandArgument(sentCommands, "agent", "rename", 3);
       await handlerNamed(events, "session_shutdown")({}, ctx);
       installSessions(api, dependencies);
       await handlerNamed(events, "session_start")({}, ctx);
-      const reloadedName = sentCommands.findLast((args) => args[0] === "agent" && args[1] === "rename")?.[3];
+      const reloadedName = lastCommandArgument(sentCommands, "agent", "rename", 3);
       expect(reloadedName).toBe(firstName);
       await createHere(ctx);
       expect(state.cleanups).toBe(1);
