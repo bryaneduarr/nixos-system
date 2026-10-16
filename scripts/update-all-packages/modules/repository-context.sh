@@ -6,8 +6,6 @@ show_system_target
 
 pi_nix_file="$repo_root/packages/pi/pi-tools/pi-tools.nix"
 
-# Run a task with a small text-only spinner. Successful command output stays
-# hidden; failures replay the captured diagnostics.
 run_with_status() {
   local start_message="$1" done_message="$2" log_file command_pid frame_index=0 command_status
   local -a spinner_frames=("[|]" "[/]" "[-]" "[\\]")
@@ -53,7 +51,6 @@ run_with_status() {
   return "$command_status"
 }
 
-# Run package-manager commands quietly, but preserve their diagnostics on failure.
 run_quietly() {
   local log_file status
   log_file="$(mktemp)"

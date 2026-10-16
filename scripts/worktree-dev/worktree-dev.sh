@@ -1,4 +1,3 @@
-# Main worktree development workflow.
 trap cleanup EXIT INT TERM HUP
 
 unlink "$server_env" 2>/dev/null || true

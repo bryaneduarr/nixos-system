@@ -1,4 +1,3 @@
-# Preserve the current server environment and prepare a port-adjusted copy.
 if [ -L "$server_env" ] && [ -e "$server_env" ]; then
   env_state=link
   original_env_target="$(readlink "$server_env")"

@@ -1,4 +1,3 @@
-# Restore launchers, environment files, and temporary state on exit.
 cleanup() {
   for app in client web admin; do
     launcher="$repo_root/apps/$app/node_modules/.bin/next"

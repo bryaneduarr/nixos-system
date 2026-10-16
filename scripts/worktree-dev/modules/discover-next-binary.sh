@@ -1,4 +1,3 @@
-# Prepare the temporary runtime directory and locate the shared Next.js binary.
 runtime_dir="$(mktemp -d "${TMPDIR:-/tmp}/worktree-dev.XXXXXX")"
 next_binary="$(find "$repo_root/node_modules/.bun" -type f -path '*/next/dist/bin/next' -print -quit)"
 

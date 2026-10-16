@@ -1,4 +1,3 @@
-# Find the first available block of four development ports.
 is_port_free() {
   ! ss -H -ltn "sport = :$1" | grep -q .
 }

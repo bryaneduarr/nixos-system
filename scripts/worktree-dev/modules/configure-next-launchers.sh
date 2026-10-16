@@ -1,4 +1,3 @@
-# Point each application launcher at the shared Next.js binary and its port.
 configure_next_launchers() {
   for spec in "client:$client_port" "web:$web_port" "admin:$admin_port"; do
     app="${spec%%:*}"

@@ -1,5 +1,4 @@
 _update_flake_inputs() {
-  # ---- Update flake inputs, including nixpkgs tools ----
   run_quietly nix flake update --flake "$flake_ref"
 
   # The flake update may change the Nix npm dependency fetcher, so calculate

@@ -1,4 +1,3 @@
-# Select the server environment file for this worktree.
 has_server_env() {
   [ -f "$1" ] && grep -q '^SERVER_URL=' "$1" && grep -q '^PORT=' "$1"
 }
