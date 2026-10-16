@@ -31,7 +31,9 @@ Coordinate a feature from request to a reviewable branch. The pull request creat
 ## Size the run
 
 - Fewer than 3 areas or about 20 files: the coordinator does the work alone and still follows the verification checklist.
-- Otherwise use the phases below. Areas are disjoint ownership units with their own files; aim for 4 to 8.
+- Otherwise use the phases below. Areas are disjoint ownership units with their own files; aim for 4 to 8, merging areas with few files.
+- Skip phase A when no contract is shared between areas. Skip phase C when every rule the work touches is enforced by a tool (such as a rule-audit cleanup); the coordinator then spot-reviews every worker diff instead.
+- Put safety-net tests (such as registration tests) in place and commit them before workers start, so every worker runs them.
 
 ## Stages
 
