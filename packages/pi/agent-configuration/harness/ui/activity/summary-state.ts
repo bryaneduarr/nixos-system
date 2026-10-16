@@ -1,5 +1,5 @@
 import { type ActivityStatus, activityStore, type ToolActivity } from "../../activity/store.ts";
-import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
+import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 
 export const ACTIVITY_SUMMARY_ENTRY = "harness-activity-summary";

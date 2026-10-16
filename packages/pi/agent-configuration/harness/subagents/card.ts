@@ -1,9 +1,10 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
 import { activityStore, type SubToolActivity } from "../activity/store.ts";
+import { COMPLETED_TASK_LABEL, STARTING_TASK_LABEL } from "../constants/subagents/progress.constant.ts";
+import type { TaskProgress } from "../types/subagents/tasks/task-progress.interface.ts";
 import { oneLine } from "../ui/formatting.ts";
 import { EMPTY, ToolBox } from "../ui/tool-renderer.ts";
-import type { TaskProgress } from "./runner.ts";
 
 const TOOL_TARGET_FIELDS = ["path", "command", "pattern", "query", "file", "prompt"];
 
@@ -68,14 +69,14 @@ export function renderSubagentCard(
       lines.push(theme.fg("muted", `Time: ${duration(call.startedAt, call.endedAt)}`));
     }
   } else {
-    const startLabel = status === "running" ? "Starting" : "No tool calls";
+    const startLabel = status === "running" ? STARTING_TASK_LABEL : "No tool calls";
     lines.push(theme.fg("muted", startLabel));
   }
 
   if (status !== "running") {
     const isSuccessful = status === "success";
     const isCancelled = status === "cancelled";
-    const finalLabel = isSuccessful ? "Completed" : isCancelled ? "Cancelled" : "Failed";
+    const finalLabel = isSuccessful ? COMPLETED_TASK_LABEL : isCancelled ? "Cancelled" : "Failed";
     const finalColor = isSuccessful ? "success" : "error";
     lines.push(theme.fg(finalColor, finalLabel));
   }

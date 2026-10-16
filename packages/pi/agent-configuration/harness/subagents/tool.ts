@@ -1,9 +1,12 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { STOPPED_TASK_LABEL } from "../constants/subagents/progress.constant.ts";
+import { TASK_TOOL_NAME } from "../constants/subagents/roles.constant.ts";
+import { TaskParams } from "../schemas/subagents/tasks/task-params.schema.ts";
+import type { TaskInput } from "../types/subagents/tasks/task-input.interface.ts";
+import type { TaskProgress } from "../types/subagents/tasks/task-progress.interface.ts";
+import type { TaskResult } from "../types/subagents/tasks/task-result.interface.ts";
 import { hiddenSubagentCall, renderSubagentCard } from "./card.ts";
-import { TaskParams } from "./parameters.ts";
 import { subagentRegistry } from "./registry.ts";
-import { TASK_TOOL_NAME } from "./roles.ts";
-import type { TaskInput, TaskProgress, TaskResult } from "./runner.ts";
 
 const TASK_TOOL_DESCRIPTION = [
   "Run an isolated subagent with a mission, optional role, context, model, reasoning, tools, and skills.",
@@ -60,7 +63,7 @@ function errorProgress(progress: TaskProgress | undefined, handleId: string, par
     role: progress?.role ?? params.role ?? TASK_TOOL_NAME,
     tools: progress?.tools ?? params.tools ?? [],
     verificationCommands: progress?.verificationCommands ?? params.verificationCommands ?? [],
-    currentTask: "Stopped",
+    currentTask: STOPPED_TASK_LABEL,
     status: "error",
     model: progress?.model,
     thinkingLevel: progress?.thinkingLevel,

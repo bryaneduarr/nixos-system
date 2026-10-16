@@ -1,35 +1,16 @@
-export const READ_ONLY_SUBAGENT_TOOLS = ["read", "grep", "find", "ls"] as const;
-export const APPROVED_COMMAND_TOOL = "approved_command" as const;
-export const TASK_TOOL_NAME = "task" as const;
-
-export const SUBAGENT_TOOLS = [...READ_ONLY_SUBAGENT_TOOLS, "bash", "edit", "write", APPROVED_COMMAND_TOOL] as const;
-export const DEFAULT_SUBAGENT_TOOLS = READ_ONLY_SUBAGENT_TOOLS;
-const LEGACY_SUBAGENT_TOOLS = [...READ_ONLY_SUBAGENT_TOOLS, "bash", "edit", "write"] as const;
-
-export const TASK_ROLES = [TASK_TOOL_NAME, "explore", "implement", "verify"] as const;
-
-export type TaskRole = (typeof TASK_ROLES)[number];
-export type SubagentTool = (typeof SUBAGENT_TOOLS)[number];
-
-export interface TaskRoleInput {
-  role?: unknown;
-  tools?: readonly string[];
-  verificationCommands?: readonly string[];
-}
-
-export interface ResolvedTaskRole {
-  role: TaskRole;
-  tools: SubagentTool[];
-  verificationCommands: string[];
-  instruction: string;
-}
-
-interface TaskRoleDefinition {
-  defaultTools: readonly SubagentTool[];
-  allowedTools: readonly SubagentTool[];
-  instruction: string;
-  acceptsVerificationCommands: boolean;
-}
+import {
+  APPROVED_COMMAND_TOOL,
+  DEFAULT_SUBAGENT_TOOLS,
+  LEGACY_SUBAGENT_TOOLS,
+  READ_ONLY_SUBAGENT_TOOLS,
+  TASK_ROLES,
+  TASK_TOOL_NAME,
+} from "../constants/subagents/roles.constant.ts";
+import type { ResolvedTaskRole } from "../types/subagents/roles/resolved-task-role.interface.ts";
+import type { SubagentTool } from "../types/subagents/roles/subagent-tool.interface.ts";
+import type { TaskRole } from "../types/subagents/roles/task-role.interface.ts";
+import type { TaskRoleDefinition } from "../types/subagents/roles/task-role-definition.interface.ts";
+import type { TaskRoleInput } from "../types/subagents/roles/task-role-input.interface.ts";
 
 const ROLE_DEFINITIONS: Record<TaskRole, TaskRoleDefinition> = {
   task: {

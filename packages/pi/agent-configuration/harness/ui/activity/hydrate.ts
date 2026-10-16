@@ -6,8 +6,8 @@ import {
   readSubagentUsage,
 } from "../../activity/parse.ts";
 import { type ActivityStatus, activityStore } from "../../activity/store.ts";
+import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { taskResultFailed } from "../../subagents/result.ts";
-import { TASK_TOOL_NAME } from "../../subagents/roles.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import { extractText, resultFailed } from "../tool-renderer.ts";
 import { recordThinking, recordUpdate, recordUserMessage, safeParseTimestamp } from "./records.ts";

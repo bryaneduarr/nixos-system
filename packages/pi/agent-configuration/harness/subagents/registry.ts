@@ -1,19 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { STARTING_TASK_LABEL, STOPPED_TASK_LABEL } from "../constants/subagents/progress.constant.ts";
+import type { SubagentHandle } from "../types/subagents/registry/subagent-handle.interface.ts";
+import type { SubagentRun } from "../types/subagents/registry/subagent-run.interface.ts";
+import type { TaskInput } from "../types/subagents/tasks/task-input.interface.ts";
+import type { TaskProgress } from "../types/subagents/tasks/task-progress.interface.ts";
 import { ImplementationQueue } from "./implementation-queue.ts";
 import { resolveTaskRole } from "./roles.ts";
-import { runTask, type TaskInput, type TaskProgress, type TaskResult } from "./runner.ts";
-
-export interface SubagentHandle {
-  id: string;
-  result: Promise<TaskResult>;
-}
-
-interface SubagentRun {
-  controller: AbortController;
-  progress: TaskProgress;
-  result: Promise<TaskResult>;
-}
+import { runTask } from "./runner.ts";
 
 export class SubagentRegistry {
   private implementationQueue = new ImplementationQueue();
@@ -29,7 +23,7 @@ export class SubagentRegistry {
       role: resolvedRole.role,
       tools: [...resolvedRole.tools],
       verificationCommands: [...resolvedRole.verificationCommands],
-      currentTask: "Starting",
+      currentTask: STARTING_TASK_LABEL,
       status: "running",
       activity: [],
     };
@@ -53,7 +47,7 @@ export class SubagentRegistry {
 
       run.progress = {
         ...run.progress,
-        currentTask: "Stopped",
+        currentTask: STOPPED_TASK_LABEL,
         status: "error",
       };
     });

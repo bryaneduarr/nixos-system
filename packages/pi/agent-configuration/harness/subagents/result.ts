@@ -1,15 +1,8 @@
-export interface ParsedTaskOutput {
-  summary: string;
-  findings: string[];
-  unresolvedQuestions: string[];
-  checks: string[];
-  filesChanged: string[];
-  risks: string[];
-  errors: string[];
-}
+import { Value } from "typebox/value";
+import { FailedTaskDetailsSchema } from "../schemas/subagents/result/failed-task-details.schema.ts";
+import type { ParsedTaskOutput } from "../types/subagents/result/parsed-task-output.interface.ts";
 
 const RESULT_SECTIONS = "status|summary|findings|unresolved_questions|checks|files_changed|risks|errors";
-const FAILED_TASK_STATUSES = new Set(["error", "cancelled"]);
 
 function section(text: string, name: string): string[] {
   const pattern = new RegExp(`(?:^|\\r?\\n)${name}:[ \\t]*([\\s\\S]*?)(?=\\r?\\n(?:${RESULT_SECTIONS}):|$)`, "i");
@@ -23,10 +16,7 @@ function section(text: string, name: string): string[] {
 }
 
 export function taskResultFailed(details: unknown): boolean {
-  if (!details || typeof details !== "object") return false;
-
-  const status = (details as { status?: unknown }).status;
-  return typeof status === "string" && FAILED_TASK_STATUSES.has(status);
+  return Value.Check(FailedTaskDetailsSchema, details);
 }
 
 export function parseTaskOutput(text: string): ParsedTaskOutput {
