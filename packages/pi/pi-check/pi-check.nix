@@ -7,11 +7,6 @@
   typescript,
 }:
 let
-  # Bun installs platform-specific native packages, so each system needs its own hash.
-  dependencyHashes = {
-    x86_64-linux = "sha256-HBKSc8uYEeTFsMCkU5BQjGf593Tszi6ZLp84H+k9OIc=";
-  };
-
   dependencies = stdenvNoCC.mkDerivation {
     pname = "pi-check-dependencies";
     version = "0.1.0";
@@ -30,7 +25,7 @@ let
       runHook preBuild
       export HOME="$TMPDIR"
       export BUN_INSTALL_CACHE_DIR="$TMPDIR/bun-cache"
-      bun install --frozen-lockfile --ignore-scripts --no-progress
+      bun install --frozen-lockfile --ignore-scripts --no-progress --cpu='*' --os=linux
       runHook postBuild
     '';
 
@@ -43,7 +38,8 @@ let
 
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    outputHash = dependencyHashes.${stdenvNoCC.hostPlatform.system};
+    # Installing packages for every CPU keeps this hash identical on x86_64 and aarch64.
+    outputHash = "sha256-bx4yLtVF028tezx2NQm/Hs6pZ5Xhjn1JUwimYFcZRZ8=";
   };
 in
 stdenvNoCC.mkDerivation {
