@@ -1,8 +1,9 @@
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { EXIT_COMMAND_DESCRIPTION, EXIT_SHORTCUT } from "../../constants/sessions/exit.constant.ts";
 import { launchCleanupWorker } from "../../services/sessions/cleanup/launch-cleanup-worker.service.ts";
 import { runExplicitExit } from "../../services/sessions/exit/run-explicit-exit.service.ts";
 import { scopedHerdr } from "../../services/sessions/herdr/scoped-herdr.service.ts";
+import type { ExitCommandApi } from "../../types/sessions/exit/exit-command-api.interface.ts";
+import type { ExitContext } from "../../types/sessions/exit/exit-context.interface.ts";
 import type { ExitDependencies } from "../../types/sessions/exit/exit-dependencies.interface.ts";
 
 export const defaultExitDependencies: ExitDependencies = {
@@ -10,8 +11,8 @@ export const defaultExitDependencies: ExitDependencies = {
   schedule: launchCleanupWorker,
 };
 
-export function installExitCommand(pi: ExtensionAPI, dependencies: ExitDependencies): void {
-  const exit = (ctx: ExtensionContext): Promise<void> => runExplicitExit(ctx, dependencies);
+export function installExitCommand(pi: ExitCommandApi, dependencies: ExitDependencies): void {
+  const exit = (ctx: ExitContext): Promise<void> => runExplicitExit(ctx, dependencies);
   pi.registerCommand("exit", {
     description: EXIT_COMMAND_DESCRIPTION,
     handler: async (_args, ctx) => exit(ctx),

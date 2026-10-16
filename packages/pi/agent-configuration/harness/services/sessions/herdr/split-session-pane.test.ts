@@ -81,7 +81,9 @@ describe("split session pane", () => {
       };
     };
     await createHerdrSessions(store, command).create(temporary, source);
-    expect(commands[1]?.slice(0, 6)).toEqual(["pane", "split", "--pane", source.pane, "--direction", "down"]);
+    expect(commands.filter((args) => args[1] === "split").map((args) => args.slice(0, 6))).toEqual([
+      ["pane", "split", "--pane", source.pane, "--direction", "down"],
+    ]);
     expect(commands.some((args) => args[0] === "tab" || args[0] === "workspace")).toBe(false);
   });
 

@@ -47,7 +47,7 @@ describe("createHerdrSessions", () => {
     expect(commands[0]).toContain(path);
     expect(commands[4]).toContain("--agent-session-id");
     expect(commands[4]).toContain(row.sessionId);
-    expect(commands.at(-1)?.[1]).toBe("release-agent");
+    expect(commands.map((args) => args[1]).at(-1)).toBe("release-agent");
 
     const sequences = commands.map((args) => Number(args[args.indexOf("--seq") + 1]));
     for (const [index, args] of commands.entries()) {

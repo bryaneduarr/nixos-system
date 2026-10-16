@@ -1,6 +1,6 @@
-import type { Theme } from "@earendil-works/pi-coding-agent";
 import type { ValueState } from "../../activity/value-state.interface.ts";
 import type { LiveSession } from "../registry/live-session.interface.ts";
+import type { SessionMenuTheme } from "./session-menu-theme.interface.ts";
 
 /* Snapshot of the session menu that one render turns into terminal lines. */
 export interface SessionMenuView {
@@ -9,7 +9,7 @@ export interface SessionMenuView {
   /* Height of the terminal in rows, which bounds the number of listed sessions. */
   readonly terminalRows: number;
   /* Theme that colors the menu lines. */
-  readonly theme: Theme;
+  readonly theme: SessionMenuTheme;
   /* Sessions that match the current filter, in display order. */
   readonly rows: readonly LiveSession[];
   /* Identity of the highlighted session, absent when no session is listed. */
