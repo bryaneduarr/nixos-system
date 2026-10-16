@@ -4,13 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import clearExtension from "./clear-session.ts";
+import lastModelExtension from "./last-model/index.ts";
 
 const stateHome = mkdtempSync(join(tmpdir(), "pi-clear-test-"));
 process.env.XDG_STATE_HOME = stateHome;
 afterAll(() => rmSync(stateHome, { recursive: true, force: true }));
-
-// Import after setting XDG_STATE_HOME; the extension resolves the state path at load time.
-const { default: lastModelExtension } = await import("./last-model/index.ts");
 
 interface FakeModel {
   readonly provider: string;
