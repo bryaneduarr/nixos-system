@@ -7,11 +7,12 @@ import {
 import type { SymbolLineLookup } from "../../../types/tools/read/symbol-line-lookup.interface.ts";
 
 function symbolOnLine(line: string): SymbolLineLookup {
-  const declarationName = SYMBOL_DECLARATION_PATTERN.exec(line)?.[1];
-  if (declarationName !== undefined) return { found: true, name: declarationName };
+  const declaration = SYMBOL_DECLARATION_PATTERN.exec(line);
+  if (declaration !== null && declaration[1] !== undefined) return { found: true, name: declaration[1] };
   if (!INDENTED_LINE_PATTERN.test(line)) return { found: false };
-  const methodName = METHOD_DECLARATION_PATTERN.exec(line)?.[1];
-  return methodName === undefined ? { found: false } : { found: true, name: `${methodName}()` };
+  const method = METHOD_DECLARATION_PATTERN.exec(line);
+  if (method === null) return { found: false };
+  return method[1] === undefined ? { found: false } : { found: true, name: `${method[1]}()` };
 }
 
 export function listSymbols(lines: readonly string[]): string[] {

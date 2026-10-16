@@ -30,10 +30,12 @@ export async function rgMatches(
     const parsedLine = parseJsonLine(rawLine, RgEventSchema);
     if (!parsedLine.valid || parsedLine.event.type !== "match") continue;
     const event = parsedLine.event;
+    const matchedLine = event.data.lines;
+    const lineText = matchedLine !== undefined && matchedLine.text !== undefined ? matchedLine.text : "";
     matches.push({
       file: event.data.path.text,
       line: event.data.line_number,
-      text: (event.data.lines?.text ?? "").replace(/\r?\n$/, ""),
+      text: lineText.replace(/\r?\n$/, ""),
     });
   }
   return matches;

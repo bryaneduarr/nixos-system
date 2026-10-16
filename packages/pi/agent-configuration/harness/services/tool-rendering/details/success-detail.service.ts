@@ -35,7 +35,10 @@ function readDetail(text: string): string {
 function editDetail(text: string): string {
   const diff = /\+(\d+) -(\d+)/.exec(text);
   if (diff) return `+${diff[1]} -${diff[2]}`;
-  if (text.startsWith("Moved:")) return text.split(/\r?\n/)[1]?.trim() ?? "Moved";
+  if (text.startsWith("Moved:")) {
+    const movedPath = text.split(/\r?\n/)[1];
+    return movedPath === undefined ? "Moved" : movedPath.trim();
+  }
   return DONE_DETAIL_LABEL;
 }
 
@@ -45,7 +48,8 @@ export function successDetail(tool: HarnessTool, text: string): string[] {
       const header = /^search ".*" \(([^)]+)\)/.exec(firstLine(text));
       if (/No (?:matches|files|structural)/.test(text)) return ["0 matches"];
       const count = countSearchEntries(text);
-      const kind = header?.[1] && !header[1].includes("fallback") ? ` (${header[1]})` : "";
+      const headerKind = header === null ? undefined : header[1];
+      const kind = headerKind !== undefined && !headerKind.includes("fallback") ? ` (${headerKind})` : "";
       return [`${count} match${count === 1 ? "" : "es"}${kind}`];
     }
     case "read":

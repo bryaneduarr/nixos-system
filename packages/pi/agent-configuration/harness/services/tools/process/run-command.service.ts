@@ -87,7 +87,7 @@ export async function runCommand(request: ExecRequest): Promise<ExecResult> {
       });
     });
 
-    child.on("close", (code: number | null) => {
+    child.on("close", (code) => {
       finish({
         stdout,
         stderr,
