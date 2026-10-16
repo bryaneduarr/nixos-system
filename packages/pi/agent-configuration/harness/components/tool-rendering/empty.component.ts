@@ -5,9 +5,7 @@ class EmptyComponent implements Component {
     return [];
   }
 
-  invalidate(): void {
-    return;
-  }
+  invalidate(): void {}
 }
 
 export const EMPTY = new EmptyComponent();

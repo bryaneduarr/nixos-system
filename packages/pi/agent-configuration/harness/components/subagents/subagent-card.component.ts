@@ -14,6 +14,7 @@ import {
 import { COMPLETED_TASK_LABEL, STARTING_TASK_LABEL } from "../../constants/subagents/progress.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
 import { presentValue } from "../../services/activity/value/present-value.service.ts";
+import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
 import { oneLine } from "../../services/tool-rendering/text/one-line.service.ts";
 import type { SubToolActivity } from "../../types/activity/sub-tool-activity.interface.ts";
 import type { TaskProgress } from "../../types/subagents/tasks/task-progress.interface.ts";
@@ -113,7 +114,13 @@ export function renderSubagentCard(
   const color = status === "error" ? "error" : "accent";
   const elapsedStartedAt = call?.status === "running" ? call.startedAt : undefined;
 
-  box.setContent(titleLine, lines, toolCallId, color, elapsedStartedAt);
+  box.setContent({
+    title: titleLine,
+    lines,
+    toolCall: toValueState(toolCallId),
+    color,
+    elapsedStartedAt: toValueState(elapsedStartedAt),
+  });
   return box;
 }
 

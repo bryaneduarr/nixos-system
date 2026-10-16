@@ -1,19 +1,26 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
+import { DONE_DETAIL_LABEL } from "../../../constants/tool-rendering/done-detail-label.constant.ts";
+import {
+  ERROR_DETAIL_FALLBACK,
+  FAILED_LABEL,
+  OK_DETAIL_FALLBACK,
+  RUNNING_LABEL,
+} from "../../../constants/tool-rendering/presentation-label.constant.ts";
 import type { HarnessPresentation } from "../../../types/tool-rendering/harness-presentation.interface.ts";
 
 export function presentationLines(presentation: HarnessPresentation, theme: Theme): string[] {
   const lines = [theme.fg("text", presentation.target)];
   if (presentation.state === "running") {
-    lines.push(theme.fg("warning", "Running..."));
+    lines.push(theme.fg("warning", RUNNING_LABEL));
     return lines;
   }
   const [first, ...rest] = presentation.details;
   if (presentation.state === "error") {
-    lines.push(theme.fg("error", `Failed - ${first ?? "error"}`));
+    lines.push(theme.fg("error", `${FAILED_LABEL} - ${first ?? ERROR_DETAIL_FALLBACK}`));
     for (const detail of rest) lines.push(theme.fg("error", detail));
     return lines;
   }
-  lines.push(theme.fg("success", `Done - ${first ?? "ok"}`));
+  lines.push(theme.fg("success", `${DONE_DETAIL_LABEL} - ${first ?? OK_DETAIL_FALLBACK}`));
   for (const detail of rest) lines.push(theme.fg("muted", detail));
   return lines;
 }
