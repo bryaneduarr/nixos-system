@@ -1,8 +1,8 @@
 # Commands
 
-Evidence: 2026-10-15 UTC; `32ac1c9`; source-inspected, `command -v` checked.
+Evidence: 2026-10-15 UTC; `e5b5d36` plus uncommitted reorganization; source-inspected, `command -v` checked.
 
-- `nrs [build|dry-build]` runs `scripts/system-target/rebuild.sh`; `nfu` runs `scripts/update-all-packages/update-all-packages.sh` ([commands.zsh](../../../scripts/system-target/commands.zsh)).
+- `nrs [build|dry-build]` and `nfu` are commands packaged by `scripts/system-target/system-target.home.nix` and `scripts/update-all-packages/update-all-packages.home.nix`.
 - Eval tests: `nix eval --impure --json --file <path>.test.nix`; they sit beside their subjects ([verification guide](../../methods/verification-and-tools.md)).
-- Pi tests: `bun test` in `home/packages/pi`; no tsconfig or type check exists.
-- Declared in `home/packages.nix`: statix, deadnix, nixfmt, nil, bun, biome, shellcheck, shfmt, stylua, lua-language-server. The last four reach `PATH` only after the next activation.
+- Pi tests: `bun test` in `packages/pi`; no tsconfig or type check exists.
+- Tools come from `packages/nix-tools/` (statix, deadnix, nixfmt, nil) and `packages/development-tools/` (biome, shellcheck, shfmt, stylua, lua-language-server); new tools need activation.
