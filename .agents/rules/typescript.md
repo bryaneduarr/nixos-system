@@ -29,6 +29,7 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 - Library types keep their own optional fields, and input schemas for external callers (tool parameters, settings files) may declare optional input fields. Convert them once at the boundary into the project's required values or unions, then use only the converted value.
 - List every file that performs such a conversion in the project's `rule-audit-boundaries.json` with the rule it needs and a one-line reason. Any other file must pass the rule audit without exceptions.
 - Tests do not cast fakes. When a function needs only part of a library object, type its parameter as a small interface of what it uses, so tests pass plain objects.
+- Exception: a `<subject>.test-double.ts` may cast a fake to a library type that cannot be constructed, such as an API with per-event overloads or classes with private members. Keep the cast in the test double, never in a test, and list the file in `rule-audit-boundaries.json` with the reason.
 - Never fill absence with fabricated defaults such as empty strings, zero, or empty objects.
 - Do not use optional chaining to work around contracts the project owns. Fix the contract or narrow explicitly.
 - Handle empty strings, empty collections, failed lookups, missing processes, and closed sockets deliberately.
