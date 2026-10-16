@@ -238,14 +238,14 @@ All paths below are relative to `packages/pi/`.
 
 | Existing path | Current behavior | Planned relationship |
 | --- | --- | --- |
-| `agent-configuration/harness/subagents/runner.ts` | One SDK prompt with in-memory history, followed by disposal | Reuse verified session construction patterns, not the one-shot lifecycle |
-| `agent-configuration/harness/subagents/roles.ts` | Legacy task, explore, implement, and verify permissions | Preserve existing roles and define separate group capabilities |
-| `agent-configuration/harness/subagents/approved-command.ts` | Exact command matching | Reuse only after cancellation and side-effect tests |
-| `agent-configuration/harness/subagents/registry.ts` | One-shot task status and fire-and-forget cancellation | Do not use as proof of group cancellation acknowledgement |
+| `agent-configuration/harness/services/subagents/tasks/run-task.service.ts` | One SDK prompt with in-memory history, followed by disposal | Reuse verified session construction patterns, not the one-shot lifecycle |
+| `agent-configuration/harness/services/subagents/roles/` | Legacy task, explore, implement, and verify permissions | Preserve existing roles and define separate group capabilities |
+| `agent-configuration/harness/services/subagents/approved-command/` | Exact command matching | Reuse only after cancellation and side-effect tests |
+| `agent-configuration/harness/services/subagents/registry/` | One-shot task status and fire-and-forget cancellation | Do not use as proof of group cancellation acknowledgement |
 | `agent-configuration/harness/index.ts` | Main-session tool registration and allowlist | Register group tools without changing legacy task behavior |
-| `agent-configuration/harness/ui/inspector/` | Tools, Subagents, and Messages pages | Add Groups without replacing existing pages |
-| `agent-configuration/harness/ui/activity/events.ts` | Inspector shortcut and activity subscriptions | Connect group activity and interruption handling |
-| `agent-configuration/harness/sessions/` | Interactive Herdr processes and exit flow | Preserve terminal behavior, integrate group shutdown only |
+| `agent-configuration/harness/{components,services}/inspector/` | Tools, Subagents, and Messages pages | Add Groups without replacing existing pages |
+| `agent-configuration/harness/services/activity/events/` | Inspector shortcut and activity subscriptions | Connect group activity and interruption handling |
+| `agent-configuration/harness/{commands,components,services}/sessions/` | Interactive Herdr processes and exit flow | Preserve terminal behavior, integrate group shutdown only |
 | `home-manager/managed-files.nix` | Installs the harness directory | Keep design docs and `.agents/` out of installed configuration |
 
 The approved behavior requires new host-owned enforcement. Pi's session API does not provide a ready-made group controller or shared task board.

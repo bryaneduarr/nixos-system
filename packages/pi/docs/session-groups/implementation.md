@@ -17,16 +17,16 @@ When local dependencies are absent, the test suite can fail at module resolution
 
 ## Organize the feature
 
-Keep group state and execution in the proposed `agent-configuration/harness/groups/` directory. These paths are relative to `packages/pi/` and do not exist yet.
+Keep group state and execution in proposed `groups` domain folders inside the harness role roots, such as `agent-configuration/harness/services/groups/` and `agent-configuration/harness/types/groups/`. These paths are relative to `packages/pi/` and do not exist yet.
 
-- Keep lifecycle, role policy, and budgets at the feature root.
-- Put task contracts, dependencies, ownership, and acceptance in `groups/board/`.
-- Put session creation, activation, and confirmed cancellation in `groups/runtime/`.
-- Put message routing and deferred waits in `groups/messaging/`.
-- Put private archives and read-only recovery in `groups/history/`.
-- Put tool schemas and registration in `groups/tools/`.
-- Put Groups-specific presentation in `ui/inspector/groups/`.
-- Add focused tests under `tests/session-groups/`.
+- Keep lifecycle, role policy, and budgets directly in `services/groups/`, `types/groups/`, and `constants/groups/`.
+- Put task contracts, dependencies, ownership, and acceptance in the `groups/board/` folders of `types/` and `services/`.
+- Put session creation, activation, and confirmed cancellation in `services/groups/runtime/`.
+- Put message routing and deferred waits in `services/groups/messaging/`.
+- Put private archives and read-only recovery in `services/groups/history/`.
+- Put tool schemas in `schemas/groups/` and each tool registration in `tools/<tool>/`.
+- Put Groups-specific presentation in `components/inspector/groups/`.
+- Add focused tests next to each session-groups file they check.
 
 Create modules when a phase needs them, not as empty scaffolding. Keep each mutation or runtime operation small enough to test independently. Extract code from legacy subagents only when both features actually reuse the same responsibility.
 
@@ -61,7 +61,7 @@ Build pure state transitions without creating SDK sessions.
 5. Implement shared accounting for active slots, lifetime membership, depth, activations, messages, and active assignment time.
 6. Track a stable goal identity across recovery and replacement. Reject fresh-group budget resets for the same unfinished goal without user authorization.
 
-Add proposed `tests/session-groups/board.test.ts` and `policy.test.ts`. Use fake clocks and deterministic IDs.
+Add proposed `board` and `policy` tests next to their subjects. Use fake clocks and deterministic IDs.
 
 Gate: prove that acceptance alone unblocks dependencies, generation checks reject stale submissions, and pause or reassignment never resets consumed budgets. Prove the default depth chain of main session, coordinator, worker, and delegated worker. Distinguish queued capacity from exhausted cumulative budgets. Test the final allowed activation and member creation at the depth boundary.
 
@@ -78,7 +78,7 @@ Build history storage before live persistent members become available.
 5. Recover closed and interrupted groups as read-only records without creating SDK sessions.
 6. Handle incomplete final writes, corrupt records, missing artifacts, and unsupported schema versions without dispatching work.
 
-Add proposed `tests/session-groups/history.test.ts`.
+Add proposed `history` tests next to their subject.
 
 Gate: opening history performs zero model calls, sends zero messages, and starts zero member sessions. Recover a setup-only group with no conversation file. Preserve interrupted evidence without treating the group as live.
 
@@ -96,7 +96,7 @@ Connect the tested controller to SDK sessions behind an internal, unavailable-to
 6. Connect main conversation replacement and shutdown to group closure. Connect user interruption to pause using the adapter verified in Phase 0.
 7. Isolate worker failures and pause on coordinator failure. Require explicit main-session recovery.
 
-Add proposed `tests/session-groups/runtime.test.ts` and `lifecycle.test.ts`. Use an injectable session factory for deterministic tests and a small real-SDK integration test for the verified boundary.
+Add proposed `runtime` and `lifecycle` tests next to their subjects. Use an injectable session factory for deterministic tests and a small real-SDK integration test for the verified boundary.
 
 Gate: prove that a second assignment reuses the member conversation, closed members cannot activate, and old executions cannot mutate board state. Confirm cancellation before transferring ownership. Do not report closure merely because abort was requested.
 
@@ -114,7 +114,7 @@ Route messages through the same controller that owns assignments and budgets.
 6. Schedule authorized follow-ups fairly within the four-active-member limit. Keep queued work dormant while paused.
 7. Record delivery failure, stopped recipients, duplicate message handling, and members awaiting cancelled descendants.
 
-Add proposed `tests/session-groups/messaging.test.ts` and `scheduling.test.ts`.
+Add proposed `messaging` and `scheduling` tests next to their subjects.
 
 Gate: fill every active slot, then exercise queued delegation and peer waits without deadlock. Demonstrate that updates do not spend activations. Demonstrate that a paused group cannot be awakened by message arrival. Reject stale and out-of-scope requests. Keep requests for dependency-blocked assignments dormant and require coordinator action for submitted or terminal tasks.
 
@@ -133,7 +133,7 @@ Expose only complete, host-enforced operations. Keep group startup explicitly ga
 7. Add main-session guidance for selective group creation, final outcome checks, and explicit closure.
 8. Integrate management tool names with `harness/index.ts` registration and allowlist enforcement. Preserve all legacy task parameters and roles.
 
-Add proposed `tests/session-groups/tools.test.ts` and `coordination.test.ts`. Retain existing `subagent-roles.test.ts`, `subagent-implementation-queue.test.ts`, and `subagent-card.test.ts` coverage.
+Add proposed `tools` and `coordination` tests next to their subjects. Retain existing subagent role, implementation queue, and subagent card coverage.
 
 Gate: reject forged sender identities, unauthorized coordinator creation, cross-group routing, broader child permissions, and autonomous limit increases. Verify that no group starts for an ordinary main-session task.
 
@@ -143,16 +143,16 @@ Require the main session to approve each task's exact verification-command list.
 
 Integrate into the existing inspector instead of opening a competing overlay.
 
-1. Add the Groups destination to `ui/inspector/input.ts` and `frame.ts`. Preserve existing numeric destinations and keyboard behavior.
-2. Add Groups-specific board and member views under `ui/inspector/groups/`.
-3. Connect group state and history subscriptions through `ui/inspector/index.ts`, `navigation.ts`, and `view.ts`.
+1. Add the Groups destination to `services/inspector/input/` and `components/inspector/frame-modal.component.ts`. Preserve existing numeric destinations and keyboard behavior.
+2. Add Groups-specific board and member views under `components/inspector/groups/`.
+3. Connect group state and history subscriptions through `components/inspector/inspector-overlay.component.ts`, `services/inspector/navigation/`, and `components/inspector/render-inspector.component.ts`.
 4. Render groups even when the legacy activity store is empty. Keep selection and scrolling stable during live updates.
 5. Show contracts, dependencies, submissions, member transcripts, messages, tool outputs, errors, and budgets.
 6. Add targeted instruction, member stop, group pause, resume, and close actions through the authorized controller.
 7. Make archived groups read-only. Disable runtime controls for closed, interrupted, or incompatible history.
 8. Preserve narrow-terminal layouts, mouse navigation, copying, and output-artifact inspection.
 
-Add proposed `tests/session-groups/inspector.test.ts`. Run existing activity-navigation, inspector-task-detail, inspector-usage, prompt-browser, and thinking-box tests.
+Add proposed `inspector` tests next to their subject. Run the existing activity, inspector, and prompt browser tests.
 
 Gate: the Groups page works without tool-history entries and without member activation. User interventions appear in the audit history and reach the main session and coordinator. Inspector exit does not pause or close the group.
 
