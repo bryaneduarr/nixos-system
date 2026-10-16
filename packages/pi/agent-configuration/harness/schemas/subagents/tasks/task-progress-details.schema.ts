@@ -1,6 +1,6 @@
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
-import { TASK_ROLES } from "../../constants/subagents/roles.constant.ts";
+import { TASK_ROLES } from "../../../constants/subagents/roles.constant.ts";
 
 export const TaskProgressDetailsSchema = Type.Object({
   /* Identifier of the subagent run. */
@@ -22,10 +22,10 @@ export const TaskProgressDetailsSchema = Type.Object({
     Type.Literal("error"),
     Type.Literal("cancelled"),
   ]),
-  /* Model metadata, validated when it is converted. */
+  /* Model metadata, absent in details persisted by older sessions. */
   model: Type.Optional(Type.Unknown()),
-  /* Reasoning level, validated when it is converted. */
+  /* Reasoning level, absent in details persisted by older sessions. */
   thinkingLevel: Type.Optional(Type.Unknown()),
-  /* Usage totals, validated when they are converted. */
+  /* Usage totals, absent in details persisted by older sessions. */
   usage: Type.Optional(Type.Unknown()),
 });

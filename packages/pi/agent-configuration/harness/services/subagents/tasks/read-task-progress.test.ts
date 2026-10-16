@@ -14,8 +14,8 @@ const PERSISTED_PROGRESS = {
 
 test("persisted task progress without optional fields converts to explicit absent states", () => {
   expect(readTaskProgress(PERSISTED_PROGRESS)).toEqual({
-    state: "present",
-    value: {
+    found: true,
+    progress: {
       id: "run-1",
       title: "Map parser",
       role: "explore",
@@ -32,6 +32,6 @@ test("persisted task progress without optional fields converts to explicit absen
 });
 
 test("task progress with an unknown role or status is rejected", () => {
-  expect(readTaskProgress({ ...PERSISTED_PROGRESS, role: "unknown" })).toEqual({ state: "absent" });
-  expect(readTaskProgress({ ...PERSISTED_PROGRESS, status: "paused" })).toEqual({ state: "absent" });
+  expect(readTaskProgress({ ...PERSISTED_PROGRESS, role: "unknown" })).toEqual({ found: false });
+  expect(readTaskProgress({ ...PERSISTED_PROGRESS, status: "paused" })).toEqual({ found: false });
 });

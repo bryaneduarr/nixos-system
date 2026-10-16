@@ -6,9 +6,9 @@ import { isRecord } from "./is-record.service.ts";
 
 export function readSubActivity(details: unknown): SubToolActivity[] {
   if (!isRecord(details) || !Array.isArray(details.activity)) return [];
-  return details.activity.flatMap((item: unknown) => {
-    if (!Value.Check(SubToolActivityRecordSchema, item)) return [];
-    return [toSubToolActivity(item)];
+  return details.activity.flatMap((rawActivity: unknown) => {
+    if (!Value.Check(SubToolActivityRecordSchema, rawActivity)) return [];
+    return [toSubToolActivity(rawActivity)];
   });
 }
 

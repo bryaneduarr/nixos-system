@@ -5,8 +5,8 @@ import { countMessageEntries } from "./count-message-entries.service.ts";
 import { readUserMessageText } from "./read-user-message-text.service.ts";
 
 export function recordUserMessage(id: string, content: unknown, cwd: string, startedAt: number): void {
-  const number = countMessageEntries() + 1;
-  activityStore.begin({ id, toolName: MESSAGE_ACTIVITY_NAME, args: { number }, cwd, startedAt });
+  const messageNumber = countMessageEntries() + 1;
+  activityStore.begin({ id, toolName: MESSAGE_ACTIVITY_NAME, args: { number: messageNumber }, cwd, startedAt });
   activityStore.finish(id, {
     ...NO_TOOL_RESULT_FIELDS,
     text: readUserMessageText(content),

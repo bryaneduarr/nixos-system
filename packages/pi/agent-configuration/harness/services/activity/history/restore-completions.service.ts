@@ -1,5 +1,6 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { ACTIVITY_COMPLETION_ENTRY } from "../../../constants/activity/activity-keys.constant.ts";
+import type { CompletionEntryData } from "../../../types/activity/completion-entry-data.interface.ts";
 import { isRecord } from "../parsing/is-record.service.ts";
 import { readAssistantActivity } from "../parsing/read-assistant-activity.service.ts";
 import { activitySummaryState } from "../summary/shared-activity-summary-state.service.ts";
@@ -14,23 +15,27 @@ export function restoreCompletions(ctx: ExtensionContext): void {
         continue;
       }
       const isStoppedAssistant = entry.message.role === "assistant" && entry.message.stopReason === "stop";
-      if (isStoppedAssistant && messageNumber > 0 && isFinalAnswer(entry.message)) {
+      const isCompletedTurn = isStoppedAssistant && messageNumber > 0 && isFinalAnswer(entry.message);
+      if (isCompletedTurn) {
         activitySummaryState.setCompletion(messageNumber, parseTimestamp(entry.timestamp));
       }
       continue;
     }
-    if (entry.type === "custom" && entry.customType === ACTIVITY_COMPLETION_ENTRY && isCompletionData(entry.data)) {
+    const isCompletionEntry = entry.type === "custom" && entry.customType === ACTIVITY_COMPLETION_ENTRY;
+    if (isCompletionEntry && isCompletionData(entry.data)) {
       activitySummaryState.setCompletion(entry.data.messageNumber, entry.data.completedAt);
     }
   }
 }
 
 function isFinalAnswer(message: unknown): boolean {
-  const trace = readAssistantActivity(message);
-  return trace.found && !trace.snapshot.hasToolCall && trace.snapshot.response.trim() !== "";
+  const assistantActivity = readAssistantActivity(message);
+  if (!assistantActivity.found) return false;
+  const hasResponseText = assistantActivity.snapshot.response.trim() !== "";
+  return !assistantActivity.snapshot.hasToolCall && hasResponseText;
 }
 
-function isCompletionData(data: unknown): data is { readonly messageNumber: number; readonly completedAt: number } {
+function isCompletionData(data: unknown): data is CompletionEntryData {
   if (!isRecord(data)) return false;
   const hasMessageNumber = typeof data.messageNumber === "number";
   const hasCompletedAt = typeof data.completedAt === "number" && Number.isFinite(data.completedAt);

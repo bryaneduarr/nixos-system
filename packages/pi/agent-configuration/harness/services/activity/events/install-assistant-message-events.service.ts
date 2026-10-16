@@ -1,0 +1,53 @@
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ActivityPublisher } from "../../../types/activity/activity-publisher.interface.ts";
+import type { AgentActivityPhase } from "../../../types/activity/agent-activity.interface.ts";
+import type { AssistantActivityLookup } from "../../../types/activity/assistant-activity-lookup.interface.ts";
+import type { AssistantMessageRecorder } from "../../../types/activity/assistant-message-recorder.interface.ts";
+import { recordUserMessage } from "../history/record-user-message.service.ts";
+import { activityStore } from "../store/shared-activity-store.service.ts";
+import { phaseForAssistantEvent } from "./phase-for-assistant-event.service.ts";
+
+export function installAssistantMessageEvents(
+  pi: ExtensionAPI,
+  publisher: ActivityPublisher,
+  assistantRecorder: AssistantMessageRecorder,
+): void {
+  let userMessageSequence = 0;
+
+  pi.on("message_start", (event, ctx) => {
+    if (event.message.role === "user") {
+      userMessageSequence++;
+      recordUserMessage(`message-live-${userMessageSequence}`, event.message.content, ctx.cwd, Date.now());
+      publisher.publish(ctx);
+      return;
+    }
+    assistantRecorder.start(event.message);
+  });
+
+  pi.on("message_update", (event, ctx) => {
+    const assistantActivity = assistantRecorder.update(event.message, ctx.cwd);
+    if (!assistantActivity.found) return;
+    publisher.touch(ctx);
+    const phase = phaseForAssistantEvent(event.assistantMessageEvent.type, assistantActivity.snapshot.hasToolCall);
+    publishAssistantText(assistantActivity, phase);
+  });
+
+  pi.on("message_end", (event, ctx) => {
+    publisher.touch(ctx);
+    const assistantActivity = assistantRecorder.end(event.message, ctx.cwd);
+    if (!assistantActivity.found) return;
+    publisher.publish(ctx);
+    publishAssistantText(assistantActivity, assistantActivity.snapshot.hasToolCall ? "working" : "responding");
+  });
+}
+
+function publishAssistantText(assistantActivity: AssistantActivityLookup, phase: AgentActivityPhase): void {
+  if (!assistantActivity.found) return;
+  activityStore.setPhase(phase);
+  activityStore.setAssistantText({
+    thinking: assistantActivity.snapshot.thinking,
+    thinkingRedacted: assistantActivity.snapshot.thinkingRedacted,
+    response: assistantActivity.snapshot.response,
+    updatedAt: Date.now(),
+  });
+}

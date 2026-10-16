@@ -9,9 +9,9 @@ import { recordUpdate } from "./record-update.service.ts";
 
 export function hydrateAssistantMessage(input: HydrateAssistantInput): void {
   const { entryId, message, cwd, startedAt } = input;
-  const trace = readAssistantActivity(message);
-  if (trace.found) {
-    hydrateAssistantText(entryId, trace.snapshot, cwd, startedAt);
+  const assistantActivity = readAssistantActivity(message);
+  if (assistantActivity.found) {
+    hydrateAssistantText(entryId, assistantActivity.snapshot, cwd, startedAt);
   }
   if (Array.isArray(message.content)) {
     hydrateToolCalls(message.content, cwd, startedAt);
