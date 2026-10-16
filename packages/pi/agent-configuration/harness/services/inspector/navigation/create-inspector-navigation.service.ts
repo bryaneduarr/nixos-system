@@ -1,10 +1,17 @@
+import {
+  DETAIL_SCROLL_TO_END,
+  SUBAGENT_JUMP_CHROME_ROWS,
+  SUBAGENT_STEP_CHROME_ROWS,
+} from "../../../constants/inspector/layout.constant.ts";
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
 import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
 import type { InspectorNavigation } from "../../../types/inspector/navigation/inspector-navigation.interface.ts";
 import type { InspectorNavigationOptions } from "../../../types/inspector/navigation/inspector-navigation-options.interface.ts";
 import type { RowSelection } from "../../../types/inspector/navigation/row-selection.interface.ts";
 import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
+import { isSubagentSelected } from "../subagents/is-subagent-selected.service.ts";
 import { buildInspectorRows } from "./build-inspector-rows.service.ts";
+import { findRowAt } from "./find-row-at.service.ts";
 import { rowKey } from "./row-key.service.ts";
 
 export function createInspectorNavigation(options: InspectorNavigationOptions): InspectorNavigation {
@@ -27,8 +34,7 @@ export function createInspectorNavigation(options: InspectorNavigationOptions): 
     },
     currentRow: () => {
       const rows = navigation.buildRows();
-      const row = rows[navigation.selectedIndex(rows)];
-      return row ? { found: true, row } : { found: false };
+      return findRowAt(rows, navigation.selectedIndex(rows));
     },
     syncSelection: (rows) => {
       const lastRow = rows[rows.length - 1];
@@ -90,7 +96,7 @@ function adjustSubagentCollapse(
     navigation.expandedTasks.add(entry.id);
     const last = entry.sub.at(-1);
     navigation.selection = { kind: "row", id: last ? rowKey({ level: "sub", entry, sub: last }) : entry.id };
-    navigation.detailScroll = Number.MAX_SAFE_INTEGER;
+    navigation.detailScroll = DETAIL_SCROLL_TO_END;
   }
   options.changed();
   return true;
@@ -99,16 +105,16 @@ function adjustSubagentCollapse(
 function stepSubagents(navigation: InspectorNavigation, options: InspectorNavigationOptions, delta: number): void {
   const rows = navigation.subagentEntries();
   if (rows.length === 0) return;
-  const selectedId = navigation.subagentSelection.kind === "selected" ? navigation.subagentSelection.id : undefined;
   const current = Math.max(
     0,
-    rows.findIndex((row) => row.id === selectedId),
+    rows.findIndex((row) => isSubagentSelected(row, navigation.subagentSelection)),
   );
   const next = Math.max(0, Math.min(rows.length - 1, current + delta));
   const nextRow = rows[next];
   if (nextRow) navigation.subagentSelection = { kind: "selected", id: nextRow.id };
-  const height = Math.max(1, options.bodyHeight() - 2);
-  navigation.subagentScroll = Math.max(0, Math.min(Math.max(0, rows.length - height), Math.max(0, next - height + 1)));
+  const pageRows = Math.max(1, options.bodyHeight() - SUBAGENT_STEP_CHROME_ROWS);
+  const maxScroll = Math.max(0, rows.length - pageRows);
+  navigation.subagentScroll = Math.min(maxScroll, Math.max(0, next - pageRows + 1));
   options.changed();
 }
 
@@ -118,8 +124,8 @@ function jump(navigation: InspectorNavigation, options: InspectorNavigationOptio
     const row = where === "start" ? rows[0] : rows[rows.length - 1];
     if (row) {
       navigation.subagentSelection = { kind: "selected", id: row.id };
-      const height = Math.max(1, options.bodyHeight() - 1);
-      navigation.subagentScroll = where === "start" ? 0 : Math.max(0, rows.length - height);
+      const pageRows = Math.max(1, options.bodyHeight() - SUBAGENT_JUMP_CHROME_ROWS);
+      navigation.subagentScroll = where === "start" ? 0 : Math.max(0, rows.length - pageRows);
       options.changed();
     }
     return;

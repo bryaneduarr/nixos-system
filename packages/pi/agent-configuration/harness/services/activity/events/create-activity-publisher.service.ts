@@ -3,7 +3,7 @@ import { renderActivitySummary } from "../../../components/activity/summary.comp
 import { ACTIVITY_WIDGET_KEY } from "../../../constants/activity/activity-keys.constant.ts";
 import { SPINNER_TICK_MS } from "../../../constants/activity/spinner.constant.ts";
 import type { ActivityPublisher } from "../../../types/activity/activity-publisher.interface.ts";
-import { inspectRequestStore } from "../../inspector/request/inspect-request-store.service.ts";
+import { inspectRequestStore } from "../../inspector/request/shared-inspect-request-store.service.ts";
 import { countMessageEntries } from "../history/count-message-entries.service.ts";
 import { activitySummaryState } from "../summary/shared-activity-summary-state.service.ts";
 

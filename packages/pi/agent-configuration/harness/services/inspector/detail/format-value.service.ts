@@ -1,5 +1,7 @@
+import { LINE_BREAK_PATTERN } from "../../../constants/inspector/text.constant.ts";
+
 export function formatValue(value: unknown): string {
-  if (typeof value === "string") return value.replace(/\r?\n/g, "\n    ");
+  if (typeof value === "string") return value.replace(LINE_BREAK_PATTERN, "\n    ");
   if (value === undefined) return "";
 
   try {

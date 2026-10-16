@@ -4,7 +4,7 @@ import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/elapsed-label
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
 import { presentValue } from "../../services/activity/value/present-value.service.ts";
 import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
-import { inspectRequestStore } from "../../services/inspector/request/inspect-request-store.service.ts";
+import { inspectRequestStore } from "../../services/inspector/request/shared-inspect-request-store.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
 import type { ToolActivityLookup } from "../../types/activity/tool-activity-lookup.interface.ts";
 import type { ToolBoxCache } from "../../types/tool-rendering/tool-box-cache.interface.ts";

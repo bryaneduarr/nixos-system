@@ -9,7 +9,8 @@ const PAGE_BY_KEY: Record<string, InspectorPage> = {
 };
 
 export function handleInspectorKey(data: string, inspector: InspectorInput): void {
-  if (matchesKey(data, "escape") || matchesKey(data, "ctrl+c") || data === "q") {
+  const isCloseKey = matchesKey(data, "escape") || matchesKey(data, "ctrl+c") || data === "q";
+  if (isCloseKey) {
     inspector.close();
     return;
   }
@@ -22,7 +23,10 @@ export function handleInspectorKey(data: string, inspector: InspectorInput): voi
     inspector.switchFocus();
     return;
   }
-  if (matchesKey(data, "left") || matchesKey(data, "right") || data === "h" || data === "l") {
+  const isArrowKey = matchesKey(data, "left") || matchesKey(data, "right");
+  const isVimKey = data === "h" || data === "l";
+  const isHorizontalKey = isArrowKey || isVimKey;
+  if (isHorizontalKey) {
     handleHorizontalKey(data, inspector);
     return;
   }
@@ -38,7 +42,8 @@ export function handleInspectorKey(data: string, inspector: InspectorInput): voi
 }
 
 function handleHorizontalKey(data: string, inspector: InspectorInput): void {
-  const direction = matchesKey(data, "left") || data === "h" ? "left" : "right";
+  const isLeftKey = matchesKey(data, "left") || data === "h";
+  const direction = isLeftKey ? "left" : "right";
   if (inspector.page === "subagents" && direction === "right") {
     inspector.openSubagent();
     return;

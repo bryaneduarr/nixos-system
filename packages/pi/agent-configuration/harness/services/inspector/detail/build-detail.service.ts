@@ -1,28 +1,28 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
-import {
-  MESSAGE_ACTIVITY_NAME,
-  THINKING_ACTIVITY_NAME,
-  UPDATE_ACTIVITY_NAME,
-} from "../../../constants/activity/activity-entry.constant.ts";
+import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
 import { BLANK_DETAIL_LINE } from "../../../constants/inspector/detail-line.constant.ts";
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
 import type { ActivityStatus } from "../../../types/activity/activity-status.interface.ts";
 import type { ToolActivity } from "../../../types/activity/tool-activity.interface.ts";
+import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 import type { DetailArtifact } from "../../../types/inspector/detail/detail-artifact.interface.ts";
 import type { DetailLine } from "../../../types/inspector/detail/detail-line.interface.ts";
 import type { DetailOptions } from "../../../types/inspector/detail/detail-options.interface.ts";
-import { presentValue } from "../../activity/value/present-value.service.ts";
 import { toolColor } from "../../tool-rendering/presentation/tool-color.service.ts";
 import { toolLabel } from "../../tool-rendering/presentation/tool-label.service.ts";
 import { toolTarget } from "../../tool-rendering/presentation/tool-target.service.ts";
 import { isHarnessTool } from "../../tools/is-harness-tool.service.ts";
-import { boxDetails } from "./box-details.service.ts";
+import { boxedDetailLines } from "./boxed-detail-lines.service.ts";
 import { formatDuration } from "./format-duration.service.ts";
 import { formatInput } from "./format-input.service.ts";
 import { formatOutput } from "./format-output.service.ts";
 import { formatTime } from "./format-time.service.ts";
+import { isPseudoEntryTool } from "./is-pseudo-entry-tool.service.ts";
 import { pseudoEntryLines } from "./pseudo-entry-lines.service.ts";
+import { readEndedAt } from "./read-ended-at.service.ts";
 import { taskSummaryLines } from "./task-summary-lines.service.ts";
+
+const RUNNING_LABEL = " · running";
 
 function statusColor(status: ActivityStatus): ThemeColor {
   switch (status) {
@@ -44,13 +44,9 @@ function artifactNoticeLines(entry: ToolActivity, artifact: DetailArtifact): Det
   ];
 }
 
-function isPseudoEntry(tool: string): boolean {
-  return tool === MESSAGE_ACTIVITY_NAME || tool === UPDATE_ACTIVITY_NAME || tool === THINKING_ACTIVITY_NAME;
-}
-
 function detailColor(tool: string): ThemeColor {
   if (isHarnessTool(tool)) return toolColor(tool);
-  return isPseudoEntry(tool) ? "accent" : "muted";
+  return isPseudoEntryTool(tool) ? "accent" : "muted";
 }
 
 function detailHeading(
@@ -70,9 +66,10 @@ function detailHeading(
   return { text, color: statusColor(status), bold: true };
 }
 
-function timingLabel(startedAt: number, endedAt: number | undefined): string {
-  const elapsed = formatDuration(Math.max(0, (endedAt ?? Date.now()) - startedAt));
-  const runningLabel = endedAt === undefined ? " · running" : "";
+function timingLabel(startedAt: number, endedAt: ValueState<number>): string {
+  const endTime = endedAt.state === "present" ? endedAt.value : Date.now();
+  const elapsed = formatDuration(Math.max(0, endTime - startedAt));
+  const runningLabel = endedAt.state === "absent" ? RUNNING_LABEL : "";
   return `${formatTime(startedAt)} · ${elapsed}${runningLabel}`;
 }
 
@@ -89,29 +86,28 @@ function targetLines(
 
 export function buildDetail({ row, width, artifact }: DetailOptions): DetailLine[] {
   const entry = row.entry;
-  const sub = row.level === "sub" ? row.sub : undefined;
-  const tool = sub?.toolName ?? entry.toolName;
-  const args = sub?.args ?? entry.args;
-  const status = sub?.status ?? entry.status;
-  const startedAt = sub?.startedAt ?? entry.startedAt;
-  const endedAt = (sub === undefined ? undefined : presentValue(sub.endedAt)) ?? presentValue(entry.endedAt);
-  const rawText = artifact.kind === "loaded" ? artifact.text : (sub?.text ?? entry.text);
+  const isChildCall = row.level === "sub";
+  const call = row.level === "sub" ? row.sub : entry;
+  const tool = call.toolName;
+  const args = call.args;
+  const startedAt = call.startedAt;
+  const endedAt = readEndedAt(row);
+  const rawText = artifact.kind === "loaded" ? artifact.text : call.text;
   const color = detailColor(tool);
   const timing = timingLabel(startedAt, endedAt);
   const lines: DetailLine[] = [
-    detailHeading(tool, args, status, startedAt),
-    ...targetLines(tool, args, sub !== undefined, color),
+    detailHeading(tool, args, call.status, startedAt),
+    ...targetLines(tool, args, isChildCall, color),
     BLANK_DETAIL_LINE,
   ];
 
-  const pseudoBody = pseudoEntryLines(tool, entry, startedAt, timing, rawText, width);
-  if (pseudoBody) return [...lines, ...pseudoBody];
+  if (isPseudoEntryTool(tool)) return [...lines, ...pseudoEntryLines(tool, entry, startedAt, timing, rawText, width)];
 
-  if (!sub && tool === TASK_TOOL_NAME) lines.push(...taskSummaryLines(entry));
+  if (!isChildCall && tool === TASK_TOOL_NAME) lines.push(...taskSummaryLines(entry));
 
   lines.push({ text: `INPUT  ${timing}`, color, bold: true });
   lines.push(BLANK_DETAIL_LINE);
-  lines.push(...boxDetails("input", formatInput(tool, args), color, width));
+  lines.push(...boxedDetailLines("input", formatInput(tool, args), color, width));
   lines.push(BLANK_DETAIL_LINE);
   lines.push(...artifactNoticeLines(entry, artifact));
 
@@ -119,6 +115,6 @@ export function buildDetail({ row, width, artifact }: DetailOptions): DetailLine
   const outputBoxTitle = artifact.kind === "loaded" ? "json" : "result";
   lines.push({ text: outputTitle, color, bold: true });
   lines.push(BLANK_DETAIL_LINE);
-  lines.push(...boxDetails(outputBoxTitle, formatOutput(rawText), color, width));
+  lines.push(...boxedDetailLines(outputBoxTitle, formatOutput(rawText), color, width));
   return lines;
 }

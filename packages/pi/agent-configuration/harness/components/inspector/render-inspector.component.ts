@@ -1,9 +1,5 @@
-import {
-  MESSAGE_ACTIVITY_NAME,
-  THINKING_ACTIVITY_NAME,
-  UPDATE_ACTIVITY_NAME,
-} from "../../constants/activity/activity-entry.constant.ts";
 import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
+import { isPseudoEntryTool } from "../../services/inspector/detail/is-pseudo-entry-tool.service.ts";
 import { readInspectorGeometry } from "../../services/inspector/layout/read-inspector-geometry.service.ts";
 import type { InspectorLayoutState } from "../../types/inspector/view/inspector-layout.interface.ts";
 import type { InspectorViewResult, InspectorViewState } from "../../types/inspector/view/inspector-view.interface.ts";
@@ -18,20 +14,16 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
   const { width, theme, page, focus, rows } = state;
   const geometry = readInspectorGeometry(width, state.terminalRows);
   const activityEntries = activityStore.all();
-  const totalCalls = activityEntries.filter(
-    (entry) =>
-      entry.toolName !== THINKING_ACTIVITY_NAME &&
-      entry.toolName !== MESSAGE_ACTIVITY_NAME &&
-      entry.toolName !== UPDATE_ACTIVITY_NAME,
-  ).length;
+  const totalCalls = activityEntries.filter((entry) => !isPseudoEntryTool(entry.toolName)).length;
   const phase = activityStore.currentAgent().phase;
-  const active = phase === "thinking" || phase === "working" || phase === "responding";
-  const lines = activityHeader(theme, geometry.contentWidth, totalCalls, active);
+  const isAgentWorking = phase === "thinking" || phase === "working" || phase === "responding";
+  const lines = activityHeader(theme, geometry.contentWidth, totalCalls, isAgentWorking);
 
   let layout: InspectorLayoutState = { kind: "none" };
   let { detailScroll, subagentScroll, subagentSelection, listScroll } = state;
 
-  if (activityEntries.length === 0 && phase === "idle") {
+  const isIdleWithoutActivity = activityEntries.length === 0 && phase === "idle";
+  if (isIdleWithoutActivity) {
     lines.push(...idlePrompt(geometry.contentWidth, theme));
   } else if (page === "subagents") {
     const subagentsPage = renderSubagentsPage({

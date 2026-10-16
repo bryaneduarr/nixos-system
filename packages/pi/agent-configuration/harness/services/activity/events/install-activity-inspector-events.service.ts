@@ -1,7 +1,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { INSPECT_SHORTCUT } from "../../../constants/tool-rendering/inspect-shortcut.constant.ts";
 import { openInspector } from "../../inspector/open/open-inspector.service.ts";
-import { inspectRequestStore } from "../../inspector/request/inspect-request-store.service.ts";
+import { inspectRequestStore } from "../../inspector/request/shared-inspect-request-store.service.ts";
 
 export function installActivityInspectorEvents(pi: ExtensionAPI, touch: (ctx: ExtensionContext) => void): void {
   inspectRequestStore.setOpener((ctx, selection) => {
