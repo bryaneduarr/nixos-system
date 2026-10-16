@@ -10,3 +10,6 @@ export interface SessionFile {
 export type SessionFileListing =
   | { readonly listed: true; readonly files: readonly SessionFile[] }
   | { readonly listed: false };
+
+/* Session file the history search skips, or none when the current session has no file yet. */
+export type ExcludedSessionFile = { readonly state: "excluded"; readonly path: string } | { readonly state: "none" };

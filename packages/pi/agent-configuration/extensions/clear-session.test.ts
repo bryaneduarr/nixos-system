@@ -15,11 +15,13 @@ interface FakeModel {
   readonly id: string;
 }
 
+type FakeModelLookup = ReturnType<FakeModel[]["find"]>;
+
 interface FakeRuntimeContext {
   readonly mode: "tui";
   readonly model: FakeModel;
   readonly scopedModels: readonly never[];
-  readonly modelRegistry: { readonly find: (provider: string, id: string) => FakeModel | undefined };
+  readonly modelRegistry: { readonly find: (provider: string, id: string) => FakeModelLookup };
   readonly sessionManager: { readonly getEntries: () => never[]; readonly getSessionFile: () => undefined };
 }
 
@@ -29,17 +31,19 @@ interface FakeClearContext {
 
 type FakeHandler = (event: { readonly reason: string }, ctx: FakeRuntimeContext) => Promise<void> | void;
 
+type FakeClearHandler = (args: string, ctx: FakeClearContext) => Promise<void>;
+
 function createFakeRuntime(model: FakeModel, thinkingLevel: string, availableModels: readonly FakeModel[] = [model]) {
   const handlers = new Map<string, FakeHandler>();
-  let clear: ((args: string, ctx: FakeClearContext) => Promise<void>) | undefined;
+  const clearHandlers: FakeClearHandler[] = [];
   let stale = false;
   let selectedModel = model;
   let selectedThinkingLevel = thinkingLevel;
   // The fake implements only the ExtensionAPI members these extensions call.
   const pi = {
     on: (name: string, handler: FakeHandler) => handlers.set(name, handler),
-    registerCommand: (_name: string, command: { handler: (args: string, ctx: FakeClearContext) => Promise<void> }) => {
-      clear = command.handler;
+    registerCommand: (_name: string, command: { handler: FakeClearHandler }) => {
+      clearHandlers.push(command.handler);
     },
     getThinkingLevel: () => {
       if (stale) throw new Error("stale pi");
@@ -73,7 +77,8 @@ function createFakeRuntime(model: FakeModel, thinkingLevel: string, availableMod
     return handler(event, context());
   }
   function runClear(clearContext: FakeClearContext): Promise<void> {
-    if (!clear) throw new Error("No clear command registered");
+    const [clear] = clearHandlers;
+    if (clear === undefined) throw new Error("No clear command registered");
     return clear("", clearContext);
   }
   return {
@@ -94,15 +99,14 @@ function createFakeRuntime(model: FakeModel, thinkingLevel: string, availableMod
 test("/clear preserves the active model and thinking level without accessing stale pi", async () => {
   const chosen = { provider: "example", id: "chosen" };
   const previous = createFakeRuntime(chosen, "high");
-  let replacement: ReturnType<typeof createFakeRuntime> | undefined;
+  const replacement = createFakeRuntime({ provider: "example", id: "default" }, "low", [
+    { provider: "example", id: "default" },
+    chosen,
+  ]);
   await previous.clear({
     newSession: async () => {
       await previous.emit("session_before_switch", { reason: "new" });
       previous.invalidate();
-      replacement = createFakeRuntime({ provider: "example", id: "default" }, "low", [
-        { provider: "example", id: "default" },
-        chosen,
-      ]);
       await replacement.emit("session_start", { reason: "new" });
       return { cancelled: false };
     },
@@ -113,21 +117,18 @@ test("/clear preserves the active model and thinking level without accessing sta
     id: "chosen",
     thinkingLevel: "high",
   });
-  expect(replacement?.model).toEqual(chosen);
-  expect(replacement?.thinkingLevel).toBe("high");
+  expect(replacement.model).toEqual(chosen);
+  expect(replacement.thinkingLevel).toBe("high");
 
-  let nextRuntime: ReturnType<typeof createFakeRuntime> | undefined;
-  const replacementRuntime = replacement;
-  if (!replacementRuntime) throw new Error("Replacement runtime was not created");
-  await replacementRuntime.clear({
+  const nextRuntime = createFakeRuntime({ provider: "example", id: "default" }, "low", [chosen]);
+  await replacement.clear({
     newSession: async () => {
-      await replacementRuntime.emit("session_before_switch", { reason: "new" });
-      replacementRuntime.invalidate();
-      nextRuntime = createFakeRuntime({ provider: "example", id: "default" }, "low", [chosen]);
+      await replacement.emit("session_before_switch", { reason: "new" });
+      replacement.invalidate();
       await nextRuntime.emit("session_start", { reason: "new" });
       return { cancelled: false };
     },
   });
-  expect(nextRuntime?.model).toEqual(chosen);
-  expect(nextRuntime?.thinkingLevel).toBe("high");
+  expect(nextRuntime.model).toEqual(chosen);
+  expect(nextRuntime.thinkingLevel).toBe("high");
 });
