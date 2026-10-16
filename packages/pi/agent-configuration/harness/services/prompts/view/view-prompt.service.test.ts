@@ -17,9 +17,10 @@ const plainTheme: PromptTheme = {
 
 const unusedClipboard: ClipboardWriter = () => {};
 
-function requireValue<T>(value: T | undefined, message: string): T {
-  if (value === undefined) throw new Error(message);
-  return value;
+function requireElement<T>(elements: readonly T[], index: number, message: string): T {
+  const element = elements.at(index);
+  if (element === undefined) throw new Error(message);
+  return element;
 }
 
 test("viewer scrolls the complete prompt, resizes, and closes without editing", async () => {
@@ -34,7 +35,7 @@ test("viewer scrolls the complete prompt, resizes, and closes without editing", 
       }),
   };
   const viewing = viewPrompt(ui, [{ text, label: "Latest" }], unusedClipboard);
-  const panel = requireValue(panels.at(0), "viewer did not open");
+  const panel = requireElement(panels, 0, "viewer did not open");
   expect(panel.render(40).join("\n")).toContain("line 0");
   expect(panel.render(40).join("\n")).not.toContain("line 19");
   panel.handleInput("\x1b[F");
@@ -70,7 +71,7 @@ test("viewer opens a centered overlay focused on the first item without editor w
       overlayOptions: { anchor: "center", width: "92%", maxHeight: "88%", margin: 1 },
     },
   ]);
-  const panel = requireValue(panels.at(0), "viewer did not open");
+  const panel = requireElement(panels, 0, "viewer did not open");
   expect(panel.render(100).join("\n")).toContain("[detail]");
   expect(panel.render(100).join("\n")).toContain("unsent");
   panel.handleInput("\x1b");

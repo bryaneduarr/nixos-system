@@ -14,9 +14,10 @@ const plainTheme: PromptTheme = {
 
 const timestamp = "2026-01-01T00:00:00.000Z";
 
-function requireValue<T>(value: T | undefined, message: string): T {
-  if (value === undefined) throw new Error(message);
-  return value;
+function requireElement<T>(elements: readonly T[], index: number, message: string): T {
+  const element = elements.at(index);
+  if (element === undefined) throw new Error(message);
+  return element;
 }
 
 test("installation transforms only user display and reads original branch text", async () => {
@@ -83,9 +84,9 @@ test("installation transforms only user display and reads original branch text",
     },
   };
   installPromptPreviews(pi);
-  const transform = requireValue(transforms.at(0), "transformer not registered");
-  const shortcut = requireValue(shortcuts.at(0), "shortcut not registered");
-  const command = requireValue(commands.at(0), "command not registered");
+  const transform = requireElement(transforms, 0, "transformer not registered");
+  const shortcut = requireElement(shortcuts, 0, "shortcut not registered");
+  const command = requireElement(commands, 0, "command not registered");
 
   for (const messageType of ["assistant", "assistant-thinking"]) {
     expect(transform(latest, { messageType, availableWidth: 80 })).toBe(latest);
@@ -95,7 +96,7 @@ test("installation transforms only user display and reads original branch text",
   expect(overlays).toHaveLength(1);
   await shortcut(ctx);
   expect(overlays).toHaveLength(1);
-  const openedPanel = requireValue(panels.at(0), "viewer did not open");
+  const openedPanel = requireElement(panels, 0, "viewer did not open");
   expect(openedPanel.render(80).join("\n")).toContain("original");
   openedPanel.handleInput("G");
   expect(openedPanel.render(80).join("\n")).toContain("original");
@@ -103,7 +104,7 @@ test("installation transforms only user display and reads original branch text",
   await viewing;
   const choosing = command("", ctx);
   await Promise.resolve();
-  const chosenPanel = requireValue(panels.at(1), "command did not open the browser");
+  const chosenPanel = requireElement(panels, 1, "command did not open the browser");
   chosenPanel.handleInput("\t");
   chosenPanel.handleInput("j");
   expect(chosenPanel.render(80).join("\n")).toContain("earlier");

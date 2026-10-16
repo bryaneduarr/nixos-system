@@ -47,6 +47,6 @@ export interface PromptNavigation {
   toggleSelection(mode: SelectionMode): void;
   /* Moves the cursor by words in a direction, where positive is forward. */
   word(direction: number): void;
-  /* Moves the cursor to the start or the end of the current line. */
-  lineEdge(end: boolean): void;
+  /* Moves the cursor to the start of the current line, or to its last character when toLineEnd is true. */
+  lineEdge(toLineEnd: boolean): void;
 }

@@ -63,7 +63,7 @@ test("collection uses only the current branch and preserves an unsent whitespace
     },
   ];
   const branchBefore = structuredClone(branch);
-  expect(collectPrompts(branch, draft).map((item) => item.text)).toEqual([draft, "latest\nraw", "earlier"]);
+  expect(collectPrompts(branch, draft).map((prompt) => prompt.text)).toEqual([draft, "latest\nraw", "earlier"]);
   expect(branch).toEqual(branchBefore);
   expect(collectPrompts([], draft)).toEqual([{ label: "Draft", text: draft }]);
   expect(collectPrompts([], "")).toEqual([]);
