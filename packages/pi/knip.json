@@ -8,6 +8,7 @@
     "**/*.test.ts"
   ],
   "project": ["agent-configuration/**/*.{ts,mjs}", "pi-tools/**/*.{ts,mjs}", "tests/**/*.ts"],
+  "ignoreBinaries": ["tsc", "biome"],
   "ignoreDependencies": [
     "@earendil-works/pi-agent-core",
     "@earendil-works/pi-client",

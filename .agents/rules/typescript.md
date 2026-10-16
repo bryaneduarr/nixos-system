@@ -26,7 +26,7 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 
 - Contracts the project owns never use optional properties (`usage?: SubagentUsage`), `| undefined`, or `| null`, in interfaces, parameters, or return types. Every value is present and typed end to end.
 - Model real absence or alternative states with literal-discriminated unions whose variants have only required fields, such as `{ usageState: "reported"; usage: SubagentUsage } | { usageState: "unreported" }`. A lookup that can fail returns such a union too. Handle every variant; use an exhaustive `never` check in `switch` defaults.
-- Library types keep their own optional fields. Convert them once at the boundary into the project's unions, then use only the converted value.
+- Library types keep their own optional fields, and input schemas for external callers (tool parameters, settings files) may declare optional input fields. Convert them once at the boundary into the project's required values or unions, then use only the converted value.
 - Never fill absence with fabricated defaults such as empty strings, zero, or empty objects.
 - Do not use optional chaining to work around contracts the project owns. Fix the contract or narrow explicitly.
 - Handle empty strings, empty collections, failed lookups, missing processes, and closed sockets deliberately.
