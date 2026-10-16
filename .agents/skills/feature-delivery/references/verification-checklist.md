@@ -5,7 +5,7 @@ Record every item before the first worker starts (baseline) and again before han
 ## Static checks
 
 - Project check for every TypeScript project touched: type errors, lint, unused code, tests (Pi: `bun run check`).
-- Rule audit through `check-code <paths>`; findings outside `rule-audit-boundaries.json` must be zero, and stale allowlist entries are errors.
+- Rule audit through `check-code <paths>`; findings outside the exceptions table in `.agents/rules/<project>-rule-audit.md` must be zero, and stale allowlist entries are errors.
 - `check-code` on every changed path for the other languages (Nix, shell, Lua).
 - Flake checks for the current system: `nix build .#checks.<system>.<check>`. Checks for other systems run only on those machines; list them as not yet run.
 

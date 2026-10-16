@@ -22,7 +22,7 @@ and end with the report format from the brief.
 ## Brief sections
 
 1. **Context.** One paragraph: the feature, the project, why the structure matters.
-2. **Before you start.** Read the rule files (list them). Install dependencies (such as `bun install --frozen-lockfile`). Record the baseline with tools on `PATH`, never a guessed local binary: type errors, lint, unused code, rule audit, and tests.
+2. **Before you start.** Read the rule files (list them), including the project's `.agents/rules/<project>-rule-audit.md` when one exists. Install dependencies (such as `bun install --frozen-lockfile`). Record the baseline with tools on `PATH`, never a guessed local binary: type errors, lint, unused code, rule audit, and tests.
 3. **Fixed constraints.** No behavior change. Entry files and installed paths that must stay. Files workers must not edit (Nix, lockfiles, project configs, `.agents/`). Import style. Runtime limits, such as processes that run outside the main loader.
 4. **Target layout.** Role folders and domain names every worker uses.
 5. **Areas.** A table of area, current files, and tests that move with them, plus placement hints per area.

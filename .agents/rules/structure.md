@@ -16,7 +16,7 @@ packages/<program>/          Everything one program needs: system and Home Manag
                              files, scripts, documentation, and tests.
 scripts/<tool>/              Standalone tools packaged by Nix, together with the command that runs them.
 nvim/                        Neovim Lua configuration, linked as-is by packages/neovim.
-.agents/                     Agent instructions only. Never imported by Nix.
+.agents/                     Agent instructions only. Never imported by Nix, except rule audit files read by checks.
 ```
 
 - Choose the category by what the code configures: a program the user runs goes in `packages/`, a daemon in `services/`, operating-system configuration that is neither in `system/`, and a tool started by a command in `scripts/`. Program-specific maintenance, such as a cache-cleanup timer, stays with its program.
@@ -25,6 +25,7 @@ nvim/                        Neovim Lua configuration, linked as-is by packages/
 - `hosts/<target>/` only sets options and holds hardware or platform specifics. Feature behavior belongs in its category folder.
 - The Pi harness keeps its Nix wiring and TypeScript source together in `packages/pi/`.
 - `.agents/` stays agent-facing. Do not import its skills or rules into Nix modules, install them through Home Manager, or generate system configuration from them.
+- Exception: a flake check may read `.agents/rules/<project>-rule-audit.md` as input to the rule audit. Never install it or generate configuration from it.
 
 ## Choose the deepest meaningful owner
 
@@ -55,7 +56,7 @@ nvim/                        Neovim Lua configuration, linked as-is by packages/
 
 ## TypeScript roots
 
-Every TypeScript project owns one or more roots: the Pi harness, each multi-file Pi extension, and any future TypeScript package in its own folder. A root's entry file (such as Pi's `index.ts`) registers everything, with the order of operations visible. Code lives in role roots beside it:
+Every TypeScript project owns one or more roots: the Pi harness, each multi-file Pi extension, and any future TypeScript package in its own folder. A root's entry file (such as Pi's `harness.extension.ts`, never `index.ts`) registers everything, with the order of operations visible. Code lives in role roots beside it:
 
 ```text
 types/<domain>/<operation>/        <responsibility>.interface.ts   Documented contracts.

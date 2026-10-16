@@ -27,9 +27,9 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 - Contracts the project owns never use optional properties (`usage?: SubagentUsage`), `| undefined`, or `| null`, in interfaces, parameters, or return types. Every value is present and typed end to end.
 - Model real absence or alternative states with literal-discriminated unions whose variants have only required fields, such as `{ usageState: "reported"; usage: SubagentUsage } | { usageState: "unreported" }`. A lookup that can fail returns such a union too. Handle every variant; use an exhaustive `never` check in `switch` defaults.
 - Library types keep their own optional fields, and input schemas for external callers (tool parameters, settings files) may declare optional input fields. Convert them once at the boundary into the project's required values or unions, then use only the converted value.
-- List every file that performs such a conversion in the project's `rule-audit-boundaries.json` with the rule it needs and a one-line reason. Any other file must pass the rule audit without exceptions.
+- List every file that performs such a conversion in the exceptions table of the project's rule audit file, `.agents/rules/<project>-rule-audit.md` (such as [pi-rule-audit.md](pi-rule-audit.md)), with the rule it needs and a one-line reason. Any other file must pass the rule audit without exceptions.
 - Tests do not cast fakes. When a function needs only part of a library object, type its parameter as a small interface of what it uses, so tests pass plain objects.
-- Exception: a `<subject>.test-double.ts` may cast a fake to a library type that cannot be constructed, such as an API with per-event overloads or classes with private members. Keep the cast in the test double, never in a test, and list the file in `rule-audit-boundaries.json` with the reason.
+- Exception: a `<subject>.test-double.ts` may cast a fake to a library type that cannot be constructed, such as an API with per-event overloads or classes with private members. Keep the cast in the test double, never in a test, and list the file in the project's rule audit exceptions table with the reason.
 - Never fill absence with fabricated defaults such as empty strings, zero, or empty objects.
 - Do not use optional chaining to work around contracts the project owns. Fix the contract or narrow explicitly.
 - Handle empty strings, empty collections, failed lookups, missing processes, and closed sockets deliberately.
@@ -44,7 +44,7 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 
 - Put contracts in the TypeScript root's `types/` folder, in `<responsibility>.interface.ts` files organized by domain and operation as described in [structure.md](structure.md). Put runtime schemas in `schemas/` and derive their types in the matching interface file. No global type catalog, aggregate interface, `shared/` folder, or barrel file.
 - Write every contract as an `interface`. Use a type alias only for unions, primitives, or schema-derived types an interface cannot represent.
-- Document every exported interface, type alias, and its members with a brief `/* ... */` comment that states purpose and meaning, not the primitive type. Functions are not commented; see [code-quality.md](code-quality.md).
+- Document every exported interface, type alias, and its members with a brief JSDoc `/** ... */` comment that states purpose and meaning, not the primitive type. Never use a plain `/* */` comment. Functions are not commented; see [code-quality.md](code-quality.md).
 - Document schema fields the same way. Contract comments explain purpose without file paths.
 - Names describe the actual responsibility. Avoid `Data`, `Payload`, `value`, and `item` when a specific name exists.
 
@@ -57,8 +57,8 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 
 ## Modules and imports
 
-- Name files `<specific-responsibility>.<singular-role>.ts`, where the role matches the file's role folder: `.interface`, `.schema`, `.constant`, `.service`, `.tool`, `.command`, `.component`, `.test`, or `.test-double` (typed fakes shared by several tests of one subject). For example `session-row.interface.ts`, `read-session-registry.service.ts`, `exit.command.ts`. Apply this to new files and files moved for the task.
-- Import directly from the module that owns the code. No re-exporting `index.ts` files.
+- Name files `<specific-responsibility>.<singular-role>.ts`, where the role matches the file's role folder: `.interface`, `.schema`, `.constant`, `.service`, `.tool`, `.command`, `.component`, `.extension` (a Pi extension entry file), `.test`, or `.test-double` (typed fakes shared by several tests of one subject). For example `session-row.interface.ts`, `read-session-registry.service.ts`, `exit.command.ts`. Apply this to new files and files moved for the task.
+- Import directly from the module that owns the code. No `index.ts` files: no barrels and no entry files named `index`.
 - Pi loads harness source files without a bundler, so harness imports stay relative and keep the `.ts` extension. Revisit this only together with a build step.
 - Use `node:` prefixes for Node built-ins.
 - Use typed parameter objects when several related parameters represent one input.
@@ -71,6 +71,6 @@ Before completion, run for the affected TypeScript project:
 - `biome ci` once a Biome configuration exists.
 - `knip` once a knip configuration exists.
 - `bun test` for the affected tests.
-- The rule audit, through `check-code`, once a `rule-audit-boundaries.json` exists. It reports `| undefined` and `| null` unions, `?.`, casts other than `as const`, files over 150 lines, and comments above functions.
+- The rule audit, through `check-code`. It reports `| undefined` and `| null` unions, `?.`, casts other than `as const`, plain `/* */` comments, files over 150 lines, and comments above functions. Exceptions live only in `.agents/rules/<project>-rule-audit.md`.
 
 Every Biome configuration sets `noExplicitAny`, `noNonNullAssertion`, `noDeprecatedImports`, `noExcessiveCognitiveComplexity`, and `useConst` to error.

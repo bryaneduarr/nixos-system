@@ -9,6 +9,7 @@ Before investigating, creating, changing, reviewing, or verifying anything, read
 - [Nix](.agents/rules/nix.md): when the task touches `.nix` files.
 - [Scripts and tests](.agents/rules/scripts.md): when the task touches shell scripts, standalone tools, or tests.
 - [TypeScript](.agents/rules/typescript.md): when the task touches `.ts` files.
+- [Pi rule audit](.agents/rules/pi-rule-audit.md): when the task touches TypeScript in `packages/pi/`.
 - [Neovim](.agents/rules/neovim.md): when the task touches `nvim/`.
 
 Follow every applicable rule, subject to higher-priority instructions. Do not silently waive rules or report completion with unresolved violations. Report missing instructions or irreconcilable requirements before making the affected change.
