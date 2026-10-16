@@ -1,6 +1,6 @@
 import { mkdir, readdir, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
-import { WORK_DIR } from "./config.ts";
+import { WORK_DIR } from "../constants/tools/workspace.constant.ts";
 
 export async function ensureDir(dir: string): Promise<void> {
   await mkdir(dir, { recursive: true });

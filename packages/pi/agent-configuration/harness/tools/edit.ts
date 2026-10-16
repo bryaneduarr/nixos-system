@@ -1,34 +1,11 @@
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, resolve } from "node:path";
+import type { EditParameters } from "../types/tools/edit/edit-parameters.interface.ts";
+import type { EditRequest, EditRequestValidation, TextEdit } from "../types/tools/edit/edit-request.interface.ts";
+import type { EditResult } from "../types/tools/edit/edit-result.interface.ts";
 import { addDiff, countLines, emptyDiff, formatDiffStats, replacementDiff } from "./diff.ts";
 import { stripAtPrefix } from "./format.ts";
 import { withPathLock } from "./locks.ts";
-
-export type EditOperation = "replace" | "create" | "delete" | "move";
-
-export interface TextEdit {
-  oldText: string;
-  newText: string;
-}
-
-export interface EditOptions {
-  cwd: string;
-  op: EditOperation;
-  path: string;
-  oldText?: string;
-  newText?: string;
-  edits?: TextEdit[];
-  content?: string;
-  overwrite?: boolean;
-  replaceAll?: boolean;
-  from?: string;
-  to?: string;
-}
-
-export interface EditResult {
-  summary: string;
-  changed: boolean;
-}
 
 function resolvePath(cwd: string, value: string): string {
   const raw = stripAtPrefix(value);
@@ -46,37 +23,77 @@ function countOccurrences(haystack: string, needle: string): number {
   return count;
 }
 
-export async function editFile(options: EditOptions): Promise<EditResult> {
-  const { cwd, op } = options;
-  const target = resolvePath(cwd, options.path);
+function replaceEdits(params: EditParameters): readonly TextEdit[] {
+  if (params.edits && params.edits.length > 0) return params.edits;
+  if (params.oldText !== undefined) return [{ oldText: params.oldText, newText: params.newText ?? "" }];
+  return [];
+}
+
+export function toEditRequest(cwd: string, params: EditParameters): EditRequestValidation {
+  const path = params.path ?? params.from;
+  if (!path) {
+    return { valid: false, summary: "edit failed: 'path' is required." };
+  }
+  if (params.op === "replace") {
+    return {
+      valid: true,
+      request: {
+        cwd,
+        change: { op: "replace", path, edits: replaceEdits(params), replaceAll: params.replaceAll ?? false },
+      },
+    };
+  }
+  if (params.op === "create") {
+    return {
+      valid: true,
+      request: {
+        cwd,
+        change: { op: "create", path, content: params.content ?? "", overwrite: params.overwrite ?? false },
+      },
+    };
+  }
+  if (params.op === "delete") {
+    return { valid: true, request: { cwd, change: { op: "delete", path } } };
+  }
+  if (!params.to) {
+    return { valid: false, summary: "Move failed: 'to' is required." };
+  }
+  return {
+    valid: true,
+    request: { cwd, change: { op: "move", path, destination: params.to, overwrite: params.overwrite ?? false } },
+  };
+}
+
+export async function editFile(request: EditRequest): Promise<EditResult> {
+  const { cwd, change } = request;
+  const target = resolvePath(cwd, change.path);
 
   return withPathLock(target, async () => {
-    if (op === "create") {
-      const content = options.content ?? "";
+    if (change.op === "create") {
       let exists = true;
       try {
         await readFile(target, "utf8");
       } catch {
         exists = false;
       }
-      if (exists && !options.overwrite) {
+      if (exists && !change.overwrite) {
         return {
-          summary: `Create failed: ${options.path} already exists (set overwrite=true to replace).`,
+          summary: `Create failed: ${change.path} already exists (set overwrite=true to replace).`,
           changed: false,
         };
       }
       await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, content, "utf8");
+      await writeFile(target, change.content, "utf8");
       return {
-        summary: `Created:\n${options.path}\n\n${formatDiffStats({
-          added: countLines(content),
+        summary: `Created:\n${change.path}\n\n${formatDiffStats({
+          added: countLines(change.content),
           removed: 0,
         })}`,
         changed: true,
       };
     }
 
-    if (op === "delete") {
+    if (change.op === "delete") {
       let content = "";
       try {
         content = await readFile(target, "utf8");
@@ -86,7 +103,7 @@ export async function editFile(options: EditOptions): Promise<EditResult> {
       }
       await unlink(target);
       return {
-        summary: `Deleted:\n${options.path}\n\n${formatDiffStats({
+        summary: `Deleted:\n${change.path}\n\n${formatDiffStats({
           added: 0,
           removed: countLines(content),
         })}`,
@@ -94,11 +111,8 @@ export async function editFile(options: EditOptions): Promise<EditResult> {
       };
     }
 
-    if (op === "move") {
-      if (!options.to) {
-        return { summary: "Move failed: 'to' is required.", changed: false };
-      }
-      const destination = resolvePath(cwd, options.to);
+    if (change.op === "move") {
+      const destination = resolvePath(cwd, change.destination);
       if (destination === target) {
         return { summary: "Move failed: source and destination are identical.", changed: false };
       }
@@ -108,9 +122,9 @@ export async function editFile(options: EditOptions): Promise<EditResult> {
       } catch {
         destinationExists = false;
       }
-      if (destinationExists && !options.overwrite) {
+      if (destinationExists && !change.overwrite) {
         return {
-          summary: `Move failed: ${options.to} already exists (set overwrite=true to replace).`,
+          summary: `Move failed: ${change.destination} already exists (set overwrite=true to replace).`,
           changed: false,
         };
       }
@@ -122,19 +136,12 @@ export async function editFile(options: EditOptions): Promise<EditResult> {
         return { summary: `Move failed: ${message}`, changed: false };
       }
       return {
-        summary: `Moved:\n${options.path} -> ${options.to}`,
+        summary: `Moved:\n${change.path} -> ${change.destination}`,
         changed: true,
       };
     }
 
-    const edits: TextEdit[] =
-      options.edits && options.edits.length > 0
-        ? options.edits
-        : options.oldText !== undefined
-          ? [{ oldText: options.oldText, newText: options.newText ?? "" }]
-          : [];
-
-    if (edits.length === 0) {
+    if (change.edits.length === 0) {
       return { summary: "Replace failed: no edits provided.", changed: false };
     }
 
@@ -148,26 +155,26 @@ export async function editFile(options: EditOptions): Promise<EditResult> {
 
     let next = content;
     let stats = emptyDiff();
-    for (const edit of edits) {
+    for (const edit of change.edits) {
       const occurrences = countOccurrences(next, edit.oldText);
       if (occurrences === 0) {
         return {
-          summary: `Replace failed: oldText not found in ${options.path}.\n\noldText:\n${edit.oldText}`,
+          summary: `Replace failed: oldText not found in ${change.path}.\n\noldText:\n${edit.oldText}`,
           changed: false,
         };
       }
-      if (occurrences > 1 && !options.replaceAll) {
+      if (occurrences > 1 && !change.replaceAll) {
         return {
-          summary: `Replace failed: oldText appears ${occurrences} times in ${options.path}. Provide more context or set replaceAll=true.`,
+          summary: `Replace failed: oldText appears ${occurrences} times in ${change.path}. Provide more context or set replaceAll=true.`,
           changed: false,
         };
       }
-      const replaced = options.replaceAll
+      const replaced = change.replaceAll
         ? next.split(edit.oldText).join(edit.newText)
         : next.replace(edit.oldText, edit.newText);
       if (replaced === next) {
         return {
-          summary: `Replace failed: replacement produced no change in ${options.path}.`,
+          summary: `Replace failed: replacement produced no change in ${change.path}.`,
           changed: false,
         };
       }
@@ -177,7 +184,7 @@ export async function editFile(options: EditOptions): Promise<EditResult> {
 
     await writeFile(target, next, "utf8");
     return {
-      summary: `Modified:\n${options.path}\n\n${formatDiffStats(stats)}`,
+      summary: `Modified:\n${change.path}\n\n${formatDiffStats(stats)}`,
       changed: true,
     };
   });

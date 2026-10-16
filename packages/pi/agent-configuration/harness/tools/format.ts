@@ -1,4 +1,6 @@
-import { MAX_TEXT_CHARS, MAX_TEXT_LINES } from "./config.ts";
+import { MAX_TEXT_CHARS, MAX_TEXT_LINES } from "../constants/tools/text-limits.constant.ts";
+import type { ClampedText } from "../types/tools/text/clamped-text.interface.ts";
+import type { HeadTailText } from "../types/tools/text/head-tail-text.interface.ts";
 
 export function stripAtPrefix(value: string): string {
   return value.startsWith("@") ? value.slice(1) : value;
@@ -8,11 +10,7 @@ export function splitLines(text: string): string[] {
   return text.split(/\r?\n/);
 }
 
-export function clampLines(
-  text: string,
-  maxLines: number,
-  maxChars: number,
-): { text: string; omittedLines: number; truncated: boolean } {
+export function clampLines(text: string, maxLines: number, maxChars: number): ClampedText {
   const lines = splitLines(text);
   const kept = lines.slice(0, maxLines);
   let out = kept.join("\n");
@@ -28,7 +26,7 @@ export function clampLines(
   };
 }
 
-export function headTail(text: string, head: number, tail: number): { text: string; omittedLines: number } {
+export function headTail(text: string, head: number, tail: number): HeadTailText {
   const lines = splitLines(text);
   if (lines.length <= head + tail) {
     return { text: lines.join("\n"), omittedLines: 0 };

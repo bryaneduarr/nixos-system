@@ -6,6 +6,7 @@ import {
 } from "../constants/subagents/approved-command.constant.ts";
 import { APPROVED_COMMAND_TOOL } from "../constants/subagents/roles.constant.ts";
 import { ApprovedCommandParams } from "../schemas/subagents/approved-command/approved-command-params.schema.ts";
+import { toToolCancellation } from "../services/tools/process/tool-cancellation.service.ts";
 import { runCommand } from "../tools/exec.ts";
 import { clampLines } from "../tools/format.ts";
 
@@ -27,10 +28,10 @@ export function createApprovedCommandTool(approvedCommands: readonly string[]) {
       }
 
       const result = await runCommand({
-        command: params.command,
+        command: { form: "shell", shellLine: params.command },
         cwd: ctx.cwd,
         timeoutMs: APPROVED_COMMAND_TIMEOUT_MS,
-        signal,
+        cancellation: toToolCancellation(signal),
       });
       const outputParts = [result.stdout, result.stderr].filter(Boolean);
       const separator = result.stdout && result.stderr ? "\n" : "";

@@ -1,12 +1,13 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import { Value } from "typebox/value";
 import { TextContentSchema } from "../schemas/tool-rendering/text-content.schema.ts";
-import { type HarnessTool, isHarnessTool } from "../tools/config.ts";
+import { isHarnessTool } from "../tools/config.ts";
 import type {
   HarnessPresentation,
   HarnessVisualState,
 } from "../types/tool-rendering/harness-presentation.interface.ts";
 import type { TextContent } from "../types/tool-rendering/text-content.interface.ts";
+import type { HarnessTool } from "../types/tools/harness-tool.interface.ts";
 import { oneLine } from "./formatting.ts";
 
 const TITLES: Record<HarnessTool, string> = {

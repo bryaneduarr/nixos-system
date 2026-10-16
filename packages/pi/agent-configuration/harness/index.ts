@@ -1,36 +1,29 @@
 import { writeFile } from "node:fs/promises";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { TASK_TOOL_NAME } from "./constants/subagents/roles.constant.ts";
+import { HARNESS_TOOLS, WEB_TOOLS } from "./constants/tools/harness-tools.constant.ts";
+import { DEFAULT_RUN_TIMEOUT_MS } from "./constants/tools/run-limits.constant.ts";
+import { DEFAULT_SEARCH_LIMIT } from "./constants/tools/search-limits.constant.ts";
+import {
+  EDIT_TOOL_DESCRIPTION,
+  READ_TOOL_DESCRIPTION,
+  RUN_TOOL_DESCRIPTION,
+  SEARCH_TOOL_DESCRIPTION,
+} from "./constants/tools/tool-descriptions.constant.ts";
+import { EditParamsSchema } from "./schemas/tools/edit/edit-parameters.schema.ts";
+import { ReadParamsSchema } from "./schemas/tools/read/read-parameters.schema.ts";
+import { RunParamsSchema } from "./schemas/tools/run/run-parameters.schema.ts";
+import { SearchParamsSchema } from "./schemas/tools/search/search-parameters.schema.ts";
+import { toToolCancellation } from "./services/tools/process/tool-cancellation.service.ts";
 import { installSessions } from "./sessions/install.ts";
 import { registerSubagentTool } from "./subagents/tool.ts";
-import { HARNESS_TOOLS, type HarnessTool } from "./tools/config.ts";
-import { editFile } from "./tools/edit.ts";
-import { EditParams, ReadParams, RunParams, SearchParams } from "./tools/parameters.ts";
-import { readSource } from "./tools/read.ts";
+import { editFile, toEditRequest } from "./tools/edit.ts";
+import { readSource, toReadSelection } from "./tools/read.ts";
 import { runShell } from "./tools/run.ts";
 import { searchRepo } from "./tools/search.ts";
 import { installHarnessPresentation } from "./ui/install.ts";
 import { createHarnessRenderers } from "./ui/tool-renderer.ts";
 
-const SEARCH_TOOL_DESCRIPTION = [
-  "Find filenames, text, symbols, definitions, references, tests, structural matches, or git history.",
-  "Returns a small, classified result with omitted counts.",
-].join(" ");
-const READ_TOOL_DESCRIPTION = [
-  "Read a bounded slice of a source file by path, line range, or symbol.",
-  "Large broad reads return structure and symbols instead of the whole file.",
-].join(" ");
-const EDIT_TOOL_DESCRIPTION = [
-  "Modify files with precise patches.",
-  "Supports exact replacements, file creation, deletion, and moves.",
-  "Returns a compact name and diff summary instead of the whole file.",
-].join(" ");
-const RUN_TOOL_DESCRIPTION = [
-  "Run a shell command when no specialized tool covers the operation.",
-  "Captures exit code, compresses large output, and stores the full output under .agent/runs.",
-].join(" ");
-
-const WEB_TOOLS = ["web_search", "fetch_content", "get_search_content", "source_check"] as const;
 const ALLOWED_TOOL_SET = new Set<string>([...HARNESS_TOOLS, TASK_TOOL_NAME, ...WEB_TOOLS]);
 
 function enforceActiveTools(pi: ExtensionAPI): void {
@@ -63,16 +56,16 @@ export default function harnessExtension(pi: ExtensionAPI): void {
     promptGuidelines: [
       "Use search to locate relevant files, symbols, references, and tests before reading or editing.",
     ],
-    parameters: SearchParams,
+    parameters: SearchParamsSchema,
     ...createHarnessRenderers("search"),
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
       const text = await searchRepo({
         cwd: ctx.cwd,
         query: params.query,
-        kind: params.kind,
-        path: params.path,
-        limit: params.limit,
-        signal,
+        kind: params.kind ?? "auto",
+        scope: params.path ? { kind: "path", path: params.path } : { kind: "workspace" },
+        limit: params.limit ?? DEFAULT_SEARCH_LIMIT,
+        cancellation: toToolCancellation(signal),
       });
       return { content: [{ type: "text", text }], details: {} };
     },
@@ -86,15 +79,13 @@ export default function harnessExtension(pi: ExtensionAPI): void {
     promptGuidelines: [
       "Use read for the source required to understand the problem; it bounds large files automatically.",
     ],
-    parameters: ReadParams,
+    parameters: ReadParamsSchema,
     ...createHarnessRenderers("read"),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       const text = await readSource({
         cwd: ctx.cwd,
         path: params.path,
-        offset: params.offset,
-        limit: params.limit,
-        symbol: params.symbol,
+        selection: toReadSelection(params),
       });
       return { content: [{ type: "text", text }], details: {} };
     },
@@ -106,29 +97,14 @@ export default function harnessExtension(pi: ExtensionAPI): void {
     description: EDIT_TOOL_DESCRIPTION,
     promptSnippet: "Apply precise file edits and report a compact diff",
     promptGuidelines: ["Use edit for code changes; prefer exact-text replacements over rewriting whole files."],
-    parameters: EditParams,
+    parameters: EditParamsSchema,
     ...createHarnessRenderers("edit"),
     async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-      const target = params.path ?? params.from;
-      if (!target) {
-        return {
-          content: [{ type: "text", text: "edit failed: 'path' is required." }],
-          details: {},
-        };
+      const validation = toEditRequest(ctx.cwd, params);
+      if (!validation.valid) {
+        return { content: [{ type: "text", text: validation.summary }], details: {} };
       }
-      const result = await editFile({
-        cwd: ctx.cwd,
-        op: params.op,
-        path: target,
-        oldText: params.oldText,
-        newText: params.newText,
-        edits: params.edits,
-        replaceAll: params.replaceAll,
-        content: params.content,
-        overwrite: params.overwrite,
-        from: params.from,
-        to: params.to,
-      });
+      const result = await editFile(validation.request);
       return { content: [{ type: "text", text: result.summary }], details: {} };
     },
   });
@@ -139,14 +115,14 @@ export default function harnessExtension(pi: ExtensionAPI): void {
     description: RUN_TOOL_DESCRIPTION,
     promptSnippet: "Run shell commands not covered by search, read, or edit",
     promptGuidelines: ["Use run only when search, read, or edit does not cover the operation."],
-    parameters: RunParams,
+    parameters: RunParamsSchema,
     ...createHarnessRenderers("run"),
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
       const text = await runShell({
         cwd: ctx.cwd,
         command: params.command,
-        timeoutMs: params.timeoutMs,
-        signal,
+        timeoutMs: params.timeoutMs ?? DEFAULT_RUN_TIMEOUT_MS,
+        cancellation: toToolCancellation(signal),
       });
       return { content: [{ type: "text", text }], details: {} };
     },
@@ -201,5 +177,3 @@ export default function harnessExtension(pi: ExtensionAPI): void {
     },
   });
 }
-
-export type { HarnessTool };

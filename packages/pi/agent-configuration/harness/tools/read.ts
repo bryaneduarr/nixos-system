@@ -1,20 +1,34 @@
 import { readFile, stat } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
-import { DEFAULT_READ_LINES, LARGE_FILE_BYTES, LARGE_FILE_LINES, STRUCTURE_SYMBOL_LIMIT } from "./config.ts";
+import {
+  DEFAULT_READ_LINES,
+  LARGE_FILE_BYTES,
+  LARGE_FILE_LINES,
+  STRUCTURE_SYMBOL_LIMIT,
+} from "../constants/tools/read-limits.constant.ts";
+import type { ReadParameters } from "../types/tools/read/read-parameters.interface.ts";
+import type { ReadRequest, ReadSelection } from "../types/tools/read/read-request.interface.ts";
+import type { SymbolRangeLookup } from "../types/tools/read/symbol-range-lookup.interface.ts";
 import { splitLines, stripAtPrefix, withLineNumbers } from "./format.ts";
-
-export interface ReadOptions {
-  cwd: string;
-  path: string;
-  offset?: number;
-  limit?: number;
-  symbol?: string;
-}
 
 const SYMBOL_PATTERN =
   /^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:function|class|interface|type|enum|const|let|var|def|func|fn|struct|trait|impl)\s+([A-Za-z_$][A-Za-z0-9_$]*)/;
 const METHOD_PATTERN =
   /^\s*(?:public|private|protected|static|async|get|set|readonly|override|\s)*([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/;
+
+export function toReadSelection(params: ReadParameters): ReadSelection {
+  if (params.symbol !== undefined && params.symbol.trim() !== "") {
+    return { kind: "symbol", symbol: params.symbol };
+  }
+  if (params.offset === undefined && params.limit === undefined) {
+    return { kind: "automatic" };
+  }
+  return {
+    kind: "lines",
+    startLine: Math.max(1, params.offset ?? 1),
+    lineCount: Math.max(1, params.limit ?? DEFAULT_READ_LINES),
+  };
+}
 
 function declarationPattern(symbol: string): RegExp {
   const name = symbol.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -23,15 +37,15 @@ function declarationPattern(symbol: string): RegExp {
   );
 }
 
-function findSymbolRange(lines: string[], symbol: string): { start: number; end: number } | undefined {
+function findSymbolRange(lines: string[], symbol: string): SymbolRangeLookup {
   const pattern = declarationPattern(symbol);
   const start = lines.findIndex((line) => pattern.test(line));
-  if (start === -1) return undefined;
+  if (start === -1) return { found: false };
 
   let depth = 0;
   let seenBrace = false;
   for (let index = start; index < lines.length; index += 1) {
-    const line = lines[index];
+    const line = lines[index] ?? "";
     for (const character of line) {
       if (character === "{") {
         depth += 1;
@@ -41,26 +55,26 @@ function findSymbolRange(lines: string[], symbol: string): { start: number; end:
       }
     }
     if (seenBrace && depth <= 0) {
-      return { start, end: index };
+      return { found: true, start, end: index };
     }
     if (!seenBrace && index - start >= 40) {
-      return { start, end: index };
+      return { found: true, start, end: index };
     }
   }
-  return { start, end: Math.min(lines.length - 1, start + 120) };
+  return { found: true, start, end: Math.min(lines.length - 1, start + 120) };
 }
 
 function listSymbols(lines: string[]): string[] {
   const symbols: string[] = [];
-  for (let index = 0; index < lines.length; index += 1) {
-    const match = SYMBOL_PATTERN.exec(lines[index]);
+  for (const [index, line] of lines.entries()) {
+    const match = SYMBOL_PATTERN.exec(line);
     if (match) {
       symbols.push(`${index + 1}: ${match[1]}`);
       if (symbols.length >= STRUCTURE_SYMBOL_LIMIT) break;
       continue;
     }
-    if (/^\s{2,}/.test(lines[index])) {
-      const method = METHOD_PATTERN.exec(lines[index]);
+    if (/^\s{2,}/.test(line)) {
+      const method = METHOD_PATTERN.exec(line);
       if (method) {
         symbols.push(`${index + 1}: ${method[1]}()`);
         if (symbols.length >= STRUCTURE_SYMBOL_LIMIT) break;
@@ -70,9 +84,9 @@ function listSymbols(lines: string[]): string[] {
   return symbols;
 }
 
-export async function readSource(options: ReadOptions): Promise<string> {
-  const { cwd } = options;
-  const rawPath = stripAtPrefix(options.path);
+export async function readSource(request: ReadRequest): Promise<string> {
+  const { cwd, selection } = request;
+  const rawPath = stripAtPrefix(request.path);
   const absolutePath = isAbsolute(rawPath) ? rawPath : resolve(cwd, rawPath);
 
   let content: string;
@@ -89,10 +103,10 @@ export async function readSource(options: ReadOptions): Promise<string> {
   }
   const total = lines.length;
 
-  if (options.symbol?.trim()) {
-    const range = findSymbolRange(lines, options.symbol.trim());
-    if (!range) {
-      return `Symbol "${options.symbol}" not found in ${rawPath}.`;
+  if (selection.kind === "symbol") {
+    const range = findSymbolRange(lines, selection.symbol.trim());
+    if (!range.found) {
+      return `Symbol "${selection.symbol}" not found in ${rawPath}.`;
     }
     const slice = lines.slice(range.start, range.end + 1);
     return [
@@ -101,11 +115,9 @@ export async function readSource(options: ReadOptions): Promise<string> {
     ].join("\n\n");
   }
 
-  if (options.offset !== undefined || options.limit !== undefined) {
-    const start = Math.max(1, options.offset ?? 1);
-    const count = Math.max(1, options.limit ?? DEFAULT_READ_LINES);
-    const startIndex = Math.min(start - 1, total);
-    const endIndex = Math.min(total, startIndex + count);
+  if (selection.kind === "lines") {
+    const startIndex = Math.min(selection.startLine - 1, total);
+    const endIndex = Math.min(total, startIndex + selection.lineCount);
     const slice = lines.slice(startIndex, endIndex);
     const remaining = total - endIndex;
     const note =
