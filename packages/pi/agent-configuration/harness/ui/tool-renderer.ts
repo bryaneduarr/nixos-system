@@ -8,7 +8,7 @@ import type { RendererContext, RendererOptions, RendererResult } from "../types/
 import type { HarnessTool } from "../types/tools/harness-tool.interface.ts";
 import { isActivityVisible } from "./activity/visibility.ts";
 import { boxLines } from "./formatting.ts";
-import { requestInspection } from "./inspector/request.ts";
+import { inspectRequestStore } from "../services/inspector/request/inspect-request-store.service.ts";
 import {
   boxTitle,
   extractText,
@@ -80,7 +80,7 @@ export class ToolBox implements Component {
 
   handleMouse(event: TuiMouseEvent): TuiMouseEventResult | undefined {
     if (!this.toolCallId || event.type !== "click" || event.button !== "left") return undefined;
-    requestInspection(this.toolCallId);
+    inspectRequestStore.requestInspection(this.toolCallId);
     return { handled: true, focus: true };
   }
 

@@ -9,8 +9,8 @@ import {
 } from "../../constants/activity/activity-keys.constant.ts";
 import { SPINNER_TICK_MS } from "../../constants/activity/spinner.constant.ts";
 import { INSPECT_SHORTCUT } from "../../constants/tool-rendering/inspect-shortcut.constant.ts";
-import { openInspector } from "../inspector/index.ts";
-import { setInspectContext, setInspectOpener } from "../inspector/request.ts";
+import { openInspector } from "../../services/inspector/open/open-inspector.service.ts";
+import { inspectRequestStore } from "../../services/inspector/request/inspect-request-store.service.ts";
 import { hydrateFromSession } from "./hydrate.ts";
 import { recordThinking, recordUpdate, recordUserMessage } from "./records.ts";
 import { restoreCompletions } from "./restore.ts";
@@ -74,13 +74,13 @@ export function installActivity(pi: ExtensionAPI): void {
   let thinkingSequence = 0;
   let messageSequence = 0;
 
-  setInspectOpener((ctx, selection) => {
+  inspectRequestStore.setOpener((ctx, selection) => {
     void openInspector(ctx, selection);
   });
 
   const touch = (ctx: ExtensionContext): void => {
     currentContext = ctx;
-    setInspectContext(ctx);
+    inspectRequestStore.setContext(ctx);
     publish(ctx);
   };
 
