@@ -1,7 +1,7 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { activityStore } from "../activity/store.ts";
-import type { HarnessTool } from "../tools/config.ts";
+import type { HarnessTool } from "../types/tools/harness-tool.interface.ts";
 import { isActivityVisible } from "./activity/visibility.ts";
 import { boxLines } from "./formatting.ts";
 import { requestInspection } from "./inspector/request.ts";

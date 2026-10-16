@@ -1,17 +1,7 @@
-import { DEFAULT_SEARCH_LIMIT } from "./config.ts";
-import { fdMatches, gitHistory, rgMatches, type SearchMatch, structuralMatches } from "./search/matches.ts";
+import type { SearchMatch } from "../types/tools/search/search-match.interface.ts";
+import type { SearchRequest } from "../types/tools/search/search-request.interface.ts";
+import { fdMatches, gitHistory, rgMatches, structuralMatches } from "./search/matches.ts";
 import { formatSearchResult } from "./search/result.ts";
-
-export type SearchKind = "auto" | "text" | "file" | "symbol" | "structural" | "history";
-
-export interface SearchOptions {
-  cwd: string;
-  query: string;
-  kind?: SearchKind;
-  path?: string;
-  limit?: number;
-  signal?: AbortSignal;
-}
 
 const DEFINITION_KEYWORDS = [
   "function",
@@ -67,25 +57,24 @@ function uniqueByLocation(matches: SearchMatch[]): SearchMatch[] {
   return result;
 }
 
-export async function searchRepo(options: SearchOptions): Promise<string> {
-  const { cwd, signal } = options;
-  const query = options.query.trim();
-  const kind = options.kind ?? "auto";
-  const limit = options.limit ?? DEFAULT_SEARCH_LIMIT;
-  const scope = options.path;
+export async function searchRepo(request: SearchRequest): Promise<string> {
+  const { cwd, scope, cancellation } = request;
+  const query = request.query.trim();
+  const kind = request.kind;
+  const limit = request.limit;
 
   if (!query) return "No query provided.";
   if (limit <= 0) return "Limit must be greater than zero.";
 
   if (kind === "history") {
-    return gitHistory(cwd, query, scope, limit, signal);
+    return gitHistory(cwd, query, scope, limit, cancellation);
   }
 
   let matches: SearchMatch[] = [];
   if (kind === "structural") {
-    matches = await structuralMatches(cwd, query, scope, signal);
+    matches = await structuralMatches(cwd, query, scope, cancellation);
     if (matches.length === 0) {
-      matches = await rgMatches(cwd, query, scope, signal);
+      matches = await rgMatches(cwd, query, scope, cancellation);
       if (matches.length > 0) {
         return formatSearchResult(
           query,
@@ -99,17 +88,17 @@ export async function searchRepo(options: SearchOptions): Promise<string> {
       return `No structural matches for: ${query}`;
     }
   } else if (kind === "file") {
-    const files = await fdMatches(cwd, query, scope, signal);
+    const files = await fdMatches(cwd, query, scope, cancellation);
     const filtered = files.slice(0, limit);
     if (filtered.length === 0) return `No files matching: ${query}`;
     const omitted = Math.max(0, files.length - limit);
     const omittedNote = omitted > 0 ? `\n\nAdditional files omitted: ${omitted}` : "";
     return `Files:\n${filtered.join("\n")}${omittedNote}`;
   } else {
-    matches = await rgMatches(cwd, query, scope, signal);
+    matches = await rgMatches(cwd, query, scope, cancellation);
   }
 
-  const files = kind === "text" || kind === "symbol" ? [] : await fdMatches(cwd, query, scope, signal);
+  const files = kind === "text" || kind === "symbol" ? [] : await fdMatches(cwd, query, scope, cancellation);
 
   matches = uniqueByLocation(matches);
 

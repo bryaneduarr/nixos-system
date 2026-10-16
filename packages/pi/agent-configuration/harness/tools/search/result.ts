@@ -1,4 +1,4 @@
-import type { SearchMatch } from "./matches.ts";
+import type { SearchMatch } from "../../types/tools/search/search-match.interface.ts";
 
 function formatLocations(matches: SearchMatch[], limit: number): string {
   return matches

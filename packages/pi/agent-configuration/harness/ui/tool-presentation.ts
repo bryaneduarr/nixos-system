@@ -1,5 +1,5 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
-import type { HarnessTool } from "../tools/config.ts";
+import type { HarnessTool } from "../types/tools/harness-tool.interface.ts";
 import { oneLine } from "./formatting.ts";
 
 const TITLES: Record<HarnessTool, string> = {

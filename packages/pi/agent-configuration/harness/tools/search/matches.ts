@@ -1,44 +1,50 @@
+import { Value } from "typebox/value";
+import { NO_TIMEOUT_MS } from "../../constants/tools/process.constant.ts";
+import { AstGrepEventSchema } from "../../schemas/tools/search/ast-grep-event.schema.ts";
+import { RgEventSchema } from "../../schemas/tools/search/rg-event.schema.ts";
+import type { JsonLineParse } from "../../types/tools/process/json-line-parse.interface.ts";
+import type { ToolCancellation } from "../../types/tools/process/tool-cancellation.interface.ts";
+import type { SearchMatch } from "../../types/tools/search/search-match.interface.ts";
+import type { SearchScope } from "../../types/tools/search/search-request.interface.ts";
 import { runCommand } from "../exec.ts";
 
-export interface SearchMatch {
-  file: string;
-  line: number;
-  text: string;
+function parseJsonLine(line: string): JsonLineParse {
+  try {
+    return { parsed: true, value: JSON.parse(line) };
+  } catch {
+    return { parsed: false };
+  }
 }
 
 export async function rgMatches(
   cwd: string,
   query: string,
-  scope: string | undefined,
-  signal: AbortSignal | undefined,
+  scope: SearchScope,
+  cancellation: ToolCancellation,
 ): Promise<SearchMatch[]> {
-  const argv = ["rg", "--json", "-n", "--no-messages", "-e", query];
-  if (scope) argv.push("--", scope);
-  const result = await runCommand({ argv, cwd, signal });
+  const argv: readonly [string, ...string[]] = [
+    "rg",
+    "--json",
+    "-n",
+    "--no-messages",
+    "-e",
+    query,
+    ...(scope.kind === "path" ? ["--", scope.path] : []),
+  ];
+  const result = await runCommand({ command: { form: "argv", argv }, cwd, timeoutMs: NO_TIMEOUT_MS, cancellation });
   if (result.code !== 0 && result.code !== 1) return [];
   const matches: SearchMatch[] = [];
   for (const rawLine of result.stdout.split("\n")) {
     if (!rawLine.trim()) continue;
-    let event: {
-      type?: string;
-      data?: {
-        path?: { text?: string };
-        line_number?: number;
-        lines?: { text?: string };
-      };
-    };
-    try {
-      event = JSON.parse(rawLine);
-    } catch {
-      continue;
-    }
+    const parsedLine = parseJsonLine(rawLine);
+    if (!parsedLine.parsed || !Value.Check(RgEventSchema, parsedLine.value)) continue;
+    const event = parsedLine.value;
     if (event.type !== "match") continue;
-    const file = event.data?.path?.text;
-    const line = event.data?.line_number;
-    const text = (event.data?.lines?.text ?? "").replace(/\r?\n$/, "");
-    if (typeof file === "string" && typeof line === "number") {
-      matches.push({ file, line, text });
-    }
+    matches.push({
+      file: event.data.path.text,
+      line: event.data.line_number,
+      text: (event.data.lines?.text ?? "").replace(/\r?\n$/, ""),
+    });
   }
   return matches;
 }
@@ -46,10 +52,10 @@ export async function rgMatches(
 export async function fdMatches(
   cwd: string,
   query: string,
-  scope: string | undefined,
-  signal: AbortSignal | undefined,
+  scope: SearchScope,
+  cancellation: ToolCancellation,
 ): Promise<string[]> {
-  const argv = [
+  const argv: readonly [string, ...string[]] = [
     "fd",
     "--type",
     "f",
@@ -60,9 +66,9 @@ export async function fdMatches(
     "node_modules",
     "--fixed-strings",
     query,
-    scope ?? ".",
+    scope.kind === "path" ? scope.path : ".",
   ];
-  const result = await runCommand({ argv, cwd, signal });
+  const result = await runCommand({ command: { form: "argv", argv }, cwd, timeoutMs: NO_TIMEOUT_MS, cancellation });
   if (result.code !== 0) return [];
   return result.stdout
     .split(/\r?\n/)
@@ -74,31 +80,30 @@ export async function fdMatches(
 export async function structuralMatches(
   cwd: string,
   query: string,
-  scope: string | undefined,
-  signal: AbortSignal | undefined,
+  scope: SearchScope,
+  cancellation: ToolCancellation,
 ): Promise<SearchMatch[]> {
-  const argv = ["ast-grep", "run", "--pattern", query, "--json=stream"];
-  if (scope) argv.push(scope);
-  const result = await runCommand({ argv, cwd, signal });
+  const argv: readonly [string, ...string[]] = [
+    "ast-grep",
+    "run",
+    "--pattern",
+    query,
+    "--json=stream",
+    ...(scope.kind === "path" ? [scope.path] : []),
+  ];
+  const result = await runCommand({ command: { form: "argv", argv }, cwd, timeoutMs: NO_TIMEOUT_MS, cancellation });
   if (result.code !== 0) return [];
   const matches: SearchMatch[] = [];
   for (const rawLine of result.stdout.split("\n")) {
     if (!rawLine.trim()) continue;
-    let event: {
-      file?: string;
-      lines?: string;
-      range?: { start?: { line?: number } };
-    };
-    try {
-      event = JSON.parse(rawLine);
-    } catch {
-      continue;
-    }
-    if (typeof event.file !== "string") continue;
+    const parsedLine = parseJsonLine(rawLine);
+    if (!parsedLine.parsed || !Value.Check(AstGrepEventSchema, parsedLine.value)) continue;
+    const event = parsedLine.value;
+    const [firstLine = ""] = (event.lines ?? "").split(/\r?\n/);
     matches.push({
       file: event.file,
-      line: (event.range?.start?.line ?? 0) + 1,
-      text: (event.lines ?? "").split(/\r?\n/)[0],
+      line: event.range.start.line + 1,
+      text: firstLine,
     });
   }
   return matches;
@@ -107,13 +112,19 @@ export async function structuralMatches(
 export async function gitHistory(
   cwd: string,
   query: string,
-  scope: string | undefined,
+  scope: SearchScope,
   limit: number,
-  signal: AbortSignal | undefined,
+  cancellation: ToolCancellation,
 ): Promise<string> {
-  const argv = ["git", "log", `-S${query}`, `-n${limit}`, "--oneline"];
-  if (scope) argv.push("--", scope);
-  const result = await runCommand({ argv, cwd, signal });
+  const argv: readonly [string, ...string[]] = [
+    "git",
+    "log",
+    `-S${query}`,
+    `-n${limit}`,
+    "--oneline",
+    ...(scope.kind === "path" ? ["--", scope.path] : []),
+  ];
+  const result = await runCommand({ command: { form: "argv", argv }, cwd, timeoutMs: NO_TIMEOUT_MS, cancellation });
   if (result.code !== 0) {
     return `History unavailable: ${result.stderr.trim() || "not a git repository"}`;
   }
