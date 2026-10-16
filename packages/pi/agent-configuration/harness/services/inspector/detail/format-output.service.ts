@@ -1,5 +1,7 @@
+import { EMPTY_TEXT_LABEL } from "../../../constants/inspector/label.constant.ts";
+
 export function formatOutput(text: string): string {
-  if (!text) return "(empty)";
+  if (!text) return EMPTY_TEXT_LABEL;
 
   try {
     const parsed: unknown = JSON.parse(text);

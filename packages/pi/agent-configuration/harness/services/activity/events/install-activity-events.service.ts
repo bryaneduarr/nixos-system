@@ -12,7 +12,7 @@ import { INSPECT_SHORTCUT } from "../../../constants/tool-rendering/inspect-shor
 import type { AgentActivityPhase } from "../../../types/activity/agent-activity.interface.ts";
 import type { AssistantActivityLookup } from "../../../types/activity/assistant-activity-lookup.interface.ts";
 import { openInspector } from "../../inspector/open/open-inspector.service.ts";
-import { inspectRequestStore } from "../../inspector/request/inspect-request-store.service.ts";
+import { inspectRequestStore } from "../../inspector/request/shared-inspect-request-store.service.ts";
 import { countMessageEntries } from "../history/count-message-entries.service.ts";
 import { hydrateFromSession } from "../history/hydrate-from-session.service.ts";
 import { recordUserMessage } from "../history/record-user-message.service.ts";

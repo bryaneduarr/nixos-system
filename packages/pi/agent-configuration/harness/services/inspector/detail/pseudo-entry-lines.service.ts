@@ -1,54 +1,49 @@
-import {
-  MESSAGE_ACTIVITY_NAME,
-  THINKING_ACTIVITY_NAME,
-  UPDATE_ACTIVITY_NAME,
-} from "../../../constants/activity/activity-entry.constant.ts";
+import { MESSAGE_ACTIVITY_NAME, UPDATE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
 import { BLANK_DETAIL_LINE } from "../../../constants/inspector/detail-line.constant.ts";
+import { NO_TEXT_LABEL } from "../../../constants/inspector/label.constant.ts";
 import type { ToolActivity } from "../../../types/activity/tool-activity.interface.ts";
 import type { DetailLine } from "../../../types/inspector/detail/detail-line.interface.ts";
+import type { PseudoEntryTool } from "../../../types/inspector/detail/pseudo-entry-tool.interface.ts";
 import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 import { isHarnessTool } from "../../tools/is-harness-tool.service.ts";
-import { boxDetails } from "./box-details.service.ts";
+import { boxedDetailLines } from "./boxed-detail-lines.service.ts";
 import { formatTime } from "./format-time.service.ts";
 
 function userMessageBody(entry: ToolActivity, startedAt: number, text: string, width: number): DetailLine[] {
   const entries = activityStore.all();
   const index = entries.indexOf(entry);
   const following = entries.slice(index + 1);
-  const nextMessage = following.findIndex((item) => item.toolName === MESSAGE_ACTIVITY_NAME);
-  const group = nextMessage < 0 ? following : following.slice(0, nextMessage);
-  const calls = group.filter((item) => isHarnessTool(item.toolName)).length;
+  const nextMessageIndex = following.findIndex((followingEntry) => followingEntry.toolName === MESSAGE_ACTIVITY_NAME);
+  const group = nextMessageIndex < 0 ? following : following.slice(0, nextMessageIndex);
+  const calls = group.filter((groupEntry) => isHarnessTool(groupEntry.toolName)).length;
   const callLabel = `${calls} tool call${calls === 1 ? "" : "s"}`;
 
   return [
     { text: `${callLabel} after this message · ${formatTime(startedAt)}`, color: "accent", bold: false },
     BLANK_DETAIL_LINE,
-    ...boxDetails("user message", text || "(no text)", "accent", width),
+    ...boxedDetailLines("user message", text || NO_TEXT_LABEL, "accent", width),
   ];
 }
 
 export function pseudoEntryLines(
-  tool: string,
+  tool: PseudoEntryTool,
   entry: ToolActivity,
   startedAt: number,
   timing: string,
   rawText: string,
   width: number,
-): DetailLine[] | undefined {
+): DetailLine[] {
   if (tool === MESSAGE_ACTIVITY_NAME) return userMessageBody(entry, startedAt, rawText, width);
   if (tool === UPDATE_ACTIVITY_NAME) {
     return [
       { text: `AGENT UPDATE  ${timing}`, color: "accent", bold: true },
       BLANK_DETAIL_LINE,
-      ...boxDetails("update", rawText, "accent", width),
+      ...boxedDetailLines("update", rawText, "accent", width),
     ];
   }
-  if (tool === THINKING_ACTIVITY_NAME) {
-    return [
-      { text: `THINKING  ${timing}`, color: "accent", bold: true },
-      BLANK_DETAIL_LINE,
-      ...boxDetails("thinking", rawText || "(redacted)", "accent", width),
-    ];
-  }
-  return undefined;
+  return [
+    { text: `THINKING  ${timing}`, color: "accent", bold: true },
+    BLANK_DETAIL_LINE,
+    ...boxedDetailLines("thinking", rawText || "(redacted)", "accent", width),
+  ];
 }

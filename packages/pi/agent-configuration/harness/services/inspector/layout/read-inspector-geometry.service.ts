@@ -1,4 +1,7 @@
+import { FRAME_CHROME_WIDTH } from "../../../constants/inspector/frame.constant.ts";
 import {
+  DETAIL_TITLE_ROWS,
+  MIN_CONTENT_WIDTH,
   MIN_STACKED_DETAIL_HEIGHT,
   MIN_STACKED_LIST_HEIGHT,
   MIN_TWO_PANE_WIDTH,
@@ -12,12 +15,12 @@ import { leftPaneWidth } from "./left-pane-width.service.ts";
 export function readInspectorGeometry(width: number, terminalRows: number): InspectorGeometry {
   const height = bodyHeight(terminalRows);
   const twoPane = width >= MIN_TWO_PANE_WIDTH;
-  const contentWidth = Math.max(8, width - 4);
+  const contentWidth = Math.max(MIN_CONTENT_WIDTH, width - FRAME_CHROME_WIDTH);
   const leftWidth = twoPane ? leftPaneWidth(contentWidth) : contentWidth;
   const rightWidth = twoPane ? Math.max(1, contentWidth - leftWidth - PANE_DIVIDER_WIDTH) : contentWidth;
   const listHeight = twoPane
     ? height
-    : Math.max(MIN_STACKED_LIST_HEIGHT, Math.floor((height - 1) * STACKED_LIST_HEIGHT_RATIO));
-  const detailHeight = twoPane ? height : Math.max(MIN_STACKED_DETAIL_HEIGHT, height - listHeight - 1);
+    : Math.max(MIN_STACKED_LIST_HEIGHT, Math.floor((height - DETAIL_TITLE_ROWS) * STACKED_LIST_HEIGHT_RATIO));
+  const detailHeight = twoPane ? height : Math.max(MIN_STACKED_DETAIL_HEIGHT, height - listHeight - DETAIL_TITLE_ROWS);
   return { height, twoPane, contentWidth, leftWidth, rightWidth, listHeight, detailHeight };
 }

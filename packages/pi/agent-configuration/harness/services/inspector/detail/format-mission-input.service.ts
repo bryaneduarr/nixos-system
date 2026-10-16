@@ -1,38 +1,54 @@
+import { INVALID_LIST_LABEL, NONE_LABEL } from "../../../constants/inspector/label.constant.ts";
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
+import type { ValueState } from "../../../types/activity/value-state.interface.ts";
+import { presentValue } from "../../activity/value/present-value.service.ts";
 import { toValueState } from "../../activity/value/to-value-state.service.ts";
 import { resolveTaskRole } from "../../subagents/roles/resolve-task-role.service.ts";
-import { stringValues } from "./string-values.service.ts";
+import { readStringList } from "./read-string-list.service.ts";
 
-export function formatMissionInput(args: Record<string, unknown>): string {
-  const selectedTools = stringValues(args.tools);
-  const verificationCommands = stringValues(args.verificationCommands);
-  let roleAndTools: string[];
+function isUnknownArray(value: unknown): value is readonly unknown[] {
+  return Array.isArray(value);
+}
 
+function roleAndToolLines(
+  args: Record<string, unknown>,
+  selectedTools: ValueState<string[]>,
+  verificationCommands: ValueState<string[]>,
+): string[] {
   try {
     const resolved = resolveTaskRole({
       role: toValueState(args.role === undefined ? undefined : String(args.role)),
-      tools: toValueState(selectedTools),
-      verificationCommands: toValueState(verificationCommands),
+      tools: selectedTools,
+      verificationCommands,
     });
-    const effectiveTools = resolved.tools.join(", ") || "none";
-    roleAndTools = [`role: ${resolved.role}`, `effective tools: ${effectiveTools}`];
+    const effectiveTools = resolved.tools.join(", ") || NONE_LABEL;
+    return [`role: ${resolved.role}`, `effective tools: ${effectiveTools}`];
   } catch {
     const role = typeof args.role === "string" ? args.role : TASK_TOOL_NAME;
-    const tools = selectedTools?.join(", ") ?? "invalid";
-    roleAndTools = [`role: ${role}`, `tools: ${tools}`];
+    const tools = selectedTools.state === "present" ? selectedTools.value.join(", ") : INVALID_LIST_LABEL;
+    return [`role: ${role}`, `tools: ${tools}`];
   }
+}
 
-  const lines = [`title: ${String(args.title ?? "")}`, ...roleAndTools, `mission: ${args.mission}`];
+export function formatMissionInput(args: Record<string, unknown>): string {
+  const selectedTools = readStringList(args.tools);
+  const verificationCommands = readStringList(args.verificationCommands);
+  const lines = [
+    `title: ${String(args.title ?? "")}`,
+    ...roleAndToolLines(args, selectedTools, verificationCommands),
+    `mission: ${args.mission}`,
+  ];
 
   if (typeof args.context === "string") {
     lines.push(`context: ${args.context}`);
   }
 
-  if (verificationCommands?.length) {
-    lines.push(`approved commands: ${verificationCommands.join("; ")}`);
+  const approvedCommands = presentValue(verificationCommands);
+  if (approvedCommands !== undefined && approvedCommands.length > 0) {
+    lines.push(`approved commands: ${approvedCommands.join("; ")}`);
   }
 
-  const skills = Array.isArray(args.skills) ? args.skills.join(", ") : "none";
+  const skills = isUnknownArray(args.skills) ? args.skills.join(", ") : NONE_LABEL;
   lines.push(`skills: ${skills}`);
 
   if (typeof args.model === "string") lines.push(`model: ${args.model}`);

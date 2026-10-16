@@ -1,7 +1,6 @@
 import type { SubagentUsage } from "../../../types/activity/subagent-usage.interface.ts";
-import { presentValue } from "../../activity/value/present-value.service.ts";
-import { readCurrentTokens } from "./read-current-tokens.service.ts";
+import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 
-export function readPeakTokens(usage: SubagentUsage): number | undefined {
-  return presentValue(usage.maxContextTokens) ?? readCurrentTokens(usage);
+export function readPeakTokens(usage: SubagentUsage): ValueState<number> {
+  return usage.maxContextTokens.state === "present" ? usage.maxContextTokens : usage.contextTokens;
 }

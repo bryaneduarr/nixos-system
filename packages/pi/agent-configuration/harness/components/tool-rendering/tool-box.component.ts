@@ -3,7 +3,7 @@ import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-wo
 import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/elapsed-label.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
 import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
-import { inspectRequestStore } from "../../services/inspector/request/inspect-request-store.service.ts";
+import { inspectRequestStore } from "../../services/inspector/request/shared-inspect-request-store.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
 
 export class ToolBox implements Component {

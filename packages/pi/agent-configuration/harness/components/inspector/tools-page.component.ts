@@ -1,9 +1,11 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth } from "@earendil-works/pi-tui";
-import { BODY_TOP_ROW } from "../../constants/inspector/layout.constant.ts";
+import { BODY_TOP_ROW, DETAIL_TITLE_ROWS } from "../../constants/inspector/layout.constant.ts";
+import { BORDER_COLOR } from "../../constants/inspector/theme-color.constant.ts";
 import { wrappedDetail } from "../../services/inspector/detail/wrapped-detail.service.ts";
 import { computeListScroll } from "../../services/inspector/layout/compute-list-scroll.service.ts";
 import { padCell } from "../../services/inspector/layout/pad-cell.service.ts";
+import { findRowAt } from "../../services/inspector/navigation/find-row-at.service.ts";
 import type { InspectorFocus } from "../../types/inspector/navigation/inspector-page.interface.ts";
 import type { InspectorGeometry } from "../../types/inspector/view/inspector-geometry.interface.ts";
 import type { ToolsPageOptions, ToolsPageResult } from "../../types/inspector/view/tools-page.interface.ts";
@@ -16,7 +18,7 @@ function twoPaneRows(
   focus: InspectorFocus,
   theme: Theme,
 ): string[] {
-  const dividerColor = focus === "detail" ? "accent" : "borderMuted";
+  const dividerColor = focus === "detail" ? "accent" : BORDER_COLOR;
   const rows: string[] = [];
   for (let index = 0; index < geometry.height; index += 1) {
     const left = listLines[index] ?? padCell("", geometry.leftWidth);
@@ -58,7 +60,7 @@ export function renderToolsPage({
     expandedTasks,
     theme,
   });
-  const detail = wrappedDetail(rows[selected], Math.max(1, geometry.rightWidth), theme, artifact);
+  const detail = wrappedDetail(findRowAt(rows, selected), Math.max(1, geometry.rightWidth), theme, artifact);
   const maxDetailScroll = Math.max(0, detail.length - geometry.detailHeight);
   const clampedDetailScroll = Math.max(0, Math.min(detailScroll, maxDetailScroll));
   const detailLines = detail
@@ -79,7 +81,9 @@ export function renderToolsPage({
       layout: {
         leftWidth: geometry.leftWidth,
         bodyTop: BODY_TOP_ROW,
-        bodyHeight: geometry.twoPane ? geometry.height : geometry.listHeight + 1 + geometry.detailHeight,
+        bodyHeight: geometry.twoPane
+          ? geometry.height
+          : geometry.listHeight + DETAIL_TITLE_ROWS + geometry.detailHeight,
         listHeight: geometry.listHeight,
         twoPane: geometry.twoPane,
         rows,

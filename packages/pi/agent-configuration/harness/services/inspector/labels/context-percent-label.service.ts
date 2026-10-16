@@ -1,11 +1,13 @@
+import { DECIMAL_PERCENT_LIMIT } from "../../../constants/inspector/format.constant.ts";
 import type { SubagentModel } from "../../../types/activity/subagent-model.interface.ts";
+import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 import { readContextLimit } from "./read-context-limit.service.ts";
 
-export function contextPercentLabel(tokens: number | undefined, model: SubagentModel | undefined): string {
+export function contextPercentLabel(tokens: ValueState<number>, model: ValueState<SubagentModel>): string {
   const limit = readContextLimit(model);
-  if (tokens === undefined || limit === undefined) {
+  if (tokens.state === "absent" || limit.state === "absent") {
     return "";
   }
-  const percent = (tokens / limit) * 100;
-  return ` (${percent < 10 ? percent.toFixed(1) : Math.round(percent)}%)`;
+  const percent = (tokens.value / limit.value) * 100;
+  return ` (${percent < DECIMAL_PERCENT_LIMIT ? percent.toFixed(1) : Math.round(percent)}%)`;
 }
