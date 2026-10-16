@@ -1,19 +1,21 @@
 import { BLANK_DETAIL_LINE } from "../../../constants/inspector/detail-line.constant.ts";
 import { EMPTY_VALUE_LABEL } from "../../../constants/inspector/label.constant.ts";
 import type { ToolActivity } from "../../../types/activity/tool-activity.interface.ts";
+import type { ToolActivityUsage } from "../../../types/activity/tool-activity-usage.interface.ts";
 import type { DetailLine } from "../../../types/inspector/detail/detail-line.interface.ts";
-import { presentValue } from "../../activity/value/present-value.service.ts";
+import { contextWindowLabel } from "../labels/context-window-label.service.ts";
 import { formatTokens } from "../labels/format-tokens.service.ts";
 import { modelLabel } from "../labels/model-label.service.ts";
 
+function currentContextLabel(usage: ToolActivityUsage): string {
+  if (usage.usageState === "unreported" || usage.usage.contextTokens.state === "absent") return EMPTY_VALUE_LABEL;
+  return formatTokens(usage.usage.contextTokens.value);
+}
+
 export function taskSummaryLines(entry: ToolActivity): DetailLine[] {
-  const currentTokens =
-    entry.usage.usageState === "reported" ? presentValue(entry.usage.usage.contextTokens) : undefined;
-  const currentContext = currentTokens === undefined ? EMPTY_VALUE_LABEL : formatTokens(currentTokens);
-  const subagentModel = presentValue(entry.model);
-  const modelWindow = subagentModel === undefined ? undefined : presentValue(subagentModel.contextWindow);
-  const contextWindow = modelWindow ? formatTokens(modelWindow) : EMPTY_VALUE_LABEL;
-  const reasoning = presentValue(entry.thinkingLevel) ?? EMPTY_VALUE_LABEL;
+  const currentContext = currentContextLabel(entry.usage);
+  const contextWindow = contextWindowLabel(entry.model);
+  const reasoning = entry.thinkingLevel.state === "present" ? entry.thinkingLevel.value : EMPTY_VALUE_LABEL;
   const callCount = entry.sub.length;
 
   return [

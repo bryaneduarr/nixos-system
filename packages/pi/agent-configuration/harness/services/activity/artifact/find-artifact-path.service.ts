@@ -3,7 +3,9 @@ import type { ArtifactPathLookup } from "../../../types/activity/artifact-path.i
 
 export function findArtifactPath(text: string): ArtifactPathLookup {
   for (const pattern of ARTIFACT_PATTERNS) {
-    const path = pattern.exec(text)?.[1];
+    const match = pattern.exec(text);
+    if (match === null) continue;
+    const [, path] = match;
     if (path) return { found: true, path };
   }
   return { found: false };

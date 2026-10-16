@@ -9,7 +9,6 @@ import type { ResolvedTaskRole } from "../../../types/subagents/roles/resolved-t
 import type { SubagentTool } from "../../../types/subagents/roles/subagent-tool.interface.ts";
 import type { TaskRole } from "../../../types/subagents/roles/task-role.interface.ts";
 import type { TaskRoleInput } from "../../../types/subagents/roles/task-role-input.interface.ts";
-import { presentValue } from "../../activity/value/present-value.service.ts";
 
 function isTaskRole(role: string): role is TaskRole {
   return TASK_ROLES.some((taskRole) => taskRole === role);
@@ -28,13 +27,15 @@ function hasDuplicateCommand(commands: readonly string[]): boolean {
 }
 
 export function resolveTaskRole(input: TaskRoleInput): ResolvedTaskRole {
-  const requestedRole = presentValue(input.role) ?? TASK_TOOL_NAME;
+  const requestedRole = input.role.state === "present" ? input.role.value : TASK_TOOL_NAME;
   if (!isTaskRole(requestedRole)) {
     throw new Error(`Unknown task role: ${requestedRole}. Allowed roles: ${TASK_ROLES.join(", ")}.`);
   }
 
   const definition = ROLE_DEFINITIONS[requestedRole];
-  const verificationCommands = [...(presentValue(input.verificationCommands) ?? [])];
+  const verificationCommands = [
+    ...(input.verificationCommands.state === "present" ? input.verificationCommands.value : []),
+  ];
   if (hasBlankCommand(verificationCommands)) {
     throw new Error("Approved verification commands must not be empty.");
   }
@@ -47,9 +48,9 @@ export function resolveTaskRole(input: TaskRoleInput): ResolvedTaskRole {
     throw new Error(`Role "${requestedRole}" cannot receive approved verification commands.`);
   }
 
-  const requestedToolList = presentValue(input.tools);
-  const requestedTools: string[] = requestedToolList ? [...requestedToolList] : [...definition.defaultTools];
-  const isToolListOmitted = requestedToolList === undefined;
+  const isToolListOmitted = input.tools.state === "absent";
+  const requestedTools: string[] =
+    input.tools.state === "present" ? [...input.tools.value] : [...definition.defaultTools];
   if (isToolListOmitted && hasVerificationCommands) {
     requestedTools.push(APPROVED_COMMAND_TOOL);
   }

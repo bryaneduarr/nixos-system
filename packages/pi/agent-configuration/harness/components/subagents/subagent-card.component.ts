@@ -14,7 +14,6 @@ import {
 } from "../../constants/subagents/card.constant.ts";
 import { COMPLETED_TASK_LABEL, STARTING_TASK_LABEL } from "../../constants/subagents/progress.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
-import { presentValue } from "../../services/activity/value/present-value.service.ts";
 import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
 import { oneLine } from "../../services/tool-rendering/text/one-line.service.ts";
 import type { SubToolActivity } from "../../types/activity/sub-tool-activity.interface.ts";
@@ -61,9 +60,8 @@ function callLines(theme: Theme, call: SubToolActivity): string[] {
   const toolLabel = target ? `${toolName} ${target}` : toolName;
   const lines = [theme.fg("text", toolLabel), theme.fg(toolStatusColor(call.status), toolStatusLabel(call.status))];
 
-  const callEndedAt = presentValue(call.endedAt);
-  if (callEndedAt !== undefined) {
-    lines.push(theme.fg("muted", `${CARD_TIME_LABEL} ${duration(call.startedAt, callEndedAt)}`));
+  if (call.endedAt.state === "present") {
+    lines.push(theme.fg("muted", `${CARD_TIME_LABEL} ${duration(call.startedAt, call.endedAt.value)}`));
   }
 
   return lines;
@@ -85,6 +83,12 @@ function finalStatusLine(theme: Theme, status: TaskStatus): string {
   return theme.fg(status === "success" ? "success" : "error", finalStatusLabel(status));
 }
 
+function reusableToolBox(theme: Theme, lastComponent: ValueState<Component>): ToolBox {
+  return lastComponent.state === "present" && lastComponent.value instanceof ToolBox
+    ? lastComponent.value
+    : new ToolBox(theme, "", [], "accent", false);
+}
+
 export function renderSubagentCard(
   theme: Theme,
   toolCallId: string,
@@ -92,9 +96,10 @@ export function renderSubagentCard(
   progressLookup: TaskProgressLookup,
   lastComponent: ValueState<Component>,
 ): Component {
-  const activityLookup = readToolActivity(toolCallId);
+  const activityLookup = readToolActivity({ state: "present", value: toolCallId });
   const recordedEntry = activityLookup.found ? activityLookup.entry : undefined;
-  const storedProgress = recordedEntry ? presentValue(recordedEntry.details) : undefined;
+  const storedProgress =
+    recordedEntry && recordedEntry.details.state === "present" ? recordedEntry.details.value : undefined;
   const liveProgress = progressLookup.found ? progressLookup.progress : undefined;
   const current = liveProgress ?? storedProgress;
 
@@ -113,8 +118,7 @@ export function renderSubagentCard(
     lines.push(finalStatusLine(theme, status));
   }
 
-  const previousComponent = presentValue(lastComponent);
-  const box = previousComponent instanceof ToolBox ? previousComponent : new ToolBox(theme, "", [], "accent", false);
+  const box = reusableToolBox(theme, lastComponent);
   const boxTitle = theme.fg("toolTitle", theme.bold(CARD_BOX_TITLE));
   const titleLine = status === "running" ? `${theme.fg("accent", "/")} ${boxTitle}` : boxTitle;
   const color = status === "error" ? "error" : "accent";

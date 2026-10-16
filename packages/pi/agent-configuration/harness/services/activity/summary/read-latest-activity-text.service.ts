@@ -23,7 +23,8 @@ function readLatestUpdateText(entries: readonly ToolActivity[]): string {
 }
 
 function readLatestToolTitle(entries: readonly ToolActivity[]): string {
-  const lastTool = entries.filter((entry) => isHarnessTool(entry.toolName)).at(-1);
-  if (lastTool === undefined || !isHarnessTool(lastTool.toolName)) return "";
-  return `${toolLabel(lastTool.toolName)} ${toolTarget(lastTool.toolName, lastTool.args)}`;
+  for (const entry of entries.toReversed()) {
+    if (isHarnessTool(entry.toolName)) return `${toolLabel(entry.toolName)} ${toolTarget(entry.toolName, entry.args)}`;
+  }
+  return "";
 }
