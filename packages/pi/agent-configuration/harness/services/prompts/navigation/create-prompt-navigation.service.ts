@@ -1,8 +1,19 @@
+import type { Grapheme } from "../../../types/prompts/grapheme.interface.ts";
 import type { PromptNavigation } from "../../../types/prompts/prompt-navigation.interface.ts";
 import { findLineEdgeIndex } from "./find-line-edge-index.service.ts";
 import { findLineRange } from "./find-line-range.service.ts";
 import { findWordIndex } from "./find-word-index.service.ts";
 import { segmentGraphemes } from "./segment-graphemes.service.ts";
+
+function startOffsetAt(units: readonly Grapheme[], index: number): number {
+  const unit = units[index];
+  return unit === undefined ? 0 : unit.start;
+}
+
+function endOffsetAt(units: readonly Grapheme[], index: number): number {
+  const unit = units[index];
+  return unit === undefined ? 0 : unit.end;
+}
 
 export function createPromptNavigation(text: string): PromptNavigation {
   const units = segmentGraphemes(text);
@@ -27,7 +38,7 @@ export function createPromptNavigation(text: string): PromptNavigation {
       if (navigation.selection === "line") {
         return { found: true, range: [navigation.lineRange(low)[0], navigation.lineRange(high)[1]] };
       }
-      return { found: true, range: [units[low]?.start ?? 0, units[high]?.end ?? 0] };
+      return { found: true, range: [startOffsetAt(units, low), endOffsetAt(units, high)] };
     },
     selectedText() {
       const selection = navigation.range();

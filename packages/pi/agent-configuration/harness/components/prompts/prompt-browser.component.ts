@@ -8,19 +8,13 @@ import {
   KEY_TAB,
   KEY_UP,
 } from "../../constants/prompts/keys.constant.ts";
-import { THEME_MUTED } from "../../constants/prompts/theme.constant.ts";
-import { PROMPT_BROWSER_FOOTER_HINT, RENDER_CACHE_LIMIT } from "../../constants/prompts/viewer.constant.ts";
 import { applyDetailKey } from "../../services/prompts/apply-detail-key.service.ts";
 import { computeBrowserLayout } from "../../services/prompts/layout/compute-browser-layout.service.ts";
 import { computeScrollOffset } from "../../services/prompts/layout/compute-scroll-offset.service.ts";
+import { createDisplayRowCache } from "../../services/prompts/layout/create-display-row-cache.service.ts";
 import { cursorRow } from "../../services/prompts/layout/cursor-row.service.ts";
-import { frameLines } from "../../services/prompts/layout/frame-lines.service.ts";
-import { joinBrowserPanes } from "../../services/prompts/layout/join-browser-panes.service.ts";
-import { renderBrowserHeading } from "../../services/prompts/layout/render-browser-heading.service.ts";
-import { renderPromptList } from "../../services/prompts/layout/render-prompt-list.service.ts";
-import { renderPromptRow } from "../../services/prompts/layout/render-prompt-row.service.ts";
+import { renderBrowserLines } from "../../services/prompts/layout/render-browser-lines.service.ts";
 import { summarizePrompt } from "../../services/prompts/layout/summarize-prompt.service.ts";
-import { wrapPrompt } from "../../services/prompts/layout/wrap-prompt.service.ts";
 import { createPromptNavigation } from "../../services/prompts/navigation/create-prompt-navigation.service.ts";
 import { isSameSelectionAnchor } from "../../services/prompts/navigation/is-same-selection-anchor.service.ts";
 import type { ClipboardWriter } from "../../types/prompts/clipboard-writer.interface.ts";
@@ -41,7 +35,7 @@ export class PromptBrowser implements PromptPanel {
   private detailWidth = 1;
   private status = "";
   private closed = false;
-  private readonly cache = new Map<number, DisplayRow[]>();
+  private readonly rowCache = createDisplayRowCache();
   private readonly summaries: string[];
 
   constructor(
@@ -51,22 +45,13 @@ export class PromptBrowser implements PromptPanel {
     private readonly done: () => void,
     private readonly clipboard: ClipboardWriter,
   ) {
-    this.navigation = createPromptNavigation(prompts.at(0)?.text ?? "");
+    const firstPrompt = prompts.at(0);
+    this.navigation = createPromptNavigation(firstPrompt === undefined ? "" : firstPrompt.text);
     this.summaries = prompts.map(summarizePrompt);
   }
 
   invalidate(): void {
-    this.cache.clear();
-  }
-
-  private rows(): DisplayRow[] {
-    let rows = this.cache.get(this.detailWidth);
-    if (!rows) {
-      rows = wrapPrompt(this.navigation.units, this.detailWidth);
-      if (this.cache.size >= RENDER_CACHE_LIMIT) this.cache.clear();
-      this.cache.set(this.detailWidth, rows);
-    }
-    return rows;
+    this.rowCache.clear();
   }
 
   render(width: number): string[] {
@@ -74,19 +59,20 @@ export class PromptBrowser implements PromptPanel {
     const layout = computeBrowserLayout(columns, this.host.terminal.rows);
     this.detailWidth = layout.detailWidth;
     this.pageSize = layout.pageSize;
-    const rows = this.rows();
+    const rows = this.rowCache.rows(this.navigation.units, this.detailWidth);
     this.scrollToCursor(rows);
-    const detail = rows
-      .slice(this.offset, this.offset + this.pageSize)
-      .map((row) => renderPromptRow(row, this.navigation, this.focus === "detail", this.theme));
-    const list = renderPromptList(this.summaries, this.selected, layout, this.theme);
-    const footer = this.theme.fg(THEME_MUTED, this.status || PROMPT_BROWSER_FOOTER_HINT);
-    const lines = [
-      renderBrowserHeading(this.focus, this.theme),
-      ...joinBrowserPanes(layout, list, detail, this.theme),
-      footer,
-    ];
-    return frameLines(lines, columns, this.theme).slice(0, layout.height);
+    return renderBrowserLines({
+      columns,
+      layout,
+      rows,
+      offset: this.offset,
+      navigation: this.navigation,
+      focus: this.focus,
+      selected: this.selected,
+      summaries: this.summaries,
+      status: this.status,
+      theme: this.theme,
+    });
   }
 
   private scrollToCursor(rows: readonly DisplayRow[]): void {
@@ -103,7 +89,7 @@ export class PromptBrowser implements PromptPanel {
     this.navigation = createPromptNavigation(prompt.text);
     this.offset = 0;
     this.status = "";
-    this.cache.clear();
+    this.rowCache.clear();
   }
 
   private async copy(text: string): Promise<void> {
@@ -149,11 +135,9 @@ export class PromptBrowser implements PromptPanel {
     if (this.focus === "list") return this.handleListKey(sequence);
     return applyDetailKey(sequence, {
       navigation: this.navigation,
-      rows: () => this.rows(),
+      rows: () => this.rowCache.rows(this.navigation.units, this.detailWidth),
       pageSize: this.pageSize,
-      copy: (text) => {
-        void this.copy(text);
-      },
+      copy: (text) => void this.copy(text),
     });
   }
 
