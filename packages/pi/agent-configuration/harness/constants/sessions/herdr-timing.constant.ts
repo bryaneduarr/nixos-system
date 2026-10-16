@@ -1,0 +1,11 @@
+export const SESSION_REGISTRATION_TIMEOUT_MS = 10_000;
+
+export const SESSION_REGISTRATION_POLL_MS = 200;
+
+export const AGENT_START_TIMEOUT_MS = 30_000;
+
+export const COMPLETION_NOTIFICATION_TITLE = "Pi finished";
+
+export const COMPLETION_NOTIFICATION_SOUND = "done";
+
+export const PANE_MIN_SPLIT_RATIO = 2;

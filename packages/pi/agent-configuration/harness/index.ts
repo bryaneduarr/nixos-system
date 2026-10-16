@@ -14,8 +14,8 @@ import { EditParamsSchema } from "./schemas/tools/edit/edit-parameters.schema.ts
 import { ReadParamsSchema } from "./schemas/tools/read/read-parameters.schema.ts";
 import { RunParamsSchema } from "./schemas/tools/run/run-parameters.schema.ts";
 import { SearchParamsSchema } from "./schemas/tools/search/search-parameters.schema.ts";
+import { installSessions } from "./services/sessions/install/install-sessions.service.ts";
 import { toToolCancellation } from "./services/tools/process/tool-cancellation.service.ts";
-import { installSessions } from "./sessions/install.ts";
 import { registerSubagentTool } from "./subagents/tool.ts";
 import { editFile, toEditRequest } from "./tools/edit.ts";
 import { readSource, toReadSelection } from "./tools/read.ts";

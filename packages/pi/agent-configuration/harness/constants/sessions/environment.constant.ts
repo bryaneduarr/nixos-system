@@ -1,0 +1,1 @@
+export const HERDR_ENVIRONMENT_ENABLED = "1";

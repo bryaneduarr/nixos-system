@@ -1,11 +1,11 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type { HerdrSessions } from "../../sessions/herdr.ts";
-import type { SessionRegistry } from "../../sessions/registry.ts";
 import type { CleanupCancellation } from "./cleanup-cancellation.interface.ts";
 import type { ExitDependencies } from "./exit/exit-dependencies.interface.ts";
+import type { HerdrSessions } from "./herdr/herdr-sessions.interface.ts";
 import type { MenuSelection } from "./menu/menu-selection.interface.ts";
 import type { ProjectSelection } from "./menu/project-selection.interface.ts";
 import type { LiveSession } from "./registry/live-session.interface.ts";
+import type { SessionRegistry } from "./registry/session-registry.interface.ts";
 
 /* External effects of the session commands, replaceable in tests. */
 export interface SessionDependencies {

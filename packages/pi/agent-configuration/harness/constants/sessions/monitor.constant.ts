@@ -1,0 +1,5 @@
+export const SESSION_REFRESH_INTERVAL_MS = 1000;
+
+export const BRANCH_REFRESH_INTERVAL_MS = 5000;
+
+export const GIT_COMMAND_TIMEOUT_MS = 2000;

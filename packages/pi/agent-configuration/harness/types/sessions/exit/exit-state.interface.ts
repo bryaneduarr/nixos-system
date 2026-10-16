@@ -1,7 +1,7 @@
 import type { CleanupCancellation } from "../cleanup-cancellation.interface.ts";
 
 /* Cleanup scheduled by an explicit exit that can still be cancelled. */
-interface ScheduledCleanup {
+export interface ScheduledCleanup {
   /* Marks that a cleanup worker is scheduled. */
   readonly scheduled: true;
   /* Cancels the scheduled cleanup worker. */
@@ -9,13 +9,13 @@ interface ScheduledCleanup {
 }
 
 /* No cleanup worker is scheduled. */
-interface UnscheduledCleanup {
+export interface UnscheduledCleanup {
   /* Marks that no cleanup worker is scheduled. */
   readonly scheduled: false;
 }
 
 /* Whether an explicit exit has scheduled a cleanup worker that can be cancelled. */
-type ExitCancellation = ScheduledCleanup | UnscheduledCleanup;
+export type ExitCancellation = ScheduledCleanup | UnscheduledCleanup;
 
 /* Process-wide state of explicit exit, shared across reloads of the extension. */
 export interface ExitState {

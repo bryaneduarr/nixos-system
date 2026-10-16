@@ -1,0 +1,7 @@
+export const WORKER_COMMAND_TIMEOUT_MS = 5000;
+
+export const WORKER_POLL_INTERVAL_MS = 500;
+
+export const PROCESS_EXIT_POLL_ATTEMPTS = 120;
+
+export const PANE_CLOSE_POLL_ATTEMPTS = 20;
