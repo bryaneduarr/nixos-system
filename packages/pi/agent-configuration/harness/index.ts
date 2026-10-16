@@ -14,6 +14,8 @@ import { EditParamsSchema } from "./schemas/tools/edit/edit-parameters.schema.ts
 import { ReadParamsSchema } from "./schemas/tools/read/read-parameters.schema.ts";
 import { RunParamsSchema } from "./schemas/tools/run/run-parameters.schema.ts";
 import { SearchParamsSchema } from "./schemas/tools/search/search-parameters.schema.ts";
+import { createHarnessRenderers } from "./services/tool-rendering/create-harness-renderers.service.ts";
+import { installHarnessPresentation } from "./services/tool-rendering/install-harness-presentation.service.ts";
 import { toToolCancellation } from "./services/tools/process/tool-cancellation.service.ts";
 import { installSessions } from "./sessions/install.ts";
 import { registerSubagentTool } from "./subagents/tool.ts";
@@ -21,8 +23,6 @@ import { editFile, toEditRequest } from "./tools/edit.ts";
 import { readSource, toReadSelection } from "./tools/read.ts";
 import { runShell } from "./tools/run.ts";
 import { searchRepo } from "./tools/search.ts";
-import { installHarnessPresentation } from "./ui/install.ts";
-import { createHarnessRenderers } from "./ui/tool-renderer.ts";
 
 const ALLOWED_TOOL_SET = new Set<string>([...HARNESS_TOOLS, TASK_TOOL_NAME, ...WEB_TOOLS]);
 

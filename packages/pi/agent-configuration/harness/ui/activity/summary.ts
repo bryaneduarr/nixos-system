@@ -8,10 +8,11 @@ import {
   UPDATE_ACTIVITY_NAME,
 } from "../../constants/activity/activity-entry.constant.ts";
 import { SPINNER_FRAMES } from "../../constants/activity/spinner.constant.ts";
+import { toolLabel } from "../../services/tool-rendering/presentation/tool-label.service.ts";
+import { toolTarget } from "../../services/tool-rendering/presentation/tool-target.service.ts";
+import { oneLine } from "../../services/tool-rendering/text/one-line.service.ts";
 import { isHarnessTool } from "../../tools/config.ts";
 import type { ActivitySummaryData } from "../../types/activity/activity-summary.interface.ts";
-import { oneLine } from "../formatting.ts";
-import { toolLabel, toolTarget } from "../tool-renderer.ts";
 import { formatElapsed } from "./elapsed.ts";
 import { actionsForMessage, activitySummaryState } from "./summary-state.ts";
 import { isActivityVisible, toggleActivityVisibility } from "./visibility.ts";

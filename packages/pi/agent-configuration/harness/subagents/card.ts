@@ -1,12 +1,13 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
 import { activityStore } from "../activity/store.ts";
+import { EMPTY } from "../components/tool-rendering/empty.component.ts";
+import { ToolBox } from "../components/tool-rendering/tool-box.component.ts";
 import { COMPLETED_TASK_LABEL, STARTING_TASK_LABEL } from "../constants/subagents/progress.constant.ts";
 import { presentValue } from "../services/activity/value/present-value.service.ts";
+import { oneLine } from "../services/tool-rendering/text/one-line.service.ts";
 import type { SubToolActivity } from "../types/activity/sub-tool-activity.interface.ts";
 import type { TaskProgress } from "../types/subagents/tasks/task-progress.interface.ts";
-import { oneLine } from "../ui/formatting.ts";
-import { EMPTY, ToolBox } from "../ui/tool-renderer.ts";
 
 const TOOL_TARGET_FIELDS = ["path", "command", "pattern", "query", "file", "prompt"];
 
