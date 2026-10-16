@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": ["bun"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true
+  },
+  "include": ["agent-configuration/**/*.ts", "pi-tools/**/*.ts", "tests/**/*.ts"]
+}

@@ -35,3 +35,6 @@ local-config.nix
 
 # Compiled Neovim spell additions; the .add word lists stay tracked.
 nvim/spell/*.spl
+
+# Local Pi dependencies for editor types and checks; Nix installs its own copy.
+packages/pi/node_modules/
