@@ -77,13 +77,14 @@ in
 
     vfsCacheMaxAge = lib.mkOption {
       type = lib.types.str;
-      default = "24h";
-      description = "Cached files unused for this long get evicted.";
+      default = "720h";
+      description = "Cached files unused for this long get evicted; `vfsCacheMaxSize` still bounds the total.";
     };
 
+    # OneDrive change polling (--poll-interval, 1m) keeps long-lived listings current.
     dirCacheTime = lib.mkOption {
       type = lib.types.str;
-      default = "30m";
+      default = "1000h";
       description = "How long directory listings are cached before re-querying OneDrive.";
     };
 

@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "pi": {
+    "extensions": ["./codex-fast-mode.extension.ts"]
+  }
+}

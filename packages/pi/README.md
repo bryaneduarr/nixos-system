@@ -1,17 +1,16 @@
 # Pi configuration
 
-- `agent-configuration/extensions/` contains independent Pi extensions.
-- `agent-configuration/harness/tools/` implements repository tools.
-- `agent-configuration/harness/activity/` stores activity state.
-- `agent-configuration/harness/ui/` renders activity and tool details.
-- `agent-configuration/harness/sessions/` manages live Pi terminals in Herdr.
+- `agent-configuration/harness/` is the Pi harness. `harness.extension.ts` registers everything, and `package.json` points Pi to it; code lives in `types/`, `schemas/`, `constants/`, `services/`, `tools/`, `commands/`, and `components/`, each divided by domain, such as `services/sessions/`.
+- `agent-configuration/extensions/` contains independent Pi extensions. Multi-file extensions use the same folders.
 - `agent-configuration/settings/` defines JSON settings installed by Home Manager.
 - `agent-configuration/themes/` contains themes.
 - `agent-configuration/skills/` contains the Efficient Tools and Web Research skills used by the Pi harness.
 - The repository root `.agents/skills/` belongs to coding harnesses. Home Manager does not read or install it.
-- `home-manager/` installs files and configures Pi. `pi-tools/` packages dependencies. `tests/` contains extension tests.
+- `home-manager/` installs files and configures Pi. `pi-tools/` packages dependencies. Tests sit next to the code they check and are not installed.
 
-`home-manager/managed-files.nix` maps source files to `~/.pi/agent/`. Pi runs with the harness tools and configured web tools. Run extension tests with `bun test` from this directory.
+`home-manager/managed-files.nix` maps source files to `~/.pi/agent/`. Pi runs with the harness tools and configured web tools.
+
+Run `bun install`, then `bun run check` from this directory to type-check, lint, find unused code, and run the tests. `nix build .#checks.x86_64-linux.pi` from the repository root runs the same checks in a sandbox.
 
 ## Browse and copy prompts
 
@@ -23,8 +22,7 @@ Press `Tab` to switch panes. In the list, use `j`, `k`, or the arrow keys to cho
 
 Press `v` to select characters or `V` to select whole lines, then move the cursor and press `y` to copy. Use `yy` to copy the current line or `ggyG` to copy the complete message. The footer reports clipboard success or failure. Copies retain original whitespace and line endings, without borders or display-wrap breaks. Escape cancels an active selection; a second Escape closes the modal. `Ctrl+C` closes immediately.
 
-After installing the configuration with `nrs`, run `/reload` in Pi. The implementation is in `agent-configuration/harness/ui/prompts/`. Run `bun test tests/prompt-previews.test.ts tests/prompt-browser.test.ts` from this directory to check previews, navigation, selection, and clipboard handling.
-
+After installing the configuration with `nrs`, run `/reload` in Pi.
 ## Live sessions in Herdr
 
 Press `Ctrl+Alt+S` or run `/sessions` in interactive Pi inside Herdr. The menu groups live sessions by canonical project directory and refreshes once a second. Each row shows one status, the Git branch, and main-session context usage. `working` takes priority over an orange `draft` label. An empty idle editor shows `idle`. Unknown context usage shows `unknown`. A star marks the current process. Press `i` to filter by folder, session name, branch, or status.
@@ -45,8 +43,7 @@ The harness reports `working` and `idle` to Herdr under its own `pi:harness` sou
 
 Pi sends one audible completion notification after the agent settles. Repeated settlement events, aborted runs, and noninteractive subagents do not send another notification. Herdr's automatic Pi state-change sound is muted to avoid a second sound. Home Manager reloads a running Herdr server when its configuration file changes. If an older server still plays both sounds, run `herdr server reload-config`; no Pi restart is needed.
 
-The manager uses the existing `pi` executable through `herdr agent start --kind pi`. It does not install a shell wrapper or change noninteractive Pi invocations. Pi must load this harness in the new pane. Restart older Pi processes to make them appear in the menu. Run the tests with `bun test packages/pi/tests` from the repository root. Tests cover sibling-pane creation, numbered names, startup-before-focus ordering, both shortcuts, draft reporting, menu rendering, and pane-only cleanup. Focus commands use mocked tests to avoid changing the active terminal during validation. Install dependencies before running the test suite. The existing renderer tests use the real TUI package rather than global package mocks.
-
+The manager uses the existing `pi` executable through `herdr agent start --kind pi`. It does not install a shell wrapper or change noninteractive Pi invocations. Pi must load this harness in the new pane. Restart older Pi processes to make them appear in the menu.
 ## Exit Pi
 
 Run `/exit` or press `Ctrl+Alt+Q` in interactive Pi. Outside Herdr, this requests Pi's graceful shutdown without closing a terminal. Inside Herdr, it also schedules closure of the current pane after the exact Pi process exits. Explicit exit works with conversation history and with Pi instances that the session manager did not create. It does not change the automatic unused-session cleanup rules.

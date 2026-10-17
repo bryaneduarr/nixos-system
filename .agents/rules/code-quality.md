@@ -15,10 +15,20 @@ These rules are mandatory for every language in this repository: Nix, shell, Typ
 
 - Keep the primary behavior of a file focused and its execution flow easy to follow without navigating through unnecessary wrapper layers.
 - Isolate complicated logic in descriptively named functions or files when that improves readability, even with one current consumer. Keep necessary decisions and the order of operations visible in the main file.
+- Extraction must clarify responsibilities, not merely hide complexity behind forwarding wrappers.
 - Do not introduce forwarding wrappers without validation, transformation, error handling, or another concrete responsibility.
 - Prefer explicit, simple implementations and useful inference over duplicate definitions.
 - Reuse code when it genuinely reduces duplication, not merely to add layers.
 - Do not sacrifice clarity to abstraction or correctness to file-size targets.
+
+## Self-explanatory code
+
+Code is written for the next reader, not its author. These rules apply to every language.
+
+- Names state exactly what a function, variable, constant, or file does or holds, such as `isPaneInWorkspace` or `readSessionRegistry`. A reader must understand the code from names and flow without comments.
+- Do not write long conditions that combine several unrelated checks inline. Give each check a named boolean or a validation function that names the rule it enforces, then combine the names. Prefer schema validation for checking the shape of external data.
+- Store repeated literals (strings, numbers, patterns, paths) in named constants. Inline a literal only when it is used once and its meaning is obvious.
+- Declare values once and keep them immutable: `const`, `readonly`, Nix `let`, `local` (and `readonly` in shell when the value never changes). Reassign or mutate only when the algorithm requires it. Leave no unused variables, parameters, or imports.
 
 ## Examples and placeholders
 
@@ -35,6 +45,7 @@ These rules apply to `#`, `//`, `/** */`, and `--` comments alike.
 - Tests follow these rules too. Outside required documentation, do not add comments that restate what the code, configuration, or script already shows, such as narrative, summary, section-banner, or usage comments.
 - Add a comment only when it records something the code cannot express and a future maintainer needs: a non-obvious external constraint, a value that must stay in sync elsewhere, a workaround for an upstream bug with its link, or a reason an apparently simpler change would break behavior. Keep it to one short line when possible.
 - Simplify unclear code instead of explaining it.
+- Do not comment functions, methods, or procedures, including `/** */` doc comments above them; the name and signature describe them. Comment inside a function only for genuinely difficult logic that renaming or splitting cannot make clear.
 - Do not prefix comments with `Why:` or `What:`. Do not use numbered step comments, decorative separators, or label-style comments.
 - Do not mention "human readable", "human friendly", or "human-like" in comments. Avoid pronouns addressing the reader.
 - End complete comment sentences with a period. Use plain keyboard characters; no em dashes or decorative Unicode.
@@ -54,9 +65,24 @@ These rules apply to `#`, `//`, `/** */`, and `--` comments alike.
 - Before implementation, inspect ownership and required related relocations; before completion, review the affected ownership area as well as the scoped diff.
 - Do not describe a change as complete while a known applicable rule violation or required related relocation remains unresolved.
 - Report the actual changes, the verification performed, and any blockers or limitations.
+- Before completion, run the diagnostics below for every changed file and resolve every error and warning they report. Report any language left unchecked.
 - Do not claim that evaluation, a build, or a type check proves runtime behavior. Only an activated system or an executed test shows that.
 - Do not run `nrs`, `nixos-rebuild switch`, or any activation merely to validate a change. Activation requires an explicit request.
 - Consult [verification and tools](../methods/verification-and-tools.md) to choose checks. It does not impose additional requirements.
+
+## Diagnostics
+
+Agents cannot see editor diagnostics, so they run the command-line equivalent of every language server configured in `nvim/lua/plugins/lsp.lua` and the linters next to it:
+
+- TypeScript (`ts_ls`, Biome): `tsc --noEmit`, `biome ci`, and `knip` from the owning project, plus the rule audit described in [typescript.md](typescript.md).
+- Nix (`nil_ls`): `nil diagnostics <file>`, `statix check`, `deadnix`, and `nixfmt --check`.
+- Shell (`bashls`): `shellcheck` and `shfmt -d`.
+- Lua (`lua_ls`): `lua-language-server --check` as described in the verification guide, and `stylua --check`.
+- C and C++ (`clangd`): `clang-tidy` when the project has a compile database.
+- CSS (`cssls`): `biome ci`.
+- HTML, Tailwind, and Emmet have no command-line diagnostics; report them as unchecked.
+
+`check-code` runs all of these on Git-changed files, or on the paths given, and lists unchecked files. When a language server is added to `lsp.lua`, add its command-line equivalent here and to `scripts/check-code/` in the same change.
 
 ## Decision priority
 

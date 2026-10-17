@@ -68,7 +68,7 @@ Run `bash -n` on standalone scripts. Scripts packaged with `writeShellApplicatio
 
 ## When changing TypeScript
 
-From the owning project directory, run its tests with `bun test` and, once configured, `tsc --noEmit` and `biome check`. The Pi harness currently has tests but no type check, so state that types were not verified.
+From the owning project directory, run `tsc --noEmit`, `biome ci`, `knip`, and `bun test`. In `packages/pi/`, `bun run check` runs all four.
 
 ## When changing documentation or instructions
 

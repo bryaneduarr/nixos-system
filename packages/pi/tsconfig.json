@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": ["bun"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "paths": {
+      "pi-powerline-footer/theme.ts": [
+        "./agent-configuration/extensions/codex-fast-mode/types/pi-powerline-footer/theme.d.ts"
+      ]
+    }
+  },
+  "include": ["agent-configuration/**/*.ts", "pi-tools/**/*.ts"]
+}

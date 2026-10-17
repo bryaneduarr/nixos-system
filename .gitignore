@@ -35,3 +35,15 @@ local-config.nix
 
 # Compiled Neovim spell additions; the .add word lists stay tracked.
 nvim/spell/*.spl
+
+# Local Pi dependencies for editor types and checks; Nix installs its own copy.
+packages/pi/node_modules/
+
+# Agent plans and briefs stay local; the pull request is the review.
+.agents/plans/
+
+# Worktrees that coding agents create for parallel work.
+.claude/worktrees/
+
+# Local rule-audit dependencies for editor types and checks; Nix installs its own copy.
+scripts/rule-audit/node_modules/

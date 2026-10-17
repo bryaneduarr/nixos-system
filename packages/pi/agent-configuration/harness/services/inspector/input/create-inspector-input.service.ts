@@ -1,0 +1,53 @@
+import { PAGE_STEP_CHROME_ROWS } from "../../../constants/inspector/layout.constant.ts";
+import type { InspectorInput } from "../../../types/inspector/input/inspector-input.interface.ts";
+import type { InspectorInputContext } from "../../../types/inspector/input/inspector-input-context.interface.ts";
+import { bodyHeight } from "../layout/body-height.service.ts";
+
+export function createInspectorInput(context: InspectorInputContext): InspectorInput {
+  const { navigation } = context;
+  return {
+    page: navigation.page,
+    footerY: context.footerY,
+    layout: context.layout,
+    subagentScroll: navigation.subagentScroll,
+    listScroll: navigation.listScroll,
+    close: context.close,
+    switchPage: (page) => {
+      navigation.page = page;
+      navigation.focus = "list";
+      navigation.detailScroll = 0;
+      navigation.artifact = { kind: "tool-result" };
+      context.setStatus("");
+    },
+    switchFocus: () => {
+      navigation.focus = navigation.focus === "list" ? "detail" : "list";
+      context.requestRender();
+    },
+    focusDetail: () => {
+      navigation.focus = "detail";
+      context.requestRender();
+    },
+    openSubagent: () => {
+      const selection = navigation.subagentSelection;
+      if (selection.kind !== "selected") return;
+      navigation.page = "tools";
+      navigation.selection = { kind: "row", id: selection.id };
+      navigation.focus = "detail";
+      navigation.detailScroll = 0;
+      navigation.artifact = { kind: "tool-result" };
+      context.setStatus("");
+    },
+    collapse: (direction) => navigation.adjustSubagentCollapse(direction),
+    copy: context.copy,
+    toggleArtifact: context.toggleArtifact,
+    pageSize: () => Math.max(1, bodyHeight(context.terminalRows()) - PAGE_STEP_CHROME_ROWS),
+    step: (delta) => navigation.step(delta),
+    jump: (where) => navigation.jump(where),
+    subagentEntries: () => navigation.subagentEntries(),
+    selectSubagent: (id) => {
+      navigation.subagentSelection = { kind: "selected", id };
+      context.requestRender();
+    },
+    select: (id) => navigation.select(id),
+  };
+}

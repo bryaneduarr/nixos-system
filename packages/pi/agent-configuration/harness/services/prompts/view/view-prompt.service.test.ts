@@ -1,0 +1,79 @@
+import { expect, test } from "bun:test";
+import { visibleWidth } from "@earendil-works/pi-tui";
+import type { ClipboardWriter } from "../../../types/prompts/clipboard-writer.interface.ts";
+import type { PromptPanel } from "../../../types/prompts/prompt-panel.interface.ts";
+import type { PromptTheme } from "../../../types/prompts/prompt-theme.interface.ts";
+import type {
+  PromptBrowserFactory,
+  PromptOverlayOptions,
+  PromptViewerUi,
+} from "../../../types/prompts/prompt-viewer-ui.interface.ts";
+import { viewPrompt } from "./view-prompt.service.ts";
+
+const plainTheme: PromptTheme = {
+  fg: (_color, text) => text,
+  bg: (_color, text) => text,
+};
+
+const unusedClipboard: ClipboardWriter = () => {};
+
+function requireElement<T>(elements: readonly T[], index: number, message: string): T {
+  const element = elements.at(index);
+  if (element === undefined) throw new Error(message);
+  return element;
+}
+
+test("viewer scrolls the complete prompt, resizes, and closes without editing", async () => {
+  const panels: PromptPanel[] = [];
+  let renders = 0;
+  const terminal = { rows: 8 };
+  const text = Array.from({ length: 20 }, (_, index) => `line ${index}`).join("\n");
+  const ui: PromptViewerUi = {
+    custom: <T>(factory: PromptBrowserFactory<T>) =>
+      new Promise<T>((resolve) => {
+        panels.push(factory({ terminal, requestRender: () => renders++ }, plainTheme, {}, resolve));
+      }),
+  };
+  const viewing = viewPrompt(ui, [{ text, label: "Latest" }], unusedClipboard);
+  const panel = requireElement(panels, 0, "viewer did not open");
+  expect(panel.render(40).join("\n")).toContain("line 0");
+  expect(panel.render(40).join("\n")).not.toContain("line 19");
+  panel.handleInput("\x1b[F");
+  expect(panel.render(40).join("\n")).toContain("line 19");
+  panel.handleInput("\x1b[H");
+  expect(panel.render(40).join("\n")).toContain("line 0");
+  panel.handleInput("\x1b[6~");
+  expect(panel.render(40).join("\n")).toContain("line 1");
+  terminal.rows = 6;
+  panel.invalidate();
+  for (const line of panel.render(5)) expect(visibleWidth(line)).toBeLessThanOrEqual(5);
+  expect(renders).toBe(3);
+  panel.handleInput("\x1b");
+  await viewing;
+});
+
+test("viewer opens a centered overlay focused on the first item without editor writes", async () => {
+  const panels: PromptPanel[] = [];
+  const overlays: PromptOverlayOptions[] = [];
+  const draft = "unsent\nraw";
+  const ui: PromptViewerUi = {
+    custom: <T>(factory: PromptBrowserFactory<T>, options: PromptOverlayOptions) => {
+      overlays.push(options);
+      return new Promise<T>((resolve) => {
+        panels.push(factory({ terminal: { rows: 24 }, requestRender: () => {} }, plainTheme, {}, resolve));
+      });
+    },
+  };
+  const viewing = viewPrompt(ui, [{ text: draft, label: "Draft" }], unusedClipboard);
+  expect(overlays).toEqual([
+    {
+      overlay: true,
+      overlayOptions: { anchor: "center", width: "92%", maxHeight: "88%", margin: 1 },
+    },
+  ]);
+  const panel = requireElement(panels, 0, "viewer did not open");
+  expect(panel.render(100).join("\n")).toContain("[detail]");
+  expect(panel.render(100).join("\n")).toContain("unsent");
+  panel.handleInput("\x1b");
+  await viewing;
+});

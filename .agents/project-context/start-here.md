@@ -8,8 +8,10 @@ Read only what the task needs; these notes are evidence pointers, not replacemen
 - Pi/Claude Code wiring: [agent harnesses](development/agent-harnesses.md).
 - Running Playwright browsers on NixOS: [playwright](development/playwright.md).
 - Neovim deployment, Mason versus Nix tools: [neovim](development/neovim.md).
+- OneDrive rclone mount latency and caching: [onedrive mount](development/onedrive-mount.md).
 - Recent work, not a new assignment: [agent instructions](tasks/agent-instructions/handoff.md).
+- Pi restructure done on `pi-architecture`, awaiting review: [handoff](tasks/pi-readable-restructure/handoff.md).
 - Repository reorganization in progress: [handoff](tasks/hosts-modularization/handoff.md).
-- Workflows: [commits](../skills/commit-done/SKILL.md), [PR writing](../skills/pr/SKILL.md), [feature completion](../skills/finish-feature/SKILL.md).
+- Workflows: [commits](../skills/commit-done/SKILL.md), [PR writing](../skills/pr/SKILL.md), [feature completion](../skills/finish-feature/SKILL.md), [intent distilling](../skills/thinking-distill/SKILL.md).
 
 Create additional pointers only when actual work establishes useful evidence.

@@ -4,12 +4,20 @@ return {
   config = function()
     local conform = require("conform")
 
+    local function is_biome_project(ctx)
+      return vim.fs.find({ "biome.json", "biome.jsonc" }, { path = ctx.dirname, upward = true })[1] ~= nil
+    end
+
+    local function is_not_biome_project(_, ctx)
+      return not is_biome_project(ctx)
+    end
+
     conform.setup({
       formatters_by_ft = {
-        javascript = { "biome", "prettierd", "eslint_d" },
-        typescript = { "biome", "prettierd", "eslint_d" },
-        javascriptreact = { "biome", "prettierd", "eslint_d" },
-        typescriptreact = { "biome", "prettierd", "eslint_d" },
+        javascript = { "biome", "script_prettierd", "eslint_d" },
+        typescript = { "biome", "script_prettierd", "eslint_d" },
+        javascriptreact = { "biome", "script_prettierd", "eslint_d" },
+        typescriptreact = { "biome", "script_prettierd", "eslint_d" },
         css = { "prettierd" },
         html = { "prettierd" },
         json = { "prettierd" },
@@ -19,6 +27,8 @@ return {
         c = { "clang_format" },
         cpp = { "clang_format" },
         nix = { "nixfmt" },
+        sh = { "shfmt" },
+        bash = { "shfmt" },
         ["_"] = { "trim_whitespace", "trim_newlines" },
       },
       formatters = {
@@ -26,10 +36,12 @@ return {
           command = "biome",
           args = { "format", "--stdin-file-path", "$FILENAME" },
           stdin = true,
-          condition = function(ctx)
-            return vim.fs.find({ "biome.json", "biome.jsonc" }, { path = ctx.filename, upward = true })[1]
+          condition = function(_, ctx)
+            return is_biome_project(ctx)
           end,
         },
+        script_prettierd = { inherit = "prettierd", condition = is_not_biome_project },
+        eslint_d = { condition = is_not_biome_project },
         stylua = {
           args = { "--config-path", vim.fn.stdpath("config") .. "/stylua.toml", "-" },
         },

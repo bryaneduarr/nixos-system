@@ -24,6 +24,7 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = with pkgs; [
       awscli2
+      bash-language-server
       biome
       bubblewrap
       cargo

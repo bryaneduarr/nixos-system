@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "agent-configuration/harness/harness.extension.ts",
+    "agent-configuration/extensions/*.ts",
+    "agent-configuration/extensions/*/*.extension.ts",
+    "pi-tools/*.ts",
+    "**/*.test.ts"
+  ],
+  "project": ["agent-configuration/**/*.ts", "pi-tools/**/*.ts"],
+  "ignoreBinaries": ["tsc", "biome"],
+  "ignoreDependencies": [
+    "@earendil-works/pi-agent-core",
+    "@earendil-works/pi-client",
+    "@earendil-works/pi-protocol",
+    "@earendil-works/pi-telemetry",
+    "@ff-labs/pi-fff",
+    "@juvio15/pi-ast-grep",
+    "pi-lsp-adapter",
+    "pi-mcp-adapter",
+    "pi-tree-sitter",
+    "pi-web-access"
+  ]
+}

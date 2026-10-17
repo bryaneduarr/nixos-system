@@ -12,6 +12,7 @@ _: {
       ];
     };
 
+    check-code.enable = true;
     command-line-tools.enable = true;
     development-tools.enable = true;
     engram.enable = true;
