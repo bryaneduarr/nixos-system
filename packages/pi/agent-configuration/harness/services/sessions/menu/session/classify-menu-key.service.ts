@@ -1,5 +1,5 @@
 import { matchesKey } from "@earendil-works/pi-tui";
-import { KEY_CTRL_C, KEY_ENTER, KEY_ESCAPE } from "../../../../constants/prompts/keys.constant.ts";
+import { KEY_CTRL_C, KEY_ENTER, KEY_ESCAPE } from "../../../../constants/keys/key-name.constant.ts";
 import { MENU_KEY_FILTER, MENU_NEW_SESSION_INPUTS } from "../../../../constants/sessions/menu/menu-keys.constant.ts";
 import type { MenuKeyAction } from "../../../../types/sessions/menu/session/menu-key-action.interface.ts";
 

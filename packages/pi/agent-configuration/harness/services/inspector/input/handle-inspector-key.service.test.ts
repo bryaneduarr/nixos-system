@@ -4,7 +4,7 @@ import type { InspectorPage } from "../../../types/inspector/navigation/inspecto
 import type { SplitViewFocus } from "../../../types/split-view/split-view-focus.interface.ts";
 import { handleInspectorKey } from "./handle-inspector-key.service.ts";
 
-function createInspectorInput(
+function createStubbedInspectorInput(
   page: InspectorPage,
   focus: SplitViewFocus,
   switchedPages: InspectorPage[],
@@ -39,7 +39,7 @@ function createInspectorInput(
 
 test("number keys open the tools, subagents, and history pages", () => {
   const switchedPages: InspectorPage[] = [];
-  const inspector = createInspectorInput("tools", "list", switchedPages);
+  const inspector = createStubbedInspectorInput("tools", "list", switchedPages);
 
   for (const key of ["1", "2", "3"]) handleInspectorKey(key, inspector);
 
@@ -48,7 +48,7 @@ test("number keys open the tools, subagents, and history pages", () => {
 
 test("ctrl+d and ctrl+u move half a page down and up", () => {
   const steps: number[] = [];
-  const inspector = { ...createInspectorInput("tools", "list", []), step: (delta: number) => steps.push(delta) };
+  const inspector = { ...createStubbedInspectorInput("tools", "list", []), step: (delta: number) => steps.push(delta) };
 
   handleInspectorKey("\x04", inspector);
   handleInspectorKey("\x15", inspector);
@@ -59,9 +59,9 @@ test("ctrl+d and ctrl+u move half a page down and up", () => {
 test("right opens the selected subagent and left from its list returns to the subagents", () => {
   const switchedPages: InspectorPage[] = [];
 
-  handleInspectorKey("l", createInspectorInput("subagents", "list", switchedPages));
-  handleInspectorKey("h", createInspectorInput("subagent", "list", switchedPages));
-  handleInspectorKey("h", createInspectorInput("subagent", "detail", switchedPages));
+  handleInspectorKey("l", createStubbedInspectorInput("subagents", "list", switchedPages));
+  handleInspectorKey("h", createStubbedInspectorInput("subagent", "list", switchedPages));
+  handleInspectorKey("h", createStubbedInspectorInput("subagent", "detail", switchedPages));
 
   expect(switchedPages).toEqual(["subagent", "subagents"]);
 });
@@ -70,7 +70,7 @@ test("enter opens a subagent from the subagents and tools pages and nowhere else
   const switchedPages: InspectorPage[] = [];
 
   for (const page of ["subagents", "tools", "history", "subagent"] as const) {
-    handleInspectorKey("\r", createInspectorInput(page, "list", switchedPages));
+    handleInspectorKey("\r", createStubbedInspectorInput(page, "list", switchedPages));
   }
 
   expect(switchedPages).toEqual(["subagent", "subagent"]);

@@ -9,3 +9,6 @@ export const KEY_G = "g";
 export const KEY_Y = "y";
 export const KEY_SHIFT_G = "shift+g";
 export const KEY_ENTER = "enter";
+export const KEY_LEFT = "left";
+export const KEY_RIGHT = "right";
+export const KEY_H = "h";

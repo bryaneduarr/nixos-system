@@ -1,5 +1,5 @@
 import { matchesKey } from "@earendil-works/pi-tui";
-import { KEY_DOWN, KEY_J, KEY_K, KEY_UP } from "../../../../constants/prompts/keys.constant.ts";
+import { KEY_DOWN, KEY_J, KEY_K, KEY_UP } from "../../../../constants/keys/key-name.constant.ts";
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";
 import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
 

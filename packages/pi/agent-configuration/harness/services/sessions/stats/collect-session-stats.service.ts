@@ -2,6 +2,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { Static } from "typebox";
 import { Value } from "typebox/value";
+import { RUN_TOOL_NAME } from "../../../constants/tools/active-tools/harness-tools.constant.ts";
 import {
   AssistantEntrySchema,
   CompactionEntrySchema,
@@ -43,7 +44,7 @@ function parseLine(line: string): unknown {
 }
 
 function isCdPrefixedRun(block: unknown): boolean {
-  if (!Value.Check(ToolCallBlockSchema, block) || block.name !== "run") return false;
+  if (!Value.Check(ToolCallBlockSchema, block) || block.name !== RUN_TOOL_NAME) return false;
   const command = block.arguments.command;
   return typeof command === "string" && splitLeadingCd(command).kind === "split";
 }

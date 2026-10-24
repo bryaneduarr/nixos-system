@@ -2,6 +2,7 @@ import { MESSAGE_ACTIVITY_NAME } from "../../../../constants/activity/record/act
 import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail/detail-line.constant.ts";
 import { NO_TEXT_LABEL } from "../../../../constants/inspector/detail/label.constant.ts";
 import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";
+import { DOT_SEPARATOR } from "../../../../constants/text/separator.constant.ts";
 import { activityStore } from "../../../../stores/activity/activity.store.ts";
 import type { DetailLine } from "../../../../types/inspector/detail/detail-line.interface.ts";
 import type { PseudoEntryLinesOptions } from "../../../../types/inspector/detail/pseudo-entry-lines-options.interface.ts";
@@ -19,7 +20,11 @@ export function userMessageLines({ entry, startedAt, rawText, width }: PseudoEnt
   const callLabel = `${calls} tool call${calls === 1 ? "" : "s"}`;
 
   return [
-    { text: `${callLabel} after this message · ${formatTime(startedAt)}`, color: THEME_ACCENT, bold: false },
+    {
+      text: `${callLabel} after this message${DOT_SEPARATOR}${formatTime(startedAt)}`,
+      color: THEME_ACCENT,
+      bold: false,
+    },
     BLANK_DETAIL_LINE,
     ...boxedDetailLines({ title: "user message", text: rawText || NO_TEXT_LABEL, color: THEME_ACCENT, width }),
   ];

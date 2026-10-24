@@ -1,10 +1,10 @@
 import { matchesKey } from "@earendil-works/pi-tui";
+import { KEY_CTRL_C, KEY_ENTER, KEY_ESCAPE, KEY_TAB } from "../../constants/keys/key-name.constant.ts";
 import {
   COLLECTION_BY_KEY,
   PROMPT_BROWSER_KEY_HINT,
   TURN_BROWSER_KEY_HINT,
 } from "../../constants/prompts/collection.constant.ts";
-import { KEY_CTRL_C, KEY_ENTER, KEY_ESCAPE, KEY_TAB } from "../../constants/prompts/keys.constant.ts";
 import { choosePromptTurn } from "../../services/prompts/collection/choose-prompt-turn.service.ts";
 import { createDisplayRowCache } from "../../services/prompts/display/create-display-row-cache.service.ts";
 import { cursorRow } from "../../services/prompts/display/cursor-row.service.ts";

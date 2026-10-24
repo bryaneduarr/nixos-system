@@ -8,6 +8,7 @@ import type { PromptPanel } from "../../../types/prompts/view/prompt-panel.inter
 import type { PromptBrowserFactory } from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
 import type { SplitViewTheme } from "../../../types/split-view/split-view-theme.interface.ts";
 import { installPromptPreviews } from "./install-prompt-previews.service.ts";
+import { requireElement } from "./require-element.test-double.ts";
 
 const plainTheme: SplitViewTheme = {
   fg: (_color, text) => text,
@@ -16,12 +17,6 @@ const plainTheme: SplitViewTheme = {
 };
 
 const timestamp = "2026-01-01T00:00:00.000Z";
-
-function requireElement<T>(elements: readonly T[], index: number, message: string): T {
-  const element = elements.at(index);
-  if (element === undefined) throw new Error(message);
-  return element;
-}
 
 test("the turn menu focuses the chosen turn and redraws the transcript", async () => {
   const handlers = new Map<string, (ctx: PromptContext) => Promise<void>>();

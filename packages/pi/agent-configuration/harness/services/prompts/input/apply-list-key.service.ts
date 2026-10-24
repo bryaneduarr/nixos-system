@@ -1,5 +1,5 @@
 import { matchesKey } from "@earendil-works/pi-tui";
-import { KEY_DOWN, KEY_J, KEY_K, KEY_UP } from "../../../constants/prompts/keys.constant.ts";
+import { KEY_DOWN, KEY_J, KEY_K, KEY_UP } from "../../../constants/keys/key-name.constant.ts";
 import type { ListKeyContext } from "../../../types/prompts/input/list-key-context.interface.ts";
 
 export function applyListKey(sequence: string, context: ListKeyContext): boolean {

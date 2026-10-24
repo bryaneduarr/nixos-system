@@ -3,6 +3,7 @@ import { TASK_TOOL_NAME } from "../../../constants/subagents/roles/roles.constan
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { InspectorNavigation } from "../../../types/inspector/navigation/inspector-navigation.interface.ts";
 import type { InspectorNavigationOptions } from "../../../types/inspector/navigation/inspector-navigation-options.interface.ts";
+import { clampDetailScroll } from "../layout/clamp-detail-scroll.service.ts";
 import { adjustSubagentCollapse } from "./adjust-subagent-collapse.service.ts";
 import { buildInspectorRows } from "./build-inspector-rows.service.ts";
 import { findRowAt } from "./find-row-at.service.ts";
@@ -63,8 +64,7 @@ export function createInspectorNavigation(options: InspectorNavigationOptions): 
         return;
       }
       const viewport = navigation.detailViewportHeight || options.bodyHeight();
-      const maxScroll = Math.max(0, options.detailLength() - viewport);
-      navigation.detailScroll = Math.max(0, Math.min(maxScroll, navigation.detailScroll + delta));
+      navigation.detailScroll = clampDetailScroll(navigation.detailScroll + delta, options.detailLength(), viewport);
       options.changed();
     },
     jump: (where) => jumpInspector(navigation, options, where),

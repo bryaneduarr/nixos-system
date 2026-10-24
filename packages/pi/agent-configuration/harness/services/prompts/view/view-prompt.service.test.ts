@@ -5,6 +5,7 @@ import type { PromptOverlayOptions } from "../../../types/prompts/view/prompt-ov
 import type { PromptPanel } from "../../../types/prompts/view/prompt-panel.interface.ts";
 import type { PromptBrowserFactory, PromptViewerUi } from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
 import type { SplitViewTheme } from "../../../types/split-view/split-view-theme.interface.ts";
+import { requireElement } from "../install/require-element.test-double.ts";
 import { viewPrompt } from "./view-prompt.service.ts";
 
 const plainTheme: SplitViewTheme = {
@@ -14,12 +15,6 @@ const plainTheme: SplitViewTheme = {
 };
 
 const unusedClipboard: ClipboardWriter = () => {};
-
-function requireElement<T>(elements: readonly T[], index: number, message: string): T {
-  const element = elements.at(index);
-  if (element === undefined) throw new Error(message);
-  return element;
-}
 
 test("viewer scrolls the complete prompt, resizes, and closes without editing", async () => {
   const panels: PromptPanel[] = [];
