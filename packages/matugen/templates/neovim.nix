@@ -21,7 +21,7 @@ lib.mkIf config.custom.matugen.enable {
         error = "{{colors.error.default.hex}}",
         background = "{{colors.background.default.hex}}",
         on_background = "{{colors.on_background.default.hex}}",
-      }
+      },
     }
   '';
 }
