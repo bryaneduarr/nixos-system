@@ -2,8 +2,10 @@
   biome,
   bun,
   callPackage,
+  fd,
   lib,
   nodejs_24,
+  ripgrep,
   stdenvNoCC,
   typescript,
 }:
@@ -27,6 +29,8 @@ let
     buildPhase = ''
       runHook preBuild
       export HOME="$TMPDIR"
+      # Transcript color tests expect the truecolor terminal Pi runs in.
+      export COLORTERM=truecolor
       export BUN_INSTALL_CACHE_DIR="$TMPDIR/bun-cache"
       bun install --frozen-lockfile --ignore-scripts --no-progress --cpu='*' --os=linux
       runHook postBuild
@@ -42,7 +46,7 @@ let
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
     # Installing packages for every CPU keeps this hash identical on x86_64 and aarch64.
-    outputHash = "sha256-bx4yLtVF028tezx2NQm/Hs6pZ5Xhjn1JUwimYFcZRZ8=";
+    outputHash = "sha256-4cajK71Nu/0RyI3iLztujef6ro4pJlVwqFaRVDzxpuY=";
   };
 in
 stdenvNoCC.mkDerivation {
@@ -62,7 +66,9 @@ stdenvNoCC.mkDerivation {
   nativeBuildInputs = [
     biome
     bun
+    fd
     nodejs_24
+    ripgrep
     ruleAudit
     typescript
   ];
@@ -71,6 +77,8 @@ stdenvNoCC.mkDerivation {
   buildPhase = ''
     runHook preBuild
     export HOME="$TMPDIR"
+    # Transcript color tests expect the truecolor terminal Pi runs in.
+    export COLORTERM=truecolor
     ln -s ${dependencies}/node_modules node_modules
     # Mirrors the package.json check script; the sandbox has no /usr/bin/env for knip's shebang.
     tsc --noEmit

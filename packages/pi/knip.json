@@ -15,9 +15,8 @@
     "@earendil-works/pi-protocol",
     "@earendil-works/pi-telemetry",
     "@ff-labs/pi-fff",
-    "@juvio15/pi-ast-grep",
+    "pi-claude-bridge",
     "pi-lsp-adapter",
-    "pi-mcp-adapter",
     "pi-tree-sitter",
     "pi-web-access"
   ]
