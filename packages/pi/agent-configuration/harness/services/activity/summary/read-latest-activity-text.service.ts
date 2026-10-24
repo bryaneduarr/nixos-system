@@ -1,11 +1,11 @@
 import { UPDATE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
 import { COMPLETED_LABEL, WORKING_LABEL } from "../../../constants/activity/summary-label.constant.ts";
-import type { ToolActivity } from "../../../types/activity/tool-activity.interface.ts";
-import { toolLabel } from "../../tool-rendering/presentation/tool-label.service.ts";
-import { toolTarget } from "../../tool-rendering/presentation/tool-target.service.ts";
+import type { ToolActivity } from "../../../types/activity/store/tool-activity.interface.ts";
+import { toolLabel } from "../../tool-rendering/labels/tool-label.service.ts";
+import { toolTarget } from "../../tool-rendering/labels/tool-target.service.ts";
 import { oneLine } from "../../tool-rendering/text/one-line.service.ts";
-import { isHarnessTool } from "../../tools/is-harness-tool.service.ts";
-import { readThinkingTitles } from "./thinking-titles.service.ts";
+import { isHarnessTool } from "../../tools/active-tools/is-harness-tool.service.ts";
+import { readThinkingTitles } from "./read-thinking-titles.service.ts";
 
 export function readLatestActivityText(
   messageNumber: number,

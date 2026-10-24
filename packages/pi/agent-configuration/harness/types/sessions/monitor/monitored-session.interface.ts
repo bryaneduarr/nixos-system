@@ -1,9 +1,9 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type { ValueState } from "../../activity/value-state.interface.ts";
+import type { ValueState } from "../../activity/value/value-state.interface.ts";
 import type { HerdrSessions } from "../herdr/herdr-sessions.interface.ts";
-import type { PaneIdentity } from "../herdr/pane-identity.interface.ts";
-import type { LiveSession } from "../registry/live-session.interface.ts";
-import type { SessionRegistry } from "../registry/session-registry.interface.ts";
+import type { PaneIdentity } from "../herdr/pane/pane-identity.interface.ts";
+import type { LiveSession } from "../registry/row/live-session.interface.ts";
+import type { SessionRegistry } from "../registry/row/session-registry.interface.ts";
 
 /** Herdr-managed Pi session that the monitor publishes after a session start. */
 export interface MonitoredSession {

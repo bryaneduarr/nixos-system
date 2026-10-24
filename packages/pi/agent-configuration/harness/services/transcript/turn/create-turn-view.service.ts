@@ -1,5 +1,5 @@
 import { TURN_VIEW_KEY } from "../../../constants/transcript/turn-view.constant.ts";
-import type { TurnView, TurnViewStore } from "../../../types/transcript/turn-view.interface.ts";
+import type { TurnView, TurnViewStore } from "../../../types/transcript/turn/turn-view.interface.ts";
 
 const LATEST_TURN_ONLY: TurnView = { hidden: true, turnsFromLatest: 0 };
 

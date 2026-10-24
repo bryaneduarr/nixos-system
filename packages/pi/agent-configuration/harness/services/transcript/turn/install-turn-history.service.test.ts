@@ -4,7 +4,7 @@ import {
   TURN_HISTORY_TOGGLE_SHORTCUT,
   TURN_REFRESH_WIDGET_KEY,
 } from "../../../constants/transcript/turn-view.constant.ts";
-import type { TurnHistoryApi, TurnHistoryContext } from "../../../types/transcript/turn-history-api.interface.ts";
+import type { TurnHistoryApi, TurnHistoryContext } from "../../../types/transcript/turn/turn-history-api.interface.ts";
 import { installTurnHistory } from "./install-turn-history.service.ts";
 import { turnView } from "./shared-turn-view.service.ts";
 

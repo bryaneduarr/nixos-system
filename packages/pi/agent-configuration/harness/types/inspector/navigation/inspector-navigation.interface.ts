@@ -1,4 +1,4 @@
-import type { ToolActivity } from "../../activity/tool-activity.interface.ts";
+import type { ToolActivity } from "../../activity/store/tool-activity.interface.ts";
 import type { DetailArtifact } from "../detail/detail-artifact.interface.ts";
 import type { InspectorRow } from "../detail/inspector-row.interface.ts";
 import type { InspectorRowLookup } from "../detail/inspector-row-lookup.interface.ts";

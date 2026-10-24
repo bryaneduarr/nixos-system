@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { recordApiError } from "../../activity/history/record-api-error.service.ts";
+import { recordApiError } from "../../activity/record/record-api-error.service.ts";
 import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 import { transformTranscriptMarkdown } from "./transform-transcript-markdown.service.ts";
 

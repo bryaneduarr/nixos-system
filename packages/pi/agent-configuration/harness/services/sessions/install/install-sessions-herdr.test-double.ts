@@ -1,12 +1,12 @@
 import { expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import type { HerdrCommand } from "../../../types/sessions/herdr/herdr-command.interface.ts";
-import type { LiveSession } from "../../../types/sessions/registry/live-session.interface.ts";
-import type { SessionRegistry } from "../../../types/sessions/registry/session-registry.interface.ts";
-import type { SessionDependencies } from "../../../types/sessions/session-dependencies.interface.ts";
+import type { HerdrCommand } from "../../../types/sessions/herdr/command/herdr-command.interface.ts";
+import type { SessionDependencies } from "../../../types/sessions/install/session-dependencies.interface.ts";
+import type { LiveSession } from "../../../types/sessions/registry/row/live-session.interface.ts";
+import type { SessionRegistry } from "../../../types/sessions/registry/row/session-registry.interface.ts";
 import { createHerdrSessions } from "../herdr/create-herdr-sessions.service.ts";
-import { processStartIdentity } from "../registry/process-start-identity.service.ts";
+import { processStartIdentity } from "../registry/identity/process-start-identity.service.ts";
 import { createDefaultSessionDependencies } from "./create-default-session-dependencies.service.ts";
 import type { InstallFlags, InstallState } from "./install-sessions.test-double.ts";
 

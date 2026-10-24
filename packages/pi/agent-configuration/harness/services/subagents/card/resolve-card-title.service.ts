@@ -1,7 +1,7 @@
 import { CARD_TITLE_FALLBACK } from "../../../constants/subagents/card.constant.ts";
-import type { ToolActivityLookup } from "../../../types/activity/tool-activity-lookup.interface.ts";
-import type { ValueState } from "../../../types/activity/value-state.interface.ts";
-import type { TaskProgress } from "../../../types/subagents/tasks/task-progress.interface.ts";
+import type { ToolActivityLookup } from "../../../types/activity/store/tool-activity-lookup.interface.ts";
+import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
+import type { TaskProgress } from "../../../types/subagents/tasks/progress/task-progress.interface.ts";
 
 function progressTitle(current: ValueState<TaskProgress>): ValueState<string> {
   if (current.state === "absent") return { state: "absent" };

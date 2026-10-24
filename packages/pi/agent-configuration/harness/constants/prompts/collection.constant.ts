@@ -1,4 +1,4 @@
-import type { PromptCollectionName } from "../../types/prompts/prompt-collections.interface.ts";
+import type { PromptCollectionName } from "../../types/prompts/view/prompt-collections.interface.ts";
 
 /** Key that shows each list of the prompt browser. */
 export const COLLECTION_BY_KEY: Readonly<Record<string, PromptCollectionName>> = { "1": "prompts", "2": "outputs" };

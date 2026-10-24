@@ -1,6 +1,6 @@
 import { DONE_DETAIL_LABEL } from "../../../constants/tool-rendering/done-detail-label.constant.ts";
 import { SEARCH_SECTION_TITLES } from "../../../constants/tool-rendering/search-section-title.constant.ts";
-import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts";
+import type { HarnessTool } from "../../../types/tools/active-tools/harness-tool.interface.ts";
 import { firstLine } from "../text/first-line.service.ts";
 import { runDetail } from "./run-detail.service.ts";
 

@@ -1,5 +1,5 @@
 import { ARTIFACT_PATTERNS } from "../../../constants/activity/artifact-pattern.constant.ts";
-import type { ArtifactPathLookup } from "../../../types/activity/artifact-path.interface.ts";
+import type { ArtifactPathLookup } from "../../../types/activity/artifact/artifact-path-lookup.interface.ts";
 
 export function findArtifactPath(text: string): ArtifactPathLookup {
   for (const pattern of ARTIFACT_PATTERNS) {

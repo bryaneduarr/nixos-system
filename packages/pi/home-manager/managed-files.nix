@@ -7,7 +7,6 @@
 }:
 let
   agentConfiguration = ../agent-configuration;
-  mcpConfigurations = ../mcp-configurations;
 
   mkJsonFile = source: {
     text = builtins.toJSON (import source);
@@ -52,7 +51,7 @@ lib.mkIf config.custom.pi.enable {
     ".pi/agent/skills/efficient-repository-workflow/SKILL.md" = mkSourceFile (
       agentConfiguration + "/skills/efficient-tools/SKILL.md"
     );
-    ".config/mcp/mcp.json" = mkJsonFile (mcpConfigurations + "/mcp-host-configuration.nix");
+    ".config/mcp/mcp.json" = mkJsonFile (agentConfiguration + "/settings/mcp-host-configuration.nix");
     ".pi/agent/extensions/codex-fast-mode" = {
       # Pi resolves extension imports from real file paths, so the sources must be copied beside node_modules, not symlinked.
       source = pkgs.runCommand "pi-codex-fast-mode" { } ''
@@ -63,14 +62,14 @@ lib.mkIf config.custom.pi.enable {
       force = true;
     };
     ".pi/agent/extensions/clear.ts" = mkSourceFile (
-      agentConfiguration + "/extensions/clear-session.ts"
+      agentConfiguration + "/extensions/clear-session.extension.ts"
     );
     ".pi/agent/extensions/last-model" = {
       source = withoutTests (agentConfiguration + "/extensions/last-model");
       force = true;
     };
     ".pi/agent/extensions/quiet-tools.ts" = mkSourceFile (
-      agentConfiguration + "/extensions/quiet-tool-output.ts"
+      agentConfiguration + "/extensions/quiet-tool-output.extension.ts"
     );
     ".pi/agent/extensions/harness" = {
       source = withoutTests (agentConfiguration + "/harness");

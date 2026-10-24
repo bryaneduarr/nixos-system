@@ -4,7 +4,7 @@
   ...
 }:
 lib.mkIf config.custom.pi.enable {
-  # pi-fff 0.10.x resolves these options from flags/environment variables;
+  # pi-fff resolves these options from flags/environment variables;
   # keep the declarative config file and environment in sync.
   home.sessionVariables = {
     PI_FFF_MODE = "override";

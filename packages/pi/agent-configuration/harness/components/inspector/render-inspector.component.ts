@@ -1,5 +1,5 @@
 import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
-import { isToolCallEntry } from "../../services/inspector/detail/is-tool-call-entry.service.ts";
+import { isToolCallEntry } from "../../services/inspector/entries/is-tool-call-entry.service.ts";
 import { readSplitViewGeometry } from "../../services/split-view/layout/read-split-view-geometry.service.ts";
 import type { InspectorLayoutState } from "../../types/inspector/view/inspector-layout.interface.ts";
 import type { InspectorViewResult, InspectorViewState } from "../../types/inspector/view/inspector-view.interface.ts";

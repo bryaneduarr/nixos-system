@@ -2,7 +2,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { DEFAULT_SEARCH_LIMIT } from "../../constants/tools/search-limits.constant.ts";
 import { SEARCH_TOOL_DESCRIPTION } from "../../constants/tools/tool-descriptions.constant.ts";
 import { SearchParamsSchema } from "../../schemas/tools/search/search-parameters.schema.ts";
-import { createHarnessRenderers } from "../../services/tool-rendering/create-harness-renderers.service.ts";
+import { createHarnessRenderers } from "../../services/tool-rendering/renderers/create-harness-renderers.service.ts";
 import { hideBackendDeclarations } from "../../services/tools/backends/hide-backend-declarations.service.ts";
 import { toToolCancellation } from "../../services/tools/process/tool-cancellation.service.ts";
 import { searchRepo } from "../../services/tools/search/search-repo.service.ts";

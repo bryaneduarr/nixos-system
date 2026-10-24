@@ -6,7 +6,7 @@ import {
   OVERLAY_MIN_WIDTH,
   OVERLAY_WIDTH,
 } from "../../../constants/inspector/layout.constant.ts";
-import type { InspectorSelection } from "../../../types/inspector/selection/inspector-selection.interface.ts";
+import type { InspectorSelection } from "../../../types/inspector/open/inspector-selection.interface.ts";
 
 let inspectorOpen = false;
 

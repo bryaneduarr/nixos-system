@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHerdrSessions } from "./create-herdr-sessions.service.ts";
-import { createRegistryIn, createSessionRow } from "./herdr-test-doubles.ts";
+import { createRegistryIn, createSessionRow } from "./create-herdr-sessions.test-double.ts";
 
 const temporary = await mkdtemp(join(tmpdir(), "pi-herdr-sessions-test-"));
 afterAll(() => rm(temporary, { recursive: true, force: true }));

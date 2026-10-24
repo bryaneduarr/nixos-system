@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { BOX_SIDE_CHROME_WIDTH, MAX_BOX_WIDTH } from "../../../constants/tool-rendering/box-width.constant.ts";
 import { WARNING_BOX_TITLE } from "../../../constants/transcript/warning-renderer.constant.ts";
-import { recordWarning } from "../../activity/history/record-warning.service.ts";
+import { recordWarning } from "../../activity/record/record-warning.service.ts";
 import { boxLines } from "../../tool-rendering/box/box-lines.service.ts";
 import { previewTextLines } from "../preview/preview-lines.service.ts";
 

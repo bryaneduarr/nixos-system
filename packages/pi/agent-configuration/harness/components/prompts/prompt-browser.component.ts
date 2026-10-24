@@ -5,26 +5,26 @@ import {
   TURN_BROWSER_KEY_HINT,
 } from "../../constants/prompts/collection.constant.ts";
 import { KEY_CTRL_C, KEY_ENTER, KEY_ESCAPE, KEY_TAB } from "../../constants/prompts/keys.constant.ts";
-import { applyDetailKey } from "../../services/prompts/apply-detail-key.service.ts";
-import { applyListKey } from "../../services/prompts/apply-list-key.service.ts";
-import { choosePromptTurn } from "../../services/prompts/choose-prompt-turn.service.ts";
-import { copyPromptText } from "../../services/prompts/copy-prompt-text.service.ts";
-import { computeScrollOffset } from "../../services/prompts/layout/compute-scroll-offset.service.ts";
-import { createDisplayRowCache } from "../../services/prompts/layout/create-display-row-cache.service.ts";
-import { cursorRow } from "../../services/prompts/layout/cursor-row.service.ts";
-import { renderBrowserLines } from "../../services/prompts/layout/render-browser-lines.service.ts";
-import { summarizeCollections } from "../../services/prompts/layout/summarize-collections.service.ts";
+import { choosePromptTurn } from "../../services/prompts/collection/choose-prompt-turn.service.ts";
+import { computeScrollOffset } from "../../services/prompts/display/compute-scroll-offset.service.ts";
+import { createDisplayRowCache } from "../../services/prompts/display/create-display-row-cache.service.ts";
+import { cursorRow } from "../../services/prompts/display/cursor-row.service.ts";
+import { applyDetailKey } from "../../services/prompts/input/apply-detail-key.service.ts";
+import { applyListKey } from "../../services/prompts/input/apply-list-key.service.ts";
+import { copyPromptText } from "../../services/prompts/input/copy-prompt-text.service.ts";
 import { createPromptNavigation } from "../../services/prompts/navigation/create-prompt-navigation.service.ts";
+import { renderBrowserLines } from "../../services/prompts/render/render-browser-lines.service.ts";
+import { summarizeCollections } from "../../services/prompts/render/summarize-collections.service.ts";
 import { readSplitViewGeometry } from "../../services/split-view/layout/read-split-view-geometry.service.ts";
-import type { ClipboardWriter } from "../../types/prompts/clipboard-writer.interface.ts";
-import type { DisplayRow } from "../../types/prompts/display-row.interface.ts";
-import type { PromptBrowserHost } from "../../types/prompts/prompt-browser-host.interface.ts";
-import type { PromptCollectionName, PromptCollections } from "../../types/prompts/prompt-collections.interface.ts";
-import type { PromptFocus } from "../../types/prompts/prompt-focus.interface.ts";
-import type { PromptNavigation } from "../../types/prompts/prompt-navigation.interface.ts";
-import type { PromptPanel } from "../../types/prompts/prompt-panel.interface.ts";
-import type { PromptSelection } from "../../types/prompts/prompt-selection.interface.ts";
-import type { PromptTheme } from "../../types/prompts/prompt-theme.interface.ts";
+import type { PromptSelection } from "../../types/prompts/collection/prompt-selection.interface.ts";
+import type { DisplayRow } from "../../types/prompts/display/display-row.interface.ts";
+import type { ClipboardWriter } from "../../types/prompts/input/clipboard-writer.interface.ts";
+import type { PromptFocus } from "../../types/prompts/input/prompt-focus.interface.ts";
+import type { PromptNavigation } from "../../types/prompts/navigation/prompt-navigation.interface.ts";
+import type { PromptTheme } from "../../types/prompts/render/prompt-theme.interface.ts";
+import type { PromptBrowserHost } from "../../types/prompts/view/prompt-browser-host.interface.ts";
+import type { PromptCollectionName, PromptCollections } from "../../types/prompts/view/prompt-collections.interface.ts";
+import type { PromptPanel } from "../../types/prompts/view/prompt-panel.interface.ts";
 
 export class PromptBrowser implements PromptPanel {
   focus: PromptFocus = "detail";

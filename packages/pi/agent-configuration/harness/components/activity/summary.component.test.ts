@@ -1,10 +1,10 @@
 import { beforeEach, expect, test } from "bun:test";
 import { MESSAGE_ACTIVITY_NAME } from "../../constants/activity/activity-entry.constant.ts";
 import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
-import { activitySummaryState } from "../../services/activity/summary/shared-activity-summary-state.service.ts";
+import { activitySummaryState } from "../../services/activity/summary/state/shared-activity-summary-state.service.ts";
 import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
-import type { SummaryTheme } from "../../types/activity/summary-theme.interface.ts";
-import type { TranscriptScroll } from "../../types/activity/transcript-scroll.interface.ts";
+import type { SummaryTheme } from "../../types/activity/summary/summary-theme.interface.ts";
+import type { TranscriptScroll } from "../../types/activity/summary/transcript-scroll.interface.ts";
 import { renderActivitySummary } from "./summary.component.ts";
 
 const TEST_CWD = "/tmp";

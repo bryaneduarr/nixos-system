@@ -1,6 +1,6 @@
 import { NEWLINE_CHARACTER } from "../../../constants/prompts/text.constant.ts";
-import type { Grapheme } from "../../../types/prompts/grapheme.interface.ts";
-import type { TextRange } from "../../../types/prompts/selection.interface.ts";
+import type { Grapheme } from "../../../types/prompts/navigation/grapheme.interface.ts";
+import type { TextRange } from "../../../types/prompts/navigation/selection.interface.ts";
 
 export function findLineRange(text: string, units: readonly Grapheme[], index: number): TextRange {
   const unit = units[index];

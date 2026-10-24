@@ -3,15 +3,15 @@ import {
   COMPLETION_NOTIFICATION_SOUND,
   COMPLETION_NOTIFICATION_TITLE,
 } from "../../../constants/sessions/herdr-timing.constant.ts";
-import type { HerdrCommand } from "../../../types/sessions/herdr/herdr-command.interface.ts";
+import type { HerdrCommand } from "../../../types/sessions/herdr/command/herdr-command.interface.ts";
 import type { HerdrSessions } from "../../../types/sessions/herdr/herdr-sessions.interface.ts";
-import type { SessionRegistry } from "../../../types/sessions/registry/session-registry.interface.ts";
-import { createSessionPane } from "./create-session-pane.service.ts";
-import { executeHerdr } from "./execute-herdr.service.ts";
-import { focusSession } from "./focus-session.service.ts";
-import { nameHerdrPane } from "./name-herdr-pane.service.ts";
-import { paneIdentity } from "./pane-identity.service.ts";
-import { reportSessionState } from "./report-session-state.service.ts";
+import type { SessionRegistry } from "../../../types/sessions/registry/row/session-registry.interface.ts";
+import { executeHerdr } from "./command/execute-herdr.service.ts";
+import { createSessionPane } from "./pane/create-session-pane.service.ts";
+import { focusSession } from "./pane/focus-session.service.ts";
+import { nameHerdrPane } from "./pane/name-herdr-pane.service.ts";
+import { paneIdentity } from "./pane/pane-identity.service.ts";
+import { reportSessionState } from "./pane/report-session-state.service.ts";
 
 const defaultHerdrCommand: HerdrCommand = (args) => executeHerdr(args, process.env);
 

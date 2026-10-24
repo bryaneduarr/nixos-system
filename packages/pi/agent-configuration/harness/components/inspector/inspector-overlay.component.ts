@@ -3,8 +3,8 @@ import type { Component, TUI, TuiMouseEvent, TuiMouseEventResult } from "@earend
 import { ACTIVITY_REFRESH_INTERVAL_MS, DEFAULT_RENDER_WIDTH } from "../../constants/inspector/layout.constant.ts";
 import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
 import { toggleArtifact } from "../../services/inspector/artifact/toggle-artifact.service.ts";
-import { buildDetail } from "../../services/inspector/detail/build-detail.service.ts";
-import { wrappedDetail } from "../../services/inspector/detail/wrapped-detail.service.ts";
+import { buildDetail } from "../../services/inspector/detail/lines/build-detail.service.ts";
+import { wrappedDetail } from "../../services/inspector/detail/lines/wrapped-detail.service.ts";
 import { createInspectorInput } from "../../services/inspector/input/create-inspector-input.service.ts";
 import { handleInspectorKey } from "../../services/inspector/input/handle-inspector-key.service.ts";
 import { handleInspectorMouse } from "../../services/inspector/input/handle-inspector-mouse.service.ts";
@@ -14,7 +14,7 @@ import { readSplitViewGeometry } from "../../services/split-view/layout/read-spl
 import type { InspectorRow } from "../../types/inspector/detail/inspector-row.interface.ts";
 import type { InspectorInput } from "../../types/inspector/input/inspector-input.interface.ts";
 import type { InspectorNavigation } from "../../types/inspector/navigation/inspector-navigation.interface.ts";
-import type { InspectorOptions } from "../../types/inspector/overlay/inspector-options.interface.ts";
+import type { InspectorOptions } from "../../types/inspector/open/inspector-options.interface.ts";
 import type { InspectorLayoutState } from "../../types/inspector/view/inspector-layout.interface.ts";
 import { renderInspector } from "./render-inspector.component.ts";
 

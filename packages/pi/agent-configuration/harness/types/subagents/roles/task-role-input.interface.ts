@@ -1,4 +1,4 @@
-import type { ValueState } from "../../activity/value-state.interface.ts";
+import type { ValueState } from "../../activity/value/value-state.interface.ts";
 
 /** Role selection from a task request, with each field either requested or omitted. */
 export interface TaskRoleInput {

@@ -1,8 +1,8 @@
 import type { CardFrame, CardKind, CardStyle, CardTint } from "../../types/transcript/card/card-style.interface.ts";
 
-/** Global key of the function Pi calls to draw a user or agent message card; must match pi-tools/patch-pi-message-cards.ts. */
+/** Global key of the function Pi calls to draw a user or agent message card; the patch that installs it must use the same key. */
 export const MESSAGE_CARD_RENDERER_KEY = "pi.harness.renderMessageCard";
-/** Global key of the function the powerline editor calls to draw the input card; must match pi-tools/patch-powerline-input-card.ts. */
+/** Global key of the function the powerline editor calls to draw the input card; the patch that installs it must use the same key. */
 export const INPUT_CARD_RENDERER_KEY = "pi.harness.renderInputCard";
 
 /** Columns the card border and padding use on both sides of the content. */

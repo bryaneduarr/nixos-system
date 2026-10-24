@@ -2,15 +2,15 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { hiddenSubagentCall, renderSubagentCard } from "../../components/subagents/subagent-card.component.ts";
 import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
 import { TASK_PROMPT_GUIDELINES, TASK_TOOL_DESCRIPTION } from "../../constants/subagents/tool-description.constant.ts";
-import { TaskParams } from "../../schemas/subagents/tasks/task-params.schema.ts";
+import { TaskParams } from "../../schemas/subagents/tasks/run/task-params.schema.ts";
 import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
 import { subagentRegistry } from "../../services/subagents/registry/shared-subagent-registry.service.ts";
-import { createFailedTaskProgress } from "../../services/subagents/tasks/create-failed-task-progress.service.ts";
-import { readTaskProgress } from "../../services/subagents/tasks/read-task-progress.service.ts";
-import { toTaskRequest } from "../../services/subagents/tasks/to-task-request.service.ts";
-import type { TaskProgress } from "../../types/subagents/tasks/task-progress.interface.ts";
-import type { TaskProgressLookup } from "../../types/subagents/tasks/task-progress-lookup.interface.ts";
-import type { TaskResult } from "../../types/subagents/tasks/task-result.interface.ts";
+import { createFailedTaskProgress } from "../../services/subagents/tasks/progress/create-failed-task-progress.service.ts";
+import { readTaskProgress } from "../../services/subagents/tasks/progress/read-task-progress.service.ts";
+import { toTaskRequest } from "../../services/subagents/tasks/run/to-task-request.service.ts";
+import type { TaskResult } from "../../types/subagents/result/task-result.interface.ts";
+import type { TaskProgress } from "../../types/subagents/tasks/progress/task-progress.interface.ts";
+import type { TaskProgressLookup } from "../../types/subagents/tasks/progress/task-progress-lookup.interface.ts";
 
 function resultContent(taskResult: TaskResult): string {
   const content = {

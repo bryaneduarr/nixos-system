@@ -17,26 +17,26 @@ import {
   HEADER_PREFIX,
   TWO_LINE_HEADER_PREFIX,
 } from "../../constants/activity/summary-layout.constant.ts";
-import { readMessageEntries } from "../../services/activity/history/read-message-entries.service.ts";
-import { readMessageStartedAt } from "../../services/activity/history/read-message-started-at.service.ts";
-import { readActionsForMessage } from "../../services/activity/summary/actions-for-message.service.ts";
+import { readMessageEntries } from "../../services/activity/messages/read-message-entries.service.ts";
+import { readMessageStartedAt } from "../../services/activity/messages/read-message-started-at.service.ts";
 import { formatDivider } from "../../services/activity/summary/format-divider.service.ts";
 import { formatElapsed } from "../../services/activity/summary/format-elapsed.service.ts";
+import { readActionsForMessage } from "../../services/activity/summary/read-actions-for-message.service.ts";
 import { readActivityMark } from "../../services/activity/summary/read-activity-mark.service.ts";
 import { readJumpToLatestHint } from "../../services/activity/summary/read-jump-to-latest-hint.service.ts";
 import { readLatestActivityText } from "../../services/activity/summary/read-latest-activity-text.service.ts";
 import { readSpinnerFrame } from "../../services/activity/summary/read-spinner-frame.service.ts";
-import { activitySummaryState } from "../../services/activity/summary/shared-activity-summary-state.service.ts";
+import { activitySummaryState } from "../../services/activity/summary/state/shared-activity-summary-state.service.ts";
 import { wrapFooterParts } from "../../services/activity/summary/wrap-footer-parts.service.ts";
 import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
-import { toolLabel } from "../../services/tool-rendering/presentation/tool-label.service.ts";
-import { toolTarget } from "../../services/tool-rendering/presentation/tool-target.service.ts";
-import { isHarnessTool } from "../../services/tools/is-harness-tool.service.ts";
-import type { ActivitySummaryTarget } from "../../types/activity/activity-summary-target.interface.ts";
-import type { SummaryHeaderParts } from "../../types/activity/summary-header-parts.interface.ts";
-import type { SummaryTheme } from "../../types/activity/summary-theme.interface.ts";
-import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
-import type { TranscriptScroll } from "../../types/activity/transcript-scroll.interface.ts";
+import { toolLabel } from "../../services/tool-rendering/labels/tool-label.service.ts";
+import { toolTarget } from "../../services/tool-rendering/labels/tool-target.service.ts";
+import { isHarnessTool } from "../../services/tools/active-tools/is-harness-tool.service.ts";
+import type { ToolActivity } from "../../types/activity/store/tool-activity.interface.ts";
+import type { ActivitySummaryTarget } from "../../types/activity/summary/activity-summary-target.interface.ts";
+import type { SummaryHeaderParts } from "../../types/activity/summary/summary-header-parts.interface.ts";
+import type { SummaryTheme } from "../../types/activity/summary/summary-theme.interface.ts";
+import type { TranscriptScroll } from "../../types/activity/summary/transcript-scroll.interface.ts";
 
 class ActivitySummaryComponent implements Component {
   constructor(

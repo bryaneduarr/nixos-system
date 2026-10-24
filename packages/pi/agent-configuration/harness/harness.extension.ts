@@ -6,7 +6,7 @@ import { registerSubagentStatusCommand } from "./commands/subagent-status/subage
 import { installSessions } from "./services/sessions/install/install-sessions.service.ts";
 import { installSubagentEvents } from "./services/subagents/events/install-subagent-events.service.ts";
 import { installHarnessPresentation } from "./services/tool-rendering/install-harness-presentation.service.ts";
-import { installToolEvents } from "./services/tools/events/install-tool-events.service.ts";
+import { installToolEvents } from "./services/tools/active-tools/install-tool-events.service.ts";
 import { registerEditTool } from "./tools/edit/edit.tool.ts";
 import { registerReadTool } from "./tools/read/read.tool.ts";
 import { registerRunTool } from "./tools/run/run.tool.ts";

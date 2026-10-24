@@ -2,11 +2,11 @@ import { TOOL_TITLES } from "../../../constants/tool-rendering/tool-title.consta
 import type {
   HarnessPresentation,
   HarnessVisualState,
-} from "../../../types/tool-rendering/harness-presentation.interface.ts";
-import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts";
+} from "../../../types/tool-rendering/presentation/harness-presentation.interface.ts";
+import type { HarnessTool } from "../../../types/tools/active-tools/harness-tool.interface.ts";
 import { errorDetail } from "../details/error-detail.service.ts";
 import { successDetail } from "../details/success-detail.service.ts";
-import { toolTarget } from "./tool-target.service.ts";
+import { toolTarget } from "../labels/tool-target.service.ts";
 
 export function resultPresentation(
   tool: HarnessTool,

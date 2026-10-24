@@ -1,7 +1,7 @@
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { MUTED_COLOR } from "../../../constants/activity/summary-label.constant.ts";
 import { DIVIDER_FILL, MIN_DIVIDER_WIDTH } from "../../../constants/activity/summary-layout.constant.ts";
-import type { SummaryTheme } from "../../../types/activity/summary-theme.interface.ts";
+import type { SummaryTheme } from "../../../types/activity/summary/summary-theme.interface.ts";
 
 export function formatDivider(theme: SummaryTheme, label: string, width: number, prefix: string): string {
   if (width < MIN_DIVIDER_WIDTH) {

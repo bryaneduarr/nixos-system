@@ -1,13 +1,13 @@
 import { BODY_TOP_ROW } from "../../constants/inspector/layout.constant.ts";
 import { LIST_PAGE_TEXT } from "../../constants/inspector/list-page-text.constant.ts";
 import { DETAIL_TITLE_ROWS } from "../../constants/split-view/layout.constant.ts";
-import { wrappedDetail } from "../../services/inspector/detail/wrapped-detail.service.ts";
-import { computeListScroll } from "../../services/inspector/layout/compute-list-scroll.service.ts";
+import { wrappedDetail } from "../../services/inspector/detail/lines/wrapped-detail.service.ts";
 import { findRowAt } from "../../services/inspector/navigation/find-row-at.service.ts";
+import { computeListScroll } from "../../services/split-view/layout/compute-list-scroll.service.ts";
 import type { ToolsPageOptions, ToolsPageResult } from "../../types/inspector/view/tools-page.interface.ts";
 import { pageTitle } from "../split-view/page-title.component.ts";
 import { splitPanes } from "../split-view/split-panes.component.ts";
-import { renderToolList } from "./tool-list.component.ts";
+import { renderToolList } from "./lists/tool-list.component.ts";
 
 export function renderToolsPage({
   page,

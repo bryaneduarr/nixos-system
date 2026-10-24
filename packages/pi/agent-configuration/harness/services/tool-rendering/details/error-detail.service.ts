@@ -1,5 +1,5 @@
 import { ERROR_DETAIL_FALLBACK } from "../../../constants/tool-rendering/presentation-label.constant.ts";
-import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts";
+import type { HarnessTool } from "../../../types/tools/active-tools/harness-tool.interface.ts";
 import { firstLine } from "../text/first-line.service.ts";
 import { oneLine } from "../text/one-line.service.ts";
 import { runDetail } from "./run-detail.service.ts";

@@ -9,13 +9,13 @@ import { resolveCardCalls } from "../../services/subagents/card/resolve-card-cal
 import { resolveCardProgress } from "../../services/subagents/card/resolve-card-progress.service.ts";
 import { resolveCardTitle } from "../../services/subagents/card/resolve-card-title.service.ts";
 import { oneLine } from "../../services/tool-rendering/text/one-line.service.ts";
-import type { SubToolActivity } from "../../types/activity/sub-tool-activity.interface.ts";
-import type { ToolActivityLookup } from "../../types/activity/tool-activity-lookup.interface.ts";
-import type { ValueState } from "../../types/activity/value-state.interface.ts";
+import type { SubToolActivity } from "../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
+import type { ToolActivityLookup } from "../../types/activity/store/tool-activity-lookup.interface.ts";
+import type { ValueState } from "../../types/activity/value/value-state.interface.ts";
 import type { SubagentCardTheme } from "../../types/subagents/card/subagent-card-theme.interface.ts";
-import type { TaskProgress } from "../../types/subagents/tasks/task-progress.interface.ts";
-import type { TaskProgressLookup } from "../../types/subagents/tasks/task-progress-lookup.interface.ts";
-import type { TaskStatus } from "../../types/subagents/tasks/task-status.interface.ts";
+import type { TaskProgress } from "../../types/subagents/tasks/progress/task-progress.interface.ts";
+import type { TaskProgressLookup } from "../../types/subagents/tasks/progress/task-progress-lookup.interface.ts";
+import type { TaskStatus } from "../../types/subagents/tasks/progress/task-status.interface.ts";
 import { EMPTY } from "../tool-rendering/empty.component.ts";
 import { ToolBox } from "../tool-rendering/tool-box.component.ts";
 

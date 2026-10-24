@@ -1,6 +1,6 @@
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import { NEWLINE_CHARACTER } from "../../../constants/prompts/text.constant.ts";
-import type { PromptItem } from "../../../types/prompts/prompt-item.interface.ts";
+import type { PromptItem } from "../../../types/prompts/collection/prompt-item.interface.ts";
 
 function agentOutputText(entry: SessionEntry): string {
   if (entry.type !== "message" || entry.message.role !== "assistant") return "";

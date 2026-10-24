@@ -1,4 +1,4 @@
-import type { ValueState } from "../../activity/value-state.interface.ts";
+import type { ValueState } from "../../activity/value/value-state.interface.ts";
 
 /** Progress of one tool call made by a codemode script. */
 export type CodemodeCallStatus = "running" | "ok" | "error" | "cancelled";

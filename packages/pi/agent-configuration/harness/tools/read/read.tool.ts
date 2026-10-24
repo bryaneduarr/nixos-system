@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { READ_TOOL_DESCRIPTION } from "../../constants/tools/tool-descriptions.constant.ts";
 import { ReadParamsSchema } from "../../schemas/tools/read/read-parameters.schema.ts";
-import { createHarnessRenderers } from "../../services/tool-rendering/create-harness-renderers.service.ts";
+import { createHarnessRenderers } from "../../services/tool-rendering/renderers/create-harness-renderers.service.ts";
 import { readSource } from "../../services/tools/read/read-source.service.ts";
 import { toReadSelection } from "../../services/tools/read/to-read-selection.service.ts";
 

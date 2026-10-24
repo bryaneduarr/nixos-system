@@ -4,8 +4,8 @@ import {
   TURN_HISTORY_TOGGLE_DESCRIPTION,
   TURN_HISTORY_TOGGLE_SHORTCUT,
 } from "../../../constants/transcript/turn-view.constant.ts";
-import type { TurnDividerRequest } from "../../../types/transcript/turn-divider.interface.ts";
-import type { TurnHistoryApi } from "../../../types/transcript/turn-history-api.interface.ts";
+import type { TurnDividerRequest } from "../../../types/transcript/turn/turn-divider.interface.ts";
+import type { TurnHistoryApi } from "../../../types/transcript/turn/turn-history-api.interface.ts";
 import { refreshTranscript } from "./refresh-transcript.service.ts";
 import { renderTurnDivider } from "./render-turn-divider.service.ts";
 import { turnView } from "./shared-turn-view.service.ts";

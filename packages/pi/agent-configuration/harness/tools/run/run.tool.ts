@@ -2,7 +2,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { DEFAULT_RUN_TIMEOUT_MS } from "../../constants/tools/run-limits.constant.ts";
 import { RUN_TOOL_DESCRIPTION, RUN_TOOL_GUIDELINES } from "../../constants/tools/tool-descriptions.constant.ts";
 import { RunParamsSchema } from "../../schemas/tools/run/run-parameters.schema.ts";
-import { createHarnessRenderers } from "../../services/tool-rendering/create-harness-renderers.service.ts";
+import { createHarnessRenderers } from "../../services/tool-rendering/renderers/create-harness-renderers.service.ts";
 import { toToolCancellation } from "../../services/tools/process/tool-cancellation.service.ts";
 import { prepareRunArguments } from "../../services/tools/run/prepare-run-arguments.service.ts";
 import { prepareRunDirectory } from "../../services/tools/run/prepare-run-directory.service.ts";

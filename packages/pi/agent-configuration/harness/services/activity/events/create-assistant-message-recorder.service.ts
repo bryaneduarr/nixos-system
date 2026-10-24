@@ -1,13 +1,13 @@
 import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
-import type { AssistantMessageRecorder } from "../../../types/activity/assistant-message-recorder.interface.ts";
-import type { ValueState } from "../../../types/activity/value-state.interface.ts";
-import { recordApiError } from "../history/record-api-error.service.ts";
-import { recordAssistantTurn } from "../history/record-assistant-turn.service.ts";
-import { recordThinking } from "../history/record-thinking.service.ts";
-import { recordUpdate } from "../history/record-update.service.ts";
-import { readApiError } from "../parsing/read-api-error.service.ts";
-import { readAssistantActivity } from "../parsing/read-assistant-activity.service.ts";
-import { readSubagentUsage } from "../parsing/read-subagent-usage.service.ts";
+import type { AssistantMessageRecorder } from "../../../types/activity/events/assistant-message-recorder.interface.ts";
+import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
+import { readApiError } from "../parsing/assistant/read-api-error.service.ts";
+import { readAssistantActivity } from "../parsing/assistant/read-assistant-activity.service.ts";
+import { readSubagentUsage } from "../parsing/subagent/read-subagent-usage.service.ts";
+import { recordApiError } from "../record/record-api-error.service.ts";
+import { recordAssistantTurn } from "../record/record-assistant-turn.service.ts";
+import { recordThinking } from "../record/record-thinking.service.ts";
+import { recordUpdate } from "../record/record-update.service.ts";
 import { activityStore } from "../store/shared-activity-store.service.ts";
 
 export function createAssistantMessageRecorder(): AssistantMessageRecorder {

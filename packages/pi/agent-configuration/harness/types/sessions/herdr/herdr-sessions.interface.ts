@@ -1,6 +1,6 @@
-import type { LiveSession } from "../registry/live-session.interface.ts";
-import type { PaneIdentity } from "./pane-identity.interface.ts";
-import type { SessionReportSource } from "./session-report-source.interface.ts";
+import type { LiveSession } from "../registry/row/live-session.interface.ts";
+import type { PaneIdentity } from "./pane/pane-identity.interface.ts";
+import type { SessionReportSource } from "./pane/session-report-source.interface.ts";
 
 /** Herdr operations that keep a Pi session pane reported, named, focused, and created. */
 export interface HerdrSessions {

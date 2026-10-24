@@ -1,6 +1,6 @@
 import { EXIT_STATE_KEY } from "../../../constants/sessions/exit.constant.ts";
 import type { ExitCancellation, ExitState } from "../../../types/sessions/exit/exit-state.interface.ts";
-import { isObjectRecord } from "../herdr/is-object-record.service.ts";
+import { isObjectRecord } from "../herdr/response/is-object-record.service.ts";
 
 const EXIT_STATE_SYMBOL = Symbol.for(EXIT_STATE_KEY);
 

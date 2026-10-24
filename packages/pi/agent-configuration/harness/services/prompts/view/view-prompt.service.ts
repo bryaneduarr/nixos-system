@@ -5,10 +5,10 @@ import {
   OVERLAY_MAX_HEIGHT,
   OVERLAY_WIDTH,
 } from "../../../constants/prompts/viewer.constant.ts";
-import type { ClipboardWriter } from "../../../types/prompts/clipboard-writer.interface.ts";
-import type { PromptCollections } from "../../../types/prompts/prompt-collections.interface.ts";
-import type { PromptSelection } from "../../../types/prompts/prompt-selection.interface.ts";
-import type { PromptViewerUi } from "../../../types/prompts/prompt-viewer-ui.interface.ts";
+import type { PromptSelection } from "../../../types/prompts/collection/prompt-selection.interface.ts";
+import type { ClipboardWriter } from "../../../types/prompts/input/clipboard-writer.interface.ts";
+import type { PromptCollections } from "../../../types/prompts/view/prompt-collections.interface.ts";
+import type { PromptViewerUi } from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
 
 export async function viewPrompt(
   ui: PromptViewerUi,

@@ -1,7 +1,7 @@
-import type { ClipboardWriter } from "../../types/prompts/clipboard-writer.interface.ts";
-import type { PromptBrowserHost } from "../../types/prompts/prompt-browser-host.interface.ts";
-import type { PromptSelection } from "../../types/prompts/prompt-selection.interface.ts";
-import type { PromptTheme } from "../../types/prompts/prompt-theme.interface.ts";
+import type { PromptSelection } from "../../types/prompts/collection/prompt-selection.interface.ts";
+import type { ClipboardWriter } from "../../types/prompts/input/clipboard-writer.interface.ts";
+import type { PromptTheme } from "../../types/prompts/render/prompt-theme.interface.ts";
+import type { PromptBrowserHost } from "../../types/prompts/view/prompt-browser-host.interface.ts";
 import { PromptBrowser } from "./prompt-browser.component.ts";
 
 const plainTheme: PromptTheme = {

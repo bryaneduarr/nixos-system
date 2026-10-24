@@ -1,7 +1,7 @@
 import { BACKEND_NO_ANSWER_PATTERNS, BACKEND_TIMEOUT_MS } from "../../../constants/tools/backend-tools.constant.ts";
 import type { BackendToolExecutor } from "../../../types/tools/backends/backend-tool-executor.interface.ts";
 import type { BackendToolResult } from "../../../types/tools/backends/backend-tool-result.interface.ts";
-import { extractText } from "../../tool-rendering/text/extract-text.service.ts";
+import { extractText } from "../result/extract-text.service.ts";
 
 export async function callBackendTool(
   executor: BackendToolExecutor,

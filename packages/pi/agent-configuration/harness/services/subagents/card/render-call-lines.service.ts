@@ -7,9 +7,9 @@ import {
   CARD_TOOL_TARGET_FIELDS,
   MILLISECONDS_PER_SECOND,
 } from "../../../constants/subagents/card.constant.ts";
-import type { SubToolActivity } from "../../../types/activity/sub-tool-activity.interface.ts";
+import type { SubToolActivity } from "../../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
 import type { SubagentCardTheme } from "../../../types/subagents/card/subagent-card-theme.interface.ts";
-import type { TaskStatus } from "../../../types/subagents/tasks/task-status.interface.ts";
+import type { TaskStatus } from "../../../types/subagents/tasks/progress/task-status.interface.ts";
 import { oneLine } from "../../tool-rendering/text/one-line.service.ts";
 
 function duration(startedAt: number, endedAt: number): string {

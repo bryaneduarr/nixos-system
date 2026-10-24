@@ -1,7 +1,7 @@
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import { DRAFT_PROMPT_LABEL } from "../../../constants/prompts/prompt-item.constant.ts";
 import { NEWLINE_CHARACTER } from "../../../constants/prompts/text.constant.ts";
-import type { PromptItem } from "../../../types/prompts/prompt-item.interface.ts";
+import type { PromptItem } from "../../../types/prompts/collection/prompt-item.interface.ts";
 
 function userPromptText(entry: SessionEntry): string {
   if (entry.type !== "message" || entry.message.role !== "user") return "";

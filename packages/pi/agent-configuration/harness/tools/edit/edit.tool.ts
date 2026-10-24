@@ -1,11 +1,11 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { EDIT_TOOL_DESCRIPTION } from "../../constants/tools/tool-descriptions.constant.ts";
 import { EditParamsSchema } from "../../schemas/tools/edit/edit-parameters.schema.ts";
-import { createHarnessRenderers } from "../../services/tool-rendering/create-harness-renderers.service.ts";
-import { editFile } from "../../services/tools/edit/edit-file.service.ts";
-import { prepareEditArguments } from "../../services/tools/edit/prepare-edit-arguments.service.ts";
+import { createHarnessRenderers } from "../../services/tool-rendering/renderers/create-harness-renderers.service.ts";
+import { editFile } from "../../services/tools/edit/change/edit-file.service.ts";
 import { readEditDiagnostics } from "../../services/tools/edit/read-edit-diagnostics.service.ts";
-import { toEditRequest } from "../../services/tools/edit/to-edit-request.service.ts";
+import { prepareEditArguments } from "../../services/tools/edit/request/prepare-edit-arguments.service.ts";
+import { toEditRequest } from "../../services/tools/edit/request/to-edit-request.service.ts";
 
 export function registerEditTool(pi: ExtensionAPI): void {
   pi.registerTool({

@@ -5,10 +5,10 @@ import { readToolActivity } from "../../services/activity/store/read-tool-activi
 import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
 import { inspectRequestStore } from "../../services/inspector/request/shared-inspect-request-store.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
-import type { ToolActivityLookup } from "../../types/activity/tool-activity-lookup.interface.ts";
-import type { ValueState } from "../../types/activity/value-state.interface.ts";
-import type { ToolBoxCache } from "../../types/tool-rendering/tool-box-cache.interface.ts";
-import type { ToolBoxContent } from "../../types/tool-rendering/tool-box-content.interface.ts";
+import type { ToolActivityLookup } from "../../types/activity/store/tool-activity-lookup.interface.ts";
+import type { ValueState } from "../../types/activity/value/value-state.interface.ts";
+import type { ToolBoxCache } from "../../types/tool-rendering/box/tool-box-cache.interface.ts";
+import type { ToolBoxContent } from "../../types/tool-rendering/box/tool-box-content.interface.ts";
 
 export class ToolBox implements Component {
   private content: ToolBoxContent;

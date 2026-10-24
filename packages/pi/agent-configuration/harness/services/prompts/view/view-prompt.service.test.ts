@@ -1,13 +1,13 @@
 import { expect, test } from "bun:test";
 import { visibleWidth } from "@earendil-works/pi-tui";
-import type { ClipboardWriter } from "../../../types/prompts/clipboard-writer.interface.ts";
-import type { PromptPanel } from "../../../types/prompts/prompt-panel.interface.ts";
-import type { PromptTheme } from "../../../types/prompts/prompt-theme.interface.ts";
+import type { ClipboardWriter } from "../../../types/prompts/input/clipboard-writer.interface.ts";
+import type { PromptTheme } from "../../../types/prompts/render/prompt-theme.interface.ts";
+import type { PromptPanel } from "../../../types/prompts/view/prompt-panel.interface.ts";
 import type {
   PromptBrowserFactory,
   PromptOverlayOptions,
   PromptViewerUi,
-} from "../../../types/prompts/prompt-viewer-ui.interface.ts";
+} from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
 import { viewPrompt } from "./view-prompt.service.ts";
 
 const plainTheme: PromptTheme = {

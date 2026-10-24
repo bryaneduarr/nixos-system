@@ -1,5 +1,5 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import type { ToolActivity } from "../../activity/tool-activity.interface.ts";
+import type { ToolActivity } from "../../activity/store/tool-activity.interface.ts";
 import type { SubagentSelection } from "../subagents/subagent-selection.interface.ts";
 
 /** Inputs for drawing the subagents page. */

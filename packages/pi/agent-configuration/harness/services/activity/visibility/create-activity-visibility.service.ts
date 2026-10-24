@@ -1,6 +1,6 @@
 import { TRANSCRIPT_VISIBILITY_KEY } from "../../../constants/activity/visibility.constant.ts";
-import type { ActivityVisibility } from "../../../types/activity/activity-visibility.interface.ts";
-import type { ValueState } from "../../../types/activity/value-state.interface.ts";
+import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
+import type { ActivityVisibility } from "../../../types/activity/visibility/activity-visibility.interface.ts";
 
 export function createActivityVisibility(): ActivityVisibility {
   let agentWorking = false;

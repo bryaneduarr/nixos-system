@@ -1,5 +1,5 @@
 import type { MarkdownTransformContext } from "@earendil-works/pi-coding-agent";
-import { isRecordedApiErrorText } from "../../activity/history/is-recorded-api-error-text.service.ts";
+import { isRecordedApiErrorText } from "../../activity/messages/is-recorded-api-error-text.service.ts";
 import { previewPrompt } from "../../prompts/preview/preview-prompt.service.ts";
 import { thinkingPreviewMarkdown } from "../thinking/thinking-preview-markdown.service.ts";
 import { presentAssistantMarkdown } from "./present-assistant-markdown.service.ts";

@@ -1,4 +1,4 @@
-import type { HarnessVisualState } from "../harness-presentation.interface.ts";
+import type { HarnessVisualState } from "../presentation/harness-presentation.interface.ts";
 import type { CodemodeCall } from "./codemode-call.interface.ts";
 
 /** What the codemode box needs to describe one script run. */

@@ -1,5 +1,5 @@
-import type { ToolActivity } from "../../../types/activity/tool-activity.interface.ts";
-import type { TaskStatus } from "../../../types/subagents/tasks/task-status.interface.ts";
+import type { ToolActivity } from "../../../types/activity/store/tool-activity.interface.ts";
+import type { TaskStatus } from "../../../types/subagents/tasks/progress/task-status.interface.ts";
 
 export function readSubagentStatus(entry: ToolActivity): TaskStatus {
   if (entry.status === "running") return "running";

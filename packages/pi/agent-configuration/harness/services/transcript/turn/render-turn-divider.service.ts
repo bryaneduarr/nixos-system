@@ -10,7 +10,7 @@ import {
   TURN_DIVIDER_SEPARATOR,
 } from "../../../constants/transcript/turn-divider.constant.ts";
 import { TURN_HISTORY_TOGGLE_LABEL } from "../../../constants/transcript/turn-view.constant.ts";
-import type { TurnDividerRequest, TurnDividerTheme } from "../../../types/transcript/turn-divider.interface.ts";
+import type { TurnDividerRequest, TurnDividerTheme } from "../../../types/transcript/turn/turn-divider.interface.ts";
 
 const DASHES_PER_SIDE_MINIMUM = 2;
 

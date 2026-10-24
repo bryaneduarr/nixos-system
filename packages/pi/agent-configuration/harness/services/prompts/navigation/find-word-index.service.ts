@@ -1,4 +1,4 @@
-import type { Grapheme } from "../../../types/prompts/grapheme.interface.ts";
+import type { Grapheme } from "../../../types/prompts/navigation/grapheme.interface.ts";
 
 const WORD_CHARACTER_PATTERN = /[\p{L}\p{N}_]/u;
 const WHITESPACE_ONLY_PATTERN = /^\s+$/u;

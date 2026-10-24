@@ -1,4 +1,4 @@
-import type { ToolActivity } from "../../activity/tool-activity.interface.ts";
+import type { ToolActivity } from "../../activity/store/tool-activity.interface.ts";
 import type { InspectorFocus, InspectorPage } from "../navigation/inspector-page.interface.ts";
 import type { InspectorLayoutState } from "../view/inspector-layout.interface.ts";
 

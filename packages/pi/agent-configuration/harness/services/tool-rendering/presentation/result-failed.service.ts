@@ -1,4 +1,4 @@
-import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts";
+import type { HarnessTool } from "../../../types/tools/active-tools/harness-tool.interface.ts";
 import { firstLine } from "../text/first-line.service.ts";
 
 export function resultFailed(tool: HarnessTool, text: string): boolean {
