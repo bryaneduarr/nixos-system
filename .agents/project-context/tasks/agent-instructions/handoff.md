@@ -1,6 +1,6 @@
 # Agent instructions handoff
 
-Evidence: 2026-10-15 UTC; base `32ac1c9`; uncommitted `.agents/`, `.claude/`, `AGENTS.md`, `CLAUDE.md`, `home/packages.nix`, eval tests.
+Evidence: 2026-10-15 UTC; base `32ac1c9`; uncommitted `.agents/`, `.claude/`, `AGENTS.md`, `CLAUDE.md`, eval tests.
 
 - Objective: adapt instructions copied from another project to this NixOS repository.
 - Owner: coordinating agent. Status: done, awaiting user review and commit.
