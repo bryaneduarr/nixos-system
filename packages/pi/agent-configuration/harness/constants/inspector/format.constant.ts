@@ -1,5 +1,11 @@
 /** Milliseconds in one second. */
 export const MILLISECONDS_PER_SECOND = 1000;
+/** Seconds in one minute. */
+export const SECONDS_PER_MINUTE = 60;
+/** Seconds in one hour. */
+export const SECONDS_PER_HOUR = 3600;
+/** Width of the zero-padded minutes and seconds of a long duration. */
+export const DURATION_PART_WIDTH = 2;
 /** Durations below this many milliseconds keep one decimal place in seconds. */
 export const DECIMAL_SECONDS_LIMIT_MS = 10_000;
 /** Tokens in one thousand, shown as kilo tokens. */
@@ -10,5 +16,7 @@ export const TOKENS_PER_MILLION = 1_000_000;
 export const DECIMAL_KILO_TOKENS_LIMIT = 10_000;
 /** Context percentages below this value keep one decimal place. */
 export const DECIMAL_PERCENT_LIMIT = 10;
+/** Width of the labels in the subagent summary. */
+export const SUMMARY_LABEL_WIDTH = 11;
 /** Width of the zero-padded subagent row number. */
 export const ROW_NUMBER_WIDTH = 2;

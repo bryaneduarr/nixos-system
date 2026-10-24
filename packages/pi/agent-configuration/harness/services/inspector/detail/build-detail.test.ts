@@ -6,7 +6,7 @@ import { buildDetail } from "./build-detail.service.ts";
 const TEST_CWD = "/tmp";
 
 describe("buildDetail", () => {
-  test("task detail shows current context, call count, and reasoning without redundant labels", () => {
+  test("task detail summarizes title, model, reasoning, tool calls, tokens, and context without dots", () => {
     activityStore.clear();
 
     const entry = activityStore.begin({
@@ -67,14 +67,19 @@ describe("buildDetail", () => {
     }).map((line) => line.text);
     const text = lines.join("\n");
 
-    expect(lines[0]).toMatch(/^TASK · SUCCESS · /);
+    expect(lines[0]).toMatch(/^TASK {2}SUCCESS {2}/);
     expect(lines[1]).toBe("");
-    expect(lines).toContain("REASONING low");
-    expect(lines).toContain("CONTEXT 12k/272k | 5 calls");
-    expect(text).not.toContain("supported");
-    expect(text).not.toContain("peak");
-    expect(text).not.toContain("spent");
-    expect(text).not.toContain("WINDOW");
+    expect(lines).toContain("Locate pi harness");
+    expect(lines).toContain("STATUS     done");
+    expect(lines).toContain("MODEL      test/sample");
+    expect(lines).toContain("REASONING  low");
+    expect(lines).toContain("TOOLS      5 calls  0 running  0 failed");
+    expect(lines).toContain(
+      "TOKENS     total 19k  input 1.0k  output 1.0k  cache read 17k  cache write 0  reasoning 0",
+    );
+    expect(lines).toContain("CONTEXT    12k/272k (4.4%)");
+    expect(text).not.toContain("·");
+    expect(text).not.toContain("—");
   });
 
   test("task input shows the effective role and default tools", () => {

@@ -14,6 +14,6 @@ export interface SubagentListOptions {
   readonly scroll: number;
   /** Selected subagent task. */
   readonly selection: SubagentSelection;
-  /** Theme used for colors and emphasis. */
-  readonly theme: Theme;
+  /** Theme colors used for status words and the selected row. */
+  readonly theme: Pick<Theme, "fg" | "bg">;
 }

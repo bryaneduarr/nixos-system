@@ -24,7 +24,7 @@ export interface InspectorViewState {
   readonly rows: readonly InspectorRow[];
   /** Index of the selected row. */
   readonly selected: number;
-  /** Ids of subagent tasks whose child calls are listed. */
+  /** Ids of subagent tasks whose child calls are shown. */
   readonly expandedTasks: ReadonlySet<string>;
   /** Text shown in place of the tool result. */
   readonly artifact: DetailArtifact;

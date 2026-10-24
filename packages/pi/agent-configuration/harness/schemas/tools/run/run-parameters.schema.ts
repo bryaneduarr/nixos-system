@@ -2,7 +2,14 @@ import { Type } from "typebox";
 
 export const RunParamsSchema = Type.Object({
   /** Shell command to execute. */
-  command: Type.String({ description: "Shell command to execute." }),
+  command: Type.String({ description: "Shell command to execute. Do not start it with `cd`; use cwd instead." }),
+  /** Directory the command starts in, relative to the session directory. Created when missing. */
+  cwd: Type.Optional(
+    Type.String({
+      description:
+        "Directory to run in, absolute or relative to the session directory. Defaults to the session directory and is created when missing.",
+    }),
+  ),
   /** Milliseconds before the command is killed. */
   timeoutMs: Type.Optional(
     Type.Integer({

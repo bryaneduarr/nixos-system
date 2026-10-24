@@ -1,5 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { registerHarnessStatusCommand } from "./commands/harness-status/harness-status.command.ts";
+import { registerSessionStatsCommand } from "./commands/session-stats/session-stats.command.ts";
 import { registerSubagentCancelCommand } from "./commands/subagent-cancel/subagent-cancel.command.ts";
 import { registerSubagentStatusCommand } from "./commands/subagent-status/subagent-status.command.ts";
 import { installSessions } from "./services/sessions/install/install-sessions.service.ts";
@@ -27,4 +28,5 @@ export default function harnessExtension(pi: ExtensionAPI): void {
   installSessions(pi);
   installToolEvents(pi);
   registerHarnessStatusCommand(pi);
+  registerSessionStatsCommand(pi);
 }

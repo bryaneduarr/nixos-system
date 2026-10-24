@@ -6,7 +6,7 @@ import { createInspectorNavigation } from "./create-inspector-navigation.service
 beforeEach(() => activityStore.clear());
 
 describe("inspector navigation", () => {
-  test("follows the selected tool and its child calls", () => {
+  test("starts with subagents collapsed and follows the selected tool and its child calls", () => {
     const navigation = createInspectorNavigation({
       bodyHeight: () => 20,
       detailLength: () => 0,
@@ -30,6 +30,7 @@ describe("inspector navigation", () => {
       ],
     });
     navigation.syncSelection(navigation.buildRows());
+    expect(navigation.buildRows().map((row) => row.entry.id)).toEqual(["task-1"]);
     expect(navigation.selection).toEqual({ kind: "row", id: "task-1" });
     expect(navigation.adjustSubagentCollapse("right")).toBe(true);
     expect(navigation.buildRows().map((row) => (row.level === "sub" ? row.sub.id : row.entry.id))).toEqual([
@@ -39,6 +40,7 @@ describe("inspector navigation", () => {
     expect(navigation.selection).toEqual({ kind: "row", id: "task-1::read-1" });
     expect(navigation.adjustSubagentCollapse("left")).toBe(true);
     expect(navigation.selection).toEqual({ kind: "row", id: "task-1" });
+    expect(navigation.buildRows().map((row) => row.entry.id)).toEqual(["task-1"]);
   });
 
   test("bounds scrolling to the detail viewport", () => {

@@ -65,6 +65,29 @@ test("collection uses only the current branch and preserves an unsent whitespace
   const branchBefore = structuredClone(branch);
   expect(collectPrompts(branch, draft).map((prompt) => prompt.text)).toEqual([draft, "latest\nraw", "earlier"]);
   expect(branch).toEqual(branchBefore);
-  expect(collectPrompts([], draft)).toEqual([{ label: "Draft", text: draft }]);
+  expect(collectPrompts([], draft)).toEqual([{ label: "Draft", text: draft, turn: { kind: "draft" } }]);
   expect(collectPrompts([], "")).toEqual([]);
+});
+
+test("a prompt without text still counts as a turn", () => {
+  const userEntry = (
+    id: string,
+    content: string | { type: "image"; data: string; mimeType: string }[],
+  ): SessionEntry => ({
+    type: "message",
+    id,
+    parentId: null,
+    timestamp,
+    message: { role: "user", content, timestamp: 0 },
+  });
+  const branch = [
+    userEntry("1", "first"),
+    userEntry("2", [{ type: "image", data: "", mimeType: "image/png" }]),
+    userEntry("3", "third"),
+  ];
+
+  expect(collectPrompts(branch, "").map((prompt) => [prompt.text, prompt.turn])).toEqual([
+    ["third", { kind: "turn", turnsFromLatest: 0 }],
+    ["first", { kind: "turn", turnsFromLatest: 2 }],
+  ]);
 });

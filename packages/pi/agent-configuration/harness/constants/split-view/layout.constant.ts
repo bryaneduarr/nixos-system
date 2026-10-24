@@ -1,0 +1,14 @@
+export const MIN_TWO_PANE_WIDTH = 64;
+export const MIN_CONTENT_WIDTH = 8;
+export const MIN_LEFT_WIDTH = 24;
+export const MAX_LEFT_WIDTH = 44;
+export const LEFT_PANE_WIDTH_RATIO = 0.34;
+export const PANE_DIVIDER_WIDTH = 3;
+export const BODY_HEIGHT_TERMINAL_RATIO = 0.8;
+export const BODY_HEIGHT_CHROME_ROWS = 6;
+export const MIN_BODY_HEIGHT = 6;
+export const MAX_BODY_HEIGHT = 48;
+export const STACKED_LIST_HEIGHT_RATIO = 0.38;
+export const MIN_STACKED_LIST_HEIGHT = 4;
+export const MIN_STACKED_DETAIL_HEIGHT = 3;
+export const DETAIL_TITLE_ROWS = 1;

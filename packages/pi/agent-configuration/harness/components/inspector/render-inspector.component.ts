@@ -1,10 +1,10 @@
 import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
-import { isPseudoEntryTool } from "../../services/inspector/detail/is-pseudo-entry-tool.service.ts";
-import { readInspectorGeometry } from "../../services/inspector/layout/read-inspector-geometry.service.ts";
+import { isToolCallEntry } from "../../services/inspector/detail/is-tool-call-entry.service.ts";
+import { readSplitViewGeometry } from "../../services/split-view/layout/read-split-view-geometry.service.ts";
 import type { InspectorLayoutState } from "../../types/inspector/view/inspector-layout.interface.ts";
 import type { InspectorViewResult, InspectorViewState } from "../../types/inspector/view/inspector-view.interface.ts";
+import { frameModal } from "../split-view/frame-modal.component.ts";
 import { activityHeader } from "./activity-header.component.ts";
-import { frameModal } from "./frame-modal.component.ts";
 import { idlePrompt } from "./idle-prompt.component.ts";
 import { inspectorFooter } from "./inspector-footer.component.ts";
 import { renderSubagentsPage } from "./subagents-page.component.ts";
@@ -12,9 +12,9 @@ import { renderToolsPage } from "./tools-page.component.ts";
 
 export function renderInspector(state: InspectorViewState): InspectorViewResult {
   const { width, theme, page, focus, rows } = state;
-  const geometry = readInspectorGeometry(width, state.terminalRows);
+  const geometry = readSplitViewGeometry(width, state.terminalRows);
   const activityEntries = activityStore.all();
-  const totalCalls = activityEntries.filter((entry) => !isPseudoEntryTool(entry.toolName)).length;
+  const totalCalls = activityEntries.filter((entry) => isToolCallEntry(entry.toolName)).length;
   const phase = activityStore.currentAgent().phase;
   const isAgentWorking = phase === "thinking" || phase === "working" || phase === "responding";
   const lines = activityHeader(theme, geometry.contentWidth, totalCalls, isAgentWorking);

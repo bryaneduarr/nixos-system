@@ -8,11 +8,19 @@ export const WORKING_LABEL = "Working";
 export const COMPLETED_LABEL = "Completed";
 /** Theme color of muted summary text. */
 export const MUTED_COLOR = "muted";
-/** Theme color of summary text that shows live work. */
+/** Theme color of the running tool calls listed inside the summary. */
 export const ACCENT_COLOR = "accent";
+/** Theme color of the hint that appears while the transcript is scrolled away from its latest message. */
+export const JUMP_TO_LATEST_COLOR = "warning";
+/** Text of the hint that appears while the transcript is scrolled away from its latest message. */
+export const JUMP_TO_LATEST_LABEL = "Jump to latest message";
+/** Keybinding that scrolls the transcript to its latest message. */
+export const JUMP_TO_LATEST_KEYBINDING = "tui.altScreen.bottom";
+/** Separator between a shortcut and the action it triggers. */
+export const SHORTCUT_SEPARATOR = " \u00b7 ";
+/** Theme color of the latest activity message in the summary header. */
+export const LATEST_ACTIVITY_COLOR = "success";
 /** Marker that ends a truncated summary line. */
 export const ELLIPSIS = "...";
 /** Separator between a tool label and its target in an expanded line. */
 export const TOOL_TARGET_SEPARATOR = " · ";
-/** Indent of each expanded summary line. */
-export const EXPANDED_LINE_INDENT = "  ";

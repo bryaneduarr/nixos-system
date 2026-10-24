@@ -8,3 +8,4 @@ export const KEY_DOWN = "down";
 export const KEY_G = "g";
 export const KEY_Y = "y";
 export const KEY_SHIFT_G = "shift+g";
+export const KEY_ENTER = "enter";

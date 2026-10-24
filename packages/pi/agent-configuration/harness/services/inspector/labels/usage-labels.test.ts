@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { SubagentModel } from "../../../types/activity/subagent-model.interface.ts";
-import { compactUsageLabel } from "./compact-usage-label.service.ts";
+import { contextUsageLabel } from "./context-usage-label.service.ts";
 import { modelLabel } from "./model-label.service.ts";
 import { modelShortLabel } from "./model-short-label.service.ts";
 import { usageLabel } from "./usage-label.service.ts";
@@ -18,7 +18,7 @@ describe("model labels", () => {
   test("model labels include the provider when showing full details", () => {
     expect(modelLabel(model)).toBe("Sample model (example/sample-model)");
     expect(modelShortLabel(model)).toBe("Sample model");
-    expect(modelLabel({ state: "absent" })).toBe("model —");
+    expect(modelLabel({ state: "absent" })).toBe("model unknown");
   });
 });
 
@@ -37,11 +37,12 @@ describe("usage labels", () => {
         maxContextTokens: { state: "present", value: 2_000 },
       },
     } as const;
-    expect(usageLabel(usage, model)).toBe("spent 5.0k · max ctx 2.0k/20k (10%)");
-    expect(compactUsageLabel(usage, model)).toBe("spent 5.0k · peak 2.0k/20k");
+    expect(usageLabel(usage, model)).toBe("spent 5.0k  max ctx 2.0k/20k (10%)");
+    expect(contextUsageLabel(usage, model)).toBe("1.0k/20k (5.0%)");
   });
 
   test("missing usage or context window does not produce a percentage", () => {
-    expect(usageLabel({ usageState: "unreported" }, { state: "absent" })).toBe("spent — · max ctx —");
+    expect(usageLabel({ usageState: "unreported" }, { state: "absent" })).toBe("spent -  max ctx -");
+    expect(contextUsageLabel({ usageState: "unreported" }, { state: "absent" })).toBe("-/-");
   });
 });

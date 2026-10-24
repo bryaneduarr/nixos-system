@@ -1,0 +1,29 @@
+import { TURN_VIEW_KEY } from "../../../constants/transcript/turn-view.constant.ts";
+import type { TurnView, TurnViewStore } from "../../../types/transcript/turn-view.interface.ts";
+
+const LATEST_TURN_ONLY: TurnView = { hidden: true, turnsFromLatest: 0 };
+
+export function createTurnView(): TurnViewStore {
+  let view = LATEST_TURN_ONLY;
+  const update = (next: TurnView): void => {
+    view = next;
+    Reflect.set(globalThis, TURN_VIEW_KEY, view);
+  };
+
+  update(view);
+
+  return {
+    reset() {
+      update(LATEST_TURN_ONLY);
+    },
+    toggleHidden() {
+      update({ ...view, hidden: !view.hidden });
+    },
+    focus(turnsFromLatest) {
+      update({ hidden: true, turnsFromLatest });
+    },
+    current() {
+      return view;
+    },
+  };
+}

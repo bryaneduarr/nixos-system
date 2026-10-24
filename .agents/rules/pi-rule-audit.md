@@ -35,6 +35,7 @@ Fix the code first. Add a row only for a file that converts a Pi or pi-tui value
 | `agent-configuration/harness/services/activity/value/to-value-state.service.ts` | `nullable-union` | Converts library values that may be undefined into ValueState once. |
 | `agent-configuration/harness/services/tools/process/tool-cancellation.service.ts` | `nullable-union` | Converts Pi's optional AbortSignal into a ToolCancellation once. |
 | `agent-configuration/harness/types/tool-rendering/renderer.interface.ts` | `nullable-union` | Mirrors Pi's render context, whose lastComponent is Component or undefined. |
+| `agent-configuration/harness/types/transcript/transcript-refresh-ui.interface.ts` | `nullable-union` | Mirrors Pi's setWidget, which removes a widget when given undefined. |
 | `agent-configuration/extensions/clear-session.test-double.ts` | `type-assertion` | Fake ExtensionAPI for an end-to-end test; Pi overloads `on` per event, so the fake cannot be typed without a cast. |
 | `agent-configuration/extensions/codex-fast-mode/fast-mode-runtime.test-double.ts` | `type-assertion` | Fake ExtensionAPI for end-to-end tests; Pi overloads `on` per event, so the fake cannot be typed without a cast. |
 | `agent-configuration/harness/services/sessions/install/install-sessions.test-double.ts` | `type-assertion` | Fake ExtensionAPI and ExtensionContext; Pi overloads `on` and its context classes have private members with no factory. |

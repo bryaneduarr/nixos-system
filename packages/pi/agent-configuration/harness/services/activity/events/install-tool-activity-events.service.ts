@@ -1,8 +1,15 @@
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, ToolExecutionStartEvent } from "@earendil-works/pi-coding-agent";
+import { BACKEND_TOOLS } from "../../../constants/tools/backend-tools.constant.ts";
 import { isRecord } from "../parsing/is-record.service.ts";
 import { readToolResultStatus } from "../parsing/read-tool-result-status.service.ts";
 import { activityStore } from "../store/shared-activity-store.service.ts";
 import { readRendererResult } from "./read-renderer-result.service.ts";
+
+const BACKEND_TOOL_NAMES: ReadonlySet<string> = new Set<string>(BACKEND_TOOLS);
+
+function isHiddenBackendCall(event: Pick<ToolExecutionStartEvent, "toolName" | "parentToolCallId">): boolean {
+  return event.parentToolCallId !== undefined && BACKEND_TOOL_NAMES.has(event.toolName);
+}
 
 export function installToolActivityEvents(
   pi: ExtensionAPI,
@@ -10,6 +17,7 @@ export function installToolActivityEvents(
   publish: (ctx: ExtensionContext) => void,
 ): void {
   pi.on("tool_execution_start", (event, ctx) => {
+    if (isHiddenBackendCall(event)) return;
     touch(ctx);
     activityStore.setPhase("working");
     activityStore.begin({
@@ -23,6 +31,7 @@ export function installToolActivityEvents(
   });
 
   pi.on("tool_execution_update", (event, ctx) => {
+    if (isHiddenBackendCall(event)) return;
     touch(ctx);
     const partial = readRendererResult(event.partialResult);
     activityStore.update(event.toolCallId, {
@@ -33,6 +42,7 @@ export function installToolActivityEvents(
   });
 
   pi.on("tool_execution_end", (event, ctx) => {
+    if (isHiddenBackendCall(event)) return;
     touch(ctx);
     const result = readRendererResult(event.result);
     activityStore.finish(event.toolCallId, {

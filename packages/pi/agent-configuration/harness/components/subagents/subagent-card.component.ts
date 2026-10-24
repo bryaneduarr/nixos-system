@@ -52,7 +52,7 @@ export function renderSubagentCard(
   const label = resolveCardTitle(current, title, activityLookup);
   const calls = resolveCardCalls(progressLookup, activityLookup);
   const call = calls.findLast((toolCall) => toolCall.status === "running") ?? calls.at(-1);
-  const activity = call ? renderCallLines(theme, call) : renderIdleLines(theme, status);
+  const activity = call ? renderCallLines(theme, call, status) : renderIdleLines(theme, status);
   const lines = [theme.fg("text", oneLine(label)), ...activity];
 
   if (status !== "running") {

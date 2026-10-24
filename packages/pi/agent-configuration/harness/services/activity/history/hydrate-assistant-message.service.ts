@@ -2,20 +2,35 @@ import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-resul
 import type { AssistantActivitySnapshot } from "../../../types/activity/agent-activity.interface.ts";
 import type { HydrateAssistantInput } from "../../../types/activity/hydrate-assistant-input.interface.ts";
 import { isRecord } from "../parsing/is-record.service.ts";
+import { readApiError } from "../parsing/read-api-error.service.ts";
 import { readAssistantActivity } from "../parsing/read-assistant-activity.service.ts";
+import { readSubagentUsage } from "../parsing/read-subagent-usage.service.ts";
 import { activityStore } from "../store/shared-activity-store.service.ts";
+import { recordApiError } from "./record-api-error.service.ts";
+import { recordAssistantTurn } from "./record-assistant-turn.service.ts";
 import { recordThinking } from "./record-thinking.service.ts";
 import { recordUpdate } from "./record-update.service.ts";
 
 export function hydrateAssistantMessage(input: HydrateAssistantInput): void {
   const { entryId, message, cwd, startedAt } = input;
   const assistantActivity = readAssistantActivity(message);
+  const apiError = readApiError(message);
   if (assistantActivity.found) {
     hydrateAssistantText(entryId, assistantActivity.snapshot, cwd, startedAt);
+    recordAssistantTurn({
+      idSuffix: entryId,
+      snapshot: assistantActivity.snapshot,
+      usage: readSubagentUsage(message),
+      hasApiError: apiError.state === "present",
+      cwd,
+      startedAt,
+      endedAt: startedAt,
+    });
   }
   if (Array.isArray(message.content)) {
     hydrateToolCalls(message.content, cwd, startedAt);
   }
+  if (apiError.state === "present") recordApiError(`api-error-${entryId}`, apiError.value, cwd, startedAt);
 }
 
 function hydrateAssistantText(

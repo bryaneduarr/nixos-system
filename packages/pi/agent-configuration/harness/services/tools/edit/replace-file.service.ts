@@ -5,6 +5,7 @@ import { addDiff } from "../diff/add-diff.service.ts";
 import { emptyDiff } from "../diff/empty-diff.service.ts";
 import { formatDiffStats } from "../diff/format-diff-stats.service.ts";
 import { replacementDiff } from "../diff/replacement-diff.service.ts";
+import { findWhitespaceMismatchLines } from "./find-whitespace-mismatch-lines.service.ts";
 
 function countOccurrences(haystack: string, needle: string): number {
   if (needle.length === 0) return 0;
@@ -15,6 +16,16 @@ function countOccurrences(haystack: string, needle: string): number {
     index = haystack.indexOf(needle, index + needle.length);
   }
   return count;
+}
+
+function notFoundSummary(path: string, content: string, oldText: string): string {
+  const candidateLines = findWhitespaceMismatchLines(content, oldText);
+  const lineLabel = candidateLines.length === 1 ? "line" : "lines";
+  const hint =
+    candidateLines.length > 0
+      ? `\n\nIgnoring whitespace, the first oldText line matches ${lineLabel} ${candidateLines.join(", ")}. Read them and copy their exact indentation.`
+      : "";
+  return `Replace failed: oldText not found in ${path}.${hint}\n\noldText:\n${oldText}`;
 }
 
 export async function replaceFile(change: ReplaceChange, target: string): Promise<EditResult> {
@@ -35,10 +46,7 @@ export async function replaceFile(change: ReplaceChange, target: string): Promis
   for (const edit of change.edits) {
     const occurrences = countOccurrences(nextContent, edit.oldText);
     if (occurrences === 0) {
-      return {
-        summary: `Replace failed: oldText not found in ${change.path}.\n\noldText:\n${edit.oldText}`,
-        changed: false,
-      };
+      return { summary: notFoundSummary(change.path, nextContent, edit.oldText), changed: false };
     }
     if (occurrences > 1 && !change.replaceAll) {
       return {
@@ -46,9 +54,10 @@ export async function replaceFile(change: ReplaceChange, target: string): Promis
         changed: false,
       };
     }
+    // A replacer function keeps dollar replacement patterns in newText literal.
     const replaced = change.replaceAll
       ? nextContent.split(edit.oldText).join(edit.newText)
-      : nextContent.replace(edit.oldText, edit.newText);
+      : nextContent.replace(edit.oldText, () => edit.newText);
     if (replaced === nextContent) {
       return {
         summary: `Replace failed: replacement produced no change in ${change.path}.`,

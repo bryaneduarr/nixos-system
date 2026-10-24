@@ -12,6 +12,7 @@ export function presentationLines(presentation: HarnessPresentation, theme: Them
   const lines = [theme.fg("text", presentation.target)];
   if (presentation.state === "running") {
     lines.push(theme.fg("warning", RUNNING_LABEL));
+    for (const detail of presentation.details) lines.push(theme.fg("muted", detail));
     return lines;
   }
   const [first, ...rest] = presentation.details;

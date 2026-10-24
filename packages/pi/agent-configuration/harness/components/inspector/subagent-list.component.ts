@@ -1,53 +1,66 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth } from "@earendil-works/pi-tui";
 import { ROW_NUMBER_WIDTH } from "../../constants/inspector/format.constant.ts";
-import { EMPTY_VALUE_LABEL, TRUNCATION_MARK } from "../../constants/inspector/label.constant.ts";
-import { SELECTED_ROW_BACKGROUND } from "../../constants/inspector/theme-color.constant.ts";
+import { EMPTY_VALUE_LABEL } from "../../constants/inspector/label.constant.ts";
+import { SUBAGENT_STATUS_TEXT } from "../../constants/inspector/subagent-status.constant.ts";
+import {
+  SUBAGENT_TABLE_COLUMNS,
+  SUBAGENT_TABLE_GAP,
+  SUBAGENT_TABLE_HEADINGS,
+  SUBAGENT_TABLE_HINT,
+} from "../../constants/inspector/subagent-table.constant.ts";
+import { TRUNCATION_MARK } from "../../constants/split-view/text.constant.ts";
 import { formatDuration } from "../../services/inspector/detail/format-duration.service.ts";
-import { compactUsageLabel } from "../../services/inspector/labels/compact-usage-label.service.ts";
-import { contextWindowLabel } from "../../services/inspector/labels/context-window-label.service.ts";
+import { contextUsageLabel } from "../../services/inspector/labels/context-usage-label.service.ts";
 import { formatTokens } from "../../services/inspector/labels/format-tokens.service.ts";
 import { modelShortLabel } from "../../services/inspector/labels/model-short-label.service.ts";
-import { oneSentence } from "../../services/inspector/labels/one-sentence.service.ts";
-import { statusGlyph } from "../../services/inspector/labels/status-glyph.service.ts";
-import { padCell } from "../../services/inspector/layout/pad-cell.service.ts";
+import { spentTokensLabel } from "../../services/inspector/labels/spent-tokens-label.service.ts";
 import { isSubagentSelected } from "../../services/inspector/subagents/is-subagent-selected.service.ts";
+import { readSubagentElapsed } from "../../services/inspector/subagents/read-subagent-elapsed.service.ts";
+import { readSubagentStatus } from "../../services/inspector/subagents/read-subagent-status.service.ts";
+import { padCell } from "../../services/split-view/layout/pad-cell.service.ts";
 import type { ToolActivity } from "../../types/activity/tool-activity.interface.ts";
 import type { ToolActivityUsage } from "../../types/activity/tool-activity-usage.interface.ts";
 import type { SubagentListOptions } from "../../types/inspector/lists/subagent-list-options.interface.ts";
+import type { SubagentTableCells } from "../../types/inspector/lists/subagent-table.interface.ts";
+import { listRow } from "../split-view/list-row.component.ts";
 
-function subagentTarget(row: ToolActivity): string {
-  if (typeof row.args.title === "string") return oneSentence(row.args.title);
-  if (typeof row.args.prompt === "string") return oneSentence(row.args.prompt);
-  return "";
+function tableLine(cells: SubagentTableCells): string {
+  return SUBAGENT_TABLE_COLUMNS.map((column) => padCell(cells[column.key], column.width)).join(SUBAGENT_TABLE_GAP);
 }
 
-function subagentLine(row: ToolActivity, rowNumber: number, width: number, theme: Theme): string {
-  const thinking = row.thinkingLevel.state === "present" ? row.thinkingLevel.value : EMPTY_VALUE_LABEL;
-  const windowLabel = contextWindowLabel(row.model);
-  const endTime = row.endedAt.state === "present" ? row.endedAt.value : Date.now();
-  const elapsed = formatDuration(Math.max(0, endTime - row.startedAt));
-  const usage = compactUsageLabel(row.usage, row.model);
-  const model = modelShortLabel(row.model);
-  const rowNumberLabel = String(rowNumber).padStart(ROW_NUMBER_WIDTH, "0");
-  const identity = `${statusGlyph(row.status, theme)} SUBAGENT ${rowNumberLabel} ${row.status}`;
-  const details = [elapsed, usage, model, thinking, `win ${windowLabel}`, subagentTarget(row)].join(" · ");
-  return truncateToWidth(`${identity} · ${details}`, width, TRUNCATION_MARK, true);
+function subagentCells(row: ToolActivity, rowNumber: number, theme: Pick<Theme, "fg">): SubagentTableCells {
+  const status = SUBAGENT_STATUS_TEXT[readSubagentStatus(row)];
+  return {
+    number: String(rowNumber).padStart(ROW_NUMBER_WIDTH, "0"),
+    status: theme.fg(status.color, status.label),
+    time: formatDuration(readSubagentElapsed(row)),
+    context: contextUsageLabel(row.usage, row.model),
+    spent: spentTokensLabel(row.usage),
+    model: modelShortLabel(row.model),
+    reasoning: row.thinkingLevel.state === "present" ? row.thinkingLevel.value : EMPTY_VALUE_LABEL,
+  };
 }
 
 function reportedTotalTokens(usage: ToolActivityUsage): number {
   return usage.usageState === "reported" ? usage.usage.totalTokens : 0;
 }
 
-export function renderSubagentList({ rows, width, height, scroll, selection, theme }: SubagentListOptions): string[] {
+function summaryLine(rows: readonly ToolActivity[]): string {
+  const runningCount = rows.filter((row) => readSubagentStatus(row) === "running").length;
   const totalTokens = rows.reduce((total, row) => total + reportedTotalTokens(row.usage), 0);
+  const counts = `${rows.length} subagents  ${runningCount} running  ${formatTokens(totalTokens)} tokens spent`;
+  return `${counts}    ${SUBAGENT_TABLE_HINT}`;
+}
+
+export function renderSubagentList({ rows, width, height, scroll, selection, theme }: SubagentListOptions): string[] {
   const output = [
-    theme.fg("muted", `${rows.length} subagents · spent ${formatTokens(totalTokens)} · ↑/↓ move · → open`),
+    theme.fg("muted", truncateToWidth(summaryLine(rows), width, TRUNCATION_MARK, true)),
+    theme.fg("dim", truncateToWidth(tableLine(SUBAGENT_TABLE_HEADINGS), width, TRUNCATION_MARK, true)),
   ];
   for (const [index, row] of rows.slice(scroll, scroll + height).entries()) {
-    const line = subagentLine(row, scroll + index + 1, width, theme);
-    const isSelected = isSubagentSelected(row, selection);
-    output.push(isSelected ? theme.bg(SELECTED_ROW_BACKGROUND, padCell(line, width)) : line);
+    const line = tableLine(subagentCells(row, scroll + index + 1, theme));
+    output.push(listRow(line, width, isSubagentSelected(row, selection), theme));
   }
   return output;
 }

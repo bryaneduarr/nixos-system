@@ -22,7 +22,7 @@ import { pseudoEntryLines } from "./pseudo-entry-lines.service.ts";
 import { readEndedAt } from "./read-ended-at.service.ts";
 import { taskSummaryLines } from "./task-summary-lines.service.ts";
 
-const RUNNING_LABEL = " · running";
+const RUNNING_LABEL = "  running";
 
 function statusColor(status: ActivityStatus): ThemeColor {
   switch (status) {
@@ -37,9 +37,9 @@ function statusColor(status: ActivityStatus): ThemeColor {
 
 function artifactNoticeLines(entry: ToolActivity, artifact: DetailArtifact): DetailLine[] {
   if (!entry.artifactPath.found) return [];
-  const artifactAction = artifact.kind === "loaded" ? "· open" : "· press a";
+  const artifactAction = artifact.kind === "loaded" ? "open" : "press a";
   return [
-    { text: `artifact ${artifactAction} · ${entry.artifactPath.path}`, color: "muted", bold: false },
+    { text: `artifact ${artifactAction}  ${entry.artifactPath.path}`, color: "muted", bold: false },
     BLANK_DETAIL_LINE,
   ];
 }
@@ -57,12 +57,12 @@ function detailHeading(
 ): DetailLine {
   if (tool === MESSAGE_ACTIVITY_NAME) {
     return {
-      text: `USER MESSAGE ${String(args.number ?? "")} · ${formatTime(startedAt)}`,
+      text: `USER MESSAGE ${String(args.number ?? "")}  ${formatTime(startedAt)}`,
       color: "accent",
       bold: true,
     };
   }
-  const text = `${toolLabel(tool)} · ${status.toUpperCase()} · ${formatTime(startedAt)}`;
+  const text = `${toolLabel(tool)}  ${status.toUpperCase()}  ${formatTime(startedAt)}`;
   return { text, color: statusColor(status), bold: true };
 }
 
@@ -70,7 +70,7 @@ function timingLabel(startedAt: number, endedAt: ValueState<number>): string {
   const endTime = endedAt.state === "present" ? endedAt.value : Date.now();
   const elapsed = formatDuration(Math.max(0, endTime - startedAt));
   const runningLabel = endedAt.state === "absent" ? RUNNING_LABEL : "";
-  return `${formatTime(startedAt)} · ${elapsed}${runningLabel}`;
+  return `${formatTime(startedAt)}  ${elapsed}${runningLabel}`;
 }
 
 function targetLines(

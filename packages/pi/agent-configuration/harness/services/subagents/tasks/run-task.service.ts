@@ -1,4 +1,4 @@
-import { type ExtensionContext, ModelRuntime } from "@earendil-works/pi-coding-agent";
+import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
   COMPLETED_TASK_LABEL,
   STOPPED_TASK_LABEL,
@@ -16,6 +16,8 @@ import type { TaskStatus } from "../../../types/subagents/tasks/task-status.inte
 import { toValueState } from "../../activity/value/to-value-state.service.ts";
 import { buildTaskSystemPrompt } from "../roles/build-task-system-prompt.service.ts";
 import { resolveTaskRole } from "../roles/resolve-task-role.service.ts";
+import { composeTaskSystemPrompt } from "./compose-task-system-prompt.service.ts";
+import { createTaskModelRuntime } from "./create-task-model-runtime.service.ts";
 import { createTaskProgress } from "./create-task-progress.service.ts";
 import { createTaskResourceLoader } from "./create-task-resource-loader.service.ts";
 import { createTaskSession } from "./create-task-session.service.ts";
@@ -49,7 +51,7 @@ export async function runTask(
   onProgress: SubagentProgressListener,
 ): Promise<TaskResult> {
   const resolvedRole = resolveTaskRole(request);
-  const runtime = await ModelRuntime.create();
+  const runtime = await createTaskModelRuntime(ctx);
   const model = resolveTaskModel({
     runtime,
     requestedModel: request.model,
@@ -57,7 +59,11 @@ export async function runTask(
   });
   const resourceLoader = await createTaskResourceLoader({
     cwd: ctx.cwd,
-    systemPrompt: buildTaskSystemPrompt(resolvedRole),
+    systemPrompt: composeTaskSystemPrompt({
+      provider: model.provider,
+      parentPrompt: ctx.getSystemPrompt(),
+      rolePrompt: buildTaskSystemPrompt(resolvedRole),
+    }),
     skillNames: request.skills.state === "present" ? request.skills.value : [],
   });
   const customTools = resolvedRole.tools.includes(APPROVED_COMMAND_TOOL)

@@ -12,9 +12,10 @@ export function readLatestActivityText(
   entries: readonly ToolActivity[],
   working: boolean,
 ): string {
+  if (!working) return COMPLETED_LABEL;
   const latest =
     readThinkingTitles(messageNumber).at(-1) || readLatestUpdateText(entries) || readLatestToolTitle(entries);
-  return latest || (working ? WORKING_LABEL : COMPLETED_LABEL);
+  return latest || WORKING_LABEL;
 }
 
 function readLatestUpdateText(entries: readonly ToolActivity[]): string {

@@ -1,22 +1,45 @@
-import { THEME_MUTED } from "../../../constants/prompts/theme.constant.ts";
-import { PROMPT_BROWSER_FOOTER_HINT } from "../../../constants/prompts/viewer.constant.ts";
+import { footerLinks } from "../../../components/split-view/footer-links.component.ts";
+import { frameModal } from "../../../components/split-view/frame-modal.component.ts";
+import { pageTitle } from "../../../components/split-view/page-title.component.ts";
+import { splitPanes } from "../../../components/split-view/split-panes.component.ts";
+import { viewHeader } from "../../../components/split-view/view-header.component.ts";
+import {
+  COLLECTION_BY_KEY,
+  COLLECTION_EMPTY_TEXT,
+  COLLECTION_LABEL,
+} from "../../../constants/prompts/collection.constant.ts";
 import type { BrowserRenderInput } from "../../../types/prompts/browser-render-input.interface.ts";
-import { frameLines } from "./frame-lines.service.ts";
-import { joinBrowserPanes } from "./join-browser-panes.service.ts";
-import { renderBrowserHeading } from "./render-browser-heading.service.ts";
+import type { PromptCollectionName } from "../../../types/prompts/prompt-collections.interface.ts";
+import type { SplitViewFooterLink } from "../../../types/split-view/footer-link.interface.ts";
 import { renderPromptList } from "./render-prompt-list.service.ts";
 import { renderPromptRow } from "./render-prompt-row.service.ts";
 
-export function renderBrowserLines(input: BrowserRenderInput): string[] {
-  const list = renderPromptList(input.summaries, input.selected, input.layout, input.theme);
+function collectionLinks(shown: PromptCollectionName): SplitViewFooterLink[] {
+  return Object.entries(COLLECTION_BY_KEY).map(([key, collection]) => ({
+    key,
+    name: COLLECTION_LABEL[collection],
+    active: collection === shown,
+  }));
+}
+
+function bodyLines(input: BrowserRenderInput): string[] {
+  const { geometry, theme } = input;
+  if (input.summaries.length === 0) return [theme.fg("dim", COLLECTION_EMPTY_TEXT[input.collection])];
+  const list = renderPromptList(input.summaries, input.selected, geometry, theme);
   const detail = input.rows
-    .slice(input.offset, input.offset + input.layout.pageSize)
-    .map((row) => renderPromptRow(row, input.navigation, input.focus === "detail", input.theme));
-  const footer = input.theme.fg(THEME_MUTED, input.status || PROMPT_BROWSER_FOOTER_HINT);
+    .slice(input.offset, input.offset + geometry.detailHeight)
+    .map((row) => renderPromptRow(row, input.navigation, input.focus === "detail", theme));
+  return splitPanes({ list, detail, geometry, focus: input.focus, theme });
+}
+
+export function renderBrowserLines(input: BrowserRenderInput): string[] {
+  const { geometry, theme, collection } = input;
+  const count = `${input.summaries.length} ${COLLECTION_LABEL[collection].toLowerCase()}`;
   const lines = [
-    renderBrowserHeading(input.focus, input.theme),
-    ...joinBrowserPanes(input.layout, list, detail, input.theme),
-    footer,
+    ...viewHeader(theme.fg("muted", `${count}  ${input.keyHint}`), geometry.contentWidth, theme),
+    pageTitle(COLLECTION_LABEL[collection], theme),
+    ...bodyLines(input),
+    footerLinks(collectionLinks(collection), input.status, geometry.contentWidth, theme),
   ];
-  return frameLines(lines, input.columns, input.theme).slice(0, input.layout.height);
+  return frameModal(lines, input.columns, theme);
 }

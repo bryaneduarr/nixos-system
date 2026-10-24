@@ -56,7 +56,7 @@ The detached helper waits up to 60 seconds for Pi to exit, then up to 10 seconds
 
 ## Extension settings
 
-Pi uses `pi-mcp-adapter` as its sole MCP extension. The managed settings disable `builtin:mcp` and store adapter settings in `~/.pi/agent/mcp-adapter.json`. The Nix package patches the LSP adapter's host libraries into wildcard peer dependencies and removes nested copies.
+Pi uses its built-in MCP support and reads servers from `~/.pi/agent/mcp.json`; run `/mcp` to sign in to OAuth servers such as Notion. Auto-compaction starts at 300k tokens on 1M-context models. The Nix package patches the LSP adapter's host libraries into wildcard peer dependencies and removes nested copies.
 
 ## Toggle Codex fast mode
 

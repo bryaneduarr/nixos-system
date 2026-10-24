@@ -1,15 +1,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import {
-  CONFIG_DIR_NAME,
-  type ExtensionAPI,
-  isToolCallEventType,
-  type ToolResultEvent,
-} from "@earendil-works/pi-coding-agent";
+import { CONFIG_DIR_NAME, type ExtensionAPI, type ToolResultEvent } from "@earendil-works/pi-coding-agent";
 
+// Must match HARNESS_TOOLS; this file is installed apart from the harness and cannot import it.
+const SELF_BOUNDED_TOOLS: ReadonlySet<string> = new Set(["search", "read", "edit", "run"]);
 const MAX_CHARS = 12_000;
 const MAX_LINES = 240;
-const READ_LIMIT = 120;
 const PREVIEW_CHAR_LIMIT = 12_000;
 const HEAD_LINES = 100;
 const TAIL_LINES = 60;
@@ -82,13 +78,9 @@ async function saveFullOutput(cwd: string, toolName: string, toolCallId: string,
 }
 
 export default function quietToolOutputExtension(pi: ExtensionAPI): void {
-  pi.on("tool_call", (event) => {
-    if (isToolCallEventType("read", event) && event.input.limit === undefined) {
-      event.input.limit = READ_LIMIT;
-    }
-  });
-
   pi.on("tool_result", async (event, context) => {
+    if (SELF_BOUNDED_TOOLS.has(event.toolName)) return;
+
     const fullOutput = joinTextBlocks(event.content);
     if (fitsWithoutPreview(fullOutput)) return;
 

@@ -6,9 +6,19 @@ import { readSubagentUsage } from "./read-subagent-usage.service.ts";
 
 export function readToolResultFields(details: unknown): ToolResultFields {
   const progressLookup = readTaskProgress(details);
+  if (progressLookup.found) {
+    const { progress } = progressLookup;
+    return {
+      details: { state: "present", value: progress },
+      sub: progress.activity,
+      usage: progress.usage,
+      model: progress.model,
+      thinkingLevel: progress.thinkingLevel,
+    };
+  }
 
   return {
-    details: progressLookup.found ? { state: "present", value: progressLookup.progress } : { state: "absent" },
+    details: { state: "absent" },
     sub: readSubActivity(details),
     usage: readSubagentUsage(details),
     ...readSubagentMetadata(details),

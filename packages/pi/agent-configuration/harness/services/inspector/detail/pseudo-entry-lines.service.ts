@@ -1,4 +1,9 @@
-import { MESSAGE_ACTIVITY_NAME, UPDATE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
+import {
+  MESSAGE_ACTIVITY_NAME,
+  REPLY_ACTIVITY_NAME,
+  TOKENS_ACTIVITY_NAME,
+  UPDATE_ACTIVITY_NAME,
+} from "../../../constants/activity/activity-entry.constant.ts";
 import { BLANK_DETAIL_LINE } from "../../../constants/inspector/detail-line.constant.ts";
 import { NO_TEXT_LABEL } from "../../../constants/inspector/label.constant.ts";
 import type { ToolActivity } from "../../../types/activity/tool-activity.interface.ts";
@@ -8,6 +13,7 @@ import { activityStore } from "../../activity/store/shared-activity-store.servic
 import { isHarnessTool } from "../../tools/is-harness-tool.service.ts";
 import { boxedDetailLines } from "./boxed-detail-lines.service.ts";
 import { formatTime } from "./format-time.service.ts";
+import { turnUsageDetail } from "./turn-usage-detail.service.ts";
 
 function userMessageBody(entry: ToolActivity, startedAt: number, text: string, width: number): DetailLine[] {
   const entries = activityStore.all();
@@ -39,6 +45,20 @@ export function pseudoEntryLines(
       { text: `AGENT UPDATE  ${timing}`, color: "accent", bold: true },
       BLANK_DETAIL_LINE,
       ...boxedDetailLines("update", rawText, "accent", width),
+    ];
+  }
+  if (tool === REPLY_ACTIVITY_NAME) {
+    return [
+      { text: `REPLY  ${timing}`, color: "accent", bold: true },
+      BLANK_DETAIL_LINE,
+      ...boxedDetailLines("reply", rawText, "accent", width),
+    ];
+  }
+  if (tool === TOKENS_ACTIVITY_NAME) {
+    return [
+      { text: `TOKENS  ${timing}`, color: "accent", bold: true },
+      BLANK_DETAIL_LINE,
+      ...boxedDetailLines("usage", turnUsageDetail(entry.usage), "accent", width),
     ];
   }
   return [

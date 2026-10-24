@@ -6,6 +6,7 @@ import type { ActivityPublisher } from "../../../types/activity/activity-publish
 import type { ValueState } from "../../../types/activity/value-state.interface.ts";
 import { inspectRequestStore } from "../../inspector/request/shared-inspect-request-store.service.ts";
 import { countMessageEntries } from "../history/count-message-entries.service.ts";
+import { readTranscriptScroll } from "../summary/read-transcript-scroll.service.ts";
 import { activitySummaryState } from "../summary/shared-activity-summary-state.service.ts";
 
 export function createActivityPublisher(): ActivityPublisher {
@@ -20,7 +21,9 @@ export function createActivityPublisher(): ActivityPublisher {
     const messageNumber = countMessageEntries();
     ctx.ui.setWidget(
       ACTIVITY_WIDGET_KEY,
-      messageNumber > 0 ? (_tui, theme) => renderActivitySummary({ messageNumber }, theme) : undefined,
+      messageNumber > 0
+        ? (tui, theme) => renderActivitySummary({ messageNumber }, theme, readTranscriptScroll(tui))
+        : undefined,
       { placement: "aboveEditor" },
     );
   };

@@ -1,8 +1,9 @@
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
+import type { TranscriptRefreshUi } from "../transcript/transcript-refresh-ui.interface.ts";
 import type { PromptViewerUi } from "./prompt-viewer-ui.interface.ts";
 
 /** User interface operations the prompt browser uses. */
-interface PromptContextUi extends PromptViewerUi {
+interface PromptContextUi extends PromptViewerUi, TranscriptRefreshUi {
   /** Shows a short informational message. */
   notify(message: string, level: "info"): void;
   /** Current text of the unsent editor draft. */

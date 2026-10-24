@@ -4,4 +4,6 @@ export interface PromptTheme {
   fg(color: string, text: string): string;
   /** Applies a background color to text. */
   bg(color: string, text: string): string;
+  /** Renders text in bold. */
+  bold(text: string): string;
 }

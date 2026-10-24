@@ -4,5 +4,5 @@ import type { InspectorFooterLink } from "../../types/inspector/footer/inspector
 export const FOOTER_LINKS: readonly InspectorFooterLink[] = [
   { page: "tools", key: "1", name: "Tools" },
   { page: "subagents", key: "2", name: "Subagents" },
-  { page: "messages", key: "3", name: "Messages" },
+  { page: "history", key: "3", name: "History" },
 ];

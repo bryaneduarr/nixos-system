@@ -18,10 +18,12 @@ export interface InspectorNavigation {
   artifact: DetailArtifact;
   /** Page currently shown. */
   page: InspectorPage;
-  /** Ids of subagent tasks whose child calls are listed. */
+  /** Ids of subagent tasks whose child calls are shown. */
   readonly expandedTasks: Set<string>;
   /** Selected subagent task on the subagents page. */
   subagentSelection: SubagentSelection;
+  /** Subagent task shown on the subagent page. */
+  openedSubagent: SubagentSelection;
   /** First visible subagent row. */
   subagentScroll: number;
   /** Detail lines visible at once, from the last render. */

@@ -1,5 +1,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { ACTIVITY_COMPLETION_ENTRY } from "../../../constants/activity/activity-keys.constant.ts";
+import {
+  ACTIVITY_COMPLETION_ENTRY,
+  ACTIVITY_SUMMARY_ENTRY,
+} from "../../../constants/activity/activity-keys.constant.ts";
 import { VISIBILITY_SHORTCUT } from "../../../constants/activity/visibility.constant.ts";
 import { countMessageEntries } from "../history/count-message-entries.service.ts";
 import { hydrateFromSession } from "../history/hydrate-from-session.service.ts";
@@ -11,14 +14,15 @@ import { createActivityPublisher } from "./create-activity-publisher.service.ts"
 import { createAssistantMessageRecorder } from "./create-assistant-message-recorder.service.ts";
 import { installActivityInspectorEvents } from "./install-activity-inspector-events.service.ts";
 import { installAssistantMessageEvents } from "./install-assistant-message-events.service.ts";
-import { installMarkdownTransformerEvents } from "./install-markdown-transformer-events.service.ts";
 import { installToolActivityEvents } from "./install-tool-activity-events.service.ts";
 
 export function installActivityEvents(pi: ExtensionAPI): void {
   const publisher = createActivityPublisher();
   const assistantRecorder = createAssistantMessageRecorder();
 
-  installMarkdownTransformerEvents(pi);
+  // Older sessions stored a summary in the transcript. Its live replacement
+  // is an editor widget, so keep these entries invisible on reload.
+  pi.registerEntryRenderer(ACTIVITY_SUMMARY_ENTRY, () => undefined);
   installAssistantMessageEvents(pi, publisher, assistantRecorder);
   installToolActivityEvents(pi, publisher.touch, publisher.publish);
   installActivityInspectorEvents(pi, publisher.touch);

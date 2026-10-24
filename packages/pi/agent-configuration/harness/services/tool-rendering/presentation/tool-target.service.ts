@@ -1,9 +1,20 @@
+import { basename, resolve } from "node:path";
 import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts";
+import { splitLeadingCd } from "../../tools/run/split-leading-cd.service.ts";
 import { oneLine } from "../text/one-line.service.ts";
 
 function stringArg(args: Record<string, unknown>, key: string): string {
   const argument = args[key];
   return typeof argument === "string" ? argument : "";
+}
+
+function runTarget(command: string, cwd: string): string {
+  const leadingCd = cwd ? { kind: "none" as const } : splitLeadingCd(command);
+  const shownCommand = leadingCd.kind === "split" ? leadingCd.command : command;
+  const directory = leadingCd.kind === "split" ? leadingCd.directory : cwd;
+  const isSessionDirectory = !directory || resolve(directory) === process.cwd();
+  const directoryLabel = isSessionDirectory ? "" : ` (in ${basename(directory)})`;
+  return `${oneLine(shownCommand)}${directoryLabel}`;
 }
 
 export function toolTarget(tool: HarnessTool, args: Record<string, unknown>): string {
@@ -21,7 +32,7 @@ export function toolTarget(tool: HarnessTool, args: Record<string, unknown>): st
       return to ? `${from} -> ${to}` : oneLine(from);
     }
     case "run":
-      return oneLine(stringArg(args, "command"));
+      return runTarget(stringArg(args, "command"), stringArg(args, "cwd"));
     default:
       return "";
   }

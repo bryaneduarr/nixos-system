@@ -1,33 +1,34 @@
 import { matchesKey } from "@earendil-works/pi-tui";
 import {
-  KEY_CTRL_C,
-  KEY_DOWN,
-  KEY_ESCAPE,
-  KEY_J,
-  KEY_K,
-  KEY_TAB,
-  KEY_UP,
-} from "../../constants/prompts/keys.constant.ts";
+  COLLECTION_BY_KEY,
+  PROMPT_BROWSER_KEY_HINT,
+  TURN_BROWSER_KEY_HINT,
+} from "../../constants/prompts/collection.constant.ts";
+import { KEY_CTRL_C, KEY_ENTER, KEY_ESCAPE, KEY_TAB } from "../../constants/prompts/keys.constant.ts";
 import { applyDetailKey } from "../../services/prompts/apply-detail-key.service.ts";
-import { computeBrowserLayout } from "../../services/prompts/layout/compute-browser-layout.service.ts";
+import { applyListKey } from "../../services/prompts/apply-list-key.service.ts";
+import { choosePromptTurn } from "../../services/prompts/choose-prompt-turn.service.ts";
+import { copyPromptText } from "../../services/prompts/copy-prompt-text.service.ts";
 import { computeScrollOffset } from "../../services/prompts/layout/compute-scroll-offset.service.ts";
 import { createDisplayRowCache } from "../../services/prompts/layout/create-display-row-cache.service.ts";
 import { cursorRow } from "../../services/prompts/layout/cursor-row.service.ts";
 import { renderBrowserLines } from "../../services/prompts/layout/render-browser-lines.service.ts";
-import { summarizePrompt } from "../../services/prompts/layout/summarize-prompt.service.ts";
+import { summarizeCollections } from "../../services/prompts/layout/summarize-collections.service.ts";
 import { createPromptNavigation } from "../../services/prompts/navigation/create-prompt-navigation.service.ts";
-import { isSameSelectionAnchor } from "../../services/prompts/navigation/is-same-selection-anchor.service.ts";
+import { readSplitViewGeometry } from "../../services/split-view/layout/read-split-view-geometry.service.ts";
 import type { ClipboardWriter } from "../../types/prompts/clipboard-writer.interface.ts";
 import type { DisplayRow } from "../../types/prompts/display-row.interface.ts";
 import type { PromptBrowserHost } from "../../types/prompts/prompt-browser-host.interface.ts";
+import type { PromptCollectionName, PromptCollections } from "../../types/prompts/prompt-collections.interface.ts";
 import type { PromptFocus } from "../../types/prompts/prompt-focus.interface.ts";
-import type { PromptItem } from "../../types/prompts/prompt-item.interface.ts";
 import type { PromptNavigation } from "../../types/prompts/prompt-navigation.interface.ts";
 import type { PromptPanel } from "../../types/prompts/prompt-panel.interface.ts";
+import type { PromptSelection } from "../../types/prompts/prompt-selection.interface.ts";
 import type { PromptTheme } from "../../types/prompts/prompt-theme.interface.ts";
 
 export class PromptBrowser implements PromptPanel {
   focus: PromptFocus = "detail";
+  collection: PromptCollectionName;
   selected = 0;
   navigation: PromptNavigation;
   private offset = 0;
@@ -36,18 +37,20 @@ export class PromptBrowser implements PromptPanel {
   private status = "";
   private closed = false;
   private readonly rowCache = createDisplayRowCache();
-  private readonly summaries: string[];
+  private readonly summaries: Readonly<Record<PromptCollectionName, readonly string[]>>;
 
   constructor(
-    private readonly prompts: readonly PromptItem[],
+    private readonly collections: PromptCollections,
     private readonly host: PromptBrowserHost,
     private readonly theme: PromptTheme,
     private readonly done: () => void,
     private readonly clipboard: ClipboardWriter,
+    private readonly selection: PromptSelection,
   ) {
-    const firstPrompt = prompts.at(0);
-    this.navigation = createPromptNavigation(firstPrompt === undefined ? "" : firstPrompt.text);
-    this.summaries = prompts.map(summarizePrompt);
+    this.collection = collections.prompts.length > 0 ? "prompts" : "outputs";
+    const firstItem = collections[this.collection].at(0);
+    this.navigation = createPromptNavigation(firstItem === undefined ? "" : firstItem.text);
+    this.summaries = summarizeCollections(collections);
   }
 
   invalidate(): void {
@@ -56,23 +59,25 @@ export class PromptBrowser implements PromptPanel {
 
   render(width: number): string[] {
     const columns = Math.max(0, Math.floor(width));
-    const layout = computeBrowserLayout(columns, this.host.terminal.rows);
-    this.detailWidth = layout.detailWidth;
-    this.pageSize = layout.pageSize;
+    const geometry = readSplitViewGeometry(columns, this.host.terminal.rows);
+    this.detailWidth = geometry.rightWidth;
+    this.pageSize = geometry.detailHeight;
     const rows = this.rowCache.rows(this.navigation.units, this.detailWidth);
     this.scrollToCursor(rows);
     return renderBrowserLines({
       columns,
-      layout,
+      geometry,
       rows,
       offset: this.offset,
       navigation: this.navigation,
+      collection: this.collection,
       focus: this.focus,
       selected: this.selected,
-      summaries: this.summaries,
+      summaries: this.summaries[this.collection],
+      keyHint: this.selection.kind === "choose-turn" ? TURN_BROWSER_KEY_HINT : PROMPT_BROWSER_KEY_HINT,
       status: this.status,
       theme: this.theme,
-    });
+    }).slice(0, this.host.terminal.rows);
   }
 
   private scrollToCursor(rows: readonly DisplayRow[]): void {
@@ -81,39 +86,30 @@ export class PromptBrowser implements PromptPanel {
   }
 
   private select(index: number): void {
-    const next = Math.max(0, Math.min(this.prompts.length - 1, index));
-    if (next === this.selected) return;
-    const prompt = this.prompts[next];
-    if (prompt === undefined) return;
-    this.selected = next;
-    this.navigation = createPromptNavigation(prompt.text);
+    const next = Math.max(0, Math.min(this.collections[this.collection].length - 1, index));
+    if (next !== this.selected) this.open(this.collection, next);
+  }
+
+  private open(collection: PromptCollectionName, index: number): void {
+    const item = this.collections[collection][index];
+    this.collection = collection;
+    this.selected = index;
+    this.navigation = createPromptNavigation(item === undefined ? "" : item.text);
     this.offset = 0;
     this.status = "";
     this.rowCache.clear();
   }
 
   private async copy(text: string): Promise<void> {
-    const navigation = this.navigation;
-    const anchor = navigation.anchor;
-    const cursor = navigation.cursor;
-    try {
-      await this.clipboard(text);
-      if (this.closed) return;
-      this.status = `Copied ${text.length} characters`;
-      const isSelectionUnchangedSinceCopy =
-        this.navigation === navigation &&
-        isSameSelectionAnchor(navigation.anchor, anchor) &&
-        navigation.cursor === cursor;
-      if (isSelectionUnchangedSinceCopy) navigation.anchor = { found: false };
-    } catch {
-      if (this.closed) return;
-      this.status = "Copy failed";
-    }
+    const status = await copyPromptText({ text, clipboard: this.clipboard, currentNavigation: () => this.navigation });
+    if (this.closed) return;
+    this.status = status;
     this.host.requestRender();
   }
 
   handleInput(sequence: string): void {
     const isEscapeWithoutSelection = matchesKey(sequence, KEY_ESCAPE) && !this.navigation.anchor.found;
+    const shownCollection = COLLECTION_BY_KEY[sequence];
     if (matchesKey(sequence, KEY_CTRL_C) || isEscapeWithoutSelection) {
       this.closed = true;
       this.done();
@@ -122,6 +118,11 @@ export class PromptBrowser implements PromptPanel {
     if (matchesKey(sequence, KEY_ESCAPE)) {
       this.navigation.anchor = { found: false };
       this.navigation.pending = "";
+    } else if (matchesKey(sequence, KEY_ENTER)) {
+      this.chooseSelectedTurn();
+      return;
+    } else if (shownCollection !== undefined) {
+      this.open(shownCollection, 0);
     } else if (matchesKey(sequence, KEY_TAB)) {
       this.focus = this.focus === "list" ? "detail" : "list";
       this.navigation.pending = "";
@@ -131,20 +132,19 @@ export class PromptBrowser implements PromptPanel {
     this.host.requestRender();
   }
 
+  private chooseSelectedTurn(): void {
+    const request = { selection: this.selection, items: this.collections[this.collection], selected: this.selected };
+    if (choosePromptTurn({ ...request, done: this.done })) this.closed = true;
+  }
+
   private handleFocusedKey(sequence: string): boolean {
-    if (this.focus === "list") return this.handleListKey(sequence);
+    if (this.focus === "list")
+      return applyListKey(sequence, { selected: this.selected, select: (index) => this.select(index) });
     return applyDetailKey(sequence, {
       navigation: this.navigation,
       rows: () => this.rowCache.rows(this.navigation.units, this.detailWidth),
       pageSize: this.pageSize,
       copy: (text) => void this.copy(text),
     });
-  }
-
-  private handleListKey(sequence: string): boolean {
-    if (matchesKey(sequence, KEY_J) || matchesKey(sequence, KEY_DOWN)) this.select(this.selected + 1);
-    else if (matchesKey(sequence, KEY_K) || matchesKey(sequence, KEY_UP)) this.select(this.selected - 1);
-    else return false;
-    return true;
   }
 }

@@ -1,7 +1,7 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import type { ActivityStatus } from "../../../types/activity/activity-status.interface.ts";
 
-export function statusGlyph(status: ActivityStatus, theme: Theme): string {
+export function statusGlyph(status: ActivityStatus, theme: Pick<Theme, "fg">): string {
   switch (status) {
     case "running":
       return theme.fg("warning", "●");

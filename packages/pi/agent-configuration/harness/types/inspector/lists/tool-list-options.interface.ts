@@ -13,8 +13,8 @@ export interface ToolListOptions {
   readonly scroll: number;
   /** Index of the selected row. */
   readonly selected: number;
-  /** Ids of subagent tasks whose child calls are listed. */
+  /** Ids of subagent tasks whose child calls are shown. */
   readonly expandedTasks: ReadonlySet<string>;
   /** Theme used for colors and emphasis. */
-  readonly theme: Theme;
+  readonly theme: Pick<Theme, "fg" | "bg">;
 }

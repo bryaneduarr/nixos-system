@@ -8,8 +8,6 @@ export interface SummaryHeaderParts {
   readonly trailing: string;
   /** Spinner or status mark followed by the latest activity text. */
   readonly activity: string;
-  /** Whether the agent is working. */
-  readonly working: boolean;
   /** Whether the header and its footer use two lines. */
   readonly twoLines: boolean;
 }

@@ -1,7 +1,8 @@
+import type { BackendToolExecutor } from "../backends/backend-tool-executor.interface.ts";
 import type { ToolCancellation } from "../process/tool-cancellation.interface.ts";
 
 /** Strategy of a search. */
-type SearchKind = "auto" | "text" | "file" | "symbol" | "structural" | "history";
+type SearchKind = "auto" | "text" | "file" | "symbol" | "references" | "structural" | "history";
 
 /** Where a search looks: the whole workspace or one path. */
 export type SearchScope = PathSearchScope | WorkspaceSearchScope;
@@ -34,4 +35,6 @@ export interface SearchRequest {
   readonly limit: number;
   /** Whether the caller can abort the search. */
   readonly cancellation: ToolCancellation;
+  /** Runs language-server, fff, and tree-sitter tools that answer before the built-in search. */
+  readonly backend: BackendToolExecutor;
 }

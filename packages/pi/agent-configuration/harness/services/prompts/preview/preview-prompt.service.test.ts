@@ -21,35 +21,47 @@ const markdownTheme: MarkdownTheme = {
   underline: identity,
 };
 
-test("short prompts retain their Markdown and long prompts have a bounded preview", () => {
+function renderPreview(text: string, width: number): string[] {
+  const component = new Markdown(text, 1, 0, markdownTheme, undefined, {
+    preserveOrderedListMarkers: true,
+    preserveBackslashEscapes: true,
+    transform: (markdown, availableWidth) => previewPrompt(markdown, availableWidth),
+  });
+  return component.render(width).map((line) => line.trimEnd());
+}
+
+test("short prompts are left unchanged", () => {
   expect(previewPrompt("**Hello**", 80)).toBe("**Hello**");
+  expect(previewPrompt("first\nsecond\nthird", 80)).toBe("first\nsecond\nthird");
+});
+
+test("long prompts show three plain lines ending in dots", () => {
   const text = "first\nsecond\nthird\nfourth";
-  const preview = previewPrompt(text, 80);
-  expect(preview).toContain("third");
-  expect(preview).not.toContain("fourth");
-  expect(preview).toContain("... Ctrl+Alt+U");
-  expect(text).toBe("first\nsecond\nthird\nfourth");
+  expect(previewPrompt(text, 80)).toBe("first\nsecond\nthird...");
+  expect(renderPreview(text, 80).filter((line) => line.trim() !== "")).toEqual([" first", " second", " third..."]);
   expect(previewPrompt("word ".repeat(10000), 80).length).toBeLessThan(400);
 });
 
-test("previews account for wrapping, Unicode, narrow widths, and code fences", () => {
-  for (const width of [5, 20, 80]) {
-    const preview = previewPrompt("界🙂 ".repeat(100), width);
-    const lines = preview.split("\n").slice(1, 4);
-    for (const line of lines) expect(visibleWidth(line)).toBeLessThanOrEqual(Math.max(2, width - 4));
-  }
-  expect(previewPrompt("```\na\nb\nc\n```", 80)).toStartWith("````\n");
+test("punctuation in a truncated prompt is shown without backslashes", () => {
+  const text =
+    "This is a test prompt on what I\n\nWant to do...\n\nCtrl+Alt+U: For full prompt. | Use /prompts\nfourth";
+  const rendered = renderPreview(text, 80).join("\n");
+  expect(rendered).toContain("Want to do");
+  expect(rendered).not.toContain("\\");
 });
 
-test("real Markdown rendering keeps previews bounded and the hint outside code fences", () => {
-  const text = `\`\`\`\n${"界🙂 word ".repeat(1000)}\n\`\`\`\nlast hidden line`;
-  const component = new Markdown(text, 1, 1, markdownTheme, undefined, {
-    transform: (markdown, width) => previewPrompt(markdown, width),
-  });
+test("code and Markdown syntax in a truncated prompt stays plain text", () => {
+  const lines = renderPreview("```\n# not a heading\n- not a list\n```\nlast hidden line", 80);
+  expect(lines.join("\n")).toContain("```");
+  expect(lines.join("\n")).toContain("# not a heading");
+  expect(lines.join("\n")).toContain("- not a list...");
+  expect(lines.join("\n")).not.toContain("\\");
+  expect(lines.join("\n")).not.toContain("last hidden line");
+});
 
-  for (const width of [10, 40, 80]) {
-    component.invalidate();
-    const lines = component.render(width);
+test("previews stay within the width for wide characters and narrow terminals", () => {
+  for (const width of [10, 20, 40, 80]) {
+    const lines = renderPreview(`${"界🙂 word ".repeat(1000)}\nlast hidden line`, width);
     expect(lines.join("\n")).toContain("...");
     expect(lines.join("\n")).not.toContain("last hidden line");
     expect(lines.length).toBeLessThan(25);

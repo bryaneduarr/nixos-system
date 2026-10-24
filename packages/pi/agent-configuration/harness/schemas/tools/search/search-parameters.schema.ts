@@ -8,8 +8,9 @@ export const SearchParamsSchema = Type.Object({
   }),
   /** Search strategy. */
   kind: Type.Optional(
-    StringEnum(["auto", "text", "file", "symbol", "structural", "history"] as const, {
-      description: "Search strategy. Defaults to auto, which combines text and filename search.",
+    StringEnum(["auto", "text", "file", "symbol", "references", "structural", "history"] as const, {
+      description:
+        "Search strategy. Defaults to auto, which combines text and filename search. file uses fuzzy fff ranking, symbol asks the language server and tree-sitter for definitions, references lists callers.",
     }),
   ),
   /** Directory or file the search is limited to. */

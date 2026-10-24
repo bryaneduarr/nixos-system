@@ -3,10 +3,18 @@ import type { ValueState } from "../../../types/activity/value-state.interface.t
 import type { ResolveTaskModelInput } from "../../../types/subagents/tasks/resolve-task-model-input.interface.ts";
 import type { TaskModel } from "../../../types/subagents/tasks/task-model.interface.ts";
 
+function unknownModelHint(runtime: ModelRuntime, provider: string): string {
+  const providerModels = runtime.getModels(provider).map((knownModel) => `${provider}/${knownModel.id}`);
+  if (providerModels.length > 0) return `Models for ${provider}: ${providerModels.join(", ")}`;
+
+  const availableProviders = new Set(runtime.getAvailableSnapshot().map((knownModel) => knownModel.provider));
+  return `Use provider/model with one of these providers: ${[...availableProviders].join(", ")}`;
+}
+
 function requestedModelOrThrow(runtime: ModelRuntime, requestedModel: string): TaskModel {
   const [provider = "", ...modelParts] = requestedModel.split("/");
   const model = runtime.getModel(provider, modelParts.join("/"));
-  if (!model) throw new Error(`Unknown model: ${requestedModel}`);
+  if (!model) throw new Error(`Unknown model: ${requestedModel}. ${unknownModelHint(runtime, provider)}`);
 
   return model;
 }

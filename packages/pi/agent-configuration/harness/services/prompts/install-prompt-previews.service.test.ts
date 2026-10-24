@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import type { PromptContext } from "../../types/prompts/prompt-context.interface.ts";
-import type { PromptExtensionApi, PromptMarkdownContext } from "../../types/prompts/prompt-extension-api.interface.ts";
+import type { PromptExtensionApi } from "../../types/prompts/prompt-extension-api.interface.ts";
 import type { PromptPanel } from "../../types/prompts/prompt-panel.interface.ts";
 import type { PromptTheme } from "../../types/prompts/prompt-theme.interface.ts";
 import type { PromptBrowserFactory, PromptOverlayOptions } from "../../types/prompts/prompt-viewer-ui.interface.ts";
@@ -10,6 +10,7 @@ import { installPromptPreviews } from "./install-prompt-previews.service.ts";
 const plainTheme: PromptTheme = {
   fg: (_color, text) => text,
   bg: (_color, text) => text,
+  bold: (text) => text,
 };
 
 const timestamp = "2026-01-01T00:00:00.000Z";
@@ -20,8 +21,7 @@ function requireElement<T>(elements: readonly T[], index: number, message: strin
   return element;
 }
 
-test("installation transforms only user display and reads original branch text", async () => {
-  const transforms: ((markdown: string, context: PromptMarkdownContext) => string)[] = [];
+test("installation opens the prompt viewer and browser with original branch text", async () => {
   const shortcuts: ((ctx: PromptContext) => Promise<void>)[] = [];
   const commands: ((args: string, ctx: PromptContext) => Promise<void>)[] = [];
   const panels: PromptPanel[] = [];
@@ -62,6 +62,7 @@ test("installation transforms only user display and reads original branch text",
         notifications.push(message);
       },
       getEditorText: () => "",
+      setWidget: () => {},
       custom: <T>(factory: PromptBrowserFactory<T>, options: PromptOverlayOptions) => {
         overlays.push(options);
         return new Promise<T>((resolve) => {
@@ -71,12 +72,8 @@ test("installation transforms only user display and reads original branch text",
     },
   };
   const pi: PromptExtensionApi = {
-    registerMarkdownTransformer: (transform) => {
-      transforms.push(transform);
-    },
     registerShortcut: (key, options) => {
-      expect(key).toBe("ctrl+alt+u");
-      shortcuts.push(options.handler);
+      if (key === "ctrl+alt+u") shortcuts.push(options.handler);
     },
     registerCommand: (name, options) => {
       expect(name).toBe("prompts");
@@ -84,14 +81,9 @@ test("installation transforms only user display and reads original branch text",
     },
   };
   installPromptPreviews(pi);
-  const transform = requireElement(transforms, 0, "transformer not registered");
   const shortcut = requireElement(shortcuts, 0, "shortcut not registered");
   const command = requireElement(commands, 0, "command not registered");
 
-  for (const messageType of ["assistant", "assistant-thinking"]) {
-    expect(transform(latest, { messageType, availableWidth: 80 })).toBe(latest);
-  }
-  expect(transform(latest, { messageType: "user", availableWidth: 80 })).not.toBe(latest);
   const viewing = shortcut(ctx);
   expect(overlays).toHaveLength(1);
   await shortcut(ctx);
@@ -112,7 +104,7 @@ test("installation transforms only user display and reads original branch text",
   await choosing;
   entries = [];
   await shortcut(ctx);
-  expect(notifications).toEqual(["No prompts or draft in this branch."]);
+  expect(notifications).toEqual(["No prompts, draft, or agent outputs in this branch."]);
   mode = "rpc";
   await shortcut(ctx);
   expect(notifications).toHaveLength(1);

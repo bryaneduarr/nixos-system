@@ -2,8 +2,10 @@ import type { ToolCancellation } from "../process/tool-cancellation.interface.ts
 
 /** A shell command to run with its working directory, timeout, and cancellation. */
 export interface RunRequest {
-  /** Directory the command starts in; full output is stored under it. */
+  /** Session directory; full output is stored under it. */
   readonly cwd: string;
+  /** Absolute directory the command starts in. */
+  readonly directory: string;
   /** Shell command text. */
   readonly command: string;
   /** Milliseconds before the command is killed. */
