@@ -2,7 +2,9 @@ import { CODEMODE_BOX_TITLE } from "../../../../constants/tools/active-tools/cod
 import type { CodemodePresentationInput } from "../../../../types/tool-rendering/codemode/codemode-presentation-input.interface.ts";
 import type { HarnessPresentation } from "../../../../types/tool-rendering/presentation/harness-presentation.interface.ts";
 import { codemodeCallRows } from "./codemode-call-rows.service.ts";
-import { codemodeErrorSummary, codemodeOutputRows, codemodeSuccessSummary } from "./codemode-outcome.service.ts";
+import { codemodeErrorSummary } from "./codemode-error-summary.service.ts";
+import { codemodeOutputRows } from "./codemode-output-rows.service.ts";
+import { codemodeSuccessSummary } from "./codemode-success-summary.service.ts";
 import { codemodeTarget } from "./codemode-target.service.ts";
 
 export function codemodePresentation(input: CodemodePresentationInput): HarnessPresentation {

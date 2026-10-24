@@ -15,17 +15,3 @@ export interface RendererContext {
   /** Whether the result view is expanded. */
   readonly expanded: boolean;
 }
-
-/** Tool result passed to a harness renderer; blocks are validated when read. */
-export interface RendererResult {
-  /** Raw content blocks of the tool result. */
-  readonly content: readonly unknown[];
-}
-
-/** Display options Pi passes with a tool result. */
-export interface RendererOptions {
-  /** Whether the result view is expanded. */
-  readonly expanded: boolean;
-  /** Whether this is a partial or streaming result. */
-  readonly isPartial: boolean;
-}

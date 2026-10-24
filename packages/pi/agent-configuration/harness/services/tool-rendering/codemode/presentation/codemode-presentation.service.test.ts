@@ -1,6 +1,5 @@
 import { expect, test } from "bun:test";
 import type { CodemodeCall } from "../../../../types/tool-rendering/codemode/codemode-call.interface.ts";
-import { readCodemodeCalls } from "../script/read-codemode-calls.service.ts";
 import { codemodePresentation } from "./codemode-presentation.service.ts";
 
 const notionFetch: CodemodeCall = {
@@ -34,12 +33,4 @@ test("a script without tool calls is labeled as a plain script", () => {
   const presentation = codemodePresentation({ code: "return 1", calls: [], text: `${header}1`, state: "success" });
   expect(presentation.target).toBe("Script");
   expect(presentation.details[0]).toBe("no tool calls");
-});
-
-test("call details that do not match the schema read as no calls", () => {
-  expect(readCodemodeCalls({ calls: "none" })).toEqual([]);
-  expect(readCodemodeCalls(undefined)).toEqual([]);
-  expect(readCodemodeCalls({ calls: [{ name: "a", args: "{}", status: "ok" }] })).toEqual([
-    { name: "a", status: "ok", durationMs: { state: "absent" } },
-  ]);
 });

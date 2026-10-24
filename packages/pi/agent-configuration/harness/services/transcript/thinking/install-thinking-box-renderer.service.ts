@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { TUI_MODE } from "../../../constants/tool-rendering/tui-mode.constant.ts";
 import { THINKING_BOX_RENDERER_KEY } from "../../../constants/transcript/thinking-box.constant.ts";
+import { TUI_MODE } from "../../../constants/ui-mode/tui-mode.constant.ts";
 import { renderMessageCard } from "../card/render-message-card.service.ts";
 
 export function installThinkingBoxRenderer(pi: ExtensionAPI): void {

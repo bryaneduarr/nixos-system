@@ -23,8 +23,8 @@ import { readJumpToLatestHint } from "../../services/activity/summary/read-jump-
 import { readLatestActivityText } from "../../services/activity/summary/read-latest-activity-text.service.ts";
 import { readSpinnerFrame } from "../../services/activity/summary/read-spinner-frame.service.ts";
 import { wrapFooterParts } from "../../services/activity/summary/wrap-footer-parts.service.ts";
+import { harnessToolTarget } from "../../services/tool-rendering/labels/harness-tool-target.service.ts";
 import { toolLabel } from "../../services/tool-rendering/labels/tool-label.service.ts";
-import { toolTarget } from "../../services/tool-rendering/labels/tool-target.service.ts";
 import { isHarnessTool } from "../../services/tools/active-tools/is-harness-tool.service.ts";
 import { activitySummaryState } from "../../stores/activity/activity-summary-state.store.ts";
 import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
@@ -126,7 +126,7 @@ class ActivitySummaryComponent implements Component {
   private runningToolLines(runningTools: readonly ToolActivity[], frame: number, width: number): string[] {
     const labelWidth = Math.max(1, width - FOOTER_RESERVED_WIDTH);
     return runningTools.map((tool) => {
-      const target = isHarnessTool(tool.toolName) ? toolTarget(tool.toolName, tool.args) : "";
+      const target = isHarnessTool(tool.toolName) ? harnessToolTarget(tool.toolName, tool.args) : "";
       const targetSuffix = target ? `${DOT_SEPARATOR}${target}` : "";
       const label = `${readSpinnerFrame(frame)} ${toolLabel(tool.toolName)}${targetSuffix}`;
       const coloredLabel = this.theme.fg(THEME_ACCENT, truncateToWidth(label, labelWidth, ELLIPSIS, true));

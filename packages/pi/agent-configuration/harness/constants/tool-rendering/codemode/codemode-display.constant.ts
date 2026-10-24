@@ -1,4 +1,4 @@
-import type { CodemodeCallStatus } from "../../types/tool-rendering/codemode/codemode-call.interface.ts";
+import type { CodemodeCallStatus } from "../../../types/tool-rendering/codemode/codemode-call.interface.ts";
 
 export const CODEMODE_TARGET_FALLBACK = "Script";
 export const CODEMODE_DEFAULT_VERB = "Running";

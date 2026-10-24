@@ -1,7 +1,7 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { THEME_MUTED } from "../../constants/split-view/theme-color.constant.ts";
-import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/elapsed-label.constant.ts";
+import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/details/elapsed-label.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
 import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
@@ -53,7 +53,7 @@ export class ToolBox implements Component {
 
     const lookup = readToolActivity(this.content.toolCall);
     const isRunning = lookup.found && lookup.entry.status === "running";
-    if (this.cache.state === "rendered" && this.cache.width === width && !isRunning) return this.cache.lines;
+    if (this.cache.state === "rendered" && this.cache.width === width && !isRunning) return [...this.cache.lines];
 
     const rendered = boxLines(width, this.content.title, this.linesWithElapsed(lookup, isRunning)).map((line) =>
       this.theme.fg(this.content.color, line),

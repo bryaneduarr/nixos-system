@@ -4,12 +4,12 @@ import {
   BOX_HORIZONTAL_RULE,
   BOX_TITLE_PREFIX,
   BOX_VERTICAL_RULE,
-} from "../../../constants/tool-rendering/box-frame.constant.ts";
+} from "../../../constants/tool-rendering/box/box-frame.constant.ts";
 import {
   BOX_CORNER_WIDTH,
   BOX_SIDE_CHROME_WIDTH,
   MIN_RENDERABLE_BOX_WIDTH,
-} from "../../../constants/tool-rendering/box-width.constant.ts";
+} from "../../../constants/tool-rendering/box/box-width.constant.ts";
 
 export function renderBox(title: string, lines: readonly string[], width: number): string[] {
   if (width < MIN_RENDERABLE_BOX_WIDTH) {

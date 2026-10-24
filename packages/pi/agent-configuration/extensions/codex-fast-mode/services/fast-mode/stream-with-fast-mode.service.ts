@@ -1,9 +1,8 @@
-import { type Api, clampThinkingLevel, type Model, type TranscriptContext } from "@earendil-works/pi-ai";
+import { type Api, clampThinkingLevel, type Model } from "@earendil-works/pi-ai";
 import { stream, streamSimple } from "@earendil-works/pi-ai/api/openai-codex-responses";
 import { buildBaseOptions } from "@earendil-works/pi-ai/api/simple-options";
 import { CODEX_RESPONSES_API, PRIORITY_SERVICE_TIER } from "../../constants/codex/codex.constant.ts";
-
-type StreamOptions = Parameters<typeof streamSimple>[2];
+import type { FastModeStreamRequest } from "../../types/fast-mode/fast-mode-stream-request.interface.ts";
 
 function isCodexResponsesModel(model: Model<Api>): model is Model<"openai-codex-responses"> {
   return model.api === CODEX_RESPONSES_API;
@@ -13,12 +12,7 @@ function missingApiKeyError(provider: string): Error {
   return new Error(`No API key for provider: ${provider}`);
 }
 
-export function streamWithFastMode(
-  model: Model<Api>,
-  context: TranscriptContext,
-  options: StreamOptions,
-  isFastModeActive: boolean,
-) {
+export function streamWithFastMode({ model, context, options, isFastModeActive }: FastModeStreamRequest) {
   if (!isCodexResponsesModel(model)) throw new Error(`Expected Codex Responses API, received ${model.api}`);
 
   if (!isFastModeActive) return streamSimple(model, context, options);

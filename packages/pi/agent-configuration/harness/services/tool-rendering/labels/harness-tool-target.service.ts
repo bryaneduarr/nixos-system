@@ -1,4 +1,10 @@
 import { basename, resolve } from "node:path";
+import {
+  EDIT_TOOL_NAME,
+  READ_TOOL_NAME,
+  RUN_TOOL_NAME,
+  SEARCH_TOOL_NAME,
+} from "../../../constants/tools/active-tools/harness-tools.constant.ts";
 import type { HarnessTool } from "../../../types/tools/active-tools/harness-tool.interface.ts";
 import { splitLeadingCd } from "../../tools/run/split-leading-cd.service.ts";
 import { oneLine } from "../text/one-line.service.ts";
@@ -17,23 +23,23 @@ function runTarget(command: string, cwd: string): string {
   return `${oneLine(shownCommand)}${directoryLabel}`;
 }
 
-export function toolTarget(tool: HarnessTool, args: Record<string, unknown>): string {
+export function harnessToolTarget(tool: HarnessTool, args: Record<string, unknown>): string {
   switch (tool) {
-    case "search": {
+    case SEARCH_TOOL_NAME: {
       const query = oneLine(stringArg(args, "query"));
       const kind = stringArg(args, "kind");
       return kind && kind !== "auto" ? `${query} (${kind})` : query;
     }
-    case "read":
+    case READ_TOOL_NAME:
       return oneLine(stringArg(args, "path"));
-    case "edit": {
+    case EDIT_TOOL_NAME: {
       const from = stringArg(args, "from") || stringArg(args, "path");
       const to = stringArg(args, "to");
       return to ? `${from} -> ${to}` : oneLine(from);
     }
-    case "run":
+    case RUN_TOOL_NAME:
       return runTarget(stringArg(args, "command"), stringArg(args, "cwd"));
     default:
-      return "";
+      return tool satisfies never;
   }
 }

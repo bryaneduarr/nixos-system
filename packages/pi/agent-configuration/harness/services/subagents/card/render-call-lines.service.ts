@@ -6,7 +6,10 @@ import {
   CARD_TOOL_TARGET_FIELDS,
 } from "../../../constants/subagents/card/card.constant.ts";
 import { MILLISECONDS_PER_SECOND } from "../../../constants/time/time-unit.constant.ts";
-import { FAILED_LABEL, RUNNING_LABEL } from "../../../constants/tool-rendering/presentation-label.constant.ts";
+import {
+  FAILED_LABEL,
+  PRESENTATION_RUNNING_LABEL,
+} from "../../../constants/tool-rendering/presentation/presentation-label.constant.ts";
 import type { SubToolActivity } from "../../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
 import type { SubagentCardTheme } from "../../../types/subagents/card/subagent-card-theme.interface.ts";
 import type { TaskStatus } from "../../../types/subagents/tasks/progress/task-status.interface.ts";
@@ -30,7 +33,7 @@ function toolTarget(call: SubToolActivity): string {
 }
 
 function toolStatusLabel(status: SubToolActivity["status"]): string {
-  if (status === "running") return RUNNING_LABEL;
+  if (status === "running") return PRESENTATION_RUNNING_LABEL;
   if (status === "error") return FAILED_LABEL;
 
   return CARD_DONE_LABEL;

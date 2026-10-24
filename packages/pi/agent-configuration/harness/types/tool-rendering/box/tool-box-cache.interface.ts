@@ -14,5 +14,5 @@ interface RenderedToolBoxCache {
   /** Terminal width the lines were rendered at. */
   readonly width: number;
   /** Rendered box lines. */
-  readonly lines: string[];
+  readonly lines: readonly string[];
 }

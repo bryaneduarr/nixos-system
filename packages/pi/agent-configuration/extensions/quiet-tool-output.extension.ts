@@ -16,6 +16,18 @@ const UNSAFE_FILE_NAME_CHARACTERS = /[^a-zA-Z0-9_-]/g;
 const UNSAFE_TIMESTAMP_CHARACTERS = /[:.]/g;
 const SHORTENED_PREVIEW_RESERVED_CHARACTERS = 24;
 
+/** A tool output to write to a file, with the call that produced it. */
+interface FullOutput {
+  /** Working directory the output folder belongs to. */
+  readonly cwd: string;
+  /** Name of the tool that produced the output. */
+  readonly toolName: string;
+  /** Identifier of the tool call. */
+  readonly toolCallId: string;
+  /** Full text of the output. */
+  readonly output: string;
+}
+
 /** Result of writing the full output of a tool call to a file. */
 type SavedOutput =
   /** The full output was written to the file at the relative path. */
@@ -64,7 +76,7 @@ function toSafeFileNamePart(value: string): string {
   return value.replace(UNSAFE_FILE_NAME_CHARACTERS, "-");
 }
 
-async function saveFullOutput(cwd: string, toolName: string, toolCallId: string, output: string): Promise<SavedOutput> {
+async function saveFullOutput({ cwd, toolName, toolCallId, output }: FullOutput): Promise<SavedOutput> {
   const timestamp = new Date().toISOString().replace(UNSAFE_TIMESTAMP_CHARACTERS, "-");
   const fileName = `${timestamp}-${toSafeFileNamePart(toolName)}-${toSafeFileNamePart(toolCallId)}.txt`;
   const artifactDirectory = join(cwd, CONFIG_DIR_NAME, "tool-output");
@@ -89,7 +101,12 @@ export default function quietToolOutputExtension(pi: ExtensionAPI): void {
       event.isError ? ERROR_HEAD_LINES : HEAD_LINES,
       event.isError ? ERROR_TAIL_LINES : TAIL_LINES,
     );
-    const saved = await saveFullOutput(context.cwd, event.toolName, event.toolCallId, fullOutput);
+    const saved = await saveFullOutput({
+      cwd: context.cwd,
+      toolName: event.toolName,
+      toolCallId: event.toolCallId,
+      output: fullOutput,
+    });
     if (!saved.saved) {
       return {
         content: [{ type: "text", text: `${preview}\n\nFull output could not be saved: ${saved.message}` }],

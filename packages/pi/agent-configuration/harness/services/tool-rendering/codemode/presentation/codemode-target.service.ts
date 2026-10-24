@@ -3,7 +3,7 @@ import {
   CODEMODE_TARGET_FALLBACK,
   CODEMODE_VERBS,
   MAX_CODEMODE_TARGET_NAMES,
-} from "../../../../constants/tool-rendering/codemode-display.constant.ts";
+} from "../../../../constants/tool-rendering/codemode/codemode-display.constant.ts";
 import type { CodemodePresentationInput } from "../../../../types/tool-rendering/codemode/codemode-presentation-input.interface.ts";
 import { readScriptToolNames } from "../script/read-script-tool-names.service.ts";
 import { displayToolName } from "./display-tool-name.service.ts";
