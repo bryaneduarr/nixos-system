@@ -5,7 +5,7 @@ import type { InspectorPage } from "../../../types/inspector/navigation/inspecto
 const PAGE_BY_KEY: Record<string, InspectorPage> = {
   "1": "tools",
   "2": "subagents",
-  "3": "messages",
+  "3": "history",
 };
 
 export function handleInspectorKey(data: string, inspector: InspectorInput): void {
@@ -21,6 +21,11 @@ export function handleInspectorKey(data: string, inspector: InspectorInput): voi
   }
   if (matchesKey(data, "tab")) {
     inspector.switchFocus();
+    return;
+  }
+  const canOpenSubagent = inspector.page === "subagents" || inspector.page === "tools";
+  if (matchesKey(data, "enter") && canOpenSubagent) {
+    inspector.openSubagent();
     return;
   }
   const isArrowKey = matchesKey(data, "left") || matchesKey(data, "right");
@@ -48,15 +53,25 @@ function handleHorizontalKey(data: string, inspector: InspectorInput): void {
     inspector.openSubagent();
     return;
   }
+  const isLeavingSubagent = inspector.page === "subagent" && direction === "left" && inspector.focus === "list";
+  if (isLeavingSubagent) {
+    inspector.switchPage("subagents");
+    return;
+  }
   if (inspector.page === "tools" && inspector.collapse(direction)) return;
   inspector.switchFocus();
 }
 
 function handleMovementKey(data: string, inspector: InspectorInput): void {
+  const halfPage = Math.max(1, Math.floor(inspector.pageSize() / 2));
   if (matchesKey(data, "pageDown")) {
     inspector.step(inspector.pageSize());
   } else if (matchesKey(data, "pageUp")) {
     inspector.step(-inspector.pageSize());
+  } else if (matchesKey(data, "ctrl+d")) {
+    inspector.step(halfPage);
+  } else if (matchesKey(data, "ctrl+u")) {
+    inspector.step(-halfPage);
   } else if (matchesKey(data, "down") || data === "j") {
     inspector.step(1);
   } else if (matchesKey(data, "up") || data === "k") {

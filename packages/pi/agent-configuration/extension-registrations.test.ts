@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { createRecordingExtensionApi } from "./extension-registrations.test-double.ts";
-import clearSessionExtension from "./extensions/clear-session.ts";
+import clearSessionExtension from "./extensions/clear-session.extension.ts";
 import codexFastModeExtension from "./extensions/codex-fast-mode/codex-fast-mode.extension.ts";
 import lastModelExtension from "./extensions/last-model/last-model.extension.ts";
-import quietToolOutputExtension from "./extensions/quiet-tool-output.ts";
+import quietToolOutputExtension from "./extensions/quiet-tool-output.extension.ts";
 import harnessExtension from "./harness/harness.extension.ts";
 
 const HARNESS_REGISTRATIONS = [
@@ -18,7 +18,6 @@ const HARNESS_REGISTRATIONS = [
   "event:session_start",
   "event:session_shutdown",
   "entry-renderer:harness-activity-summary",
-  "markdown-transformer:transformer",
   "event:message_start",
   "event:message_update",
   "event:message_end",
@@ -34,9 +33,23 @@ const HARNESS_REGISTRATIONS = [
   "event:session_shutdown",
   "event:session_start",
   "event:agent_start",
-  "markdown-transformer:transformer",
   "shortcut:ctrl+alt+u",
+  "shortcut:alt+t",
   "command:prompts",
+  "event:session_start",
+  "event:input",
+  "event:session_shutdown",
+  "shortcut:alt+h",
+  "markdown-transformer:transformer",
+  "event:session_start",
+  "event:session_shutdown",
+  "event:session_start",
+  "event:session_shutdown",
+  "event:session_start",
+  "event:session_shutdown",
+  "event:session_start",
+  "event:session_shutdown",
+  "tool-renderer:resolver",
   "event:session_shutdown",
   "command:exit",
   "shortcut:ctrl+alt+q",
@@ -59,6 +72,7 @@ const HARNESS_REGISTRATIONS = [
   "event:turn_start",
   "event:tool_call",
   "command:harness-status",
+  "command:session-stats",
 ];
 
 const CODEX_FAST_MODE_REGISTRATIONS = [
@@ -101,7 +115,7 @@ describe("extension entry points register their features in order", () => {
     expect(registrationsOf(clearSessionExtension)).toEqual(["command:clear"]);
   });
 
-  test("quiet tool output registers its tool events", () => {
-    expect(registrationsOf(quietToolOutputExtension)).toEqual(["event:tool_call", "event:tool_result"]);
+  test("quiet tool output registers its tool result event", () => {
+    expect(registrationsOf(quietToolOutputExtension)).toEqual(["event:tool_result"]);
   });
 });

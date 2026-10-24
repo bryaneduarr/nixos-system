@@ -35,7 +35,7 @@ The menu, pane label, and Herdr agent use `<project-name>-pi-<number-of-instance
 
 The private registry lives under `$XDG_STATE_HOME/pi/sessions/`, or `~/.local/state/pi/sessions/`. Each Herdr socket has a separate registry. Records contain process start times, session identities, project paths, and status, but no editor contents. The manager removes expired records after 15 seconds and remembers valid project directories. Print, JSON, and RPC invocations do not register. Failed startup leaves the new pane open for inspection and does not close existing panes.
 
-After a successful switch, the manager shuts down an unused session only when the manager created that session. The session must have no conversation history, editor text, queued prompts, or active work. Pi 1.1.0 inserts attachment paths into the editor, so attachments prevent cleanup. Using the configured clipboard-paste action permanently protects the process because Pi does not expose completion of asynchronous clipboard reads. Starting a conversation or a user bash command also permanently protects the process, including after `/new`. Existing Pi terminals that the manager did not create never close automatically.
+After a successful switch, the manager shuts down an unused session only when the manager created that session. The session must have no conversation history, editor text, queued prompts, or active work. Pi inserts attachment paths into the editor, so attachments prevent cleanup. Using the configured clipboard-paste action permanently protects the process because Pi does not expose completion of asynchronous clipboard reads. Starting a conversation or a user bash command also permanently protects the process, including after `/new`. Existing Pi terminals that the manager did not create never close automatically.
 
 Cleanup requests a graceful Pi shutdown. A detached helper waits for that exact process to exit and verifies that its pane contains only the original shell before closing that pane. It leaves sibling panes intact and never issues a tab-close command. A replacement process, failed switch, or unavailable process information prevents closure. The harness also sends lifecycle and session identity reports to Herdr. If Herdr rejects an agent rename while startup is pending, Pi keeps its live record and retries the rename on the next heartbeat.
 
@@ -56,7 +56,7 @@ The detached helper waits up to 60 seconds for Pi to exit, then up to 10 seconds
 
 ## Extension settings
 
-Pi uses `pi-mcp-adapter` as its sole MCP extension. The managed settings disable `builtin:mcp` and store adapter settings in `~/.pi/agent/mcp-adapter.json`. The Nix package patches the LSP adapter's host libraries into wildcard peer dependencies and removes nested copies.
+Pi uses its built-in MCP support and reads servers from `~/.pi/agent/mcp.json`; run `/mcp` to sign in to OAuth servers such as Notion. Auto-compaction starts at 300k tokens on 1M-context models. The Nix package patches the LSP adapter's host libraries into wildcard peer dependencies and removes nested copies.
 
 ## Toggle Codex fast mode
 
@@ -65,7 +65,3 @@ Select a supported `openai-codex` model, then run `/fast` to open the On/Off men
 Fast mode requests the `priority` service tier and increases usage. Pi saves your last on or off choice in `$XDG_STATE_HOME/pi/codex-fast-mode.json`, or `~/.local/state/pi/codex-fast-mode.json` when `XDG_STATE_HOME` is unset. This preference applies across new and resumed sessions. Without a saved preference, fast mode starts off or restores the active session's existing choice. It does not write to the managed `settings.json`.
 
 The extension reads supported priority models from `$CODEX_HOME/models_cache.json`, or `~/.codex/models_cache.json` when `CODEX_HOME` is unset. If the cache is unavailable, the fallback models are `gpt-5.4` and `gpt-5.5`. Restart Pi after Codex refreshes its model cache. Unsupported models use their normal service tier even when the saved fast-mode preference is on.
-
-## Session groups, planned
-
-Session groups are designed but not implemented. The [approved design](docs/session-groups/design.md) defines an on-demand main session, a coordination-only member, focused workers, and a shared task board. The [implementation plan](docs/session-groups/implementation.md) defines phased delivery and acceptance checks. The [glossary](../../../GLOSSARY.md) defines the team terminology.

@@ -2,6 +2,8 @@ _: {
   home.stateVersion = "26.05";
 
   custom = {
+    agent-chrome.enable = true;
+    antigravity-cli.enable = true;
     btop.enable = true;
 
     bun = {

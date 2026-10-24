@@ -1,7 +1,7 @@
 import { CARD_NO_TOOL_CALLS_LABEL } from "../../../constants/subagents/card.constant.ts";
 import { STARTING_TASK_LABEL } from "../../../constants/subagents/progress.constant.ts";
 import type { SubagentCardTheme } from "../../../types/subagents/card/subagent-card-theme.interface.ts";
-import type { TaskStatus } from "../../../types/subagents/tasks/task-status.interface.ts";
+import type { TaskStatus } from "../../../types/subagents/tasks/progress/task-status.interface.ts";
 
 export function renderIdleLines(theme: SubagentCardTheme, status: TaskStatus): string[] {
   const startLabel = status === "running" ? STARTING_TASK_LABEL : CARD_NO_TOOL_CALLS_LABEL;

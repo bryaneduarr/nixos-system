@@ -1,5 +1,5 @@
-import type { ToolActivityLookup } from "../../../types/activity/tool-activity-lookup.interface.ts";
-import type { ValueState } from "../../../types/activity/value-state.interface.ts";
+import type { ToolActivityLookup } from "../../../types/activity/store/tool-activity-lookup.interface.ts";
+import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
 import { activityStore } from "./shared-activity-store.service.ts";
 
 export function readToolActivity(toolCall: ValueState<string>): ToolActivityLookup {

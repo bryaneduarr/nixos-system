@@ -2,11 +2,12 @@ import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { renderActivitySummary } from "../../../components/activity/summary.component.ts";
 import { ACTIVITY_WIDGET_KEY } from "../../../constants/activity/activity-keys.constant.ts";
 import { SPINNER_TICK_MS } from "../../../constants/activity/spinner.constant.ts";
-import type { ActivityPublisher } from "../../../types/activity/activity-publisher.interface.ts";
-import type { ValueState } from "../../../types/activity/value-state.interface.ts";
+import type { ActivityPublisher } from "../../../types/activity/events/activity-publisher.interface.ts";
+import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
 import { inspectRequestStore } from "../../inspector/request/shared-inspect-request-store.service.ts";
-import { countMessageEntries } from "../history/count-message-entries.service.ts";
-import { activitySummaryState } from "../summary/shared-activity-summary-state.service.ts";
+import { countMessageEntries } from "../messages/count-message-entries.service.ts";
+import { readTranscriptScroll } from "../summary/state/read-transcript-scroll.service.ts";
+import { activitySummaryState } from "../summary/state/shared-activity-summary-state.service.ts";
 
 export function createActivityPublisher(): ActivityPublisher {
   let currentContext: ValueState<ExtensionContext> = { state: "absent" };
@@ -20,7 +21,9 @@ export function createActivityPublisher(): ActivityPublisher {
     const messageNumber = countMessageEntries();
     ctx.ui.setWidget(
       ACTIVITY_WIDGET_KEY,
-      messageNumber > 0 ? (_tui, theme) => renderActivitySummary({ messageNumber }, theme) : undefined,
+      messageNumber > 0
+        ? (tui, theme) => renderActivitySummary({ messageNumber }, theme, readTranscriptScroll(tui))
+        : undefined,
       { placement: "aboveEditor" },
     );
   };

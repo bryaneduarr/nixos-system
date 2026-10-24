@@ -4,8 +4,8 @@ import { IMPLEMENT_TASK_ROLE } from "../../../constants/subagents/roles.constant
 import type { SubagentRegistry } from "../../../types/subagents/registry/subagent-registry.interface.ts";
 import type { SubagentRun } from "../../../types/subagents/registry/subagent-run.interface.ts";
 import { resolveTaskRole } from "../roles/resolve-task-role.service.ts";
-import { createTaskProgress } from "../tasks/create-task-progress.service.ts";
-import { runTask } from "../tasks/run-task.service.ts";
+import { createTaskProgress } from "../tasks/progress/create-task-progress.service.ts";
+import { runTask } from "../tasks/run/run-task.service.ts";
 import { createImplementationQueue } from "./create-implementation-queue.service.ts";
 
 export function createSubagentRegistry(): SubagentRegistry {

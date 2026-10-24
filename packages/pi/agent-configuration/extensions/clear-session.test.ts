@@ -2,8 +2,8 @@ import { afterAll, expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import clearExtension from "./clear-session.extension.ts";
 import { asExtensionApi } from "./clear-session.test-double.ts";
-import clearExtension from "./clear-session.ts";
 import lastModelExtension from "./last-model/last-model.extension.ts";
 
 const stateHome = mkdtempSync(join(tmpdir(), "pi-clear-test-"));

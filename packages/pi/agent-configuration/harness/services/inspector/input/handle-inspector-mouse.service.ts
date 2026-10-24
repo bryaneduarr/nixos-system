@@ -4,9 +4,9 @@ import {
   BODY_TOP_ROW,
   FOOTER_LEFT_INSET,
   FOOTER_LINK_GAP,
-  PANE_DIVIDER_WIDTH,
   SUBAGENT_LIST_TOP_ROW,
 } from "../../../constants/inspector/layout.constant.ts";
+import { PANE_DIVIDER_WIDTH } from "../../../constants/split-view/layout.constant.ts";
 import type { InspectorInput } from "../../../types/inspector/input/inspector-input.interface.ts";
 import { rowKey } from "../navigation/row-key.service.ts";
 

@@ -1,7 +1,7 @@
 /** Placeholder shown where a token count, duration, or model name is missing. */
-export const EMPTY_VALUE_LABEL = "—";
+export const EMPTY_VALUE_LABEL = "-";
 /** Label shown for a subagent without a recorded model. */
-export const NO_MODEL_LABEL = "model —";
+export const NO_MODEL_LABEL = "model unknown";
 /** Placeholder shown for a text that is empty. */
 export const EMPTY_TEXT_LABEL = "(empty)";
 /** Placeholder shown for a user message without text. */
@@ -10,5 +10,3 @@ export const NO_TEXT_LABEL = "(no text)";
 export const NONE_LABEL = "none";
 /** Placeholder shown for tool arguments that are not a valid list. */
 export const INVALID_LIST_LABEL = "invalid";
-/** Marker appended to text cut short to fit the available width. */
-export const TRUNCATION_MARK = "…";

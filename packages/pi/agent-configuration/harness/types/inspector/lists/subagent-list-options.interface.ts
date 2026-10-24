@@ -1,5 +1,5 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import type { ToolActivity } from "../../activity/tool-activity.interface.ts";
+import type { ToolActivity } from "../../activity/store/tool-activity.interface.ts";
 import type { SubagentSelection } from "../subagents/subagent-selection.interface.ts";
 
 /** Inputs for drawing the subagents list. */
@@ -14,6 +14,6 @@ export interface SubagentListOptions {
   readonly scroll: number;
   /** Selected subagent task. */
   readonly selection: SubagentSelection;
-  /** Theme used for colors and emphasis. */
-  readonly theme: Theme;
+  /** Theme colors used for status words and the selected row. */
+  readonly theme: Pick<Theme, "fg" | "bg">;
 }

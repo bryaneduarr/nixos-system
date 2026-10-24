@@ -1,5 +1,8 @@
 import type { SearchMatch } from "../../../types/tools/search/search-match.interface.ts";
 import type { SearchRequest } from "../../../types/tools/search/search-request.interface.ts";
+import { pathExists } from "../path/path-exists.service.ts";
+import { resolveToolPath } from "../path/resolve-tool-path.service.ts";
+import { backendSearch } from "./backend-search.service.ts";
 import { fdMatches } from "./fd-matches.service.ts";
 import { formatSearchResult } from "./format-search-result.service.ts";
 import { gitHistory } from "./git-history.service.ts";
@@ -91,16 +94,26 @@ async function searchSymbols(request: SearchRequest, query: string): Promise<str
   });
 }
 
+async function isMissingPath(cwd: string, path: string): Promise<boolean> {
+  return !(await pathExists(resolveToolPath(cwd, path)));
+}
+
 export async function searchRepo(request: SearchRequest): Promise<string> {
   const { cwd, scope, cancellation, limit } = request;
   const query = request.query.trim();
 
   if (!query) return "No query provided.";
   if (limit <= 0) return "Limit must be greater than zero.";
+  if (scope.kind === "path" && (await isMissingPath(cwd, scope.path))) return `Path not found: ${scope.path}`;
 
   if (request.kind === "history") return gitHistory(cwd, query, scope, limit, cancellation);
+
+  const engineResult = await backendSearch(request, query);
+  if (engineResult.found) return `Strategy: ${engineResult.label}\n\n${engineResult.text}`;
+
   if (request.kind === "structural") return searchStructural(request, query);
   if (request.kind === "file") return searchFiles(request, query);
   if (request.kind === "symbol") return searchSymbols(request, query);
+  if (request.kind === "references") return searchText({ ...request, kind: "text" }, query);
   return searchText(request, query);
 }

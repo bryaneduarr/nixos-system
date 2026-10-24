@@ -1,7 +1,7 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type { TaskProgress } from "../tasks/task-progress.interface.ts";
-import type { TaskProgressLookup } from "../tasks/task-progress-lookup.interface.ts";
-import type { TaskRequest } from "../tasks/task-request.interface.ts";
+import type { TaskProgress } from "../tasks/progress/task-progress.interface.ts";
+import type { TaskProgressLookup } from "../tasks/progress/task-progress-lookup.interface.ts";
+import type { TaskRequest } from "../tasks/run/task-request.interface.ts";
 import type { SubagentHandle } from "./subagent-handle.interface.ts";
 import type { SubagentProgressListener } from "./subagent-progress-listener.interface.ts";
 

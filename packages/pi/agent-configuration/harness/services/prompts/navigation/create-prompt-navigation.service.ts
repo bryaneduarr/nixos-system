@@ -1,5 +1,5 @@
-import type { Grapheme } from "../../../types/prompts/grapheme.interface.ts";
-import type { PromptNavigation } from "../../../types/prompts/prompt-navigation.interface.ts";
+import type { Grapheme } from "../../../types/prompts/navigation/grapheme.interface.ts";
+import type { PromptNavigation } from "../../../types/prompts/navigation/prompt-navigation.interface.ts";
 import { findLineEdgeIndex } from "./find-line-edge-index.service.ts";
 import { findLineRange } from "./find-line-range.service.ts";
 import { findWordIndex } from "./find-word-index.service.ts";

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import type { ValueState } from "../../../types/activity/value-state.interface.ts";
+import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
 import type { TaskRoleInput } from "../../../types/subagents/roles/task-role-input.interface.ts";
 import { buildTaskSystemPrompt } from "./build-task-system-prompt.service.ts";
 import { resolveTaskRole } from "./resolve-task-role.service.ts";

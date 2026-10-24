@@ -7,7 +7,6 @@
 }:
 let
   agentConfiguration = ../agent-configuration;
-  mcpConfigurations = ../mcp-configurations;
 
   mkJsonFile = source: {
     text = builtins.toJSON (import source);
@@ -36,7 +35,11 @@ lib.mkIf config.custom.pi.enable {
       };
       force = true;
     };
-    ".pi/agent/lsp.json" = mkJsonFile (agentConfiguration + "/settings/lsp.nix");
+    ".pi/agent/claude-bridge.json" = mkJsonFile (agentConfiguration + "/settings/claude-bridge.nix");
+    ".pi/agent/lsp.json" = {
+      text = builtins.toJSON (import (agentConfiguration + "/settings/lsp.nix") { inherit lib pkgs; });
+      force = true;
+    };
     ".pi/agent/pi-fff.json" = mkJsonFile (agentConfiguration + "/settings/pi-fff.nix");
     ".pi/agent/web-search.json" = {
       text = builtins.toJSON (import (agentConfiguration + "/settings/web-search.nix") { inherit pkgs; });
@@ -48,32 +51,25 @@ lib.mkIf config.custom.pi.enable {
     ".pi/agent/skills/efficient-repository-workflow/SKILL.md" = mkSourceFile (
       agentConfiguration + "/skills/efficient-tools/SKILL.md"
     );
-    ".pi/agent/mcp-adapter.json" = mkJsonFile (agentConfiguration + "/settings/mcp.nix");
-    ".config/mcp/mcp.json" = mkJsonFile (mcpConfigurations + "/mcp-host-configuration.nix");
+    ".config/mcp/mcp.json" = mkJsonFile (agentConfiguration + "/settings/mcp-host-configuration.nix");
     ".pi/agent/extensions/codex-fast-mode" = {
-      source = pkgs.symlinkJoin {
-        name = "pi-codex-fast-mode";
-        paths = [
-          (withoutTests (agentConfiguration + "/extensions/codex-fast-mode"))
-          (pkgs.linkFarm "pi-codex-fast-mode-node-modules" [
-            {
-              name = "node_modules";
-              path = "${piTools}/lib/pi-packages/node_modules";
-            }
-          ])
-        ];
-      };
+      # Pi resolves extension imports from real file paths, so the sources must be copied beside node_modules, not symlinked.
+      source = pkgs.runCommand "pi-codex-fast-mode" { } ''
+        cp -r ${withoutTests (agentConfiguration + "/extensions/codex-fast-mode")} "$out"
+        chmod u+w "$out"
+        ln -s ${piTools}/lib/pi-packages/node_modules "$out/node_modules"
+      '';
       force = true;
     };
     ".pi/agent/extensions/clear.ts" = mkSourceFile (
-      agentConfiguration + "/extensions/clear-session.ts"
+      agentConfiguration + "/extensions/clear-session.extension.ts"
     );
     ".pi/agent/extensions/last-model" = {
       source = withoutTests (agentConfiguration + "/extensions/last-model");
       force = true;
     };
     ".pi/agent/extensions/quiet-tools.ts" = mkSourceFile (
-      agentConfiguration + "/extensions/quiet-tool-output.ts"
+      agentConfiguration + "/extensions/quiet-tool-output.extension.ts"
     );
     ".pi/agent/extensions/harness" = {
       source = withoutTests (agentConfiguration + "/harness");
@@ -81,6 +77,9 @@ lib.mkIf config.custom.pi.enable {
     };
     ".pi/agent/extensions/powerline-footer/theme.json" = mkSourceFile (
       agentConfiguration + "/themes/powerline.json"
+    );
+    ".pi/agent/themes/catppuccin-mocha.json" = mkSourceFile (
+      agentConfiguration + "/themes/catppuccin-mocha.json"
     );
     ".pi/agent/AGENTS.md" = mkSourceFile (agentConfiguration + "/harness/instructions.md");
     ".pi/agent/npm" = {

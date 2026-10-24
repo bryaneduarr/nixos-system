@@ -1,15 +1,15 @@
 import { Input, matchesKey } from "@earendil-works/pi-tui";
 import { MENU_FILTER_PROMPT } from "../../constants/sessions/menu.constant.ts";
 import { SESSION_REFRESH_INTERVAL_MS } from "../../constants/sessions/monitor.constant.ts";
-import { filterSessionRows } from "../../services/sessions/menu/filter-session-rows.service.ts";
-import { keepOrChooseSelection } from "../../services/sessions/menu/keep-or-choose-selection.service.ts";
-import { moveSessionSelection } from "../../services/sessions/menu/move-session-selection.service.ts";
-import { renderSessionMenu } from "../../services/sessions/menu/render-session-menu.service.ts";
-import type { ValueState } from "../../types/activity/value-state.interface.ts";
-import type { MenuSelection } from "../../types/sessions/menu/menu-selection.interface.ts";
-import type { SessionMenuComponent } from "../../types/sessions/menu/session-menu-component.interface.ts";
-import type { SessionMenuInput } from "../../types/sessions/menu/session-menu-input.interface.ts";
-import type { LiveSession } from "../../types/sessions/registry/live-session.interface.ts";
+import { filterSessionRows } from "../../services/sessions/menu/session/filter-session-rows.service.ts";
+import { keepOrChooseSelection } from "../../services/sessions/menu/session/keep-or-choose-selection.service.ts";
+import { moveSessionSelection } from "../../services/sessions/menu/session/move-session-selection.service.ts";
+import { renderSessionMenu } from "../../services/sessions/menu/session/render-session-menu.service.ts";
+import type { ValueState } from "../../types/activity/value/value-state.interface.ts";
+import type { MenuSelection } from "../../types/sessions/menu/session/menu-selection.interface.ts";
+import type { SessionMenuComponent } from "../../types/sessions/menu/session/session-menu-component.interface.ts";
+import type { SessionMenuInput } from "../../types/sessions/menu/session/session-menu-input.interface.ts";
+import type { LiveSession } from "../../types/sessions/registry/row/live-session.interface.ts";
 
 const MENU_FILTER_RENDER_MARGIN = 4;
 

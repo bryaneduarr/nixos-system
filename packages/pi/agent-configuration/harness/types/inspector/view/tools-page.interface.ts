@@ -1,21 +1,21 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
+import type { SplitViewGeometry } from "../../split-view/split-view-geometry.interface.ts";
 import type { DetailArtifact } from "../detail/detail-artifact.interface.ts";
 import type { InspectorRow } from "../detail/inspector-row.interface.ts";
-import type { InspectorFocus, InspectorPage } from "../navigation/inspector-page.interface.ts";
-import type { InspectorGeometry } from "./inspector-geometry.interface.ts";
+import type { InspectorFocus, ListInspectorPage } from "../navigation/inspector-page.interface.ts";
 import type { InspectorLayoutState } from "./inspector-layout.interface.ts";
 
-/** Inputs for drawing the tool calls or user messages page. */
+/** Inputs for drawing a page that lists rows next to a detail pane. */
 export interface ToolsPageOptions {
-  /** Page shown: tool calls or user messages. */
-  readonly page: InspectorPage;
+  /** Page shown. */
+  readonly page: ListInspectorPage;
   /** Pane that has keyboard focus. */
   readonly focus: InspectorFocus;
   /** Rows of the tool list. */
   readonly rows: readonly InspectorRow[];
   /** Index of the selected row. */
   readonly selected: number;
-  /** Ids of subagent tasks whose child calls are listed. */
+  /** Ids of subagent tasks whose child calls are shown. */
   readonly expandedTasks: ReadonlySet<string>;
   /** Text shown in place of the tool result. */
   readonly artifact: DetailArtifact;
@@ -24,7 +24,7 @@ export interface ToolsPageOptions {
   /** First visible detail line before clamping. */
   readonly detailScroll: number;
   /** Pane sizes for this frame. */
-  readonly geometry: InspectorGeometry;
+  readonly geometry: SplitViewGeometry;
   /** Theme used for colors and emphasis. */
   readonly theme: Theme;
 }

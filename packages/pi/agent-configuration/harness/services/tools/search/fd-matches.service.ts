@@ -8,6 +8,7 @@ export async function fdMatches(
   scope: SearchScope,
   cancellation: ToolCancellation,
 ): Promise<string[]> {
+  const isPathQuery = query.includes("/");
   const argv: readonly [string, ...string[]] = [
     "fd",
     "--type",
@@ -18,6 +19,7 @@ export async function fdMatches(
     "--exclude",
     "node_modules",
     "--fixed-strings",
+    ...(isPathQuery ? ["--full-path"] : []),
     query,
     scope.kind === "path" ? scope.path : ".",
   ];

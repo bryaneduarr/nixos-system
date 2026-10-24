@@ -1,4 +1,4 @@
-import type { ValueState } from "../../activity/value-state.interface.ts";
+import type { ValueState } from "../../activity/value/value-state.interface.ts";
 
 /** Inputs of one approved command request from a worker. */
 export interface RunApprovedCommandInput {

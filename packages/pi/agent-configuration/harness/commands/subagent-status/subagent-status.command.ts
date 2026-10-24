@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { subagentRegistry } from "../../services/subagents/registry/shared-subagent-registry.service.ts";
-import type { TaskProgress } from "../../types/subagents/tasks/task-progress.interface.ts";
+import type { TaskProgress } from "../../types/subagents/tasks/progress/task-progress.interface.ts";
 
 function runsMatching(requestedId: string): TaskProgress[] {
   const lookup = subagentRegistry.status(requestedId);

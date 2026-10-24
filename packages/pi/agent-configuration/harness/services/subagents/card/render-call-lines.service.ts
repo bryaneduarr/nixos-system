@@ -7,8 +7,9 @@ import {
   CARD_TOOL_TARGET_FIELDS,
   MILLISECONDS_PER_SECOND,
 } from "../../../constants/subagents/card.constant.ts";
-import type { SubToolActivity } from "../../../types/activity/sub-tool-activity.interface.ts";
+import type { SubToolActivity } from "../../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
 import type { SubagentCardTheme } from "../../../types/subagents/card/subagent-card-theme.interface.ts";
+import type { TaskStatus } from "../../../types/subagents/tasks/progress/task-status.interface.ts";
 import { oneLine } from "../../tool-rendering/text/one-line.service.ts";
 
 function duration(startedAt: number, endedAt: number): string {
@@ -42,11 +43,13 @@ function toolStatusColor(status: SubToolActivity["status"]): ThemeColor {
   return "success";
 }
 
-export function renderCallLines(theme: SubagentCardTheme, call: SubToolActivity): string[] {
+export function renderCallLines(theme: SubagentCardTheme, call: SubToolActivity, taskStatus: TaskStatus): string[] {
   const target = toolTarget(call);
   const toolName = call.toolName.toUpperCase();
   const toolLabel = target ? `${toolName} ${target}` : toolName;
-  const lines = [theme.fg("text", toolLabel), theme.fg(toolStatusColor(call.status), toolStatusLabel(call.status))];
+  // A finished call of a running subagent must not read as Done; the subagent is still working.
+  const shownStatus = taskStatus === "running" ? "running" : call.status;
+  const lines = [theme.fg("text", toolLabel), theme.fg(toolStatusColor(shownStatus), toolStatusLabel(shownStatus))];
 
   if (call.endedAt.state === "present") {
     lines.push(theme.fg("muted", `${CARD_TIME_LABEL} ${duration(call.startedAt, call.endedAt.value)}`));

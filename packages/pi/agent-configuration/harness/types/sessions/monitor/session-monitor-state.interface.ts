@@ -1,4 +1,4 @@
-import type { ValueState } from "../../activity/value-state.interface.ts";
+import type { ValueState } from "../../activity/value/value-state.interface.ts";
 import type { MonitoredSession } from "./monitored-session.interface.ts";
 
 /** Mutable state of the session monitor that persists across the events of one Pi process. */

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { HerdrCommand } from "../../../types/sessions/herdr/herdr-command.interface.ts";
+import type { HerdrCommand } from "../../../types/sessions/herdr/command/herdr-command.interface.ts";
 import { captureExitTarget } from "./capture-exit-target.service.ts";
 
 describe("captureExitTarget", () => {

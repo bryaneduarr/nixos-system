@@ -1,18 +1,19 @@
 import { expect, test } from "bun:test";
 import { visibleWidth } from "@earendil-works/pi-tui";
-import type { ClipboardWriter } from "../../../types/prompts/clipboard-writer.interface.ts";
-import type { PromptPanel } from "../../../types/prompts/prompt-panel.interface.ts";
-import type { PromptTheme } from "../../../types/prompts/prompt-theme.interface.ts";
+import type { ClipboardWriter } from "../../../types/prompts/input/clipboard-writer.interface.ts";
+import type { PromptTheme } from "../../../types/prompts/render/prompt-theme.interface.ts";
+import type { PromptPanel } from "../../../types/prompts/view/prompt-panel.interface.ts";
 import type {
   PromptBrowserFactory,
   PromptOverlayOptions,
   PromptViewerUi,
-} from "../../../types/prompts/prompt-viewer-ui.interface.ts";
+} from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
 import { viewPrompt } from "./view-prompt.service.ts";
 
 const plainTheme: PromptTheme = {
   fg: (_color, text) => text,
   bg: (_color, text) => text,
+  bold: (text) => text,
 };
 
 const unusedClipboard: ClipboardWriter = () => {};
@@ -26,7 +27,7 @@ function requireElement<T>(elements: readonly T[], index: number, message: strin
 test("viewer scrolls the complete prompt, resizes, and closes without editing", async () => {
   const panels: PromptPanel[] = [];
   let renders = 0;
-  const terminal = { rows: 8 };
+  const terminal = { rows: 24 };
   const text = Array.from({ length: 20 }, (_, index) => `line ${index}`).join("\n");
   const ui: PromptViewerUi = {
     custom: <T>(factory: PromptBrowserFactory<T>) =>
@@ -34,7 +35,12 @@ test("viewer scrolls the complete prompt, resizes, and closes without editing", 
         panels.push(factory({ terminal, requestRender: () => renders++ }, plainTheme, {}, resolve));
       }),
   };
-  const viewing = viewPrompt(ui, [{ text, label: "Latest" }], unusedClipboard);
+  const viewing = viewPrompt(
+    ui,
+    { prompts: [{ text, label: "Latest", turn: { kind: "turn", turnsFromLatest: 0 } }], outputs: [] },
+    unusedClipboard,
+    { kind: "read-only" },
+  );
   const panel = requireElement(panels, 0, "viewer did not open");
   expect(panel.render(40).join("\n")).toContain("line 0");
   expect(panel.render(40).join("\n")).not.toContain("line 19");
@@ -64,7 +70,12 @@ test("viewer opens a centered overlay focused on the first item without editor w
       });
     },
   };
-  const viewing = viewPrompt(ui, [{ text: draft, label: "Draft" }], unusedClipboard);
+  const viewing = viewPrompt(
+    ui,
+    { prompts: [{ text: draft, label: "Draft", turn: { kind: "draft" } }], outputs: [] },
+    unusedClipboard,
+    { kind: "read-only" },
+  );
   expect(overlays).toEqual([
     {
       overlay: true,
@@ -72,7 +83,7 @@ test("viewer opens a centered overlay focused on the first item without editor w
     },
   ]);
   const panel = requireElement(panels, 0, "viewer did not open");
-  expect(panel.render(100).join("\n")).toContain("[detail]");
+  expect(panel.render(100).join("\n")).toContain("◆ Prompts");
   expect(panel.render(100).join("\n")).toContain("unsent");
   panel.handleInput("\x1b");
   await viewing;

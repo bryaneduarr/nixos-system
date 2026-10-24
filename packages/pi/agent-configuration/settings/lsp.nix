@@ -1,5 +1,12 @@
+{ lib, pkgs }:
 {
   installMode = "off";
   warmup = true;
-  servers = { };
+  servers.vtsls.install = {
+    type = "system";
+    command = [
+      (lib.getExe pkgs.vtsls)
+      "--stdio"
+    ];
+  };
 }

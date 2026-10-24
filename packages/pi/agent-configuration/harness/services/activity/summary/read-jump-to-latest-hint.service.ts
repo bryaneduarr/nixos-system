@@ -1,0 +1,18 @@
+import { getKeybindings } from "@earendil-works/pi-tui";
+import {
+  JUMP_TO_LATEST_KEYBINDING,
+  JUMP_TO_LATEST_LABEL,
+  SHORTCUT_SEPARATOR,
+} from "../../../constants/activity/summary-label.constant.ts";
+
+export function readJumpToLatestHint(): string {
+  const shortcut = getKeybindings().getKeys(JUMP_TO_LATEST_KEYBINDING).map(capitalizeKeyParts).join("/");
+  return shortcut === "" ? JUMP_TO_LATEST_LABEL : `${shortcut}${SHORTCUT_SEPARATOR}${JUMP_TO_LATEST_LABEL}`;
+}
+
+function capitalizeKeyParts(key: string): string {
+  return key
+    .split("+")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("+");
+}

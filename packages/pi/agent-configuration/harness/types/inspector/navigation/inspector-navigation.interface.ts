@@ -1,4 +1,4 @@
-import type { ToolActivity } from "../../activity/tool-activity.interface.ts";
+import type { ToolActivity } from "../../activity/store/tool-activity.interface.ts";
 import type { DetailArtifact } from "../detail/detail-artifact.interface.ts";
 import type { InspectorRow } from "../detail/inspector-row.interface.ts";
 import type { InspectorRowLookup } from "../detail/inspector-row-lookup.interface.ts";
@@ -18,10 +18,12 @@ export interface InspectorNavigation {
   artifact: DetailArtifact;
   /** Page currently shown. */
   page: InspectorPage;
-  /** Ids of subagent tasks whose child calls are listed. */
+  /** Ids of subagent tasks whose child calls are shown. */
   readonly expandedTasks: Set<string>;
   /** Selected subagent task on the subagents page. */
   subagentSelection: SubagentSelection;
+  /** Subagent task shown on the subagent page. */
+  openedSubagent: SubagentSelection;
   /** First visible subagent row. */
   subagentScroll: number;
   /** Detail lines visible at once, from the last render. */

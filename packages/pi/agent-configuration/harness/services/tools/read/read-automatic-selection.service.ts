@@ -7,6 +7,7 @@ import {
 import type { LoadedFile } from "../../../types/tools/read/loaded-file.interface.ts";
 import { withLineNumbers } from "../text/with-line-numbers.service.ts";
 import { listSymbols } from "./list-symbols.service.ts";
+import { outlineFile } from "./outline-file.service.ts";
 
 async function readFileSize(file: LoadedFile): Promise<number> {
   try {
@@ -14,6 +15,14 @@ async function readFileSize(file: LoadedFile): Promise<number> {
   } catch {
     return file.content.length;
   }
+}
+
+async function structureSection(file: LoadedFile): Promise<string> {
+  const outline = await outlineFile(file.absolutePath);
+  if (outline.found) return `Outline (ast-grep):\n${outline.text}`;
+
+  const symbols = listSymbols(file.lines);
+  return symbols.length > 0 ? `Symbols:\n${symbols.join("\n")}` : "Symbols:\nnone detected";
 }
 
 export async function readAutomaticSelection(file: LoadedFile): Promise<string> {
@@ -24,12 +33,10 @@ export async function readAutomaticSelection(file: LoadedFile): Promise<string> 
     return [`${file.displayPath} (${total} lines)`, withLineNumbers(file.lines, 1)].join("\n\n");
   }
 
-  const symbols = listSymbols(file.lines);
   const head = file.lines.slice(0, STRUCTURE_HEAD_LINES);
-  const symbolSection = symbols.length > 0 ? `Symbols:\n${symbols.join("\n")}` : "Symbols:\nnone detected";
   return [
     `${file.displayPath} (${total} lines, ${size} bytes) - large file, showing structure only`,
-    symbolSection,
+    await structureSection(file),
     `Head:\n${withLineNumbers(head, 1)}`,
     `[Use read with offset/limit or symbol=<name> to view a specific section.]`,
   ].join("\n\n");

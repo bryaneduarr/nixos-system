@@ -1,7 +1,7 @@
 import { EXIT_COMMAND_DESCRIPTION, EXIT_SHORTCUT } from "../../constants/sessions/exit.constant.ts";
-import { launchCleanupWorker } from "../../services/sessions/cleanup/launch-cleanup-worker.service.ts";
+import { launchCleanupWorker } from "../../services/sessions/cleanup/worker/launch-cleanup-worker.service.ts";
 import { runExplicitExit } from "../../services/sessions/exit/run-explicit-exit.service.ts";
-import { scopedHerdr } from "../../services/sessions/herdr/scoped-herdr.service.ts";
+import { scopedHerdr } from "../../services/sessions/herdr/command/scoped-herdr.service.ts";
 import type { ExitCommandApi } from "../../types/sessions/exit/exit-command-api.interface.ts";
 import type { ExitContext } from "../../types/sessions/exit/exit-context.interface.ts";
 import type { ExitDependencies } from "../../types/sessions/exit/exit-dependencies.interface.ts";

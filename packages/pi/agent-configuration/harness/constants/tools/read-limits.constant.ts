@@ -1,7 +1,9 @@
 export const DEFAULT_READ_LINES = 120;
+export const MAX_READ_CHARS = 12_000;
 export const LARGE_FILE_LINES = 250;
 export const LARGE_FILE_BYTES = 12_000;
 export const STRUCTURE_SYMBOL_LIMIT = 60;
 export const STRUCTURE_HEAD_LINES = 30;
 export const SYMBOL_SCAN_LINE_LIMIT = 40;
 export const SYMBOL_FALLBACK_LINE_SPAN = 120;
+export const OUTLINE_MAX_LINES = 80;

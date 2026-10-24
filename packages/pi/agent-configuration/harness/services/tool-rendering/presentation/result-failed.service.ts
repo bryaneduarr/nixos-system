@@ -1,4 +1,4 @@
-import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts";
+import type { HarnessTool } from "../../../types/tools/active-tools/harness-tool.interface.ts";
 import { firstLine } from "../text/first-line.service.ts";
 
 export function resultFailed(tool: HarnessTool, text: string): boolean {
@@ -8,9 +8,13 @@ export function resultFailed(tool: HarnessTool, text: string): boolean {
     case "edit":
       return /^(?:Create|Delete|Move|Replace) failed:/.test(text);
     case "run":
-      return /^exit:\s*(?!0\b)/.test(text);
+      return /^exit:(?!\s*0\b)/.test(text);
     case "search":
-      return text.startsWith("No query provided.") || text.startsWith("Limit must be greater than zero.");
+      return (
+        text.startsWith("No query provided.") ||
+        text.startsWith("Limit must be greater than zero.") ||
+        text.startsWith("Path not found:")
+      );
     default:
       return false;
   }

@@ -1,4 +1,4 @@
-import type { CleanupCancellation } from "../cleanup-cancellation.interface.ts";
+import type { CleanupCancellation } from "../cleanup/worker/cleanup-cancellation.interface.ts";
 
 /** Cleanup scheduled by an explicit exit that can still be cancelled. */
 export interface ScheduledCleanup {

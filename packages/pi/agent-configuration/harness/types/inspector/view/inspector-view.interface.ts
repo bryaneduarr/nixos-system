@@ -1,5 +1,5 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import type { ToolActivity } from "../../activity/tool-activity.interface.ts";
+import type { ToolActivity } from "../../activity/store/tool-activity.interface.ts";
 import type { DetailArtifact } from "../detail/detail-artifact.interface.ts";
 import type { InspectorRow } from "../detail/inspector-row.interface.ts";
 import type { InspectorFocus, InspectorPage } from "../navigation/inspector-page.interface.ts";
@@ -24,7 +24,7 @@ export interface InspectorViewState {
   readonly rows: readonly InspectorRow[];
   /** Index of the selected row. */
   readonly selected: number;
-  /** Ids of subagent tasks whose child calls are listed. */
+  /** Ids of subagent tasks whose child calls are shown. */
   readonly expandedTasks: ReadonlySet<string>;
   /** Text shown in place of the tool result. */
   readonly artifact: DetailArtifact;

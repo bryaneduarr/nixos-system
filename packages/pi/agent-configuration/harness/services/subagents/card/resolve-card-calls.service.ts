@@ -1,6 +1,6 @@
-import type { SubToolActivity } from "../../../types/activity/sub-tool-activity.interface.ts";
-import type { ToolActivityLookup } from "../../../types/activity/tool-activity-lookup.interface.ts";
-import type { TaskProgressLookup } from "../../../types/subagents/tasks/task-progress-lookup.interface.ts";
+import type { SubToolActivity } from "../../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
+import type { ToolActivityLookup } from "../../../types/activity/store/tool-activity-lookup.interface.ts";
+import type { TaskProgressLookup } from "../../../types/subagents/tasks/progress/task-progress-lookup.interface.ts";
 
 export function resolveCardCalls(
   progressLookup: TaskProgressLookup,

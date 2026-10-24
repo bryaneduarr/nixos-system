@@ -1,10 +1,10 @@
-import type { ActivityFinishPatch } from "../../../types/activity/activity-finish-patch.interface.ts";
-import type { ActivityListener } from "../../../types/activity/activity-listener.interface.ts";
-import type { ActivityStore } from "../../../types/activity/activity-store.interface.ts";
-import type { ActivityUpdatePatch } from "../../../types/activity/activity-update-patch.interface.ts";
-import type { AgentActivity } from "../../../types/activity/agent-activity.interface.ts";
-import type { ToolActivity } from "../../../types/activity/tool-activity.interface.ts";
-import type { ToolResultFields } from "../../../types/activity/tool-result-fields.interface.ts";
+import type { ToolResultFields } from "../../../types/activity/parsing/tool-result/tool-result-fields.interface.ts";
+import type { ActivityFinishPatch } from "../../../types/activity/store/activity-finish-patch.interface.ts";
+import type { ActivityListener } from "../../../types/activity/store/activity-listener.interface.ts";
+import type { ActivityStore } from "../../../types/activity/store/activity-store.interface.ts";
+import type { ActivityUpdatePatch } from "../../../types/activity/store/activity-update-patch.interface.ts";
+import type { AgentActivity } from "../../../types/activity/store/agent-activity.interface.ts";
+import type { ToolActivity } from "../../../types/activity/store/tool-activity.interface.ts";
 import { findArtifactPath } from "../artifact/find-artifact-path.service.ts";
 
 function createIdleAgentActivity(): AgentActivity {

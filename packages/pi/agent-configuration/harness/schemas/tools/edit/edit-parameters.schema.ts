@@ -1,9 +1,10 @@
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
+import { EDIT_OPERATIONS } from "../../../constants/tools/edit-operations.constant.ts";
 
 export const EditParamsSchema = Type.Object({
   /** Operation the model asks for. */
-  op: StringEnum(["replace", "create", "delete", "move"] as const, {
+  op: StringEnum(EDIT_OPERATIONS, {
     description:
       "replace edits an existing file, create writes a new file, delete removes a file, move renames or relocates a file.",
   }),

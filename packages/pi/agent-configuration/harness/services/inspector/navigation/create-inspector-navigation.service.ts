@@ -23,10 +23,11 @@ export function createInspectorNavigation(options: InspectorNavigationOptions): 
     page: "tools",
     expandedTasks: new Set<string>(),
     subagentSelection: { kind: "none" },
+    openedSubagent: { kind: "none" },
     subagentScroll: 0,
     detailViewportHeight: 0,
     listScroll: 0,
-    buildRows: () => buildInspectorRows(navigation.page, navigation.expandedTasks),
+    buildRows: () => buildInspectorRows(navigation),
     subagentEntries: () => activityStore.all().filter((entry) => entry.toolName === TASK_TOOL_NAME),
     selectedIndex: (rows) => {
       const index = rows.findIndex((row) => isRowSelected(row, navigation.selection));

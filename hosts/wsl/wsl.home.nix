@@ -2,11 +2,10 @@ _: {
   home.stateVersion = "25.05";
 
   custom = {
+    antigravity-cli.enable = true;
     btop.enable = true;
 
-    bun = {
-      enable = true;
-    };
+    bun.enable = true;
 
     check-code.enable = true;
     command-line-tools.enable = true;

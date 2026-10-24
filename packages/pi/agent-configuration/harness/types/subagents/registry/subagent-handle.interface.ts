@@ -1,4 +1,4 @@
-import type { TaskResult } from "../tasks/task-result.interface.ts";
+import type { TaskResult } from "../result/task-result.interface.ts";
 
 /** Reference to a started subagent run. */
 export interface SubagentHandle {

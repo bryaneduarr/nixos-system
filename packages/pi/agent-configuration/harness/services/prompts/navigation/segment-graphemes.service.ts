@@ -1,4 +1,4 @@
-import type { Grapheme } from "../../../types/prompts/grapheme.interface.ts";
+import type { Grapheme } from "../../../types/prompts/navigation/grapheme.interface.ts";
 
 const graphemeSegmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 

@@ -1,5 +1,5 @@
-import type { HarnessVisualState } from "../../../types/tool-rendering/harness-presentation.interface.ts";
-import type { HarnessTool } from "../../../types/tools/harness-tool.interface.ts";
+import type { HarnessVisualState } from "../../../types/tool-rendering/presentation/harness-presentation.interface.ts";
+import type { HarnessTool } from "../../../types/tools/active-tools/harness-tool.interface.ts";
 import { resultFailed } from "./result-failed.service.ts";
 
 export function resultVisualState(

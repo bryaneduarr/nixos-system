@@ -6,12 +6,13 @@ import {
   OK_DETAIL_FALLBACK,
   RUNNING_LABEL,
 } from "../../../constants/tool-rendering/presentation-label.constant.ts";
-import type { HarnessPresentation } from "../../../types/tool-rendering/harness-presentation.interface.ts";
+import type { HarnessPresentation } from "../../../types/tool-rendering/presentation/harness-presentation.interface.ts";
 
 export function presentationLines(presentation: HarnessPresentation, theme: Theme): string[] {
   const lines = [theme.fg("text", presentation.target)];
   if (presentation.state === "running") {
     lines.push(theme.fg("warning", RUNNING_LABEL));
+    for (const detail of presentation.details) lines.push(theme.fg("muted", detail));
     return lines;
   }
   const [first, ...rest] = presentation.details;
