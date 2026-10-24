@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { recordApiError } from "../../activity/record/record-api-error.service.ts";
-import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 import { transformTranscriptMarkdown } from "./transform-transcript-markdown.service.ts";
 
 const longText = "original\n".repeat(30);

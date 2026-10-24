@@ -1,5 +1,5 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { subagentRegistry } from "../../services/subagents/registry/shared-subagent-registry.service.ts";
+import { subagentRegistry } from "../../stores/subagents/subagent-registry.store.ts";
 import type { TaskProgress } from "../../types/subagents/tasks/progress/task-progress.interface.ts";
 
 function runsMatching(requestedId: string): TaskProgress[] {

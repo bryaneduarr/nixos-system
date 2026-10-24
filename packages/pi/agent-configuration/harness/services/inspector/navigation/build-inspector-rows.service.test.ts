@@ -1,8 +1,8 @@
 import { beforeEach, expect, test } from "bun:test";
 import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
 import type { InspectorPage } from "../../../types/inspector/navigation/inspector-page.interface.ts";
-import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 import { buildInspectorRows } from "./build-inspector-rows.service.ts";
 
 function begin(id: string, toolName: string, args: Record<string, unknown> = {}): void {

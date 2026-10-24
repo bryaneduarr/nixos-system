@@ -4,11 +4,11 @@ import {
   SUBAGENT_STEP_CHROME_ROWS,
 } from "../../../constants/inspector/layout.constant.ts";
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
 import type { InspectorNavigation } from "../../../types/inspector/navigation/inspector-navigation.interface.ts";
 import type { InspectorNavigationOptions } from "../../../types/inspector/navigation/inspector-navigation-options.interface.ts";
 import type { RowSelection } from "../../../types/inspector/navigation/row-selection.interface.ts";
-import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 import { isSubagentSelected } from "../subagents/is-subagent-selected.service.ts";
 import { buildInspectorRows } from "./build-inspector-rows.service.ts";
 import { findRowAt } from "./find-row-at.service.ts";

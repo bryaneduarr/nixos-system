@@ -6,10 +6,10 @@ import {
 } from "../../../../constants/activity/activity-entry.constant.ts";
 import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail-line.constant.ts";
 import { NO_TEXT_LABEL } from "../../../../constants/inspector/label.constant.ts";
+import { activityStore } from "../../../../stores/activity/activity.store.ts";
 import type { ToolActivity } from "../../../../types/activity/store/tool-activity.interface.ts";
 import type { DetailLine } from "../../../../types/inspector/detail/detail-line.interface.ts";
 import type { PseudoEntryTool } from "../../../../types/inspector/detail/pseudo-entry-tool.interface.ts";
-import { activityStore } from "../../../activity/store/shared-activity-store.service.ts";
 import { isHarnessTool } from "../../../tools/active-tools/is-harness-tool.service.ts";
 import { formatTime } from "../../format/format-time.service.ts";
 import { boxedDetailLines } from "./boxed-detail-lines.service.ts";

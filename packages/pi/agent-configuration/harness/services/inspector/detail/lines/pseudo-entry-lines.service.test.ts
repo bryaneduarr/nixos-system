@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from "bun:test";
+import { activityStore } from "../../../../stores/activity/activity.store.ts";
 import { recordTokens } from "../../../activity/record/record-tokens.service.ts";
-import { activityStore } from "../../../activity/store/shared-activity-store.service.ts";
 import { buildDetail } from "./build-detail.service.ts";
 
 beforeEach(() => {

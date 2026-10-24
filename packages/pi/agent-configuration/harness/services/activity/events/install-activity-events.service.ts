@@ -4,12 +4,12 @@ import {
   ACTIVITY_SUMMARY_ENTRY,
 } from "../../../constants/activity/activity-keys.constant.ts";
 import { VISIBILITY_SHORTCUT } from "../../../constants/activity/visibility.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
+import { activitySummaryState } from "../../../stores/activity/activity-summary-state.store.ts";
+import { activityVisibility } from "../../../stores/activity/activity-visibility.store.ts";
 import { hydrateFromSession } from "../hydrate/hydrate-from-session.service.ts";
 import { restoreCompletions } from "../hydrate/restore-completions.service.ts";
 import { countMessageEntries } from "../messages/count-message-entries.service.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
-import { activitySummaryState } from "../summary/state/shared-activity-summary-state.service.ts";
-import { activityVisibility } from "../visibility/shared-activity-visibility.service.ts";
 import { createActivityPublisher } from "./create-activity-publisher.service.ts";
 import { createAssistantMessageRecorder } from "./create-assistant-message-recorder.service.ts";
 import { installActivityInspectorEvents } from "./install-activity-inspector-events.service.ts";

@@ -1,7 +1,7 @@
 import { beforeEach, expect, test } from "bun:test";
 import { NO_TOOL_RESULT_FIELDS } from "../../constants/activity/no-tool-result-fields.constant.ts";
-import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
-import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
+import { activityStore } from "../../stores/activity/activity.store.ts";
+import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
 import { noLiveProgress, noPreviousComponent, plainSubagentCardTheme } from "./subagent-card.test-double.ts";
 
 const TEST_CWD = "/tmp";

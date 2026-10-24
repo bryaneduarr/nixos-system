@@ -1,5 +1,5 @@
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
 import { isMessageEntry } from "./is-message-entry.service.ts";
 
 export function readMessageStartedAt(messageNumber: number): ValueState<number> {

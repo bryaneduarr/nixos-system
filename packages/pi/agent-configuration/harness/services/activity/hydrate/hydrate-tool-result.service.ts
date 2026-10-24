@@ -1,9 +1,9 @@
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { HydrateToolResultInput } from "../../../types/activity/hydrate/hydrate-tool-result-input.interface.ts";
 import { taskResultFailed } from "../../subagents/result/task-result-failed.service.ts";
 import { extractText } from "../../tools/result/extract-text.service.ts";
 import { readToolResultFields } from "../parsing/tool-result/read-tool-result-fields.service.ts";
 import { readToolResultStatus } from "../parsing/tool-result/read-tool-result-status.service.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
 
 export function hydrateToolResult(input: HydrateToolResultInput): void {
   const { id, message, cwd, startedAt } = input;

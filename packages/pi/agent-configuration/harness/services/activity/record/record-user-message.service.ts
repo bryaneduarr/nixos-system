@@ -1,8 +1,8 @@
 import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
 import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { countMessageEntries } from "../messages/count-message-entries.service.ts";
 import { readUserMessageText } from "../parsing/assistant/read-user-message-text.service.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
 
 export function recordUserMessage(id: string, content: unknown, cwd: string, startedAt: number): void {
   const messageNumber = countMessageEntries() + 1;

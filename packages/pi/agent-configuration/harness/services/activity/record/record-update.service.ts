@@ -1,6 +1,6 @@
 import { UPDATE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
 import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 
 export function recordUpdate(id: string, text: string, cwd: string, startedAt: number): void {
   if (!text.trim()) return;

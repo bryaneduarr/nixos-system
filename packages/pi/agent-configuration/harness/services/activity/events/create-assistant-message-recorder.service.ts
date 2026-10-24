@@ -1,4 +1,5 @@
 import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { AssistantMessageRecorder } from "../../../types/activity/events/assistant-message-recorder.interface.ts";
 import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
 import { readApiError } from "../parsing/assistant/read-api-error.service.ts";
@@ -8,7 +9,6 @@ import { recordApiError } from "../record/record-api-error.service.ts";
 import { recordAssistantTurn } from "../record/record-assistant-turn.service.ts";
 import { recordThinking } from "../record/record-thinking.service.ts";
 import { recordUpdate } from "../record/record-update.service.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
 
 export function createAssistantMessageRecorder(): AssistantMessageRecorder {
   let thinkingId: ValueState<string> = { state: "absent" };

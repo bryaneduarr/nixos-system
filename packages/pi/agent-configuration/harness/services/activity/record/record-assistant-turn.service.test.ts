@@ -1,7 +1,7 @@
 import { beforeEach, expect, test } from "bun:test";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { ToolActivityUsage } from "../../../types/activity/parsing/subagent/tool-activity-usage.interface.ts";
 import type { AssistantActivitySnapshot } from "../../../types/activity/store/agent-activity.interface.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
 import { recordAssistantTurn } from "./record-assistant-turn.service.ts";
 
 const TIMING = { cwd: "/tmp", startedAt: 1000, endedAt: 3500 };

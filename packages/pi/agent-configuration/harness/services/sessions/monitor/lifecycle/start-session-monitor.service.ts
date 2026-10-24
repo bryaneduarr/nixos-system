@@ -11,6 +11,7 @@ import {
 } from "../../../../constants/sessions/environment.constant.ts";
 import { SESSION_REFRESH_INTERVAL_MS } from "../../../../constants/sessions/monitor.constant.ts";
 import { PASTE_IMAGE_KEYBINDING } from "../../../../constants/sessions/monitor-events.constant.ts";
+import { usedSessionIdentities } from "../../../../stores/sessions/used-session-identities.store.ts";
 import type { SessionDependencies } from "../../../../types/sessions/install/session-dependencies.interface.ts";
 import type { MonitoredSession } from "../../../../types/sessions/monitor/monitored-session.interface.ts";
 import type { SessionMonitorState } from "../../../../types/sessions/monitor/session-monitor-state.interface.ts";
@@ -21,7 +22,6 @@ import { processSessionIdentity } from "../../registry/identity/process-session-
 import { createSessionRegistry } from "../../registry/row/create-session-registry.service.ts";
 import { latchSessionHistory } from "../publish/latch-session-history.service.ts";
 import { publishSessionMonitor } from "../publish/publish-session-monitor.service.ts";
-import { usedSessionIdentities } from "../publish/shared-used-session-identities.service.ts";
 import { canReportSession } from "./can-report-session.service.ts";
 import { stopSessionMonitor } from "./stop-session-monitor.service.ts";
 

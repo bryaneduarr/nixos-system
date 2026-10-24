@@ -1,7 +1,6 @@
 import { copyToClipboard, type Theme } from "@earendil-works/pi-coding-agent";
 import type { Component, TUI, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { ACTIVITY_REFRESH_INTERVAL_MS, DEFAULT_RENDER_WIDTH } from "../../constants/inspector/layout.constant.ts";
-import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
 import { toggleArtifact } from "../../services/inspector/artifact/toggle-artifact.service.ts";
 import { buildDetail } from "../../services/inspector/detail/lines/build-detail.service.ts";
 import { wrappedDetail } from "../../services/inspector/detail/lines/wrapped-detail.service.ts";
@@ -11,6 +10,7 @@ import { handleInspectorMouse } from "../../services/inspector/input/handle-insp
 import { createInspectorNavigation } from "../../services/inspector/navigation/create-inspector-navigation.service.ts";
 import { bodyHeight } from "../../services/split-view/layout/body-height.service.ts";
 import { readSplitViewGeometry } from "../../services/split-view/layout/read-split-view-geometry.service.ts";
+import { activityStore } from "../../stores/activity/activity.store.ts";
 import type { InspectorRow } from "../../types/inspector/detail/inspector-row.interface.ts";
 import type { InspectorInput } from "../../types/inspector/input/inspector-input.interface.ts";
 import type { InspectorNavigation } from "../../types/inspector/navigation/inspector-navigation.interface.ts";

@@ -1,8 +1,8 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { ACTIVITY_COMPLETION_ENTRY } from "../../../constants/activity/activity-keys.constant.ts";
+import { activitySummaryState } from "../../../stores/activity/activity-summary-state.store.ts";
 import type { CompletionEntryData } from "../../../types/activity/hydrate/completion-entry-data.interface.ts";
 import { readAssistantActivity } from "../parsing/assistant/read-assistant-activity.service.ts";
-import { activitySummaryState } from "../summary/state/shared-activity-summary-state.service.ts";
 import { isRecord } from "../value/is-record.service.ts";
 import { parseTimestamp } from "./parse-timestamp.service.ts";
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { NO_TOOL_RESULT_FIELDS } from "../../../../constants/activity/no-tool-result-fields.constant.ts";
-import { activityStore } from "../../../activity/store/shared-activity-store.service.ts";
+import { activityStore } from "../../../../stores/activity/activity.store.ts";
 import { buildDetail } from "./build-detail.service.ts";
 
 const TEST_CWD = "/tmp";

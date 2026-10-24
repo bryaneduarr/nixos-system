@@ -1,5 +1,5 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { subagentRegistry } from "../../services/subagents/registry/shared-subagent-registry.service.ts";
+import { subagentRegistry } from "../../stores/subagents/subagent-registry.store.ts";
 
 export function registerSubagentCancelCommand(pi: ExtensionAPI): void {
   pi.registerCommand("subagent-cancel", {

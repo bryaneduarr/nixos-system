@@ -1,10 +1,10 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { ActivityPublisher } from "../../../types/activity/events/activity-publisher.interface.ts";
 import type { AssistantMessageRecorder } from "../../../types/activity/events/assistant-message-recorder.interface.ts";
 import type { AssistantActivityLookup } from "../../../types/activity/parsing/assistant/assistant-activity-lookup.interface.ts";
 import type { AgentActivityPhase } from "../../../types/activity/store/agent-activity.interface.ts";
 import { recordUserMessage } from "../record/record-user-message.service.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
 import { phaseForAssistantEvent } from "./phase-for-assistant-event.service.ts";
 
 export function installAssistantMessageEvents(

@@ -26,12 +26,12 @@ import { readActivityMark } from "../../services/activity/summary/read-activity-
 import { readJumpToLatestHint } from "../../services/activity/summary/read-jump-to-latest-hint.service.ts";
 import { readLatestActivityText } from "../../services/activity/summary/read-latest-activity-text.service.ts";
 import { readSpinnerFrame } from "../../services/activity/summary/read-spinner-frame.service.ts";
-import { activitySummaryState } from "../../services/activity/summary/state/shared-activity-summary-state.service.ts";
 import { wrapFooterParts } from "../../services/activity/summary/wrap-footer-parts.service.ts";
-import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
 import { toolLabel } from "../../services/tool-rendering/labels/tool-label.service.ts";
 import { toolTarget } from "../../services/tool-rendering/labels/tool-target.service.ts";
 import { isHarnessTool } from "../../services/tools/active-tools/is-harness-tool.service.ts";
+import { activitySummaryState } from "../../stores/activity/activity-summary-state.store.ts";
+import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
 import type { ToolActivity } from "../../types/activity/store/tool-activity.interface.ts";
 import type { ActivitySummaryTarget } from "../../types/activity/summary/activity-summary-target.interface.ts";
 import type { SummaryHeaderParts } from "../../types/activity/summary/summary-header-parts.interface.ts";

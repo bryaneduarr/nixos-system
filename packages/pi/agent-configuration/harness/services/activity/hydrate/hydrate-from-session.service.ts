@@ -1,6 +1,6 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { recordUserMessage } from "../record/record-user-message.service.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
 import { isRecord } from "../value/is-record.service.ts";
 import { hydrateAssistantMessage } from "./hydrate-assistant-message.service.ts";
 import { hydrateToolResult } from "./hydrate-tool-result.service.ts";
