@@ -2,7 +2,7 @@ import type { Theme, ToolRenderers } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
 import { EMPTY } from "../../../../components/tool-rendering/empty.component.ts";
 import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";
-import { CODEMODE_BOX_TITLE } from "../../../../constants/tools/codemode.constant.ts";
+import { CODEMODE_BOX_TITLE } from "../../../../constants/tools/active-tools/codemode.constant.ts";
 import { readToolActivity } from "../../../activity/store/read-tool-activity.service.ts";
 import { toValueState } from "../../../activity/value/to-value-state.service.ts";
 import { extractText } from "../../../tools/result/extract-text.service.ts";

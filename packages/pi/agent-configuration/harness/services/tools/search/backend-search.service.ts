@@ -3,7 +3,7 @@ import {
   LSP_WORKSPACE_SYMBOLS_TOOL,
   TREE_SITTER_CALLERS_TOOL,
   TREE_SITTER_DEFINITION_TOOL,
-} from "../../../constants/tools/backend-tools.constant.ts";
+} from "../../../constants/tools/backends/backend-tools.constant.ts";
 import type { BackendSearchResult } from "../../../types/tools/search/backend-search-result.interface.ts";
 import type { SearchRequest } from "../../../types/tools/search/search-request.interface.ts";
 import { callBackendTool } from "../backends/call-backend-tool.service.ts";
@@ -17,7 +17,8 @@ async function labelled(label: string, pending: ReturnType<typeof callBackendToo
   return result.found ? { found: true, label, text: result.text } : { found: false };
 }
 
-async function searchSymbolDefinitions(request: SearchRequest, query: string): Promise<BackendSearchResult> {
+async function searchSymbolDefinitions(request: SearchRequest): Promise<BackendSearchResult> {
+  const { query } = request;
   const languageServer = await labelled(
     "symbol (language server)",
     callBackendTool(request.backend, LSP_WORKSPACE_SYMBOLS_TOOL, { query }),
@@ -30,8 +31,9 @@ async function searchSymbolDefinitions(request: SearchRequest, query: string): P
   );
 }
 
-export function backendSearch(request: SearchRequest, query: string): Promise<BackendSearchResult> {
-  switch (request.kind) {
+export function backendSearch(request: SearchRequest): Promise<BackendSearchResult> {
+  const { kind, query } = request;
+  switch (kind) {
     case "file":
       return labelled(
         "file (fff)",
@@ -42,13 +44,18 @@ export function backendSearch(request: SearchRequest, query: string): Promise<Ba
         }),
       );
     case "symbol":
-      return searchSymbolDefinitions(request, query);
+      return searchSymbolDefinitions(request);
     case "references":
       return labelled(
         "references (tree-sitter callers)",
         callBackendTool(request.backend, TREE_SITTER_CALLERS_TOOL, { name: query, ...scopePath(request) }),
       );
-    default:
+    case "auto":
+    case "text":
+    case "structural":
+    case "history":
       return Promise.resolve({ found: false });
+    default:
+      return kind satisfies never;
   }
 }

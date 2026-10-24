@@ -1,11 +1,9 @@
 import type { SearchMatch } from "../../../types/tools/search/search-match.interface.ts";
 import type { SearchResultSections } from "../../../types/tools/search/search-result-sections.interface.ts";
+import { locationKey } from "./location-key.service.ts";
 
 function formatLocations(matches: readonly SearchMatch[], limit: number): string {
-  return matches
-    .slice(0, limit)
-    .map((match) => `${match.file}:${match.line}`)
-    .join("\n");
+  return matches.slice(0, limit).map(locationKey).join("\n");
 }
 
 export function formatSearchResult(sections: SearchResultSections): string {
@@ -19,7 +17,7 @@ export function formatSearchResult(sections: SearchResultSections): string {
 
   if (definitions.length > 0) {
     const shown = definitions.slice(0, limit);
-    for (const match of shown) shownIds.add(`${match.file}:${match.line}`);
+    for (const match of shown) shownIds.add(locationKey(match));
     push("Definition", formatLocations(shown, limit));
   }
 
@@ -31,12 +29,12 @@ export function formatSearchResult(sections: SearchResultSections): string {
 
   if (tests.length > 0) {
     const shown = tests.slice(0, limit);
-    for (const match of shown) shownIds.add(`${match.file}:${match.line}`);
+    for (const match of shown) shownIds.add(locationKey(match));
     const testFiles = [...new Set(shown.map((match) => match.file))];
     push("Tests", testFiles.join("\n"));
   }
 
-  const uniqueReferences = references.filter((match) => !shownIds.has(`${match.file}:${match.line}`));
+  const uniqueReferences = references.filter((match) => !shownIds.has(locationKey(match)));
   if (uniqueReferences.length > 0) {
     push("References", formatLocations(uniqueReferences, limit));
   }

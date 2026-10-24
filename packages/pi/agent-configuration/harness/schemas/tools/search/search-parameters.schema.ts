@@ -1,5 +1,7 @@
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
+import { DEFAULT_SEARCH_KIND, SEARCH_KINDS } from "../../../constants/tools/search/search-kinds.constant.ts";
+import { DEFAULT_SEARCH_LIMIT } from "../../../constants/tools/search/search-limits.constant.ts";
 
 export const SearchParamsSchema = Type.Object({
   /** Text, filename, symbol, pattern, or commit text to find. */
@@ -8,9 +10,8 @@ export const SearchParamsSchema = Type.Object({
   }),
   /** Search strategy. */
   kind: Type.Optional(
-    StringEnum(["auto", "text", "file", "symbol", "references", "structural", "history"] as const, {
-      description:
-        "Search strategy. Defaults to auto, which combines text and filename search. file uses fuzzy fff ranking, symbol asks the language server and tree-sitter for definitions, references lists callers.",
+    StringEnum(SEARCH_KINDS, {
+      description: `Search strategy. Defaults to ${DEFAULT_SEARCH_KIND}, which combines text and filename search. file uses fuzzy fff ranking, symbol asks the language server and tree-sitter for definitions, references lists callers.`,
     }),
   ),
   /** Directory or file the search is limited to. */
@@ -20,7 +21,7 @@ export const SearchParamsSchema = Type.Object({
     Type.Integer({
       minimum: 1,
       maximum: 100,
-      description: "Maximum results per section. Defaults to 20.",
+      description: `Maximum results per section. Defaults to ${DEFAULT_SEARCH_LIMIT}.`,
     }),
   ),
 });

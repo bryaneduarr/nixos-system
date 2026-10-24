@@ -10,8 +10,4 @@ export const EXIT_CODE_UNKNOWN = 1;
 
 export const EXIT_CODE_KILLED = 124;
 
-export const EXIT_CODE_SPAWN_FAILED = 127;
-
-export const RG_ERROR_EXIT_CODE = 2;
-
 export const COMMAND_NOT_FOUND_EXIT_CODE = 127;

@@ -3,7 +3,7 @@ import {
   LARGE_FILE_BYTES,
   LARGE_FILE_LINES,
   STRUCTURE_HEAD_LINES,
-} from "../../../constants/tools/read-limits.constant.ts";
+} from "../../../constants/tools/read/read-limits.constant.ts";
 import type { LoadedFile } from "../../../types/tools/read/loaded-file.interface.ts";
 import { withLineNumbers } from "../text/with-line-numbers.service.ts";
 import { listSymbols } from "./list-symbols.service.ts";

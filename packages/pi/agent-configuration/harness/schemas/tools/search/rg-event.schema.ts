@@ -12,12 +12,16 @@ export const RgEventSchema = Type.Object({
     }),
     /** One-based line number of the match. */
     line_number: Type.Number(),
-    /** Text of the matching line. */
-    lines: Type.Optional(
+    /** Matching line, as UTF-8 text or as base64 bytes when it is not valid UTF-8. */
+    lines: Type.Union([
       Type.Object({
-        /** Matching line text, when printed as UTF-8. */
-        text: Type.Optional(Type.String()),
+        /** Matching line text. */
+        text: Type.String(),
       }),
-    ),
+      Type.Object({
+        /** Matching line as base64 bytes. */
+        bytes: Type.String(),
+      }),
+    ]),
   }),
 });

@@ -1,5 +1,5 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { HARNESS_TOOLS } from "../../constants/tools/harness-tools.constant.ts";
+import { HARNESS_TOOLS } from "../../constants/tools/active-tools/harness-tools.constant.ts";
 import { enforceActiveTools } from "../../services/tools/active-tools/enforce-active-tools.service.ts";
 import { writeStatusFile } from "../../services/tools/active-tools/write-status-file.service.ts";
 

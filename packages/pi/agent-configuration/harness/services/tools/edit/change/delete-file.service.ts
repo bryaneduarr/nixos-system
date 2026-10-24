@@ -1,5 +1,5 @@
 import { readFile, unlink } from "node:fs/promises";
-import type { DeleteChange } from "../../../../types/tools/edit/edit-request.interface.ts";
+import type { DeleteChange } from "../../../../types/tools/edit/delete-change.interface.ts";
 import type { EditResult } from "../../../../types/tools/edit/edit-result.interface.ts";
 import { countLines } from "../../diff/count-lines.service.ts";
 import { formatDiffStats } from "../../diff/format-diff-stats.service.ts";

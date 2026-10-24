@@ -1,48 +1,29 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { DEFAULT_RUN_TIMEOUT_MS } from "../../constants/tools/run-limits.constant.ts";
-import { RUN_TOOL_DESCRIPTION, RUN_TOOL_GUIDELINES } from "../../constants/tools/tool-descriptions.constant.ts";
+import { RUN_TOOL_NAME } from "../../constants/tools/active-tools/harness-tools.constant.ts";
+import {
+  RUN_TOOL_DESCRIPTION,
+  RUN_TOOL_GUIDELINES,
+  RUN_TOOL_LABEL,
+  RUN_TOOL_PROMPT_SNIPPET,
+} from "../../constants/tools/run/run-tool.constant.ts";
 import { RunParamsSchema } from "../../schemas/tools/run/run-parameters.schema.ts";
 import { createHarnessRenderers } from "../../services/tool-rendering/renderers/create-harness-renderers.service.ts";
 import { toToolCancellation } from "../../services/tools/process/tool-cancellation.service.ts";
+import { executeRun } from "../../services/tools/run/execute-run.service.ts";
 import { prepareRunArguments } from "../../services/tools/run/prepare-run-arguments.service.ts";
-import { prepareRunDirectory } from "../../services/tools/run/prepare-run-directory.service.ts";
-import { runShell } from "../../services/tools/run/run-shell.service.ts";
-import type { RunDirectory } from "../../types/tools/run/run-directory.interface.ts";
-
-function blockedMessage(runDirectory: Extract<RunDirectory, { state: "blocked" }>): string {
-  if (runDirectory.reason === "not-a-directory") {
-    return `${runDirectory.directory} is not a directory.\nCreate the directory first, then run again.`;
-  }
-  return `Could not create ${runDirectory.directory}.\nCheck the path and its permissions, then run again.`;
-}
 
 export function registerRunTool(pi: ExtensionAPI): void {
   pi.registerTool({
-    name: "run",
-    label: "Run",
+    name: RUN_TOOL_NAME,
+    label: RUN_TOOL_LABEL,
     description: RUN_TOOL_DESCRIPTION,
-    promptSnippet: "Run shell commands not covered by search, read, or edit",
+    promptSnippet: RUN_TOOL_PROMPT_SNIPPET,
     promptGuidelines: [...RUN_TOOL_GUIDELINES],
     parameters: RunParamsSchema,
     prepareArguments: prepareRunArguments,
-    ...createHarnessRenderers("run"),
+    ...createHarnessRenderers(RUN_TOOL_NAME),
     async execute(_toolCallId, params, signal, _onUpdate, ctx) {
-      const runDirectory = await prepareRunDirectory(ctx.cwd, params.cwd ?? ".");
-      if (runDirectory.state === "blocked") {
-        return {
-          isError: true,
-          content: [{ type: "text", text: blockedMessage(runDirectory) }],
-          details: {},
-        };
-      }
-      const text = await runShell({
-        cwd: ctx.cwd,
-        directory: runDirectory.directory,
-        command: params.command,
-        timeoutMs: params.timeoutMs ?? DEFAULT_RUN_TIMEOUT_MS,
-        cancellation: toToolCancellation(signal),
-      });
-      return { content: [{ type: "text", text }], details: {} };
+      return executeRun({ cwd: ctx.cwd, parameters: params, cancellation: toToolCancellation(signal) });
     },
   });
 }

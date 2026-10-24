@@ -1,19 +1,9 @@
 import { mkdir, stat } from "node:fs/promises";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import type { RunDirectory } from "../../../types/tools/run/run-directory.interface.ts";
+import { expandHome } from "../path/expand-home.service.ts";
 import { resolveToolPath } from "../path/resolve-tool-path.service.ts";
 
-const HOME_PREFIX = "~/";
-
 type ExistingEntry = "directory" | "other" | "missing";
-
-function expandHome(requestedDirectory: string): string {
-  if (requestedDirectory === "~") return homedir();
-  return requestedDirectory.startsWith(HOME_PREFIX)
-    ? join(homedir(), requestedDirectory.slice(HOME_PREFIX.length))
-    : requestedDirectory;
-}
 
 async function existingEntry(directory: string): Promise<ExistingEntry> {
   try {

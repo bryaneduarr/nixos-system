@@ -1,14 +1,8 @@
-import type { ToolCancellation } from "../../../types/tools/process/tool-cancellation.interface.ts";
-import type { SearchScope } from "../../../types/tools/search/search-request.interface.ts";
+import type { GitHistoryRequest } from "../../../types/tools/search/git-history-request.interface.ts";
 import { runArgv } from "../process/run-argv.service.ts";
 
-export async function gitHistory(
-  cwd: string,
-  query: string,
-  scope: SearchScope,
-  limit: number,
-  cancellation: ToolCancellation,
-): Promise<string> {
+export async function gitHistory(request: GitHistoryRequest): Promise<string> {
+  const { cwd, query, scope, limit, cancellation } = request;
   const argv: readonly [string, ...string[]] = [
     "git",
     "log",

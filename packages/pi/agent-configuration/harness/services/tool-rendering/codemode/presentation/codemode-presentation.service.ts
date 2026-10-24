@@ -1,4 +1,4 @@
-import { CODEMODE_BOX_TITLE } from "../../../../constants/tools/codemode.constant.ts";
+import { CODEMODE_BOX_TITLE } from "../../../../constants/tools/active-tools/codemode.constant.ts";
 import type { CodemodePresentationInput } from "../../../../types/tool-rendering/codemode/codemode-presentation-input.interface.ts";
 import type { HarnessPresentation } from "../../../../types/tool-rendering/presentation/harness-presentation.interface.ts";
 import { codemodeCallRows } from "./codemode-call-rows.service.ts";

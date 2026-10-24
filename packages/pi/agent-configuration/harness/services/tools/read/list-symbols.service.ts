@@ -1,9 +1,9 @@
-import { STRUCTURE_SYMBOL_LIMIT } from "../../../constants/tools/read-limits.constant.ts";
+import { STRUCTURE_SYMBOL_LIMIT } from "../../../constants/tools/read/read-limits.constant.ts";
 import {
   INDENTED_LINE_PATTERN,
   METHOD_DECLARATION_PATTERN,
   SYMBOL_DECLARATION_PATTERN,
-} from "../../../constants/tools/read-patterns.constant.ts";
+} from "../../../constants/tools/read/read-patterns.constant.ts";
 import type { SymbolLineLookup } from "../../../types/tools/read/symbol-line-lookup.interface.ts";
 
 function symbolOnLine(line: string): SymbolLineLookup {

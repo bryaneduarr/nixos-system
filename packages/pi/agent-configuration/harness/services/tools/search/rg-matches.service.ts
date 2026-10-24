@@ -1,8 +1,9 @@
-import { RG_ERROR_EXIT_CODE } from "../../../constants/tools/process.constant.ts";
+import { RG_ERROR_EXIT_CODE } from "../../../constants/tools/search/ripgrep.constant.ts";
+import { EMPTY_LINE_TEXT } from "../../../constants/tools/search/search-text.constant.ts";
 import { RgEventSchema } from "../../../schemas/tools/search/rg-event.schema.ts";
-import type { ToolCancellation } from "../../../types/tools/process/tool-cancellation.interface.ts";
+import type { SearchCommandRequest } from "../../../types/tools/search/search-command-request.interface.ts";
 import type { SearchMatch } from "../../../types/tools/search/search-match.interface.ts";
-import type { SearchScope } from "../../../types/tools/search/search-request.interface.ts";
+import type { SearchScope } from "../../../types/tools/search/search-scope.interface.ts";
 import { parseJsonLine } from "../process/parse-json-line.service.ts";
 import { runArgv } from "../process/run-argv.service.ts";
 
@@ -26,8 +27,7 @@ function parseRgMatches(stdout: string): SearchMatch[] {
     const parsedLine = parseJsonLine(rawLine, RgEventSchema);
     if (!parsedLine.valid || parsedLine.event.type !== "match") continue;
     const event = parsedLine.event;
-    const matchedLine = event.data.lines;
-    const lineText = matchedLine !== undefined && matchedLine.text !== undefined ? matchedLine.text : "";
+    const lineText = "text" in event.data.lines ? event.data.lines.text : EMPTY_LINE_TEXT;
     matches.push({
       file: event.data.path.text,
       line: event.data.line_number,
@@ -37,12 +37,8 @@ function parseRgMatches(stdout: string): SearchMatch[] {
   return matches;
 }
 
-export async function rgMatches(
-  cwd: string,
-  query: string,
-  scope: SearchScope,
-  cancellation: ToolCancellation,
-): Promise<SearchMatch[]> {
+export async function rgMatches(request: SearchCommandRequest): Promise<SearchMatch[]> {
+  const { cwd, query, scope, cancellation } = request;
   const result = await runArgv(cwd, rgArgv(query, scope, false), cancellation);
   const matches = parseRgMatches(result.stdout);
   const isRejectedPattern = result.code === RG_ERROR_EXIT_CODE && matches.length === 0;

@@ -1,7 +1,7 @@
 import { mkdir, rename } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { MoveChange } from "../../../../types/tools/edit/edit-request.interface.ts";
 import type { EditResult } from "../../../../types/tools/edit/edit-result.interface.ts";
+import type { MoveChange } from "../../../../types/tools/edit/move-change.interface.ts";
 import { isReadableFile } from "../../path/is-readable-file.service.ts";
 import { resolveToolPath } from "../../path/resolve-tool-path.service.ts";
 

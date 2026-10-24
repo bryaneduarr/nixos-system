@@ -1,6 +1,6 @@
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
-import { EDIT_OPERATIONS } from "../../../constants/tools/edit-operations.constant.ts";
+import { EDIT_OPERATIONS } from "../../../constants/tools/edit/edit-operations.constant.ts";
 
 export const EditParamsSchema = Type.Object({
   /** Operation the model asks for. */
