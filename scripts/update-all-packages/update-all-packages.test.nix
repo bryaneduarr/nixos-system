@@ -45,6 +45,10 @@ let
       ]
       ++ limits
     )
+    [
+      "nix"
+      "test-update-antigravity-cli"
+    ]
     (
       [
         "sudo"
@@ -105,6 +109,7 @@ import ../system-target/stubbed-script-check.nix {
   prepare = ''
     printf 'update_pi_dependencies() { nix test-update-pi; }\n' > scripts/update-all-packages/modules/update-pi-dependencies.sh
     printf 'verify_pi() { nix test-verify-pi; }\n' > scripts/update-all-packages/modules/verify-pi.sh
+    printf 'update_antigravity_cli() { nix test-update-antigravity-cli; }\n' > scripts/update-all-packages/modules/update-antigravity-cli.sh
     mkdir -p "$(dirname ${piDefinition})"
     printf '  npmDepsHash = "previous";\n' > ${piDefinition}
   '';

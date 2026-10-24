@@ -1,6 +1,5 @@
-# buildNpmPackage hashes the complete package-lock dependency tree. Ask Nix
-# for the new fixed-output hash, then build once more with that hash recorded.
 refresh_pi_npm_hash() {
+  # buildNpmPackage hashes the whole lock tree, so ask Nix for the new hash and rebuild with it.
   local build_output new_hash original_hash_line
 
   original_hash_line="$(sed -n 's/^[[:space:]]*npmDepsHash = \(.*\);$/\1/p' "$pi_nix_file")"
