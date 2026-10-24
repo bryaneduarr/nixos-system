@@ -31,7 +31,7 @@ export function installPromptPreviews(pi: PromptExtensionApi): void {
     }
     browserOpen = true;
     try {
-      await viewPrompt(ctx.ui, collections, copyToClipboard, selection);
+      await viewPrompt({ ui: ctx.ui, collections, clipboard: copyToClipboard, selection });
     } finally {
       browserOpen = false;
     }

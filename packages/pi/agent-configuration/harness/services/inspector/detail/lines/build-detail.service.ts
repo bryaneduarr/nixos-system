@@ -1,6 +1,7 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
 import { MESSAGE_ACTIVITY_NAME } from "../../../../constants/activity/activity-entry.constant.ts";
 import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail-line.constant.ts";
+import { THEME_ACCENT, THEME_MUTED } from "../../../../constants/split-view/theme-color.constant.ts";
 import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.ts";
 import type { ActivityStatus } from "../../../../types/activity/store/activity-status.interface.ts";
 import type { ToolActivity } from "../../../../types/activity/store/tool-activity.interface.ts";
@@ -39,14 +40,14 @@ function artifactNoticeLines(entry: ToolActivity, artifact: DetailArtifact): Det
   if (!entry.artifactPath.found) return [];
   const artifactAction = artifact.kind === "loaded" ? "open" : "press a";
   return [
-    { text: `artifact ${artifactAction}  ${entry.artifactPath.path}`, color: "muted", bold: false },
+    { text: `artifact ${artifactAction}  ${entry.artifactPath.path}`, color: THEME_MUTED, bold: false },
     BLANK_DETAIL_LINE,
   ];
 }
 
 function detailColor(tool: string): ThemeColor {
   if (isHarnessTool(tool)) return toolColor(tool);
-  return isPseudoEntryTool(tool) ? "accent" : "muted";
+  return isPseudoEntryTool(tool) ? THEME_ACCENT : THEME_MUTED;
 }
 
 function detailHeading(
@@ -58,7 +59,7 @@ function detailHeading(
   if (tool === MESSAGE_ACTIVITY_NAME) {
     return {
       text: `USER MESSAGE ${String(args.number ?? "")}  ${formatTime(startedAt)}`,
-      color: "accent",
+      color: THEME_ACCENT,
       bold: true,
     };
   }

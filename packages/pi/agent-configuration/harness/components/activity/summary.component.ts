@@ -1,14 +1,9 @@
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import {
-  ACCENT_COLOR,
   DETAILS_LABEL,
-  ELLIPSIS,
-  JUMP_TO_LATEST_COLOR,
   LATEST_ACTIVITY_COLOR,
-  MUTED_COLOR,
   SUMMARY_SEPARATOR,
-  TOOL_TARGET_SEPARATOR,
 } from "../../constants/activity/summary-label.constant.ts";
 import {
   FOOTER_END_PREFIX,
@@ -17,6 +12,9 @@ import {
   HEADER_PREFIX,
   TWO_LINE_HEADER_PREFIX,
 } from "../../constants/activity/summary-layout.constant.ts";
+import { THEME_ACCENT, THEME_MUTED, THEME_WARNING } from "../../constants/split-view/theme-color.constant.ts";
+import { ELLIPSIS } from "../../constants/text/ellipsis.constant.ts";
+import { DOT_SEPARATOR } from "../../constants/text/separator.constant.ts";
 import { readMessageEntries } from "../../services/activity/messages/read-message-entries.service.ts";
 import { readMessageStartedAt } from "../../services/activity/messages/read-message-started-at.service.ts";
 import { formatDivider } from "../../services/activity/summary/format-divider.service.ts";
@@ -35,13 +33,13 @@ import { activityVisibility } from "../../stores/activity/activity-visibility.st
 import type { ToolActivity } from "../../types/activity/store/tool-activity.interface.ts";
 import type { ActivitySummaryTarget } from "../../types/activity/summary/activity-summary-target.interface.ts";
 import type { SummaryHeaderParts } from "../../types/activity/summary/summary-header-parts.interface.ts";
-import type { SummaryTheme } from "../../types/activity/summary/summary-theme.interface.ts";
 import type { TranscriptScroll } from "../../types/activity/summary/transcript-scroll.interface.ts";
+import type { SplitViewTheme } from "../../types/split-view/split-view-theme.interface.ts";
 
 class ActivitySummaryComponent implements Component {
   constructor(
     private readonly target: ActivitySummaryTarget,
-    private readonly theme: SummaryTheme,
+    private readonly theme: Pick<SplitViewTheme, "fg">,
     private readonly scroll: TranscriptScroll,
   ) {}
 
@@ -101,13 +99,13 @@ class ActivitySummaryComponent implements Component {
       titleWidth > 0
         ? `${SUMMARY_SEPARATOR}${this.theme.fg(LATEST_ACTIVITY_COLOR, truncateToWidth(activity, titleWidth, ELLIPSIS, true))}`
         : "";
-    const trailingText = twoLines ? "" : this.theme.fg(MUTED_COLOR, `${SUMMARY_SEPARATOR}${trailing}`);
-    const label = `${this.theme.fg(MUTED_COLOR, leading)}${title}${trailingText}`;
+    const trailingText = twoLines ? "" : this.theme.fg(THEME_MUTED, `${SUMMARY_SEPARATOR}${trailing}`);
+    const label = `${this.theme.fg(THEME_MUTED, leading)}${title}${trailingText}`;
     return formatDivider(this.theme, label, width, twoLines ? TWO_LINE_HEADER_PREFIX : HEADER_PREFIX);
   }
 
   private jumpToLatestHint(): string {
-    return this.theme.fg(JUMP_TO_LATEST_COLOR, readJumpToLatestHint());
+    return this.theme.fg(THEME_WARNING, readJumpToLatestHint());
   }
 
   private footer(parts: readonly string[], width: number): string[] {
@@ -115,7 +113,7 @@ class ActivitySummaryComponent implements Component {
     return lines.map((text, index) =>
       formatDivider(
         this.theme,
-        this.theme.fg(MUTED_COLOR, text),
+        this.theme.fg(THEME_MUTED, text),
         width,
         index === lines.length - 1 ? FOOTER_END_PREFIX : FOOTER_PREFIX,
       ),
@@ -126,9 +124,9 @@ class ActivitySummaryComponent implements Component {
     const labelWidth = Math.max(1, width - FOOTER_RESERVED_WIDTH);
     return runningTools.map((tool) => {
       const target = isHarnessTool(tool.toolName) ? toolTarget(tool.toolName, tool.args) : "";
-      const targetSuffix = target ? `${TOOL_TARGET_SEPARATOR}${target}` : "";
+      const targetSuffix = target ? `${DOT_SEPARATOR}${target}` : "";
       const label = `${readSpinnerFrame(frame)} ${toolLabel(tool.toolName)}${targetSuffix}`;
-      const coloredLabel = this.theme.fg(ACCENT_COLOR, truncateToWidth(label, labelWidth, ELLIPSIS, true));
+      const coloredLabel = this.theme.fg(THEME_ACCENT, truncateToWidth(label, labelWidth, ELLIPSIS, true));
       return formatDivider(this.theme, coloredLabel, width, FOOTER_PREFIX);
     });
   }
@@ -140,7 +138,7 @@ function singleLineTitleWidth(width: number, leading: string, trailing: string):
 
 export function renderActivitySummary(
   target: ActivitySummaryTarget,
-  theme: SummaryTheme,
+  theme: Pick<SplitViewTheme, "fg">,
   scroll: TranscriptScroll,
 ): Component {
   return new ActivitySummaryComponent(target, theme, scroll);

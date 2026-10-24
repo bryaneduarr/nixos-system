@@ -1,6 +1,5 @@
 import type { CodemodeCallStatus } from "../../types/tool-rendering/codemode/codemode-call.interface.ts";
 
-export const CODEMODE_BOX_COLOR = "accent";
 export const CODEMODE_TARGET_FALLBACK = "Script";
 export const CODEMODE_DEFAULT_VERB = "Running";
 export const MAX_CODEMODE_TARGET_NAMES = 3;

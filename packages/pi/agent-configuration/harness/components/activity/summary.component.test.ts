@@ -3,8 +3,8 @@ import { MESSAGE_ACTIVITY_NAME } from "../../constants/activity/activity-entry.c
 import { activityStore } from "../../stores/activity/activity.store.ts";
 import { activitySummaryState } from "../../stores/activity/activity-summary-state.store.ts";
 import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
-import type { SummaryTheme } from "../../types/activity/summary/summary-theme.interface.ts";
 import type { TranscriptScroll } from "../../types/activity/summary/transcript-scroll.interface.ts";
+import type { SplitViewTheme } from "../../types/split-view/split-view-theme.interface.ts";
 import { renderActivitySummary } from "./summary.component.ts";
 
 const TEST_CWD = "/tmp";
@@ -13,7 +13,7 @@ const WIDTH = 160;
 const atLatest: TranscriptScroll = { isAwayFromLatest: () => false };
 const awayFromLatest: TranscriptScroll = { isAwayFromLatest: () => true };
 
-const taggedTheme: SummaryTheme = {
+const taggedTheme: Pick<SplitViewTheme, "fg"> = {
   fg: (color, text) => `<${color}>${text}</${color}>`,
 };
 

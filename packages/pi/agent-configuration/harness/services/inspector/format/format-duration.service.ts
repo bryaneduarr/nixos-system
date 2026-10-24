@@ -1,10 +1,9 @@
+import { DECIMAL_SECONDS_LIMIT_MS, DURATION_PART_WIDTH } from "../../../constants/inspector/format.constant.ts";
 import {
-  DECIMAL_SECONDS_LIMIT_MS,
-  DURATION_PART_WIDTH,
   MILLISECONDS_PER_SECOND,
   SECONDS_PER_HOUR,
   SECONDS_PER_MINUTE,
-} from "../../../constants/inspector/format.constant.ts";
+} from "../../../constants/time/time-unit.constant.ts";
 
 function padPart(part: number): string {
   return String(part).padStart(DURATION_PART_WIDTH, "0");

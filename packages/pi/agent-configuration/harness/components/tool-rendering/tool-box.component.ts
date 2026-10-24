@@ -1,5 +1,6 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
+import { THEME_MUTED } from "../../constants/split-view/theme-color.constant.ts";
 import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/elapsed-label.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
@@ -67,7 +68,7 @@ export class ToolBox implements Component {
 
     const displayLines = this.content.lines.filter((line) => !line.includes(ELAPSED_TIME_LABEL));
     const elapsedSeconds = ((Date.now() - timerStart.value) / 1000).toFixed(1);
-    const timeLine = this.theme.fg("muted", `${ELAPSED_TIME_LABEL}${elapsedSeconds} s`);
+    const timeLine = this.theme.fg(THEME_MUTED, `${ELAPSED_TIME_LABEL}${elapsedSeconds} s`);
     return [...displayLines, timeLine];
   }
 

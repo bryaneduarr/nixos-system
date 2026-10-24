@@ -10,6 +10,7 @@ import {
   SUBAGENT_TABLE_HINT,
 } from "../../../constants/inspector/subagent-table.constant.ts";
 import { TRUNCATION_MARK } from "../../../constants/split-view/text.constant.ts";
+import { THEME_DIM, THEME_MUTED } from "../../../constants/split-view/theme-color.constant.ts";
 import { formatDuration } from "../../../services/inspector/format/format-duration.service.ts";
 import { formatTokens } from "../../../services/inspector/format/format-tokens.service.ts";
 import { contextUsageLabel } from "../../../services/inspector/labels/context/context-usage-label.service.ts";
@@ -55,12 +56,12 @@ function summaryLine(rows: readonly ToolActivity[]): string {
 
 export function renderSubagentList({ rows, width, height, scroll, selection, theme }: SubagentListOptions): string[] {
   const output = [
-    theme.fg("muted", truncateToWidth(summaryLine(rows), width, TRUNCATION_MARK, true)),
-    theme.fg("dim", truncateToWidth(tableLine(SUBAGENT_TABLE_HEADINGS), width, TRUNCATION_MARK, true)),
+    theme.fg(THEME_MUTED, truncateToWidth(summaryLine(rows), width, TRUNCATION_MARK, true)),
+    theme.fg(THEME_DIM, truncateToWidth(tableLine(SUBAGENT_TABLE_HEADINGS), width, TRUNCATION_MARK, true)),
   ];
   for (const [index, row] of rows.slice(scroll, scroll + height).entries()) {
     const line = tableLine(subagentCells(row, scroll + index + 1, theme));
-    output.push(listRow(line, width, isSubagentSelected(row, selection), theme));
+    output.push(listRow({ text: line, width, isSelected: isSubagentSelected(row, selection), theme }));
   }
   return output;
 }

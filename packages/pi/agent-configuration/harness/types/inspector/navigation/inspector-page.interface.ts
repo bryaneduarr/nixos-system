@@ -3,6 +3,3 @@ export type InspectorPage = "tools" | "subagents" | "subagent" | "history";
 
 /** Page that lists rows next to a detail pane. */
 export type ListInspectorPage = Exclude<InspectorPage, "subagents">;
-
-/** Pane that receives keyboard input: the row list or the detail pane. */
-export type InspectorFocus = "list" | "detail";

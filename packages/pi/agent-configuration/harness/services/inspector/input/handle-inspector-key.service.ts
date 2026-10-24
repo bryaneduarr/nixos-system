@@ -1,12 +1,6 @@
 import { matchesKey } from "@earendil-works/pi-tui";
+import { FOOTER_LINKS } from "../../../constants/inspector/footer.constant.ts";
 import type { InspectorInput } from "../../../types/inspector/input/inspector-input.interface.ts";
-import type { InspectorPage } from "../../../types/inspector/navigation/inspector-page.interface.ts";
-
-const PAGE_BY_KEY: Record<string, InspectorPage> = {
-  "1": "tools",
-  "2": "subagents",
-  "3": "history",
-};
 
 export function handleInspectorKey(data: string, inspector: InspectorInput): void {
   const isCloseKey = matchesKey(data, "escape") || matchesKey(data, "ctrl+c") || data === "q";
@@ -14,9 +8,9 @@ export function handleInspectorKey(data: string, inspector: InspectorInput): voi
     inspector.close();
     return;
   }
-  const destinationPage = PAGE_BY_KEY[data];
-  if (destinationPage) {
-    inspector.switchPage(destinationPage);
+  const destinationLink = FOOTER_LINKS.find((link) => link.key === data);
+  if (destinationLink) {
+    inspector.switchPage(destinationLink.page);
     return;
   }
   if (matchesKey(data, "tab")) {

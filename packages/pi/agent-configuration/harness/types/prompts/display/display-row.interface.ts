@@ -11,4 +11,4 @@ export interface DisplayCell {
 }
 
 /** Cells of one wrapped terminal line of a prompt. */
-export type DisplayRow = DisplayCell[];
+export type DisplayRow = readonly DisplayCell[];

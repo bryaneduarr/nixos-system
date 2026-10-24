@@ -1,9 +1,3 @@
-/** Milliseconds in one second. */
-export const MILLISECONDS_PER_SECOND = 1000;
-/** Seconds in one minute. */
-export const SECONDS_PER_MINUTE = 60;
-/** Seconds in one hour. */
-export const SECONDS_PER_HOUR = 3600;
 /** Width of the zero-padded minutes and seconds of a long duration. */
 export const DURATION_PART_WIDTH = 2;
 /** Durations below this many milliseconds keep one decimal place in seconds. */

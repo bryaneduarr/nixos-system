@@ -1,6 +1,7 @@
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import { NEWLINE_CHARACTER } from "../../../constants/prompts/text.constant.ts";
 import type { PromptItem } from "../../../types/prompts/collection/prompt-item.interface.ts";
+import { isUserEntry } from "./is-user-entry.service.ts";
 
 function agentOutputText(entry: SessionEntry): string {
   if (entry.type !== "message" || entry.message.role !== "assistant") return "";
@@ -8,10 +9,6 @@ function agentOutputText(entry: SessionEntry): string {
     .filter((block) => block.type === "text")
     .map((block) => block.text)
     .join(NEWLINE_CHARACTER);
-}
-
-function isUserEntry(entry: SessionEntry): boolean {
-  return entry.type === "message" && entry.message.role === "user";
 }
 
 export function collectAgentOutputs(branch: readonly SessionEntry[]): PromptItem[] {

@@ -1,5 +1,5 @@
 import type { AssistantActivityLookup } from "../../../../types/activity/parsing/assistant/assistant-activity-lookup.interface.ts";
-import { isRecord } from "../../value/is-record.service.ts";
+import { isRecord } from "../../../values/is-record.service.ts";
 
 export function readAssistantActivity(message: unknown): AssistantActivityLookup {
   if (!isRecord(message) || message.role !== "assistant" || !Array.isArray(message.content)) {

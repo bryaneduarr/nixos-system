@@ -8,6 +8,7 @@ import {
   COLLECTION_EMPTY_TEXT,
   COLLECTION_LABEL,
 } from "../../../constants/prompts/collection.constant.ts";
+import { THEME_DIM, THEME_MUTED } from "../../../constants/split-view/theme-color.constant.ts";
 import type { BrowserRenderInput } from "../../../types/prompts/render/browser-render-input.interface.ts";
 import type { PromptCollectionName } from "../../../types/prompts/view/prompt-collections.interface.ts";
 import type { SplitViewFooterLink } from "../../../types/split-view/footer-link.interface.ts";
@@ -24,11 +25,11 @@ function collectionLinks(shown: PromptCollectionName): SplitViewFooterLink[] {
 
 function bodyLines(input: BrowserRenderInput): string[] {
   const { geometry, theme } = input;
-  if (input.summaries.length === 0) return [theme.fg("dim", COLLECTION_EMPTY_TEXT[input.collection])];
-  const list = renderPromptList(input.summaries, input.selected, geometry, theme);
+  if (input.summaries.length === 0) return [theme.fg(THEME_DIM, COLLECTION_EMPTY_TEXT[input.collection])];
+  const list = renderPromptList({ summaries: input.summaries, selected: input.selected, geometry, theme });
   const detail = input.rows
     .slice(input.offset, input.offset + geometry.detailHeight)
-    .map((row) => renderPromptRow(row, input.navigation, input.focus === "detail", theme));
+    .map((row) => renderPromptRow({ row, navigation: input.navigation, focused: input.focus === "detail", theme }));
   return splitPanes({ list, detail, geometry, focus: input.focus, theme });
 }
 
@@ -36,10 +37,10 @@ export function renderBrowserLines(input: BrowserRenderInput): string[] {
   const { geometry, theme, collection } = input;
   const count = `${input.summaries.length} ${COLLECTION_LABEL[collection].toLowerCase()}`;
   const lines = [
-    ...viewHeader(theme.fg("muted", `${count}  ${input.keyHint}`), geometry.contentWidth, theme),
+    ...viewHeader(theme.fg(THEME_MUTED, `${count}  ${input.keyHint}`), geometry.contentWidth, theme),
     pageTitle(COLLECTION_LABEL[collection], theme),
     ...bodyLines(input),
-    footerLinks(collectionLinks(collection), input.status, geometry.contentWidth, theme),
+    footerLinks({ links: collectionLinks(collection), status: input.status, width: geometry.contentWidth, theme }),
   ];
   return frameModal(lines, input.columns, theme);
 }

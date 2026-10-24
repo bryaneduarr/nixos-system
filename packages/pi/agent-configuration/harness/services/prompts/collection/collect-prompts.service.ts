@@ -2,6 +2,7 @@ import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import { DRAFT_PROMPT_LABEL } from "../../../constants/prompts/prompt-item.constant.ts";
 import { NEWLINE_CHARACTER } from "../../../constants/prompts/text.constant.ts";
 import type { PromptItem } from "../../../types/prompts/collection/prompt-item.interface.ts";
+import { isUserEntry } from "./is-user-entry.service.ts";
 
 function userPromptText(entry: SessionEntry): string {
   if (entry.type !== "message" || entry.message.role !== "user") return "";
@@ -12,10 +13,6 @@ function userPromptText(entry: SessionEntry): string {
         .filter((block) => block.type === "text")
         .map((block) => block.text)
         .join(NEWLINE_CHARACTER);
-}
-
-function isUserEntry(entry: SessionEntry): boolean {
-  return entry.type === "message" && entry.message.role === "user";
 }
 
 export function collectPrompts(branch: readonly SessionEntry[], draft: string): PromptItem[] {

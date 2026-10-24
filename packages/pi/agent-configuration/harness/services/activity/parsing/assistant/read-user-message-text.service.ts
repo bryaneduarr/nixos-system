@@ -1,4 +1,4 @@
-import { isRecord } from "../../value/is-record.service.ts";
+import { isRecord } from "../../../values/is-record.service.ts";
 
 export function readUserMessageText(content: unknown): string {
   if (typeof content === "string") return content;

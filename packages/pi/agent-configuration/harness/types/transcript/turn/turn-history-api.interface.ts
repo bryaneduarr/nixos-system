@@ -1,5 +1,5 @@
+import type { SplitViewTheme } from "../../split-view/split-view-theme.interface.ts";
 import type { TranscriptRefreshUi } from "./transcript-refresh-ui.interface.ts";
-import type { TurnDividerTheme } from "./turn-divider.interface.ts";
 
 /** Session state the turn history reads from an event or shortcut. */
 export interface TurnHistoryContext {
@@ -8,7 +8,7 @@ export interface TurnHistoryContext {
   /** Interface operations and colors. */
   readonly ui: TranscriptRefreshUi & {
     /** Colors of the current theme. */
-    readonly theme: TurnDividerTheme;
+    readonly theme: Pick<SplitViewTheme, "fg">;
   };
 }
 

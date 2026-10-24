@@ -1,7 +1,7 @@
 import { SHELL_NAME_PATTERN } from "../../../../constants/sessions/cleanup-payload.constant.ts";
 import type { PaneCloseTarget } from "../../../../types/sessions/cleanup/pane/pane-close-target.interface.ts";
+import { isUnknownArray } from "../../../values/is-unknown-array.service.ts";
 import { isObjectRecord } from "../../herdr/response/is-object-record.service.ts";
-import { isUnknownArray } from "../../herdr/response/is-unknown-array.service.ts";
 
 export function dedicatedShell(target: PaneCloseTarget, tab: unknown, pane: unknown, processInfo: unknown): boolean {
   if (!isObjectRecord(tab) || !isObjectRecord(pane) || !isObjectRecord(processInfo)) return false;

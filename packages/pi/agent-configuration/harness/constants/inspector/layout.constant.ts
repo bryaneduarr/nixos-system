@@ -10,7 +10,4 @@ export const PAGE_STEP_CHROME_ROWS = 2;
 export const SUBAGENT_STEP_CHROME_ROWS = 3;
 export const SUBAGENT_JUMP_CHROME_ROWS = 2;
 export const DETAIL_SCROLL_TO_END = Number.MAX_SAFE_INTEGER;
-export const OVERLAY_WIDTH = "92%";
 export const OVERLAY_MIN_WIDTH = 56;
-export const OVERLAY_MAX_HEIGHT = "88%";
-export const OVERLAY_MARGIN = 1;

@@ -1,6 +1,7 @@
 import { BODY_TOP_ROW } from "../../constants/inspector/layout.constant.ts";
 import { LIST_PAGE_TEXT } from "../../constants/inspector/list-page-text.constant.ts";
 import { DETAIL_TITLE_ROWS } from "../../constants/split-view/layout.constant.ts";
+import { THEME_DIM } from "../../constants/split-view/theme-color.constant.ts";
 import { wrappedDetail } from "../../services/inspector/detail/lines/wrapped-detail.service.ts";
 import { findRowAt } from "../../services/inspector/navigation/find-row-at.service.ts";
 import { computeListScroll } from "../../services/split-view/layout/compute-list-scroll.service.ts";
@@ -25,11 +26,16 @@ export function renderToolsPage({
   const lines = [pageTitle(pageText.title, theme)];
 
   if (rows.length === 0) {
-    lines.push(theme.fg("dim", pageText.empty));
+    lines.push(theme.fg(THEME_DIM, pageText.empty));
     return { lines, layout: { kind: "none" }, listScroll, detailScroll };
   }
 
-  const clampedListScroll = computeListScroll(listScroll, rows.length, geometry.listHeight, selected);
+  const clampedListScroll = computeListScroll({
+    previous: listScroll,
+    length: rows.length,
+    height: geometry.listHeight,
+    selected,
+  });
   const listLines = renderToolList({
     rows,
     width: geometry.leftWidth,

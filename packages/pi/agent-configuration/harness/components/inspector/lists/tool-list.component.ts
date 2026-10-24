@@ -1,7 +1,9 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
 import { NO_TEXT_LABEL } from "../../../constants/inspector/label.constant.ts";
+import { THEME_ACCENT, THEME_TEXT } from "../../../constants/split-view/theme-color.constant.ts";
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
+import { ACTIVE_MARKER } from "../../../constants/text/glyph.constant.ts";
 import { readEndedAt } from "../../../services/inspector/entries/read-ended-at.service.ts";
 import { formatDuration } from "../../../services/inspector/format/format-duration.service.ts";
 import { formatTime } from "../../../services/inspector/format/format-time.service.ts";
@@ -55,14 +57,17 @@ function toolRowText(
   const target = toolTargetLabel(call.toolName, call.args, row.entry.text);
 
   if (call.toolName === MESSAGE_ACTIVITY_NAME) {
-    return theme.fg("accent", `◆ MESSAGE ${String(call.args.number ?? "")}  ${target || NO_TEXT_LABEL}`);
+    return theme.fg(
+      THEME_ACCENT,
+      `${ACTIVE_MARKER}MESSAGE ${String(call.args.number ?? "")}  ${target || NO_TEXT_LABEL}`,
+    );
   }
 
   const prefix = call.toolName === TASK_TOOL_NAME ? "SUBAGENT " : "";
   const startTime = rowStartTime(row, call);
   const label = `${prefix}${toolLabel(call.toolName)}${startTime}  ${rowElapsed(row)}${rowUsage(row, call.toolName)}  ${target}`;
   const disclosure = rowDisclosure(row, expandedTasks, isLastChild);
-  return `${statusGlyph(call.status, theme)} ${disclosure}${theme.fg(isSelected ? "accent" : "text", label)}`;
+  return `${statusGlyph(call.status, theme)} ${disclosure}${theme.fg(isSelected ? THEME_ACCENT : THEME_TEXT, label)}`;
 }
 
 export function renderToolList({
@@ -83,7 +88,9 @@ export function renderToolList({
     }
     const isSelected = scroll + index === selected;
     const isLastChild = isLastChildRow(row, rows, scroll + index);
-    out.push(listRow(toolRowText(row, expandedTasks, isSelected, isLastChild, theme), width, isSelected, theme));
+    out.push(
+      listRow({ text: toolRowText(row, expandedTasks, isSelected, isLastChild, theme), width, isSelected, theme }),
+    );
   }
   return out;
 }

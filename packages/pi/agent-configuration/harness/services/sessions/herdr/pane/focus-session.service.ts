@@ -2,7 +2,7 @@ import { PI_AGENT_NAME } from "../../../../constants/sessions/herdr.constant.ts"
 import type { HerdrCommand } from "../../../../types/sessions/herdr/command/herdr-command.interface.ts";
 import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
 import type { SessionRegistry } from "../../../../types/sessions/registry/row/session-registry.interface.ts";
-import { isUnknownArray } from "../response/is-unknown-array.service.ts";
+import { isUnknownArray } from "../../../values/is-unknown-array.service.ts";
 import { readObjectValue } from "../response/read-object-value.service.ts";
 import { paneIdentity } from "./pane-identity.service.ts";
 

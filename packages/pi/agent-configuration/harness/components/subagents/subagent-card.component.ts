@@ -1,4 +1,5 @@
 import type { Component } from "@earendil-works/pi-tui";
+import { THEME_ACCENT, THEME_TEXT } from "../../constants/split-view/theme-color.constant.ts";
 import { CARD_BOX_TITLE } from "../../constants/subagents/card.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
 import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
@@ -36,7 +37,7 @@ function runningCallStart(calls: readonly SubToolActivity[]): ValueState<number>
 function reusableBox(theme: SubagentCardTheme, lastComponent: ValueState<Component>): ToolBox {
   if (lastComponent.state === "present" && lastComponent.value instanceof ToolBox) return lastComponent.value;
 
-  return new ToolBox(theme, "", [], "accent", false);
+  return new ToolBox(theme, "", [], THEME_ACCENT, false);
 }
 
 export function renderSubagentCard(
@@ -53,7 +54,7 @@ export function renderSubagentCard(
   const calls = resolveCardCalls(progressLookup, activityLookup);
   const call = calls.findLast((toolCall) => toolCall.status === "running") ?? calls.at(-1);
   const activity = call ? renderCallLines(theme, call, status) : renderIdleLines(theme, status);
-  const lines = [theme.fg("text", oneLine(label)), ...activity];
+  const lines = [theme.fg(THEME_TEXT, oneLine(label)), ...activity];
 
   if (status !== "running") {
     lines.push(renderFinalStatusLine(theme, status));
@@ -61,8 +62,8 @@ export function renderSubagentCard(
 
   const box = reusableBox(theme, lastComponent);
   const boxTitle = theme.fg("toolTitle", theme.bold(CARD_BOX_TITLE));
-  const titleLine = status === "running" ? `${theme.fg("accent", "/")} ${boxTitle}` : boxTitle;
-  const color = status === "error" ? "error" : "accent";
+  const titleLine = status === "running" ? `${theme.fg(THEME_ACCENT, "/")} ${boxTitle}` : boxTitle;
+  const color = status === "error" ? "error" : THEME_ACCENT;
 
   box.setContent({
     title: titleLine,

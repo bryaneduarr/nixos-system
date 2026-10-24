@@ -2,6 +2,7 @@ import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-resul
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { HydrateAssistantInput } from "../../../types/activity/hydrate/hydrate-assistant-input.interface.ts";
 import type { AssistantActivitySnapshot } from "../../../types/activity/store/agent-activity.interface.ts";
+import { isRecord } from "../../values/is-record.service.ts";
 import { readApiError } from "../parsing/assistant/read-api-error.service.ts";
 import { readAssistantActivity } from "../parsing/assistant/read-assistant-activity.service.ts";
 import { readSubagentUsage } from "../parsing/subagent/read-subagent-usage.service.ts";
@@ -9,7 +10,6 @@ import { recordApiError } from "../record/record-api-error.service.ts";
 import { recordAssistantTurn } from "../record/record-assistant-turn.service.ts";
 import { recordThinking } from "../record/record-thinking.service.ts";
 import { recordUpdate } from "../record/record-update.service.ts";
-import { isRecord } from "../value/is-record.service.ts";
 
 export function hydrateAssistantMessage(input: HydrateAssistantInput): void {
   const { entryId, message, cwd, startedAt } = input;

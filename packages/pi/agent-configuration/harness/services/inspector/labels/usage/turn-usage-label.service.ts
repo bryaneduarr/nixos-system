@@ -1,3 +1,4 @@
+import { DOT_SEPARATOR } from "../../../../constants/text/separator.constant.ts";
 import type { SubagentUsage } from "../../../../types/activity/parsing/subagent/subagent-usage.interface.ts";
 import { formatTokens } from "../../format/format-tokens.service.ts";
 
@@ -7,5 +8,5 @@ export function turnUsageLabel(usage: SubagentUsage): string {
     `out ${formatTokens(usage.outputTokens)}`,
     `cache read ${formatTokens(usage.cacheReadTokens)}`,
     `cache write ${formatTokens(usage.cacheWriteTokens)}`,
-  ].join(" · ");
+  ].join(DOT_SEPARATOR);
 }

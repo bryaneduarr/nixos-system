@@ -6,7 +6,7 @@ import { PI_AGENT_NAME } from "../../../../constants/sessions/herdr.constant.ts"
 import { AGENT_START_TIMEOUT_MS, PANE_MIN_SPLIT_RATIO } from "../../../../constants/sessions/herdr-timing.constant.ts";
 import type { HerdrCommand } from "../../../../types/sessions/herdr/command/herdr-command.interface.ts";
 import type { SessionPaneSplit } from "../../../../types/sessions/herdr/pane/session-creation.interface.ts";
-import { isUnknownArray } from "../response/is-unknown-array.service.ts";
+import { isUnknownArray } from "../../../values/is-unknown-array.service.ts";
 import { readObjectValue } from "../response/read-object-value.service.ts";
 import { awaitSessionRegistration } from "./await-session-registration.service.ts";
 import { focusSession } from "./focus-session.service.ts";

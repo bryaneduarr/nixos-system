@@ -7,13 +7,14 @@ import {
   MENU_HEIGHT_RATIO,
   MENU_LINES_PER_ROW,
 } from "../../../../constants/sessions/menu.constant.ts";
+import { THEME_ACCENT, THEME_MUTED } from "../../../../constants/split-view/theme-color.constant.ts";
 import type { SessionMenuView } from "../../../../types/sessions/menu/session/session-menu-view.interface.ts";
 import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
 import { terminalLabel } from "./terminal-label.service.ts";
 
 export function renderSessionMenu(view: SessionMenuView): string[] {
   const selected = view.rows.findIndex((row) => isHighlighted(view, row));
-  const lines = [view.theme.bold(view.theme.fg("accent", "Pi sessions")), ...view.filterLines, ""];
+  const lines = [view.theme.bold(view.theme.fg(THEME_ACCENT, "Pi sessions")), ...view.filterLines, ""];
   const count = Math.max(
     1,
     Math.floor((view.terminalRows * MENU_HEIGHT_RATIO - MENU_CHROME_LINES) / MENU_LINES_PER_ROW),
@@ -32,7 +33,7 @@ function renderRows(view: SessionMenuView, rows: readonly LiveSession[]): string
   for (const row of rows) {
     if (row.cwd !== cwd) {
       cwd = row.cwd;
-      lines.push(view.theme.fg("muted", terminalLabel(basename(cwd) || cwd)));
+      lines.push(view.theme.fg(THEME_MUTED, terminalLabel(basename(cwd) || cwd)));
     }
     const prefix = isHighlighted(view, row) ? "> " : "  ";
     const status =

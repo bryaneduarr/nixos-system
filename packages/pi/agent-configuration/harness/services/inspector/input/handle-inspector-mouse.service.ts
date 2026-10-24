@@ -7,7 +7,9 @@ import {
   SUBAGENT_LIST_TOP_ROW,
 } from "../../../constants/inspector/layout.constant.ts";
 import { PANE_DIVIDER_WIDTH } from "../../../constants/split-view/layout.constant.ts";
+import { ACTIVE_MARKER } from "../../../constants/text/glyph.constant.ts";
 import type { InspectorInput } from "../../../types/inspector/input/inspector-input.interface.ts";
+import { formatFooterLink } from "../../split-view/footer/format-footer-link.service.ts";
 import { rowKey } from "../navigation/row-key.service.ts";
 
 const HANDLED: TuiMouseEventResult = { handled: true, focus: true };
@@ -16,7 +18,7 @@ function handleFooterClick(event: TuiMouseEvent, inspector: InspectorInput): boo
   if (event.y !== inspector.footerY) return false;
   let linkLeft = FOOTER_LEFT_INSET;
   for (const link of FOOTER_LINKS) {
-    const linkWidth = visibleWidth(`◆ ${link.key} ${link.name}`);
+    const linkWidth = visibleWidth(formatFooterLink(link, ACTIVE_MARKER));
     const isOnLink = event.x >= linkLeft && event.x < linkLeft + linkWidth;
     if (isOnLink) {
       inspector.switchPage(link.page);

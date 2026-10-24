@@ -4,20 +4,12 @@ import {
   OVERLAY_MARGIN,
   OVERLAY_MAX_HEIGHT,
   OVERLAY_WIDTH,
-} from "../../../constants/prompts/viewer.constant.ts";
-import type { PromptSelection } from "../../../types/prompts/collection/prompt-selection.interface.ts";
-import type { ClipboardWriter } from "../../../types/prompts/input/clipboard-writer.interface.ts";
-import type { PromptCollections } from "../../../types/prompts/view/prompt-collections.interface.ts";
-import type { PromptViewerUi } from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
+} from "../../../constants/split-view/overlay.constant.ts";
+import type { ViewPromptRequest } from "../../../types/prompts/view/view-prompt-request.interface.ts";
 
-export async function viewPrompt(
-  ui: PromptViewerUi,
-  collections: PromptCollections,
-  clipboard: ClipboardWriter,
-  selection: PromptSelection,
-): Promise<void> {
+export async function viewPrompt({ ui, collections, clipboard, selection }: ViewPromptRequest): Promise<void> {
   await ui.custom<void>(
-    (host, theme, _keybindings, done) => new PromptBrowser(collections, host, theme, done, clipboard, selection),
+    (host, theme, _keybindings, done) => new PromptBrowser({ collections, host, theme, done, clipboard, selection }),
     {
       overlay: true,
       overlayOptions: {

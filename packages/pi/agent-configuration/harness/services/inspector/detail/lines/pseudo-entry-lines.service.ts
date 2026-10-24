@@ -6,6 +6,7 @@ import {
 } from "../../../../constants/activity/activity-entry.constant.ts";
 import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail-line.constant.ts";
 import { NO_TEXT_LABEL } from "../../../../constants/inspector/label.constant.ts";
+import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";
 import { activityStore } from "../../../../stores/activity/activity.store.ts";
 import type { ToolActivity } from "../../../../types/activity/store/tool-activity.interface.ts";
 import type { DetailLine } from "../../../../types/inspector/detail/detail-line.interface.ts";
@@ -25,9 +26,9 @@ function userMessageBody(entry: ToolActivity, startedAt: number, text: string, w
   const callLabel = `${calls} tool call${calls === 1 ? "" : "s"}`;
 
   return [
-    { text: `${callLabel} after this message · ${formatTime(startedAt)}`, color: "accent", bold: false },
+    { text: `${callLabel} after this message · ${formatTime(startedAt)}`, color: THEME_ACCENT, bold: false },
     BLANK_DETAIL_LINE,
-    ...boxedDetailLines("user message", text || NO_TEXT_LABEL, "accent", width),
+    ...boxedDetailLines("user message", text || NO_TEXT_LABEL, THEME_ACCENT, width),
   ];
 }
 
@@ -42,28 +43,28 @@ export function pseudoEntryLines(
   if (tool === MESSAGE_ACTIVITY_NAME) return userMessageBody(entry, startedAt, rawText, width);
   if (tool === UPDATE_ACTIVITY_NAME) {
     return [
-      { text: `AGENT UPDATE  ${timing}`, color: "accent", bold: true },
+      { text: `AGENT UPDATE  ${timing}`, color: THEME_ACCENT, bold: true },
       BLANK_DETAIL_LINE,
-      ...boxedDetailLines("update", rawText, "accent", width),
+      ...boxedDetailLines("update", rawText, THEME_ACCENT, width),
     ];
   }
   if (tool === REPLY_ACTIVITY_NAME) {
     return [
-      { text: `REPLY  ${timing}`, color: "accent", bold: true },
+      { text: `REPLY  ${timing}`, color: THEME_ACCENT, bold: true },
       BLANK_DETAIL_LINE,
-      ...boxedDetailLines("reply", rawText, "accent", width),
+      ...boxedDetailLines("reply", rawText, THEME_ACCENT, width),
     ];
   }
   if (tool === TOKENS_ACTIVITY_NAME) {
     return [
-      { text: `TOKENS  ${timing}`, color: "accent", bold: true },
+      { text: `TOKENS  ${timing}`, color: THEME_ACCENT, bold: true },
       BLANK_DETAIL_LINE,
-      ...boxedDetailLines("usage", turnUsageDetail(entry.usage), "accent", width),
+      ...boxedDetailLines("usage", turnUsageDetail(entry.usage), THEME_ACCENT, width),
     ];
   }
   return [
-    { text: `THINKING  ${timing}`, color: "accent", bold: true },
+    { text: `THINKING  ${timing}`, color: THEME_ACCENT, bold: true },
     BLANK_DETAIL_LINE,
-    ...boxedDetailLines("thinking", rawText || "(redacted)", "accent", width),
+    ...boxedDetailLines("thinking", rawText || "(redacted)", THEME_ACCENT, width),
   ];
 }

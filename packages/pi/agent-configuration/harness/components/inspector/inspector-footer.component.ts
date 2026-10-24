@@ -6,5 +6,5 @@ import { footerLinks } from "../split-view/footer-links.component.ts";
 export function inspectorFooter(page: InspectorPage, status: string, width: number, theme: Theme): string {
   const activePage = page === "subagent" ? "subagents" : page;
   const links = FOOTER_LINKS.map((link) => ({ key: link.key, name: link.name, active: link.page === activePage }));
-  return footerLinks(links, status, width, theme);
+  return footerLinks({ links, status, width, theme });
 }

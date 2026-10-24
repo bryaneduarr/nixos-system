@@ -1,11 +1,12 @@
 import { expect, test } from "bun:test";
 import type { InspectorInput } from "../../../types/inspector/input/inspector-input.interface.ts";
-import type { InspectorFocus, InspectorPage } from "../../../types/inspector/navigation/inspector-page.interface.ts";
+import type { InspectorPage } from "../../../types/inspector/navigation/inspector-page.interface.ts";
+import type { SplitViewFocus } from "../../../types/split-view/split-view-focus.interface.ts";
 import { handleInspectorKey } from "./handle-inspector-key.service.ts";
 
 function createInspectorInput(
   page: InspectorPage,
-  focus: InspectorFocus,
+  focus: SplitViewFocus,
   switchedPages: InspectorPage[],
 ): InspectorInput {
   return {

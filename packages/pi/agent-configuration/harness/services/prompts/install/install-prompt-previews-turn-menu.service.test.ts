@@ -4,12 +4,12 @@ import { TURN_MENU_SHORTCUT, TURN_REFRESH_WIDGET_KEY } from "../../../constants/
 import { turnView } from "../../../stores/transcript/turn-view.store.ts";
 import type { PromptContext } from "../../../types/prompts/install/prompt-context.interface.ts";
 import type { PromptExtensionApi } from "../../../types/prompts/install/prompt-extension-api.interface.ts";
-import type { PromptTheme } from "../../../types/prompts/render/prompt-theme.interface.ts";
 import type { PromptPanel } from "../../../types/prompts/view/prompt-panel.interface.ts";
 import type { PromptBrowserFactory } from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
+import type { SplitViewTheme } from "../../../types/split-view/split-view-theme.interface.ts";
 import { installPromptPreviews } from "./install-prompt-previews.service.ts";
 
-const plainTheme: PromptTheme = {
+const plainTheme: SplitViewTheme = {
   fg: (_color, text) => text,
   bg: (_color, text) => text,
   bold: (text) => text,

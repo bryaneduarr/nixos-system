@@ -1,20 +1,13 @@
-import { THEME_ACCENT, THEME_SELECTED_BACKGROUND } from "../../../constants/prompts/theme.constant.ts";
-import type { DisplayRow } from "../../../types/prompts/display/display-row.interface.ts";
+import { SELECTED_ROW_BACKGROUND, THEME_ACCENT } from "../../../constants/split-view/theme-color.constant.ts";
 import type { Grapheme } from "../../../types/prompts/navigation/grapheme.interface.ts";
-import type { PromptNavigation } from "../../../types/prompts/navigation/prompt-navigation.interface.ts";
 import type { TextRange } from "../../../types/prompts/navigation/selection.interface.ts";
-import type { PromptTheme } from "../../../types/prompts/render/prompt-theme.interface.ts";
+import type { PromptRowOptions } from "../../../types/prompts/render/prompt-row-options.interface.ts";
 
 function isUnitInSpan(unit: Grapheme, span: TextRange): boolean {
   return unit.start < span[1] && unit.end > span[0];
 }
 
-export function renderPromptRow(
-  row: DisplayRow,
-  navigation: PromptNavigation,
-  focused: boolean,
-  theme: PromptTheme,
-): string {
+export function renderPromptRow({ row, navigation, focused, theme }: PromptRowOptions): string {
   const selection = navigation.range();
   return row
     .map((cell) => {
@@ -22,8 +15,8 @@ export function renderPromptRow(
       const selected = selection.found && unit !== undefined && isUnitInSpan(unit, selection.range);
       const cursor = focused && cell.index === navigation.cursor;
       const text = cell.text || (selected || cursor ? " " : "");
-      if (selected) return theme.bg(THEME_SELECTED_BACKGROUND, text);
-      if (cursor) return theme.bg(THEME_SELECTED_BACKGROUND, theme.fg(THEME_ACCENT, text));
+      if (selected) return theme.bg(SELECTED_ROW_BACKGROUND, text);
+      if (cursor) return theme.bg(SELECTED_ROW_BACKGROUND, theme.fg(THEME_ACCENT, text));
       return text;
     })
     .join("");

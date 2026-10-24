@@ -1,9 +1,9 @@
 import type { ExtensionAPI, ExtensionContext, ToolExecutionStartEvent } from "@earendil-works/pi-coding-agent";
 import { BACKEND_TOOLS } from "../../../constants/tools/backend-tools.constant.ts";
 import { activityStore } from "../../../stores/activity/activity.store.ts";
+import { isRecord } from "../../values/is-record.service.ts";
 import { readRendererResult } from "../parsing/tool-result/read-renderer-result.service.ts";
 import { readToolResultStatus } from "../parsing/tool-result/read-tool-result-status.service.ts";
-import { isRecord } from "../value/is-record.service.ts";
 
 const BACKEND_TOOL_NAMES: ReadonlySet<string> = new Set<string>(BACKEND_TOOLS);
 

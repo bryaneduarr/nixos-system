@@ -1,11 +1,15 @@
-import { NEWLINE_CHARACTER } from "../../../constants/prompts/text.constant.ts";
+import { NEWLINE_CHARACTER, TEXT_START_OFFSET } from "../../../constants/prompts/text.constant.ts";
 import type { Grapheme } from "../../../types/prompts/navigation/grapheme.interface.ts";
 import type { TextRange } from "../../../types/prompts/navigation/selection.interface.ts";
 
+function lineRangeAt(text: string, offset: number): TextRange {
+  const start = offset === 0 ? 0 : text.lastIndexOf(NEWLINE_CHARACTER, offset - 1) + 1;
+  const newline = text.indexOf(NEWLINE_CHARACTER, offset);
+  return [start, newline < 0 ? text.length : newline + 1];
+}
+
 export function findLineRange(text: string, units: readonly Grapheme[], index: number): TextRange {
   const unit = units[index];
-  const unitStart = unit === undefined ? 0 : unit.start;
-  const start = unitStart === 0 ? 0 : text.lastIndexOf(NEWLINE_CHARACTER, unitStart - 1) + 1;
-  const newline = text.indexOf(NEWLINE_CHARACTER, unitStart);
-  return [start, newline < 0 ? text.length : newline + 1];
+  if (unit === undefined) return lineRangeAt(text, TEXT_START_OFFSET);
+  return lineRangeAt(text, unit.start);
 }

@@ -1,6 +1,7 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
 import { EMPTY } from "../../../components/tool-rendering/empty.component.ts";
+import { THEME_ACCENT } from "../../../constants/split-view/theme-color.constant.ts";
 import type {
   RendererContext,
   RendererOptions,
@@ -20,7 +21,7 @@ import { resultVisualState } from "../presentation/result-visual-state.service.t
 import { runningPresentation } from "../presentation/running-presentation.service.ts";
 
 function runningBoxTitle(tool: HarnessTool, theme: Theme): string {
-  return `${theme.fg("accent", "/")} ${boxTitle(tool, theme)}`;
+  return `${theme.fg(THEME_ACCENT, "/")} ${boxTitle(tool, theme)}`;
 }
 
 export function createHarnessRenderers(tool: HarnessTool) {

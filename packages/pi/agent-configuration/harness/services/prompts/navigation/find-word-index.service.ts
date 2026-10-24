@@ -3,17 +3,14 @@ import type { Grapheme } from "../../../types/prompts/navigation/grapheme.interf
 const WORD_CHARACTER_PATTERN = /[\p{L}\p{N}_]/u;
 const WHITESPACE_ONLY_PATTERN = /^\s+$/u;
 
-function unitTextAt(units: readonly Grapheme[], index: number): string {
-  const unit = units[index];
-  return unit === undefined ? "" : unit.text;
-}
-
 function isWordUnit(units: readonly Grapheme[], index: number): boolean {
-  return WORD_CHARACTER_PATTERN.test(unitTextAt(units, index));
+  const unit = units[index];
+  return unit !== undefined && WORD_CHARACTER_PATTERN.test(unit.text);
 }
 
 function isSpaceUnit(units: readonly Grapheme[], index: number): boolean {
-  return WHITESPACE_ONLY_PATTERN.test(unitTextAt(units, index));
+  const unit = units[index];
+  return unit !== undefined && WHITESPACE_ONLY_PATTERN.test(unit.text);
 }
 
 function findNextWordStart(units: readonly Grapheme[], cursor: number): number {

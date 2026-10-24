@@ -3,11 +3,8 @@ import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.t
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";
 import { toValueState } from "../../../activity/value/to-value-state.service.ts";
 import { resolveTaskRole } from "../../../subagents/roles/resolve-task-role.service.ts";
+import { isUnknownArray } from "../../../values/is-unknown-array.service.ts";
 import { readStringList } from "./read-string-list.service.ts";
-
-function isUnknownArray(value: unknown): value is readonly unknown[] {
-  return Array.isArray(value);
-}
 
 function roleAndToolLines(
   args: Record<string, unknown>,

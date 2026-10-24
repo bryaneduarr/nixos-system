@@ -1,4 +1,5 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
+import { THEME_MUTED, THEME_TEXT } from "../../../constants/split-view/theme-color.constant.ts";
 import { DONE_DETAIL_LABEL } from "../../../constants/tool-rendering/done-detail-label.constant.ts";
 import {
   ERROR_DETAIL_FALLBACK,
@@ -9,10 +10,10 @@ import {
 import type { HarnessPresentation } from "../../../types/tool-rendering/presentation/harness-presentation.interface.ts";
 
 export function presentationLines(presentation: HarnessPresentation, theme: Theme): string[] {
-  const lines = [theme.fg("text", presentation.target)];
+  const lines = [theme.fg(THEME_TEXT, presentation.target)];
   if (presentation.state === "running") {
     lines.push(theme.fg("warning", RUNNING_LABEL));
-    for (const detail of presentation.details) lines.push(theme.fg("muted", detail));
+    for (const detail of presentation.details) lines.push(theme.fg(THEME_MUTED, detail));
     return lines;
   }
   const [first, ...rest] = presentation.details;
@@ -22,6 +23,6 @@ export function presentationLines(presentation: HarnessPresentation, theme: Them
     return lines;
   }
   lines.push(theme.fg("success", `${DONE_DETAIL_LABEL} - ${first ?? OK_DETAIL_FALLBACK}`));
-  for (const detail of rest) lines.push(theme.fg("muted", detail));
+  for (const detail of rest) lines.push(theme.fg(THEME_MUTED, detail));
   return lines;
 }

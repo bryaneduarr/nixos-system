@@ -1,16 +1,13 @@
 import { expect, test } from "bun:test";
 import { visibleWidth } from "@earendil-works/pi-tui";
 import type { ClipboardWriter } from "../../../types/prompts/input/clipboard-writer.interface.ts";
-import type { PromptTheme } from "../../../types/prompts/render/prompt-theme.interface.ts";
+import type { PromptOverlayOptions } from "../../../types/prompts/view/prompt-overlay-options.interface.ts";
 import type { PromptPanel } from "../../../types/prompts/view/prompt-panel.interface.ts";
-import type {
-  PromptBrowserFactory,
-  PromptOverlayOptions,
-  PromptViewerUi,
-} from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
+import type { PromptBrowserFactory, PromptViewerUi } from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
+import type { SplitViewTheme } from "../../../types/split-view/split-view-theme.interface.ts";
 import { viewPrompt } from "./view-prompt.service.ts";
 
-const plainTheme: PromptTheme = {
+const plainTheme: SplitViewTheme = {
   fg: (_color, text) => text,
   bg: (_color, text) => text,
   bold: (text) => text,
@@ -35,12 +32,12 @@ test("viewer scrolls the complete prompt, resizes, and closes without editing", 
         panels.push(factory({ terminal, requestRender: () => renders++ }, plainTheme, {}, resolve));
       }),
   };
-  const viewing = viewPrompt(
+  const viewing = viewPrompt({
     ui,
-    { prompts: [{ text, label: "Latest", turn: { kind: "turn", turnsFromLatest: 0 } }], outputs: [] },
-    unusedClipboard,
-    { kind: "read-only" },
-  );
+    collections: { prompts: [{ text, label: "Latest", turn: { kind: "turn", turnsFromLatest: 0 } }], outputs: [] },
+    clipboard: unusedClipboard,
+    selection: { kind: "read-only" },
+  });
   const panel = requireElement(panels, 0, "viewer did not open");
   expect(panel.render(40).join("\n")).toContain("line 0");
   expect(panel.render(40).join("\n")).not.toContain("line 19");
@@ -70,12 +67,12 @@ test("viewer opens a centered overlay focused on the first item without editor w
       });
     },
   };
-  const viewing = viewPrompt(
+  const viewing = viewPrompt({
     ui,
-    { prompts: [{ text: draft, label: "Draft", turn: { kind: "draft" } }], outputs: [] },
-    unusedClipboard,
-    { kind: "read-only" },
-  );
+    collections: { prompts: [{ text: draft, label: "Draft", turn: { kind: "draft" } }], outputs: [] },
+    clipboard: unusedClipboard,
+    selection: { kind: "read-only" },
+  });
   expect(overlays).toEqual([
     {
       overlay: true,

@@ -2,6 +2,7 @@ import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail-line.c
 import { SUMMARY_LABEL_WIDTH } from "../../../../constants/inspector/format.constant.ts";
 import { EMPTY_VALUE_LABEL } from "../../../../constants/inspector/label.constant.ts";
 import { SUBAGENT_STATUS_TEXT } from "../../../../constants/inspector/subagent-status.constant.ts";
+import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";
 import type { SubToolActivity } from "../../../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
 import type { ToolActivityUsage } from "../../../../types/activity/parsing/subagent/tool-activity-usage.interface.ts";
 import type { ToolActivity } from "../../../../types/activity/store/tool-activity.interface.ts";
@@ -15,7 +16,7 @@ import { readSubagentElapsed } from "../../subagents/read-subagent-elapsed.servi
 import { readSubagentStatus } from "../../subagents/read-subagent-status.service.ts";
 
 function summaryLine(label: string, text: string): DetailLine {
-  return { text: `${label.padEnd(SUMMARY_LABEL_WIDTH)}${text}`, color: "accent", bold: false };
+  return { text: `${label.padEnd(SUMMARY_LABEL_WIDTH)}${text}`, color: THEME_ACCENT, bold: false };
 }
 
 function argumentText(entry: ToolActivity, key: string): string {
@@ -66,7 +67,7 @@ export function taskSummaryLines(entry: ToolActivity): DetailLine[] {
   const elapsed = formatDuration(readSubagentElapsed(entry));
 
   return [
-    { text: titleText(entry), color: "accent", bold: true },
+    { text: titleText(entry), color: THEME_ACCENT, bold: true },
     BLANK_DETAIL_LINE,
     summaryLine("ROLE", roleText(entry)),
     { ...summaryLine("STATUS", `${status.label}${stepText(entry)}`), color: status.color },

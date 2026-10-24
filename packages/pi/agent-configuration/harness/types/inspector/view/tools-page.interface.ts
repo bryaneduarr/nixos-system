@@ -1,8 +1,9 @@
 import type { Theme } from "@earendil-works/pi-coding-agent";
+import type { SplitViewFocus } from "../../split-view/split-view-focus.interface.ts";
 import type { SplitViewGeometry } from "../../split-view/split-view-geometry.interface.ts";
 import type { DetailArtifact } from "../detail/detail-artifact.interface.ts";
 import type { InspectorRow } from "../detail/inspector-row.interface.ts";
-import type { InspectorFocus, ListInspectorPage } from "../navigation/inspector-page.interface.ts";
+import type { ListInspectorPage } from "../navigation/inspector-page.interface.ts";
 import type { InspectorLayoutState } from "./inspector-layout.interface.ts";
 
 /** Inputs for drawing a page that lists rows next to a detail pane. */
@@ -10,7 +11,7 @@ export interface ToolsPageOptions {
   /** Page shown. */
   readonly page: ListInspectorPage;
   /** Pane that has keyboard focus. */
-  readonly focus: InspectorFocus;
+  readonly focus: SplitViewFocus;
   /** Rows of the tool list. */
   readonly rows: readonly InspectorRow[];
   /** Index of the selected row. */

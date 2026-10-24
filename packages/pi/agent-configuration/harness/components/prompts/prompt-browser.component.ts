@@ -6,28 +6,25 @@ import {
 } from "../../constants/prompts/collection.constant.ts";
 import { KEY_CTRL_C, KEY_ENTER, KEY_ESCAPE, KEY_TAB } from "../../constants/prompts/keys.constant.ts";
 import { choosePromptTurn } from "../../services/prompts/collection/choose-prompt-turn.service.ts";
-import { computeScrollOffset } from "../../services/prompts/display/compute-scroll-offset.service.ts";
 import { createDisplayRowCache } from "../../services/prompts/display/create-display-row-cache.service.ts";
 import { cursorRow } from "../../services/prompts/display/cursor-row.service.ts";
 import { applyDetailKey } from "../../services/prompts/input/apply-detail-key.service.ts";
 import { applyListKey } from "../../services/prompts/input/apply-list-key.service.ts";
 import { copyPromptText } from "../../services/prompts/input/copy-prompt-text.service.ts";
-import { createPromptNavigation } from "../../services/prompts/navigation/create-prompt-navigation.service.ts";
+import { createItemNavigation } from "../../services/prompts/navigation/create-item-navigation.service.ts";
 import { renderBrowserLines } from "../../services/prompts/render/render-browser-lines.service.ts";
 import { summarizeCollections } from "../../services/prompts/render/summarize-collections.service.ts";
+import { computeListScroll } from "../../services/split-view/layout/compute-list-scroll.service.ts";
 import { readSplitViewGeometry } from "../../services/split-view/layout/read-split-view-geometry.service.ts";
-import type { PromptSelection } from "../../types/prompts/collection/prompt-selection.interface.ts";
 import type { DisplayRow } from "../../types/prompts/display/display-row.interface.ts";
-import type { ClipboardWriter } from "../../types/prompts/input/clipboard-writer.interface.ts";
-import type { PromptFocus } from "../../types/prompts/input/prompt-focus.interface.ts";
 import type { PromptNavigation } from "../../types/prompts/navigation/prompt-navigation.interface.ts";
-import type { PromptTheme } from "../../types/prompts/render/prompt-theme.interface.ts";
-import type { PromptBrowserHost } from "../../types/prompts/view/prompt-browser-host.interface.ts";
-import type { PromptCollectionName, PromptCollections } from "../../types/prompts/view/prompt-collections.interface.ts";
+import type { PromptBrowserOptions } from "../../types/prompts/view/prompt-browser-options.interface.ts";
+import type { PromptCollectionName } from "../../types/prompts/view/prompt-collections.interface.ts";
 import type { PromptPanel } from "../../types/prompts/view/prompt-panel.interface.ts";
+import type { SplitViewFocus } from "../../types/split-view/split-view-focus.interface.ts";
 
 export class PromptBrowser implements PromptPanel {
-  focus: PromptFocus = "detail";
+  focus: SplitViewFocus = "detail";
   collection: PromptCollectionName;
   selected = 0;
   navigation: PromptNavigation;
@@ -38,18 +35,10 @@ export class PromptBrowser implements PromptPanel {
   private closed = false;
   private readonly rowCache = createDisplayRowCache();
   private readonly summaries: Readonly<Record<PromptCollectionName, readonly string[]>>;
-
-  constructor(
-    private readonly collections: PromptCollections,
-    private readonly host: PromptBrowserHost,
-    private readonly theme: PromptTheme,
-    private readonly done: () => void,
-    private readonly clipboard: ClipboardWriter,
-    private readonly selection: PromptSelection,
-  ) {
+  constructor(private readonly options: PromptBrowserOptions) {
+    const { collections } = options;
     this.collection = collections.prompts.length > 0 ? "prompts" : "outputs";
-    const firstItem = collections[this.collection].at(0);
-    this.navigation = createPromptNavigation(firstItem === undefined ? "" : firstItem.text);
+    this.navigation = createItemNavigation(collections[this.collection], 0);
     this.summaries = summarizeCollections(collections);
   }
 
@@ -59,7 +48,7 @@ export class PromptBrowser implements PromptPanel {
 
   render(width: number): string[] {
     const columns = Math.max(0, Math.floor(width));
-    const geometry = readSplitViewGeometry(columns, this.host.terminal.rows);
+    const geometry = readSplitViewGeometry(columns, this.options.host.terminal.rows);
     this.detailWidth = geometry.rightWidth;
     this.pageSize = geometry.detailHeight;
     const rows = this.rowCache.rows(this.navigation.units, this.detailWidth);
@@ -74,37 +63,45 @@ export class PromptBrowser implements PromptPanel {
       focus: this.focus,
       selected: this.selected,
       summaries: this.summaries[this.collection],
-      keyHint: this.selection.kind === "choose-turn" ? TURN_BROWSER_KEY_HINT : PROMPT_BROWSER_KEY_HINT,
+      keyHint: this.options.selection.kind === "choose-turn" ? TURN_BROWSER_KEY_HINT : PROMPT_BROWSER_KEY_HINT,
       status: this.status,
-      theme: this.theme,
-    }).slice(0, this.host.terminal.rows);
+      theme: this.options.theme,
+    }).slice(0, this.options.host.terminal.rows);
   }
 
   private scrollToCursor(rows: readonly DisplayRow[]): void {
     const cursorRowIndex = cursorRow(rows, this.navigation.cursor);
-    this.offset = computeScrollOffset(this.offset, cursorRowIndex, this.pageSize, rows.length);
+    this.offset = computeListScroll({
+      previous: this.offset,
+      length: rows.length,
+      height: this.pageSize,
+      selected: cursorRowIndex,
+    });
   }
 
   private select(index: number): void {
-    const next = Math.max(0, Math.min(this.collections[this.collection].length - 1, index));
+    const next = Math.max(0, Math.min(this.options.collections[this.collection].length - 1, index));
     if (next !== this.selected) this.open(this.collection, next);
   }
 
   private open(collection: PromptCollectionName, index: number): void {
-    const item = this.collections[collection][index];
     this.collection = collection;
     this.selected = index;
-    this.navigation = createPromptNavigation(item === undefined ? "" : item.text);
+    this.navigation = createItemNavigation(this.options.collections[collection], index);
     this.offset = 0;
     this.status = "";
     this.rowCache.clear();
   }
 
   private async copy(text: string): Promise<void> {
-    const status = await copyPromptText({ text, clipboard: this.clipboard, currentNavigation: () => this.navigation });
+    const status = await copyPromptText({
+      text,
+      clipboard: this.options.clipboard,
+      currentNavigation: () => this.navigation,
+    });
     if (this.closed) return;
     this.status = status;
-    this.host.requestRender();
+    this.options.host.requestRender();
   }
 
   handleInput(sequence: string): void {
@@ -112,7 +109,7 @@ export class PromptBrowser implements PromptPanel {
     const shownCollection = COLLECTION_BY_KEY[sequence];
     if (matchesKey(sequence, KEY_CTRL_C) || isEscapeWithoutSelection) {
       this.closed = true;
-      this.done();
+      this.options.done();
       return;
     }
     if (matchesKey(sequence, KEY_ESCAPE)) {
@@ -129,12 +126,13 @@ export class PromptBrowser implements PromptPanel {
     } else if (!this.handleFocusedKey(sequence)) {
       return;
     }
-    this.host.requestRender();
+    this.options.host.requestRender();
   }
 
   private chooseSelectedTurn(): void {
-    const request = { selection: this.selection, items: this.collections[this.collection], selected: this.selected };
-    if (choosePromptTurn({ ...request, done: this.done })) this.closed = true;
+    const { selection, collections, done } = this.options;
+    const items = collections[this.collection];
+    if (choosePromptTurn({ selection, items, selected: this.selected, done })) this.closed = true;
   }
 
   private handleFocusedKey(sequence: string): boolean {
