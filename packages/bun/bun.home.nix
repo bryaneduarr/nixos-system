@@ -21,9 +21,18 @@ let
     ${lib.getExe' pkgs.util-linux "flock"} 9
   '';
 
+  # Bun skips lifecycle scripts of untrusted packages; these need their postinstall to fetch a platform binary.
+  trustedGlobalPackages = [
+    "opencode-ai@latest"
+  ];
+
+  installGlobalPackage = installFlags: name: ''
+    ${lib.getExe pkgs.bun} install -g ${installFlags} "${name}" \
+      || warnEcho "Could not install ${name} with Bun; it is retried on the next activation."
+  '';
+
   globalPackages = [
     "@openai/codex@latest"
-    "opencode-ai@latest"
     "@anthropic-ai/claude-code"
     "tree-sitter-cli"
     "npm-check-updates"
@@ -51,9 +60,8 @@ in
         export PATH="${activationPath}:$PATH"
         export BUN_INSTALL="$HOME/.bun"
         ${takeMaintenanceLock}
-        ${lib.concatMapStringsSep "\n" (
-          name: ''${lib.getExe pkgs.bun} install -g "${name}"''
-        ) globalPackages}
+        ${lib.concatMapStringsSep "\n" (installGlobalPackage "") globalPackages}
+        ${lib.concatMapStringsSep "\n" (installGlobalPackage "--trust") trustedGlobalPackages}
       '';
     };
 
