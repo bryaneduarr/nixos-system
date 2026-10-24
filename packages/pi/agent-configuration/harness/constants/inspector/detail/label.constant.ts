@@ -10,3 +10,5 @@ export const NO_TEXT_LABEL = "(no text)";
 export const NONE_LABEL = "none";
 /** Placeholder shown for tool arguments that are not a valid list. */
 export const INVALID_LIST_LABEL = "invalid";
+/** Label that starts the title line of a subagent task input. */
+export const TITLE_LINE_LABEL = "title: ";

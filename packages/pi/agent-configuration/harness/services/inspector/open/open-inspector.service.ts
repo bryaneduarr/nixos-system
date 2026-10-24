@@ -1,6 +1,6 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { InspectorOverlay } from "../../../components/inspector/inspector-overlay.component.ts";
-import { OVERLAY_MIN_WIDTH } from "../../../constants/inspector/layout.constant.ts";
+import { OVERLAY_MIN_WIDTH } from "../../../constants/inspector/open/inspector-overlay.constant.ts";
 import {
   OVERLAY_ANCHOR,
   OVERLAY_MARGIN,

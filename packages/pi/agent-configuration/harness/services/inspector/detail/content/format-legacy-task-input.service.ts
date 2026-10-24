@@ -1,4 +1,4 @@
-import { EMPTY_TEXT_LABEL } from "../../../../constants/inspector/label.constant.ts";
+import { EMPTY_TEXT_LABEL } from "../../../../constants/inspector/detail/label.constant.ts";
 import { readStringList } from "./read-string-list.service.ts";
 
 const TASK_DEFAULT_TOOLS = "search, read, run";

@@ -1,8 +1,11 @@
-import { copyToClipboard, type Theme } from "@earendil-works/pi-coding-agent";
+import type { Theme } from "@earendil-works/pi-coding-agent";
 import type { Component, TUI, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
-import { ACTIVITY_REFRESH_INTERVAL_MS, DEFAULT_RENDER_WIDTH } from "../../constants/inspector/layout.constant.ts";
+import {
+  ACTIVITY_REFRESH_INTERVAL_MS,
+  DEFAULT_RENDER_WIDTH,
+} from "../../constants/inspector/open/inspector-overlay.constant.ts";
 import { toggleArtifact } from "../../services/inspector/artifact/toggle-artifact.service.ts";
-import { buildDetail } from "../../services/inspector/detail/lines/build-detail.service.ts";
+import { copySelection } from "../../services/inspector/clipboard/copy-selection.service.ts";
 import { wrappedDetail } from "../../services/inspector/detail/lines/wrapped-detail.service.ts";
 import { createInspectorInput } from "../../services/inspector/input/create-inspector-input.service.ts";
 import { handleInspectorKey } from "../../services/inspector/input/handle-inspector-key.service.ts";
@@ -11,7 +14,6 @@ import { createInspectorNavigation } from "../../services/inspector/navigation/c
 import { bodyHeight } from "../../services/split-view/layout/body-height.service.ts";
 import { readSplitViewGeometry } from "../../services/split-view/layout/read-split-view-geometry.service.ts";
 import { activityStore } from "../../stores/activity/activity.store.ts";
-import type { InspectorRow } from "../../types/inspector/detail/inspector-row.interface.ts";
 import type { InspectorInput } from "../../types/inspector/input/inspector-input.interface.ts";
 import type { InspectorNavigation } from "../../types/inspector/navigation/inspector-navigation.interface.ts";
 import type { InspectorOptions } from "../../types/inspector/open/inspector-options.interface.ts";
@@ -91,7 +93,7 @@ export class InspectorOverlay implements Component {
     this.navigation.subagentScroll = result.subagentScroll;
     this.navigation.listScroll = result.listScroll;
     this.navigation.detailScroll = result.detailScroll;
-    return result.lines;
+    return [...result.lines];
   }
 
   private input(): InspectorInput {
@@ -104,7 +106,7 @@ export class InspectorOverlay implements Component {
       requestRender: () => this.tui.requestRender(),
       setStatus: (message) => this.setStatus(message),
       copy: () => {
-        void this.copySelection();
+        void copySelection(this.navigation, this.detailPaneWidth()).then((message) => this.setStatus(message));
       },
       toggleArtifact: () => {
         void toggleArtifact(this.navigation).then((message) => this.setStatus(message));
@@ -117,30 +119,12 @@ export class InspectorOverlay implements Component {
   }
 
   private detailLineCount(): number {
-    return wrappedDetail(this.navigation.currentRow(), this.detailPaneWidth(), this.theme, this.navigation.artifact)
-      .length;
-  }
-
-  private plainDetail(row: InspectorRow): string {
-    return buildDetail({ row, width: this.detailPaneWidth(), artifact: this.navigation.artifact })
-      .map((line) => line.text)
-      .join("\n");
-  }
-
-  private async copySelection(): Promise<void> {
-    const lookup = this.navigation.currentRow();
-    if (!lookup.found) {
-      this.setStatus("nothing selected");
-      return;
-    }
-    const artifact = this.navigation.artifact;
-    const text = artifact.kind === "loaded" ? artifact.text : this.plainDetail(lookup.row);
-    try {
-      await copyToClipboard(text);
-      this.setStatus(`copied ${text.length} chars`);
-    } catch (error) {
-      this.setStatus(`copy failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
+    return wrappedDetail({
+      lookup: this.navigation.currentRow(),
+      width: this.detailPaneWidth(),
+      theme: this.theme,
+      artifact: this.navigation.artifact,
+    }).length;
   }
 
   private setStatus(message: string): void {

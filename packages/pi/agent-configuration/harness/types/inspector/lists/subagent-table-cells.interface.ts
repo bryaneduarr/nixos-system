@@ -15,11 +15,3 @@ export interface SubagentTableCells {
   /** Reasoning level the subagent runs with. */
   readonly reasoning: string;
 }
-
-/** One column of the subagents table. */
-export interface SubagentTableColumn {
-  /** Cell shown in this column. */
-  readonly key: keyof SubagentTableCells;
-  /** Width of the column in terminal columns. */
-  readonly width: number;
-}

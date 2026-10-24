@@ -1,0 +1,3 @@
+export const ACTIVITY_REFRESH_INTERVAL_MS = 1000;
+export const DEFAULT_RENDER_WIDTH = 80;
+export const OVERLAY_MIN_WIDTH = 56;

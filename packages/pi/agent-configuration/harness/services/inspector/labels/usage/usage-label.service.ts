@@ -1,4 +1,4 @@
-import { EMPTY_VALUE_LABEL } from "../../../../constants/inspector/label.constant.ts";
+import { EMPTY_VALUE_LABEL } from "../../../../constants/inspector/detail/label.constant.ts";
 import type { SubagentModel } from "../../../../types/activity/parsing/subagent/subagent-model.interface.ts";
 import type { ToolActivityUsage } from "../../../../types/activity/parsing/subagent/tool-activity-usage.interface.ts";
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";

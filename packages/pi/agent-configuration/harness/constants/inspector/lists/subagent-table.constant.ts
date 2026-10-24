@@ -1,4 +1,5 @@
-import type { SubagentTableCells, SubagentTableColumn } from "../../types/inspector/lists/subagent-table.interface.ts";
+import type { SubagentTableCells } from "../../../types/inspector/lists/subagent-table-cells.interface.ts";
+import type { SubagentTableColumn } from "../../../types/inspector/lists/subagent-table-column.interface.ts";
 
 /** Columns of the subagents table in display order. */
 export const SUBAGENT_TABLE_COLUMNS: readonly SubagentTableColumn[] = [
@@ -20,7 +21,5 @@ export const SUBAGENT_TABLE_HEADINGS: SubagentTableCells = {
   model: "MODEL",
   reasoning: "REASONING",
 };
-/** Space between two table columns. */
-export const SUBAGENT_TABLE_GAP = "  ";
 /** Key hints shown above the subagents table. */
 export const SUBAGENT_TABLE_HINT = "↑/↓ move  l or enter open";

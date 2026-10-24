@@ -4,7 +4,6 @@ import type { SplitViewGeometry } from "../../split-view/split-view-geometry.int
 import type { DetailArtifact } from "../detail/detail-artifact.interface.ts";
 import type { InspectorRow } from "../detail/inspector-row.interface.ts";
 import type { ListInspectorPage } from "../navigation/inspector-page.interface.ts";
-import type { InspectorLayoutState } from "./inspector-layout.interface.ts";
 
 /** Inputs for drawing a page that lists rows next to a detail pane. */
 export interface ToolsPageOptions {
@@ -28,16 +27,4 @@ export interface ToolsPageOptions {
   readonly geometry: SplitViewGeometry;
   /** Theme used for colors and emphasis. */
   readonly theme: Theme;
-}
-
-/** Lines and clamped scroll state produced by drawing the tool calls page. */
-export interface ToolsPageResult {
-  /** Lines of the page. */
-  readonly lines: string[];
-  /** Layout of the tool list for mouse hit tests. */
-  readonly layout: InspectorLayoutState;
-  /** First visible tool list row after clamping. */
-  readonly listScroll: number;
-  /** First visible detail line after clamping. */
-  readonly detailScroll: number;
 }

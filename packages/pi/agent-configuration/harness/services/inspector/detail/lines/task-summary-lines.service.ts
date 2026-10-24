@@ -1,7 +1,7 @@
-import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail-line.constant.ts";
-import { SUMMARY_LABEL_WIDTH } from "../../../../constants/inspector/format.constant.ts";
-import { EMPTY_VALUE_LABEL } from "../../../../constants/inspector/label.constant.ts";
-import { SUBAGENT_STATUS_TEXT } from "../../../../constants/inspector/subagent-status.constant.ts";
+import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail/detail-line.constant.ts";
+import { EMPTY_VALUE_LABEL } from "../../../../constants/inspector/detail/label.constant.ts";
+import { SUMMARY_LABEL_WIDTH } from "../../../../constants/inspector/format/format.constant.ts";
+import { SUBAGENT_STATUS_TEXT } from "../../../../constants/inspector/labels/subagent-status.constant.ts";
 import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";
 import type { SubToolActivity } from "../../../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
 import type { ToolActivityUsage } from "../../../../types/activity/parsing/subagent/tool-activity-usage.interface.ts";
@@ -15,7 +15,7 @@ import { modelLabel } from "../../labels/model/model-label.service.ts";
 import { readSubagentElapsed } from "../../subagents/read-subagent-elapsed.service.ts";
 import { readSubagentStatus } from "../../subagents/read-subagent-status.service.ts";
 
-function summaryLine(label: string, text: string): DetailLine {
+function summaryField(label: string, text: string): DetailLine {
   return { text: `${label.padEnd(SUMMARY_LABEL_WIDTH)}${text}`, color: THEME_ACCENT, bold: false };
 }
 
@@ -69,14 +69,14 @@ export function taskSummaryLines(entry: ToolActivity): DetailLine[] {
   return [
     { text: titleText(entry), color: THEME_ACCENT, bold: true },
     BLANK_DETAIL_LINE,
-    summaryLine("ROLE", roleText(entry)),
-    { ...summaryLine("STATUS", `${status.label}${stepText(entry)}`), color: status.color },
-    summaryLine("MODEL", modelLabel(entry.model)),
-    summaryLine("REASONING", reasoning),
-    summaryLine("TIME", `${elapsed}  started ${formatTime(entry.startedAt)}`),
-    summaryLine("TOOLS", toolCountText(entry.sub)),
-    summaryLine("TOKENS", tokenText(entry.usage)),
-    summaryLine("CONTEXT", `${contextUsageLabel(entry.usage, entry.model)}${peakText(entry.usage)}`),
+    summaryField("ROLE", roleText(entry)),
+    { ...summaryField("STATUS", `${status.label}${stepText(entry)}`), color: status.color },
+    summaryField("MODEL", modelLabel(entry.model)),
+    summaryField("REASONING", reasoning),
+    summaryField("TIME", `${elapsed}  started ${formatTime(entry.startedAt)}`),
+    summaryField("TOOLS", toolCountText(entry.sub)),
+    summaryField("TOKENS", tokenText(entry.usage)),
+    summaryField("CONTEXT", `${contextUsageLabel(entry.usage, entry.model)}${peakText(entry.usage)}`),
     BLANK_DETAIL_LINE,
   ];
 }

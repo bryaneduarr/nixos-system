@@ -7,7 +7,9 @@ export function statusGlyph(status: ActivityStatus, theme: Pick<Theme, "fg">): s
       return theme.fg("warning", "●");
     case "error":
       return theme.fg("error", "✗");
-    default:
+    case "success":
       return theme.fg("success", "✓");
+    default:
+      return status satisfies never;
   }
 }

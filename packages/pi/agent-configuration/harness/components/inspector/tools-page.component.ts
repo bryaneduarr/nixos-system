@@ -1,11 +1,12 @@
-import { BODY_TOP_ROW } from "../../constants/inspector/layout.constant.ts";
-import { LIST_PAGE_TEXT } from "../../constants/inspector/list-page-text.constant.ts";
-import { DETAIL_TITLE_ROWS } from "../../constants/split-view/layout.constant.ts";
+import { LIST_PAGE_TEXT } from "../../constants/inspector/lists/list-page-text.constant.ts";
 import { THEME_DIM } from "../../constants/split-view/theme-color.constant.ts";
 import { wrappedDetail } from "../../services/inspector/detail/lines/wrapped-detail.service.ts";
+import { buildToolsPageLayout } from "../../services/inspector/layout/build-tools-page-layout.service.ts";
+import { clampDetailScroll } from "../../services/inspector/layout/clamp-detail-scroll.service.ts";
 import { findRowAt } from "../../services/inspector/navigation/find-row-at.service.ts";
 import { computeListScroll } from "../../services/split-view/layout/compute-list-scroll.service.ts";
-import type { ToolsPageOptions, ToolsPageResult } from "../../types/inspector/view/tools-page.interface.ts";
+import type { ToolsPageOptions } from "../../types/inspector/view/tools-page-options.interface.ts";
+import type { ToolsPageResult } from "../../types/inspector/view/tools-page-result.interface.ts";
 import { pageTitle } from "../split-view/page-title.component.ts";
 import { splitPanes } from "../split-view/split-panes.component.ts";
 import { renderToolList } from "./lists/tool-list.component.ts";
@@ -45,27 +46,19 @@ export function renderToolsPage({
     expandedTasks,
     theme,
   });
-  const detail = wrappedDetail(findRowAt(rows, selected), Math.max(1, geometry.rightWidth), theme, artifact);
-  const maxDetailScroll = Math.max(0, detail.length - geometry.detailHeight);
-  const clampedDetailScroll = Math.max(0, Math.min(detailScroll, maxDetailScroll));
+  const detail = wrappedDetail({
+    lookup: findRowAt(rows, selected),
+    width: Math.max(1, geometry.rightWidth),
+    theme,
+    artifact,
+  });
+  const clampedDetailScroll = clampDetailScroll(detailScroll, detail.length, geometry.detailHeight);
   const detailLines = detail.slice(clampedDetailScroll, clampedDetailScroll + geometry.detailHeight);
   lines.push(...splitPanes({ list: listLines, detail: detailLines, geometry, focus, theme }));
 
   return {
     lines,
-    layout: {
-      kind: "laid-out",
-      layout: {
-        leftWidth: geometry.leftWidth,
-        bodyTop: BODY_TOP_ROW,
-        bodyHeight: geometry.twoPane
-          ? geometry.height
-          : geometry.listHeight + DETAIL_TITLE_ROWS + geometry.detailHeight,
-        listHeight: geometry.listHeight,
-        twoPane: geometry.twoPane,
-        rows,
-      },
-    },
+    layout: buildToolsPageLayout(geometry, rows),
     listScroll: clampedListScroll,
     detailScroll: clampedDetailScroll,
   };

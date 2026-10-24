@@ -1,4 +1,4 @@
-import { NO_MODEL_LABEL } from "../../../../constants/inspector/label.constant.ts";
+import { NO_MODEL_LABEL } from "../../../../constants/inspector/detail/label.constant.ts";
 import type { SubagentModel } from "../../../../types/activity/parsing/subagent/subagent-model.interface.ts";
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";
 

@@ -1,0 +1,1 @@
+export const ONE_SENTENCE_MAX_LENGTH = 160;

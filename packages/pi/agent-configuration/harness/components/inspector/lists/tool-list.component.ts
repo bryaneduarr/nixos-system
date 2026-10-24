@@ -1,74 +1,8 @@
-import type { Theme } from "@earendil-works/pi-coding-agent";
-import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
-import { NO_TEXT_LABEL } from "../../../constants/inspector/label.constant.ts";
-import { THEME_ACCENT, THEME_TEXT } from "../../../constants/split-view/theme-color.constant.ts";
-import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
-import { ACTIVE_MARKER } from "../../../constants/text/glyph.constant.ts";
-import { readEndedAt } from "../../../services/inspector/entries/read-ended-at.service.ts";
-import { formatDuration } from "../../../services/inspector/format/format-duration.service.ts";
-import { formatTime } from "../../../services/inspector/format/format-time.service.ts";
-import { statusGlyph } from "../../../services/inspector/labels/tool/status-glyph.service.ts";
-import { toolTargetLabel } from "../../../services/inspector/labels/tool/tool-target-label.service.ts";
-import { usageLabel } from "../../../services/inspector/labels/usage/usage-label.service.ts";
+import { isLastChildRow } from "../../../services/inspector/rows/is-last-child-row.service.ts";
+import { toolRowText } from "../../../services/inspector/rows/tool-row-text.service.ts";
 import { padCell } from "../../../services/split-view/layout/pad-cell.service.ts";
-import { toolLabel } from "../../../services/tool-rendering/labels/tool-label.service.ts";
-import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
 import type { ToolListOptions } from "../../../types/inspector/lists/tool-list-options.interface.ts";
 import { listRow } from "../../split-view/list-row.component.ts";
-
-function isLastChildRow(row: InspectorRow, rows: readonly InspectorRow[], index: number): boolean {
-  const nextRow = rows[index + 1];
-  if (nextRow === undefined) return true;
-
-  return nextRow.level !== "sub" || nextRow.entry.id !== row.entry.id;
-}
-
-function rowDisclosure(row: InspectorRow, expandedTasks: ReadonlySet<string>, isLastChild: boolean): string {
-  if (row.level === "sub") return isLastChild ? "  └─ " : "  ├─ ";
-  if (row.entry.sub.length === 0) return "  ";
-  return expandedTasks.has(row.entry.id) ? "▾ " : "▸ ";
-}
-
-function rowElapsed(row: InspectorRow): string {
-  const startedAt = row.level === "sub" ? row.sub.startedAt : row.entry.startedAt;
-  const endedAt = readEndedAt(row);
-  const endTime = endedAt.state === "present" ? endedAt.value : Date.now();
-  return formatDuration(Math.max(0, endTime - startedAt));
-}
-
-function rowUsage(row: InspectorRow, tool: string): string {
-  if (row.level === "sub" || tool !== TASK_TOOL_NAME) return "";
-  return `  ${usageLabel(row.entry.usage, row.entry.model)}`;
-}
-
-function rowStartTime(row: InspectorRow, call: { readonly toolName: string; readonly startedAt: number }): string {
-  const isSubagentCall = row.level === "sub" || call.toolName === TASK_TOOL_NAME;
-  return isSubagentCall ? `  ${formatTime(call.startedAt)}` : "";
-}
-
-function toolRowText(
-  row: InspectorRow,
-  expandedTasks: ReadonlySet<string>,
-  isSelected: boolean,
-  isLastChild: boolean,
-  theme: Pick<Theme, "fg">,
-): string {
-  const call = row.level === "sub" ? row.sub : row.entry;
-  const target = toolTargetLabel(call.toolName, call.args, row.entry.text);
-
-  if (call.toolName === MESSAGE_ACTIVITY_NAME) {
-    return theme.fg(
-      THEME_ACCENT,
-      `${ACTIVE_MARKER}MESSAGE ${String(call.args.number ?? "")}  ${target || NO_TEXT_LABEL}`,
-    );
-  }
-
-  const prefix = call.toolName === TASK_TOOL_NAME ? "SUBAGENT " : "";
-  const startTime = rowStartTime(row, call);
-  const label = `${prefix}${toolLabel(call.toolName)}${startTime}  ${rowElapsed(row)}${rowUsage(row, call.toolName)}  ${target}`;
-  const disclosure = rowDisclosure(row, expandedTasks, isLastChild);
-  return `${statusGlyph(call.status, theme)} ${disclosure}${theme.fg(isSelected ? THEME_ACCENT : THEME_TEXT, label)}`;
-}
 
 export function renderToolList({
   rows,
@@ -88,9 +22,8 @@ export function renderToolList({
     }
     const isSelected = scroll + index === selected;
     const isLastChild = isLastChildRow(row, rows, scroll + index);
-    out.push(
-      listRow({ text: toolRowText(row, expandedTasks, isSelected, isLastChild, theme), width, isSelected, theme }),
-    );
+    const text = toolRowText({ row, expandedTasks, isSelected, isLastChild, theme });
+    out.push(listRow({ text, width, isSelected, theme }));
   }
   return out;
 }

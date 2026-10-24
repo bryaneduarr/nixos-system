@@ -1,4 +1,4 @@
-import { DECIMAL_SECONDS_LIMIT_MS, DURATION_PART_WIDTH } from "../../../constants/inspector/format.constant.ts";
+import { DECIMAL_SECONDS_LIMIT_MS, DURATION_PART_WIDTH } from "../../../constants/inspector/format/format.constant.ts";
 import {
   MILLISECONDS_PER_SECOND,
   SECONDS_PER_HOUR,

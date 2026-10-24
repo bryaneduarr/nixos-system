@@ -1,5 +1,5 @@
 import { matchesKey } from "@earendil-works/pi-tui";
-import { FOOTER_LINKS } from "../../../constants/inspector/footer.constant.ts";
+import { FOOTER_LINKS } from "../../../constants/inspector/lists/footer.constant.ts";
 import type { InspectorInput } from "../../../types/inspector/input/inspector-input.interface.ts";
 
 export function handleInspectorKey(data: string, inspector: InspectorInput): void {

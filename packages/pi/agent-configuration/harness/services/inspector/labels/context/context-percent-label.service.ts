@@ -1,4 +1,4 @@
-import { DECIMAL_PERCENT_LIMIT } from "../../../../constants/inspector/format.constant.ts";
+import { DECIMAL_PERCENT_LIMIT } from "../../../../constants/inspector/format/format.constant.ts";
 import type { SubagentModel } from "../../../../types/activity/parsing/subagent/subagent-model.interface.ts";
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";
 import { readContextLimit } from "./read-context-limit.service.ts";

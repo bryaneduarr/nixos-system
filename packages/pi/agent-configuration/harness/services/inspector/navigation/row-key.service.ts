@@ -1,4 +1,4 @@
-import { ROW_KEY_SEPARATOR } from "../../../constants/inspector/row-key.constant.ts";
+import { ROW_KEY_SEPARATOR } from "../../../constants/inspector/navigation/row-key.constant.ts";
 import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
 
 export function rowKey(row: InspectorRow): string {

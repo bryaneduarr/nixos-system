@@ -1,4 +1,4 @@
-import { ONE_SENTENCE_MAX_LENGTH } from "../../../../constants/inspector/layout.constant.ts";
+import { ONE_SENTENCE_MAX_LENGTH } from "../../../../constants/inspector/labels/sentence.constant.ts";
 
 export function oneSentence(text: string): string {
   const normalized = text.replace(/\s+/g, " ").trim();

@@ -1,4 +1,5 @@
-import { PAGE_STEP_CHROME_ROWS } from "../../../constants/inspector/layout.constant.ts";
+import { DEFAULT_ARTIFACT } from "../../../constants/inspector/detail/default-artifact.constant.ts";
+import { PAGE_STEP_CHROME_ROWS } from "../../../constants/inspector/navigation/scroll.constant.ts";
 import type { InspectorInput } from "../../../types/inspector/input/inspector-input.interface.ts";
 import type { InspectorInputContext } from "../../../types/inspector/input/inspector-input-context.interface.ts";
 import { bodyHeight } from "../../split-view/layout/body-height.service.ts";
@@ -18,7 +19,7 @@ export function createInspectorInput(context: InspectorInputContext): InspectorI
       navigation.page = page;
       navigation.focus = "list";
       navigation.detailScroll = 0;
-      navigation.artifact = { kind: "tool-result" };
+      navigation.artifact = DEFAULT_ARTIFACT;
       context.setStatus("");
     },
     switchFocus: () => {
@@ -38,7 +39,7 @@ export function createInspectorInput(context: InspectorInputContext): InspectorI
       navigation.selection = { kind: "row", id: selection.id };
       navigation.focus = "list";
       navigation.detailScroll = 0;
-      navigation.artifact = { kind: "tool-result" };
+      navigation.artifact = DEFAULT_ARTIFACT;
       context.setStatus("");
     },
     collapse: (direction) => navigation.adjustSubagentCollapse(direction),
