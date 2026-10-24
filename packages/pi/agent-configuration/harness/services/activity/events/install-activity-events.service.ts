@@ -2,8 +2,8 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
   ACTIVITY_COMPLETION_ENTRY,
   ACTIVITY_SUMMARY_ENTRY,
-} from "../../../constants/activity/activity-keys.constant.ts";
-import { VISIBILITY_SHORTCUT } from "../../../constants/activity/visibility.constant.ts";
+} from "../../../constants/activity/events/activity-keys.constant.ts";
+import { VISIBILITY_SHORTCUT } from "../../../constants/activity/visibility/visibility.constant.ts";
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { activitySummaryState } from "../../../stores/activity/activity-summary-state.store.ts";
 import { activityVisibility } from "../../../stores/activity/activity-visibility.store.ts";

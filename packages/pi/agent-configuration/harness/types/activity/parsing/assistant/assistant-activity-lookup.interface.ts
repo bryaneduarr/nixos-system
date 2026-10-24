@@ -1,4 +1,4 @@
-import type { AssistantActivitySnapshot } from "../../store/agent-activity.interface.ts";
+import type { AssistantActivitySnapshot } from "../../store/assistant-activity-snapshot.interface.ts";
 
 /** Result of reading the thinking and response text of an assistant message. */
 export type AssistantActivityLookup =

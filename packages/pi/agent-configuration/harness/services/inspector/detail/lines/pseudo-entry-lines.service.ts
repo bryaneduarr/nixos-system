@@ -3,7 +3,7 @@ import {
   REPLY_ACTIVITY_NAME,
   TOKENS_ACTIVITY_NAME,
   UPDATE_ACTIVITY_NAME,
-} from "../../../../constants/activity/activity-entry.constant.ts";
+} from "../../../../constants/activity/record/activity-entry.constant.ts";
 import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail/detail-line.constant.ts";
 import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";
 import type { DetailLine } from "../../../../types/inspector/detail/detail-line.interface.ts";

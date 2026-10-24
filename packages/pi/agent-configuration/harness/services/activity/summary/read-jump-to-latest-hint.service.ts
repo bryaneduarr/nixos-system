@@ -1,5 +1,6 @@
 import { getKeybindings } from "@earendil-works/pi-tui";
-import { JUMP_TO_LATEST_KEYBINDING, JUMP_TO_LATEST_LABEL } from "../../../constants/activity/summary-label.constant.ts";
+import { JUMP_TO_LATEST_KEYBINDING } from "../../../constants/activity/summary/summary-keybinding.constant.ts";
+import { JUMP_TO_LATEST_LABEL } from "../../../constants/activity/summary/summary-label.constant.ts";
 import { DOT_SEPARATOR } from "../../../constants/text/separator.constant.ts";
 
 export function readJumpToLatestHint(): string {

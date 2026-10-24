@@ -6,8 +6,8 @@ import {
   TURN_DIVIDER_ARROW,
   TURN_DIVIDER_DASH,
   TURN_DIVIDER_DIRECTION_WORD,
-} from "../../../constants/transcript/turn-divider.constant.ts";
-import { TURN_HISTORY_TOGGLE_LABEL } from "../../../constants/transcript/turn-view.constant.ts";
+} from "../../../constants/transcript/turn/turn-divider.constant.ts";
+import { TURN_HISTORY_TOGGLE_LABEL } from "../../../constants/transcript/turn/turn-view.constant.ts";
 import type { SplitViewTheme } from "../../../types/split-view/split-view-theme.interface.ts";
 import type { TurnDividerRequest } from "../../../types/transcript/turn/turn-divider.interface.ts";
 

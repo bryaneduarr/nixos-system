@@ -1,4 +1,4 @@
-import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/record/no-tool-result-fields.constant.ts";
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { AssistantMessageRecorder } from "../../../types/activity/events/assistant-message-recorder.interface.ts";
 import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
@@ -33,9 +33,9 @@ export function createAssistantMessageRecorder(): AssistantMessageRecorder {
       const assistantActivity = readAssistantActivity(message);
       if (!assistantActivity.found) return assistantActivity;
       if (thinkingId.state === "present")
-        recordThinking(thinkingId.value, assistantActivity.snapshot.thinking, cwd, Date.now());
+        recordThinking({ id: thinkingId.value, text: assistantActivity.snapshot.thinking, cwd, startedAt: Date.now() });
       if (updateId.state === "present" && assistantActivity.snapshot.hasToolCall)
-        recordUpdate(updateId.value, assistantActivity.snapshot.response, cwd, Date.now());
+        recordUpdate({ id: updateId.value, text: assistantActivity.snapshot.response, cwd, startedAt: Date.now() });
       return assistantActivity;
     },
     end(message, cwd) {
@@ -43,7 +43,7 @@ export function createAssistantMessageRecorder(): AssistantMessageRecorder {
       if (!assistantActivity.found) return assistantActivity;
       const { thinking, response, hasToolCall } = assistantActivity.snapshot;
       if (thinkingId.state === "present" && thinking) {
-        recordThinking(thinkingId.value, thinking, cwd, Date.now());
+        recordThinking({ id: thinkingId.value, text: thinking, cwd, startedAt: Date.now() });
         activityStore.finish(thinkingId.value, {
           ...NO_TOOL_RESULT_FIELDS,
           text: thinking,
@@ -53,7 +53,7 @@ export function createAssistantMessageRecorder(): AssistantMessageRecorder {
       }
       thinkingId = { state: "absent" };
       if (updateId.state === "present" && hasToolCall && response.trim()) {
-        recordUpdate(updateId.value, response, cwd, Date.now());
+        recordUpdate({ id: updateId.value, text: response, cwd, startedAt: Date.now() });
         activityStore.finish(updateId.value, {
           ...NO_TOOL_RESULT_FIELDS,
           text: response,
@@ -63,7 +63,8 @@ export function createAssistantMessageRecorder(): AssistantMessageRecorder {
       }
       updateId = { state: "absent" };
       const apiError = readApiError(message);
-      if (apiError.state === "present") recordApiError(`api-error-live-${sequence}`, apiError.value, cwd, Date.now());
+      if (apiError.state === "present")
+        recordApiError({ id: `api-error-live-${sequence}`, message: apiError.value, cwd, occurredAt: Date.now() });
       if (messageStartedAt.state === "present") {
         recordAssistantTurn({
           idSuffix: `live-${sequence}`,

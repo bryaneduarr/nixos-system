@@ -4,7 +4,7 @@ import {
   THINKING_ACTIVITY_NAME,
   TOKENS_ACTIVITY_NAME,
   UPDATE_ACTIVITY_NAME,
-} from "../../../constants/activity/activity-entry.constant.ts";
+} from "../../../constants/activity/record/activity-entry.constant.ts";
 import type { PseudoEntryTool } from "../../../types/inspector/detail/pseudo-entry-tool.interface.ts";
 
 const PSEUDO_ENTRY_TOOLS: ReadonlySet<string> = new Set<PseudoEntryTool>([

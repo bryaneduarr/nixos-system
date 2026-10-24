@@ -1,9 +1,6 @@
 import { stripTerminalSequences } from "@earendil-works/pi-tui";
-import {
-  CARD_SIDE_CHROME_WIDTH,
-  CARD_STYLES,
-  MIN_CARD_WIDTH,
-} from "../../../constants/transcript/message-card.constant.ts";
+import { CARD_SIDE_CHROME_WIDTH, MIN_CARD_WIDTH } from "../../../constants/transcript/card/card-layout.constant.ts";
+import { CARD_STYLES } from "../../../constants/transcript/card/card-style.constant.ts";
 import { cardFrameLines } from "./card-frame-lines.service.ts";
 
 const EDITOR_BORDER_PATTERN = /^─{3,}/;

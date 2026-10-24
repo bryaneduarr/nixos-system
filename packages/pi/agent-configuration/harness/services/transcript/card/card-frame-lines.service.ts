@@ -8,8 +8,10 @@ import {
   truncateToWidth,
   visibleWidth,
 } from "@earendil-works/pi-tui";
-import { CARD_BASE_TEXT_COLOR, CARD_SIDE_CHROME_WIDTH } from "../../../constants/transcript/message-card.constant.ts";
-import type { CardStyle, CardTint } from "../../../types/transcript/card/card-style.interface.ts";
+import { CARD_SIDE_CHROME_WIDTH } from "../../../constants/transcript/card/card-layout.constant.ts";
+import { CARD_BASE_TEXT_COLOR } from "../../../constants/transcript/card/card-style.constant.ts";
+import type { CardStyle } from "../../../types/transcript/card/card-style.interface.ts";
+import type { CardTint } from "../../../types/transcript/card/card-tint.interface.ts";
 
 const RESET_STYLE = "\x1b[0m";
 const FOREGROUND_RESET = "\x1b[39m";

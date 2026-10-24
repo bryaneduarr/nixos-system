@@ -1,5 +1,5 @@
 import type { ToolActivityUsage } from "../parsing/subagent/tool-activity-usage.interface.ts";
-import type { AssistantActivitySnapshot } from "../store/agent-activity.interface.ts";
+import type { AssistantActivitySnapshot } from "../store/assistant-activity-snapshot.interface.ts";
 
 /** Fields that record the final reply and token usage of one finished assistant message. */
 export interface RecordAssistantTurnInput {

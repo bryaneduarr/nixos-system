@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from "bun:test";
-import { MESSAGE_ACTIVITY_NAME } from "../../constants/activity/activity-entry.constant.ts";
+import { MESSAGE_ACTIVITY_NAME } from "../../constants/activity/record/activity-entry.constant.ts";
 import { activityStore } from "../../stores/activity/activity.store.ts";
 import { activitySummaryState } from "../../stores/activity/activity-summary-state.store.ts";
 import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";

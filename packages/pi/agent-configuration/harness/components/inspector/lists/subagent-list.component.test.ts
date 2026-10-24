@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from "bun:test";
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/record/no-tool-result-fields.constant.ts";
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { ToolActivity } from "../../../types/activity/store/tool-activity.interface.ts";
 import { renderSubagentList } from "./subagent-list.component.ts";

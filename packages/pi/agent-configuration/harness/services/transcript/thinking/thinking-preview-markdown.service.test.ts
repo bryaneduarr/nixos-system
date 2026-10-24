@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { Markdown, type MarkdownTheme } from "@earendil-works/pi-tui";
-import { previewTextLines } from "../preview/preview-lines.service.ts";
+import { previewTextLines } from "../preview/preview-text-lines.service.ts";
 import { thinkingPreviewMarkdown } from "./thinking-preview-markdown.service.ts";
 
 const keepText = (text: string): string => text;

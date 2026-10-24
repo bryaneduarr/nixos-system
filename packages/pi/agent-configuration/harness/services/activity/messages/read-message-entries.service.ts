@@ -1,4 +1,4 @@
-import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
+import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/record/activity-entry.constant.ts";
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { ToolActivity } from "../../../types/activity/store/tool-activity.interface.ts";
 import { isMessageEntry } from "./is-message-entry.service.ts";

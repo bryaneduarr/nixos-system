@@ -1,14 +1,7 @@
-import type { CardFrame, CardKind, CardStyle, CardTint } from "../../types/transcript/card/card-style.interface.ts";
-
-/** Global key of the function Pi calls to draw a user or agent message card; the patch that installs it must use the same key. */
-export const MESSAGE_CARD_RENDERER_KEY = "pi.harness.renderMessageCard";
-/** Global key of the function the powerline editor calls to draw the input card; the patch that installs it must use the same key. */
-export const INPUT_CARD_RENDERER_KEY = "pi.harness.renderInputCard";
-
-/** Columns the card border and padding use on both sides of the content. */
-export const CARD_SIDE_CHROME_WIDTH = 4;
-/** Narrowest width that still fits a card frame; below it the content is drawn without one. */
-export const MIN_CARD_WIDTH = 12;
+import type { CardFrame } from "../../../types/transcript/card/card-frame.interface.ts";
+import type { CardKind } from "../../../types/transcript/card/card-kind.interface.ts";
+import type { CardStyle } from "../../../types/transcript/card/card-style.interface.ts";
+import type { CardTint } from "../../../types/transcript/card/card-tint.interface.ts";
 
 /** Hex color of text inside a card, restored after every color reset in the content. */
 export const CARD_BASE_TEXT_COLOR = "#cdd6f4";

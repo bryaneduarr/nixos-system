@@ -1,17 +1,15 @@
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
-import {
-  DETAILS_LABEL,
-  LATEST_ACTIVITY_COLOR,
-  SUMMARY_SEPARATOR,
-} from "../../constants/activity/summary-label.constant.ts";
+import { LATEST_ACTIVITY_COLOR } from "../../constants/activity/summary/summary-color.constant.ts";
+import { DETAILS_LABEL } from "../../constants/activity/summary/summary-label.constant.ts";
 import {
   FOOTER_END_PREFIX,
   FOOTER_PREFIX,
   FOOTER_RESERVED_WIDTH,
   HEADER_PREFIX,
+  SUMMARY_SEPARATOR,
   TWO_LINE_HEADER_PREFIX,
-} from "../../constants/activity/summary-layout.constant.ts";
+} from "../../constants/activity/summary/summary-layout.constant.ts";
 import { THEME_ACCENT, THEME_MUTED, THEME_WARNING } from "../../constants/split-view/theme-color.constant.ts";
 import { ELLIPSIS } from "../../constants/text/ellipsis.constant.ts";
 import { DOT_SEPARATOR } from "../../constants/text/separator.constant.ts";
@@ -56,7 +54,7 @@ class ActivitySummaryComponent implements Component {
     const summaryParts = [countLabel, ...(duration ? [duration] : []), DETAILS_LABEL];
     const trailing = summaryParts.join(SUMMARY_SEPARATOR);
     const latestText = readLatestActivityText(this.target.messageNumber, entries, working);
-    const activity = `${readActivityMark(working, expanded, runningTools.length, frame)} ${latestText}`;
+    const activity = `${readActivityMark({ working, expanded, runningCount: runningTools.length, frame })} ${latestText}`;
     const toolLines = expanded && working ? this.runningToolLines(runningTools, frame, width) : [];
     const isAwayFromLatest = this.scroll.isAwayFromLatest();
     const twoLines =
@@ -101,7 +99,12 @@ class ActivitySummaryComponent implements Component {
         : "";
     const trailingText = twoLines ? "" : this.theme.fg(THEME_MUTED, `${SUMMARY_SEPARATOR}${trailing}`);
     const label = `${this.theme.fg(THEME_MUTED, leading)}${title}${trailingText}`;
-    return formatDivider(this.theme, label, width, twoLines ? TWO_LINE_HEADER_PREFIX : HEADER_PREFIX);
+    return formatDivider({
+      theme: this.theme,
+      label,
+      width,
+      prefix: twoLines ? TWO_LINE_HEADER_PREFIX : HEADER_PREFIX,
+    });
   }
 
   private jumpToLatestHint(): string {
@@ -111,12 +114,12 @@ class ActivitySummaryComponent implements Component {
   private footer(parts: readonly string[], width: number): string[] {
     const lines = wrapFooterParts(parts, Math.max(1, width - FOOTER_RESERVED_WIDTH));
     return lines.map((text, index) =>
-      formatDivider(
-        this.theme,
-        this.theme.fg(THEME_MUTED, text),
+      formatDivider({
+        theme: this.theme,
+        label: this.theme.fg(THEME_MUTED, text),
         width,
-        index === lines.length - 1 ? FOOTER_END_PREFIX : FOOTER_PREFIX,
-      ),
+        prefix: index === lines.length - 1 ? FOOTER_END_PREFIX : FOOTER_PREFIX,
+      }),
     );
   }
 
@@ -127,7 +130,7 @@ class ActivitySummaryComponent implements Component {
       const targetSuffix = target ? `${DOT_SEPARATOR}${target}` : "";
       const label = `${readSpinnerFrame(frame)} ${toolLabel(tool.toolName)}${targetSuffix}`;
       const coloredLabel = this.theme.fg(THEME_ACCENT, truncateToWidth(label, labelWidth, ELLIPSIS, true));
-      return formatDivider(this.theme, coloredLabel, width, FOOTER_PREFIX);
+      return formatDivider({ theme: this.theme, label: coloredLabel, width, prefix: FOOTER_PREFIX });
     });
   }
 }

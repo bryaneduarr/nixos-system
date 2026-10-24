@@ -21,7 +21,7 @@ test("reply text that repeats a recorded API error is left to the error preview"
   const errorMessage = "API Error: overloaded";
   const context = { messageType: "assistant" as const, isStreaming: false, availableWidth: 80 };
   activityStore.clear();
-  recordApiError("api-error-test", errorMessage, "/tmp", 0);
+  recordApiError({ id: "api-error-test", message: errorMessage, cwd: "/tmp", occurredAt: 0 });
 
   expect(transformTranscriptMarkdown(errorMessage, context)).toBe("");
   expect(transformTranscriptMarkdown("A normal reply", context)).toBe("A normal reply");

@@ -12,3 +12,5 @@ export const TWO_LINE_HEADER_PREFIX = "┌ ";
 export const FOOTER_PREFIX = "│ ";
 /** Prefix of the last footer line. */
 export const FOOTER_END_PREFIX = "└ ";
+/** Separator between the parts of a summary header or footer. */
+export const SUMMARY_SEPARATOR = " | ";

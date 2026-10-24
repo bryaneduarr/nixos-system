@@ -13,7 +13,7 @@ export function hydrateFromSession(ctx: ExtensionContext): void {
     const startedAt = parseTimestamp(entry.timestamp);
     const message: Readonly<Record<string, unknown>> = entry.message;
     if (message.role === "user") {
-      recordUserMessage(`message-${entry.id}`, message.content, ctx.cwd, startedAt);
+      recordUserMessage({ id: `message-${entry.id}`, content: message.content, cwd: ctx.cwd, startedAt });
     } else if (message.role === "assistant" && Array.isArray(message.content)) {
       hydrateAssistantMessage({ entryId: entry.id, message, cwd: ctx.cwd, startedAt });
     } else if (message.role === "toolResult" && typeof message.toolCallId === "string") {

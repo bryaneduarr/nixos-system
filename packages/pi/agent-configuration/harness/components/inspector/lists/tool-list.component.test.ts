@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { Theme } from "@earendil-works/pi-coding-agent";
-import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/record/no-tool-result-fields.constant.ts";
 import { formatTime } from "../../../services/inspector/format/format-time.service.ts";
 import { buildInspectorRows } from "../../../services/inspector/navigation/build-inspector-rows.service.ts";
 import { activityStore } from "../../../stores/activity/activity.store.ts";

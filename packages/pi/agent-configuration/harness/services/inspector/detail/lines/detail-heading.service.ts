@@ -1,4 +1,4 @@
-import { MESSAGE_ACTIVITY_NAME } from "../../../../constants/activity/activity-entry.constant.ts";
+import { MESSAGE_ACTIVITY_NAME } from "../../../../constants/activity/record/activity-entry.constant.ts";
 import { USER_MESSAGE_HEADING } from "../../../../constants/inspector/detail/heading.constant.ts";
 import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";
 import type { DetailHeadingOptions } from "../../../../types/inspector/detail/detail-heading-options.interface.ts";

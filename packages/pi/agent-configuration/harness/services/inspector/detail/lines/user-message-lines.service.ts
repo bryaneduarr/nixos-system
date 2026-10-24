@@ -1,4 +1,4 @@
-import { MESSAGE_ACTIVITY_NAME } from "../../../../constants/activity/activity-entry.constant.ts";
+import { MESSAGE_ACTIVITY_NAME } from "../../../../constants/activity/record/activity-entry.constant.ts";
 import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail/detail-line.constant.ts";
 import { NO_TEXT_LABEL } from "../../../../constants/inspector/detail/label.constant.ts";
 import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";

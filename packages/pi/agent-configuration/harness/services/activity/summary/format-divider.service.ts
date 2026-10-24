@@ -1,9 +1,10 @@
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
-import { DIVIDER_FILL, MIN_DIVIDER_WIDTH } from "../../../constants/activity/summary-layout.constant.ts";
+import { DIVIDER_FILL, MIN_DIVIDER_WIDTH } from "../../../constants/activity/summary/summary-layout.constant.ts";
 import { THEME_MUTED } from "../../../constants/split-view/theme-color.constant.ts";
-import type { SplitViewTheme } from "../../../types/split-view/split-view-theme.interface.ts";
+import type { FormatDividerInput } from "../../../types/activity/summary/format-divider-input.interface.ts";
 
-export function formatDivider(theme: Pick<SplitViewTheme, "fg">, label: string, width: number, prefix: string): string {
+export function formatDivider(input: FormatDividerInput): string {
+  const { theme, label, width, prefix } = input;
   if (width < MIN_DIVIDER_WIDTH) {
     return truncateToWidth(DIVIDER_FILL, Math.max(1, width), "", true);
   }

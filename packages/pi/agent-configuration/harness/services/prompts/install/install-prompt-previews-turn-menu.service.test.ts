@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
-import { TURN_MENU_SHORTCUT, TURN_REFRESH_WIDGET_KEY } from "../../../constants/transcript/turn-view.constant.ts";
+import { TURN_MENU_SHORTCUT, TURN_REFRESH_WIDGET_KEY } from "../../../constants/transcript/turn/turn-view.constant.ts";
 import { turnView } from "../../../stores/transcript/turn-view.store.ts";
 import type { PromptContext } from "../../../types/prompts/install/prompt-context.interface.ts";
 import type { PromptExtensionApi } from "../../../types/prompts/install/prompt-extension-api.interface.ts";

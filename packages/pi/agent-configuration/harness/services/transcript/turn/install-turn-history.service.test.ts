@@ -3,9 +3,10 @@ import {
   TURN_DIVIDER_RENDERER_KEY,
   TURN_HISTORY_TOGGLE_SHORTCUT,
   TURN_REFRESH_WIDGET_KEY,
-} from "../../../constants/transcript/turn-view.constant.ts";
+} from "../../../constants/transcript/turn/turn-view.constant.ts";
 import { turnView } from "../../../stores/transcript/turn-view.store.ts";
-import type { TurnHistoryApi, TurnHistoryContext } from "../../../types/transcript/turn/turn-history-api.interface.ts";
+import type { TurnHistoryApi } from "../../../types/transcript/turn/turn-history-api.interface.ts";
+import type { TurnHistoryContext } from "../../../types/transcript/turn/turn-history-context.interface.ts";
 import { installTurnHistory } from "./install-turn-history.service.ts";
 
 type RegisteredHandler =

@@ -1,5 +1,5 @@
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { ACTIVITY_COMPLETION_ENTRY } from "../../../constants/activity/activity-keys.constant.ts";
+import { ACTIVITY_COMPLETION_ENTRY } from "../../../constants/activity/events/activity-keys.constant.ts";
 import { activitySummaryState } from "../../../stores/activity/activity-summary-state.store.ts";
 import type { CompletionEntryData } from "../../../types/activity/hydrate/completion-entry-data.interface.ts";
 import { isRecord } from "../../values/is-record.service.ts";

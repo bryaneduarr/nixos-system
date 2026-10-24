@@ -1,4 +1,4 @@
-import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
+import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/record/activity-entry.constant.ts";
 import { NO_TEXT_LABEL } from "../../../constants/inspector/detail/label.constant.ts";
 import { THEME_ACCENT, THEME_TEXT } from "../../../constants/split-view/theme-color.constant.ts";
 import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
