@@ -1,4 +1,5 @@
-import type { ScanState, ScanStep } from "../../types/source/scan-state.interface.ts";
+import type { ScanState } from "../../types/source/scan-state.interface.ts";
+import type { ScanStep } from "../../types/source/scan-step.interface.ts";
 import { scanBlockComment } from "./scanning/scan-block-comment.service.ts";
 import { scanCode } from "./scanning/scan-code.service.ts";
 import { scanLineComment } from "./scanning/scan-line-comment.service.ts";

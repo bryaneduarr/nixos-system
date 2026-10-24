@@ -5,7 +5,8 @@ import {
   SLASH,
   WHITESPACE,
 } from "../../../constants/source/scan-characters.constant.ts";
-import type { ScanState, ScanStep } from "../../../types/source/scan-state.interface.ts";
+import type { ScanState } from "../../../types/source/scan-state.interface.ts";
+import type { ScanStep } from "../../../types/source/scan-step.interface.ts";
 import { createScanStep } from "./create-scan-step.service.ts";
 
 function closeTemplateExpression(state: ScanState): void {
@@ -13,7 +14,7 @@ function closeTemplateExpression(state: ScanState): void {
   const closesExpression = innermostDepth === state.braceDepth - 1;
   state.braceDepth -= 1;
   if (closesExpression) {
-    state.templateExpressionDepths.pop();
+    state.templateExpressionDepths = state.templateExpressionDepths.slice(0, -1);
     state.mode = "template";
   }
 }

@@ -6,5 +6,18 @@ export const RULE_MESSAGES = {
   "function-comment": "Comment above a function; the name and signature describe it.",
   "file-length": "File is longer than the line limit; split it by responsibility.",
   "plain-block-comment": "Plain block comment; use a JSDoc /** */ comment.",
+  "fabricated-default":
+    "Empty string or zero invented for absence; return a union variant or branch on the empty case.",
+  "definite-assignment": "Definite assignment `x!:`; initialize the binding or restructure the code.",
+  "mutable-array": "Mutable array type in a contract; use `readonly T[]`.",
+  "unchecked-default": "`default:` without an exhaustive `never` check; use `x satisfies never` or a lookup table.",
+  "positional-parameters": "More than three positional parameters; take one typed parameter object.",
+  "multi-export": "More than one export in a service or store file; give each export its own file.",
+  "multi-interface-file": "More than one interface in an interface file; give each contract its own file.",
+  "banned-name": "Banned word in a file or folder name; name it for what it owns.",
+  "missing-role-suffix": "File name lacks a role suffix such as `.service.ts`; name it `<responsibility>.<role>.ts`.",
+  "duplicate-constant": "Constant name or text duplicated in another constant file; import the single owner.",
+  "duplicate-function": "Function name declared in more than one file; keep one owner and import it.",
+  "crowded-constants-folder": "Constants folder holds too many files; group them in operation folders.",
   "stale-boundary": "Exception matches no finding; remove its row from the rule file.",
 } as const;
