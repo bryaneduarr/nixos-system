@@ -36,7 +36,11 @@ lib.mkIf config.custom.pi.enable {
       };
       force = true;
     };
-    ".pi/agent/lsp.json" = mkJsonFile (agentConfiguration + "/settings/lsp.nix");
+    ".pi/agent/claude-bridge.json" = mkJsonFile (agentConfiguration + "/settings/claude-bridge.nix");
+    ".pi/agent/lsp.json" = {
+      text = builtins.toJSON (import (agentConfiguration + "/settings/lsp.nix") { inherit lib pkgs; });
+      force = true;
+    };
     ".pi/agent/pi-fff.json" = mkJsonFile (agentConfiguration + "/settings/pi-fff.nix");
     ".pi/agent/web-search.json" = {
       text = builtins.toJSON (import (agentConfiguration + "/settings/web-search.nix") { inherit pkgs; });
@@ -48,21 +52,14 @@ lib.mkIf config.custom.pi.enable {
     ".pi/agent/skills/efficient-repository-workflow/SKILL.md" = mkSourceFile (
       agentConfiguration + "/skills/efficient-tools/SKILL.md"
     );
-    ".pi/agent/mcp-adapter.json" = mkJsonFile (agentConfiguration + "/settings/mcp.nix");
     ".config/mcp/mcp.json" = mkJsonFile (mcpConfigurations + "/mcp-host-configuration.nix");
     ".pi/agent/extensions/codex-fast-mode" = {
-      source = pkgs.symlinkJoin {
-        name = "pi-codex-fast-mode";
-        paths = [
-          (withoutTests (agentConfiguration + "/extensions/codex-fast-mode"))
-          (pkgs.linkFarm "pi-codex-fast-mode-node-modules" [
-            {
-              name = "node_modules";
-              path = "${piTools}/lib/pi-packages/node_modules";
-            }
-          ])
-        ];
-      };
+      # Pi resolves extension imports from real file paths, so the sources must be copied beside node_modules, not symlinked.
+      source = pkgs.runCommand "pi-codex-fast-mode" { } ''
+        cp -r ${withoutTests (agentConfiguration + "/extensions/codex-fast-mode")} "$out"
+        chmod u+w "$out"
+        ln -s ${piTools}/lib/pi-packages/node_modules "$out/node_modules"
+      '';
       force = true;
     };
     ".pi/agent/extensions/clear.ts" = mkSourceFile (
@@ -81,6 +78,9 @@ lib.mkIf config.custom.pi.enable {
     };
     ".pi/agent/extensions/powerline-footer/theme.json" = mkSourceFile (
       agentConfiguration + "/themes/powerline.json"
+    );
+    ".pi/agent/themes/catppuccin-mocha.json" = mkSourceFile (
+      agentConfiguration + "/themes/catppuccin-mocha.json"
     );
     ".pi/agent/AGENTS.md" = mkSourceFile (agentConfiguration + "/harness/instructions.md");
     ".pi/agent/npm" = {

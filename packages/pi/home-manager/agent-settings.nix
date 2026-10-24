@@ -9,19 +9,18 @@ let
   piExtensionNames = [
     "@ff-labs/pi-fff"
     "pi-lsp-adapter"
-    "@juvio15/pi-ast-grep"
     "pi-tree-sitter"
     "pi-web-access"
-    "pi-mcp-adapter"
     "pi-powerline-footer"
+    "pi-claude-bridge"
   ];
   piPackages = map (name: "npm:${name}@${builtins.getAttr name piDependencies}") piExtensionNames;
 in
 lib.mkIf config.custom.pi.enable {
   home.file.".pi/agent/settings.json" = {
     text = builtins.toJSON {
+      compaction = import ../agent-configuration/settings/compaction.nix { inherit lib; };
       defaultTools = [ ];
-      extensions = [ "-builtin:mcp" ];
       hideThinkingBlock = false;
       showLastPrompt = false;
       lastChangelogVersion = builtins.getAttr "@earendil-works/pi-coding-agent" piDependencies;
@@ -31,6 +30,7 @@ lib.mkIf config.custom.pi.enable {
         placement = "below";
         welcome = false;
         separator = "ascii";
+        workingIndicatorPlacement = "above-powerline";
         customItems = [
           {
             id = "fast";
@@ -78,7 +78,7 @@ lib.mkIf config.custom.pi.enable {
         };
       };
       quietStartup = true;
-      theme = "dark";
+      theme = "catppuccin-mocha";
       tuiMode = "fullscreen";
       terminal = {
         clearOnShrink = true;
