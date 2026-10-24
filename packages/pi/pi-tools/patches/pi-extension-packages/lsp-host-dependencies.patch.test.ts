@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 test("the LSP packaging patch uses host peers and removes duplicate host libraries", () => {
   const directory = mkdtempSync(join(tmpdir(), "pi-lsp-package-"));
-  const script = join(import.meta.dir, "patch-lsp-host-dependencies.ts");
+  const script = join(import.meta.dir, "lsp-host-dependencies.patch.ts");
   const manifestPath = join(directory, "package.json");
 
   try {

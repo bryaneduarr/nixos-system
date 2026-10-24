@@ -1,5 +1,6 @@
 import { join } from "node:path";
-import { readPackagePath, replaceOnce } from "../pi-source-patch.ts";
+import { readPackagePath } from "../source-edit/read-package-path.service.ts";
+import { replaceOnce } from "../source-edit/replace-once.service.ts";
 
 // tree-sitter-wasms builds Lua for an older tree-sitter ABI that web-tree-sitter 0.26 refuses to load.
 const BROKEN_LUA_ENTRY = '  ".lua":    { pkg: "tree-sitter-wasms", wasm: "out/tree-sitter-lua.wasm" },';

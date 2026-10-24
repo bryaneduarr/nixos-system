@@ -1,5 +1,6 @@
 import { join } from "node:path";
-import { readPackagePath, replaceOnce } from "../pi-source-patch.ts";
+import { readPackagePath } from "../source-edit/read-package-path.service.ts";
+import { replaceOnce } from "../source-edit/replace-once.service.ts";
 
 const CONTEXT_SEGMENT_GUARD = [
   '  id: "context_pct",',

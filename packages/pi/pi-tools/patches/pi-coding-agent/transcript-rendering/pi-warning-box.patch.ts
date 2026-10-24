@@ -1,9 +1,11 @@
 import { join } from "node:path";
-import { findBundledChunkContaining, readPackagePath, replaceOnce } from "../../pi-source-patch.ts";
+import { findBundledChunkContaining } from "../../source-edit/find-bundled-chunk-containing.service.ts";
+import { readPackagePath } from "../../source-edit/read-package-path.service.ts";
+import { replaceOnce } from "../../source-edit/replace-once.service.ts";
 
 // Must match WARNING_RENDERER_KEY in the harness transcript constants.
 const RENDERER_KEY = "pi.harness.createWarningRenderer";
-// The chat container filter in patch-pi-hidden-assistant-spacing.ts hides components carrying this marker.
+// The chat container filter in the hidden assistant spacing patch hides components carrying this marker.
 const HISTORY_ENTRY_MARKER = "harnessHistoryEntry";
 
 const MODULAR_WARNING_TEXT = [
