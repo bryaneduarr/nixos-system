@@ -1,19 +1,19 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { HERDR_BIN_PATH_VARIABLE } from "../../../../constants/sessions/environment.constant.ts";
 import {
   HERDR_COMMAND_TIMEOUT_MS,
   HERDR_MAX_BUFFER_BYTES,
-  SILENT_HERDR_COMMANDS,
-} from "../../../../constants/sessions/herdr.constant.ts";
+} from "../../../../constants/sessions/herdr/herdr.constant.ts";
+import { HERDR_PANE, SILENT_HERDR_COMMANDS } from "../../../../constants/sessions/herdr/herdr-command.constant.ts";
 import { readObjectValue } from "../response/read-object-value.service.ts";
 import { herdrError } from "./herdr-error.service.ts";
+import { resolveHerdrBinary } from "./resolve-herdr-binary.service.ts";
 import { throwStructuredHerdrError } from "./throw-structured-herdr-error.service.ts";
 
 const execute = promisify(execFile);
 
-export async function executeHerdr(args: string[], env: NodeJS.ProcessEnv): Promise<Record<string, unknown>> {
-  const binary = env[HERDR_BIN_PATH_VARIABLE] || "herdr";
+export async function executeHerdr(args: readonly string[], env: NodeJS.ProcessEnv): Promise<Record<string, unknown>> {
+  const binary = resolveHerdrBinary(env);
   let stdout: string;
   try {
     ({ stdout } = await execute(binary, args, {
@@ -33,5 +33,5 @@ export async function executeHerdr(args: string[], env: NodeJS.ProcessEnv): Prom
 
 function isSilentCommand(args: readonly string[]): boolean {
   const subcommand = args[1];
-  return args[0] === "pane" && subcommand !== undefined && SILENT_HERDR_COMMANDS.has(subcommand);
+  return args[0] === HERDR_PANE && subcommand !== undefined && SILENT_HERDR_COMMANDS.has(subcommand);
 }

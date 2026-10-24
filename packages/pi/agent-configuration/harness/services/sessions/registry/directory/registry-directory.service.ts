@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { XDG_STATE_HOME_VARIABLE } from "../../../../constants/sessions/environment.constant.ts";
+import { XDG_STATE_HOME_VARIABLE } from "../../../../constants/sessions/install/environment.constant.ts";
 
 const REGISTRY_KEY_LENGTH = 24;
 

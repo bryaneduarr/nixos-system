@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { getKeybindings, KeybindingsManager, setKeybindings } from "@earendil-works/pi-tui";
+import { handlerNamed } from "./handler-named.test-double.ts";
 import { installSessions } from "./install-sessions.service.ts";
 import {
   applyEnvironment,
@@ -13,7 +14,6 @@ import {
   createPasteImageDefinitions,
   ENVIRONMENT_KEYS,
   environmentFor,
-  handlerNamed,
   type InstallFlags,
   registerFakeApi,
   restoreEnvironment,
@@ -23,6 +23,7 @@ import {
   createInstallDependencies,
   expectHistoryRecord,
   lastCommandArgument,
+  renameTargets,
 } from "./install-sessions-herdr.test-double.ts";
 
 describe("installSessions", () => {
@@ -42,7 +43,7 @@ describe("installSessions", () => {
     const ctx = createInstallContext(root, state, notifications);
     const show = (target: ExtensionContext) => handlerNamed(shortcuts, "ctrl+alt+s")(target);
     const createHere = (target: ExtensionContext) => handlerNamed(shortcuts, "ctrl+alt+n")(target);
-    const dependencies = createInstallDependencies(root, token, sentCommands, flags, state, created);
+    const dependencies = createInstallDependencies({ root, token, sentCommands, flags, state, created });
     try {
       installSessions(api, dependencies);
       expect([...shortcuts.keys()]).toEqual(["ctrl+alt+q", "ctrl+alt+s", "ctrl+alt+n"]);
@@ -53,12 +54,8 @@ describe("installSessions", () => {
       expect(
         sentCommands.some((args) => args[1] === "report-agent-session" && args.includes(join(root, "session.jsonl"))),
       ).toBe(true);
-      expect(
-        sentCommands.some((args) => args[0] === "pane" && args[1] === "rename" && /-pi-1$/.test(args[3] ?? "")),
-      ).toBe(true);
-      expect(
-        sentCommands.some((args) => args[0] === "agent" && args[1] === "rename" && /-pi-1$/.test(args[3] ?? "")),
-      ).toBe(true);
+      expect(renameTargets(sentCommands, "pane").some((name) => /-pi-1$/.test(name))).toBe(true);
+      expect(renameTargets(sentCommands, "agent").some((name) => /-pi-1$/.test(name))).toBe(true);
       expect(notifications.some((message) => message.includes("Session manager unavailable"))).toBe(false);
 
       state.selection = "self";
@@ -130,11 +127,11 @@ describe("installSessions", () => {
       delete process.env.PI_MANAGED_SESSION;
       installSessions(api, dependencies);
       await handlerNamed(events, "session_start")({}, ctx);
-      const firstName = lastCommandArgument(sentCommands, "agent", "rename", 3);
+      const firstName = lastCommandArgument(sentCommands, { command: "agent", subcommand: "rename", position: 3 });
       await handlerNamed(events, "session_shutdown")({}, ctx);
       installSessions(api, dependencies);
       await handlerNamed(events, "session_start")({}, ctx);
-      const reloadedName = lastCommandArgument(sentCommands, "agent", "rename", 3);
+      const reloadedName = lastCommandArgument(sentCommands, { command: "agent", subcommand: "rename", position: 3 });
       expect(reloadedName).toBe(firstName);
       await createHere(ctx);
       expect(state.cleanups).toBe(1);

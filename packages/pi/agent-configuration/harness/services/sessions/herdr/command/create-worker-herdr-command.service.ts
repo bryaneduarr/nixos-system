@@ -1,16 +1,16 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { WORKER_COMMAND_TIMEOUT_MS } from "../../../../constants/sessions/cleanup.constant.ts";
-import { HERDR_BIN_PATH_VARIABLE } from "../../../../constants/sessions/environment.constant.ts";
+import { WORKER_COMMAND_TIMEOUT_MS } from "../../../../constants/sessions/cleanup/cleanup-timing.constant.ts";
 import type { HerdrCommand } from "../../../../types/sessions/herdr/command/herdr-command.interface.ts";
 import { readObjectValue } from "../response/read-object-value.service.ts";
+import { resolveHerdrBinary } from "./resolve-herdr-binary.service.ts";
 import { socketEnvironment } from "./socket-environment.service.ts";
 
 const execute = promisify(execFile);
 
 export function createWorkerHerdrCommand(socket: string): HerdrCommand {
   return async (args) => {
-    const { stdout } = await execute(process.env[HERDR_BIN_PATH_VARIABLE] || "herdr", args, {
+    const { stdout } = await execute(resolveHerdrBinary(process.env), args, {
       timeout: WORKER_COMMAND_TIMEOUT_MS,
       env: socketEnvironment(socket),
     });

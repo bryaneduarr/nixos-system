@@ -3,32 +3,10 @@ import type { ValueState } from "../../../../types/activity/value/value-state.in
 import type { SessionMenuComponent } from "../../../../types/sessions/menu/session/session-menu-component.interface.ts";
 import type { SessionMenuContext } from "../../../../types/sessions/menu/session/session-menu-context.interface.ts";
 import type { SessionMenuTheme } from "../../../../types/sessions/menu/session/session-menu-theme.interface.ts";
-import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
 import type { SessionListing } from "../../../../types/sessions/registry/row/session-listing.interface.ts";
+import { createLiveSession } from "../../registry/row/live-session.test-double.ts";
 
-function session(overrides: Partial<LiveSession>): LiveSession {
-  return {
-    identity: "session",
-    pid: 1,
-    processStart: "boot:start",
-    updatedAt: Date.now(),
-    cwd: "/tmp/project",
-    pane: "w1:p1",
-    tab: "w1:t1",
-    workspace: "w1",
-    sessionId: "session",
-    name: "test",
-    branch: "main",
-    context: { usageState: "unavailable" },
-    status: "idle",
-    owned: false,
-    historyEver: false,
-    cleanupSafe: false,
-    ...overrides,
-  };
-}
-
-export const firstRow = session({
+export const firstRow = createLiveSession({
   identity: "one",
   pid: process.pid,
   cwd: "/tmp/project-a",
@@ -38,7 +16,7 @@ export const firstRow = session({
   status: "idle",
 });
 
-export const secondRow = session({
+export const secondRow = createLiveSession({
   identity: "two",
   pid: 1,
   cwd: "/tmp/project-b",

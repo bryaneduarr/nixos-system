@@ -2,9 +2,9 @@ import { realpath } from "node:fs/promises";
 import {
   HERDR_API_SOCKET_VARIABLE,
   HERDR_SOCKET_PATH_VARIABLE,
-} from "../../../constants/sessions/environment.constant.ts";
+} from "../../../constants/sessions/install/environment.constant.ts";
 import type { ExitDependencies } from "../../../types/sessions/exit/exit-dependencies.interface.ts";
-import type { ScheduledCleanup } from "../../../types/sessions/exit/exit-state.interface.ts";
+import type { ScheduledCleanup } from "../../../types/sessions/exit/scheduled-cleanup.interface.ts";
 import { captureExitTarget } from "./capture-exit-target.service.ts";
 
 export async function scheduleHerdrExit(dependencies: ExitDependencies): Promise<ScheduledCleanup> {

@@ -1,4 +1,8 @@
-import { EXIT_COMMAND_DESCRIPTION, EXIT_SHORTCUT } from "../../constants/sessions/exit.constant.ts";
+import {
+  EXIT_COMMAND_DESCRIPTION,
+  EXIT_COMMAND_NAME,
+  EXIT_SHORTCUT,
+} from "../../constants/sessions/exit/exit.constant.ts";
 import { launchCleanupWorker } from "../../services/sessions/cleanup/worker/launch-cleanup-worker.service.ts";
 import { runExplicitExit } from "../../services/sessions/exit/run-explicit-exit.service.ts";
 import { scopedHerdr } from "../../services/sessions/herdr/command/scoped-herdr.service.ts";
@@ -13,7 +17,7 @@ export const defaultExitDependencies: ExitDependencies = {
 
 export function installExitCommand(pi: ExitCommandApi, dependencies: ExitDependencies): void {
   const exit = (ctx: ExitContext): Promise<void> => runExplicitExit(ctx, dependencies);
-  pi.registerCommand("exit", {
+  pi.registerCommand(EXIT_COMMAND_NAME, {
     description: EXIT_COMMAND_DESCRIPTION,
     handler: async (_args, ctx) => exit(ctx),
   });

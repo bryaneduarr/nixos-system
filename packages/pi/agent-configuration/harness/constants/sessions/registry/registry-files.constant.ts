@@ -21,3 +21,15 @@ export const PROJECT_FALLBACK_PREFIX = "project-";
 export const MISSING_FILE_CODE = "ENOENT";
 
 export const EXISTING_FILE_CODE = "EEXIST";
+
+export const LIVE_SESSION_SUFFIX = ".json";
+
+export const RESERVATION_SUFFIX = ".reservation";
+
+export const HISTORY_SUFFIX = ".history";
+
+export const PROJECT_MARKER_SUFFIX = ".project";
+
+export const TEMPORARY_FILE_SUFFIX = ".tmp";
+
+export const NO_SUCH_PROCESS_CODE = "ESRCH";

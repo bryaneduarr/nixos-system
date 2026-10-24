@@ -5,7 +5,7 @@ import {
   PARENT_DIRECTORY_CHOICE,
   PROJECT_DIRECTORY_INPUT_TITLE,
   USE_DIRECTORY_CHOICE,
-} from "../../../../constants/sessions/menu-choices.constant.ts";
+} from "../../../../constants/sessions/menu/menu-choices.constant.ts";
 import type { ProjectPickerContext } from "../../../../types/sessions/menu/project/project-picker-context.interface.ts";
 import type { ProjectSelection } from "../../../../types/sessions/menu/project/project-selection.interface.ts";
 import { canonicalDirectory } from "../../registry/directory/canonical-directory.service.ts";

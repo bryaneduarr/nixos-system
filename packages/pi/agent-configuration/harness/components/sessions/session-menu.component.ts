@@ -1,17 +1,17 @@
-import { Input, matchesKey } from "@earendil-works/pi-tui";
-import { MENU_FILTER_PROMPT } from "../../constants/sessions/menu.constant.ts";
-import { SESSION_REFRESH_INTERVAL_MS } from "../../constants/sessions/monitor.constant.ts";
+import { Input } from "@earendil-works/pi-tui";
+import { MENU_FILTER_PROMPT } from "../../constants/sessions/menu/menu.constant.ts";
+import { SESSION_REFRESH_INTERVAL_MS } from "../../constants/sessions/monitor/monitor.constant.ts";
+import { chooseSelectedSession } from "../../services/sessions/menu/session/choose-selected-session.service.ts";
+import { classifyMenuKey } from "../../services/sessions/menu/session/classify-menu-key.service.ts";
 import { filterSessionRows } from "../../services/sessions/menu/session/filter-session-rows.service.ts";
 import { keepOrChooseSelection } from "../../services/sessions/menu/session/keep-or-choose-selection.service.ts";
 import { moveSessionSelection } from "../../services/sessions/menu/session/move-session-selection.service.ts";
+import { renderFilterLines } from "../../services/sessions/menu/session/render-filter-lines.service.ts";
 import { renderSessionMenu } from "../../services/sessions/menu/session/render-session-menu.service.ts";
 import type { ValueState } from "../../types/activity/value/value-state.interface.ts";
-import type { MenuSelection } from "../../types/sessions/menu/session/menu-selection.interface.ts";
 import type { SessionMenuComponent } from "../../types/sessions/menu/session/session-menu-component.interface.ts";
 import type { SessionMenuInput } from "../../types/sessions/menu/session/session-menu-input.interface.ts";
 import type { LiveSession } from "../../types/sessions/registry/row/live-session.interface.ts";
-
-const MENU_FILTER_RENDER_MARGIN = 4;
 
 export function createSessionMenuComponent(input: SessionMenuInput): SessionMenuComponent {
   let rows: readonly LiveSession[] = [];
@@ -22,11 +22,6 @@ export function createSessionMenuComponent(input: SessionMenuInput): SessionMenu
   let filtering = false;
   const filter = new Input({ prompt: MENU_FILTER_PROMPT });
   const visibleRows = (): LiveSession[] => filterSessionRows(rows, filter.getValue());
-  const chosenSelection = (): MenuSelection => {
-    if (selection.state === "absent") return "cancel";
-    const selectedId = selection.value;
-    return visibleRows().find((row) => row.identity === selectedId) ?? "cancel";
-  };
   const refresh = async (): Promise<void> => {
     if (refreshing || disposed) return;
     refreshing = true;
@@ -61,31 +56,39 @@ export function createSessionMenuComponent(input: SessionMenuInput): SessionMenu
       filter.invalidate();
     },
     handleInput(data: string) {
-      if (filtering) {
-        if (matchesKey(data, "escape") || matchesKey(data, "enter")) {
+      const action = classifyMenuKey(data, filtering);
+      switch (action) {
+        case "stop-filtering":
           filtering = false;
           filter.focused = false;
-        } else {
+          break;
+        case "edit-filter":
           filter.handleInput(data);
           selection = keepOrChooseSelection(visibleRows(), selection, process.pid);
-        }
-      } else if (matchesKey(data, "escape") || matchesKey(data, "ctrl+c")) {
-        input.done("cancel");
-      } else if (data === "n" || data === "N") {
-        input.done("new");
-      } else if (matchesKey(data, "i")) {
-        filtering = true;
-        filter.focused = true;
-      } else if (matchesKey(data, "enter")) {
-        input.done(chosenSelection());
-      } else {
-        selection = moveSessionSelection(visibleRows(), selection, data);
+          break;
+        case "cancel":
+          input.done("cancel");
+          break;
+        case "new-session":
+          input.done("new");
+          break;
+        case "start-filtering":
+          filtering = true;
+          filter.focused = true;
+          break;
+        case "choose":
+          input.done(chooseSelectedSession(visibleRows(), selection));
+          break;
+        case "move-selection":
+          selection = moveSessionSelection(visibleRows(), selection, data);
+          break;
+        default:
+          return action satisfies never;
       }
       input.tui.requestRender();
     },
     render(width: number) {
-      const filterLines =
-        filtering || filter.getValue() ? filter.render(Math.max(1, width - MENU_FILTER_RENDER_MARGIN)) : [];
+      const filterLines = renderFilterLines(filter, filtering, width);
       return renderSessionMenu({
         width,
         terminalRows: input.tui.terminal.rows,

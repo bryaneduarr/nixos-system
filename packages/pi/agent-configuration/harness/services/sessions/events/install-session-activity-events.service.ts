@@ -1,5 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { PI_INTERACTIVE_MODE } from "../../../constants/sessions/environment.constant.ts";
+import { PI_INTERACTIVE_MODE } from "../../../constants/sessions/install/environment.constant.ts";
 import type { MonitoredSession } from "../../../types/sessions/monitor/monitored-session.interface.ts";
 import type { SessionMonitorState } from "../../../types/sessions/monitor/session-monitor-state.interface.ts";
 import { latchSessionHistory } from "../monitor/publish/latch-session-history.service.ts";

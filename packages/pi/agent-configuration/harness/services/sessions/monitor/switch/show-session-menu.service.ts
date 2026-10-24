@@ -8,16 +8,21 @@ export function showSessionMenu(
   ctx: ExtensionContext,
   dependencies: SessionDependencies,
 ): Promise<void> {
-  return switchSession(state, ctx, dependencies, async (session) => {
-    const selection = await dependencies.selectSession(ctx, session.registry);
-    if (selection === "cancel") return false;
-    if (selection === "new") {
-      const project = await dependencies.selectProject(ctx, session.registry);
-      if (!project.selected) return false;
-      await session.herdr.create(project.path, session.pane);
-      return true;
-    }
-    await session.herdr.focus(selection);
-    return selection.identity !== session.identity && selection.pane !== session.pane.pane;
+  return switchSession({
+    state,
+    ctx,
+    dependencies,
+    select: async (session) => {
+      const selection = await dependencies.selectSession(ctx, session.registry);
+      if (selection === "cancel") return false;
+      if (selection === "new") {
+        const project = await dependencies.selectProject(ctx, session.registry);
+        if (!project.selected) return false;
+        await session.herdr.create(project.path, session.pane);
+        return true;
+      }
+      await session.herdr.focus(selection);
+      return selection.identity !== session.identity && selection.pane !== session.pane.pane;
+    },
   });
 }

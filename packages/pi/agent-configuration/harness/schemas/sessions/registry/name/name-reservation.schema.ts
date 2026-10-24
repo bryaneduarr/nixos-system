@@ -1,5 +1,8 @@
 import { Type } from "typebox";
-import { PROJECT_NAME_PATTERN, SESSION_IDENTITY_PATTERN } from "../../../../constants/sessions/registry.constant.ts";
+import {
+  PROJECT_NAME_PATTERN,
+  SESSION_IDENTITY_PATTERN,
+} from "../../../../constants/sessions/registry/registry.constant.ts";
 
 export const NameReservationSchema = Type.Object({
   /** Session identity that holds the reserved name. */

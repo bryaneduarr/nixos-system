@@ -1,5 +1,5 @@
 import { Type } from "typebox";
-import { ABSOLUTE_PATH_PATTERN } from "../../../../constants/sessions/registry.constant.ts";
+import { ABSOLUTE_PATH_PATTERN } from "../../../../constants/sessions/registry/registry.constant.ts";
 import { ExitTargetSchema } from "../../exit/exit-target.schema.ts";
 import { SessionRowSchema } from "../../registry/row/session-row.schema.ts";
 

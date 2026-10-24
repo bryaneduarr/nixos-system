@@ -6,7 +6,8 @@ import {
   MENU_FOOTER,
   MENU_HEIGHT_RATIO,
   MENU_LINES_PER_ROW,
-} from "../../../../constants/sessions/menu.constant.ts";
+} from "../../../../constants/sessions/menu/menu.constant.ts";
+import { USAGE_STATE_MEASURED } from "../../../../constants/sessions/registry/usage-state.constant.ts";
 import { THEME_ACCENT, THEME_MUTED } from "../../../../constants/split-view/theme-color.constant.ts";
 import type { SessionMenuView } from "../../../../types/sessions/menu/session/session-menu-view.interface.ts";
 import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
@@ -38,7 +39,7 @@ function renderRows(view: SessionMenuView, rows: readonly LiveSession[]): string
     const prefix = isHighlighted(view, row) ? "> " : "  ";
     const status =
       row.status === "draft" ? view.theme.style("draft", { fg: rgbColor(...DRAFT_STATUS_RGB) }) : row.status;
-    const context = row.context.usageState === "measured" ? `${row.context.percent.toFixed(0)}%` : "unknown";
+    const context = row.context.usageState === USAGE_STATE_MEASURED ? `${row.context.percent.toFixed(0)}%` : "unknown";
     const currentMarker = row.pid === view.pid ? " *" : "";
     lines.push(
       `${prefix}${terminalLabel(row.name)}${currentMarker}  ${status}  ${terminalLabel(row.branch)}  ${context}`,

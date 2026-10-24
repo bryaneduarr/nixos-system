@@ -1,6 +1,6 @@
 import { mkdir, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { RESERVATION_STALE_MS } from "../../../../constants/sessions/registry.constant.ts";
+import { RESERVATION_STALE_MS } from "../../../../constants/sessions/registry/registry.constant.ts";
 import {
   EXISTING_FILE_CODE,
   INVALID_SESSION_IDENTITY_MESSAGE,
@@ -8,7 +8,7 @@ import {
   NAME_LOCK_RETRY_MS,
   NAME_LOCK_TIMEOUT_MS,
   PRIVATE_DIRECTORY_MODE,
-} from "../../../../constants/sessions/registry-files.constant.ts";
+} from "../../../../constants/sessions/registry/registry-files.constant.ts";
 import { hasErrorCode } from "../../errors/has-error-code.service.ts";
 import { prepareRegistryDirectory } from "../directory/prepare-registry-directory.service.ts";
 import { isSessionIdentity } from "../identity/is-session-identity.service.ts";

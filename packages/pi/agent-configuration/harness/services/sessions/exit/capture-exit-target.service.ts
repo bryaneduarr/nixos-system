@@ -1,5 +1,10 @@
-import { CANNOT_PROVE_SHELL_MESSAGE, EXPLICIT_EXIT_MODE } from "../../../constants/sessions/exit.constant.ts";
-import { ABSOLUTE_PATH_PATTERN } from "../../../constants/sessions/registry.constant.ts";
+import { CANNOT_PROVE_SHELL_MESSAGE, EXPLICIT_EXIT_MODE } from "../../../constants/sessions/exit/exit.constant.ts";
+import {
+  HERDR_PANE_CURRENT,
+  HERDR_PANE_GET,
+  HERDR_PANE_PROCESS_INFO,
+} from "../../../constants/sessions/herdr/herdr-command.constant.ts";
+import { ABSOLUTE_PATH_PATTERN } from "../../../constants/sessions/registry/registry.constant.ts";
 import type { ExitTarget } from "../../../types/sessions/exit/exit-target.interface.ts";
 import type { HerdrCommand } from "../../../types/sessions/herdr/command/herdr-command.interface.ts";
 import type { PaneIdentity } from "../../../types/sessions/herdr/pane/pane-identity.interface.ts";
@@ -10,17 +15,14 @@ import { processStartIdentity } from "../registry/identity/process-start-identit
 
 export async function captureExitTarget(socket: string, command: HerdrCommand): Promise<ExitTarget> {
   if (!ABSOLUTE_PATH_PATTERN.test(socket)) throw new Error("Herdr socket must be an absolute path");
-  const current = paneIdentity((await command(["pane", "current", "--current"])).pane);
-  const pane = paneIdentity((await command(["pane", "get", current.pane])).pane);
+  const current = paneIdentity((await command(HERDR_PANE_CURRENT)).pane);
+  const pane = paneIdentity((await command([...HERDR_PANE_GET, current.pane])).pane);
   if (!isSamePane(pane, current)) throw new Error("Current pane changed");
-  const shellPid = readShellPid(
-    (await command(["pane", "process-info", "--pane", current.pane])).process_info,
-    current.pane,
-  );
+  const shellPid = readShellPid((await command([...HERDR_PANE_PROCESS_INFO, current.pane])).process_info, current.pane);
   const processStart = await processStartIdentity(process.pid);
   const shellStart = await processStartIdentity(shellPid);
   if (!processStart || !shellStart) throw new Error("Process start identities are unavailable");
-  const recheckedPane = paneIdentity((await command(["pane", "current", "--current"])).pane);
+  const recheckedPane = paneIdentity((await command(HERDR_PANE_CURRENT)).pane);
   if (!isSamePane(recheckedPane, current)) throw new Error("Current pane changed");
   return {
     ...current,

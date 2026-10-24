@@ -3,13 +3,13 @@ import { randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { handlerNamed } from "./handler-named.test-double.ts";
 import { installSessions } from "./install-sessions.service.ts";
 import {
   applyEnvironment,
   createInstallContext,
   ENVIRONMENT_KEYS,
   environmentFor,
-  handlerNamed,
   type InstallFlags,
   type InstallState,
   registerFakeApi,
@@ -47,7 +47,7 @@ describe("installSessions agent state", () => {
     applyEnvironment(environmentFor(root, token));
     const ctx = createInstallContext(root, state, notifications);
     try {
-      installSessions(api, createInstallDependencies(root, token, sentCommands, flags, state));
+      installSessions(api, createInstallDependencies({ root, token, sentCommands, flags, state, created: [] }));
       await handlerNamed(events, "session_start")({}, ctx);
       expect(sentCommands.some((args) => args[1] === "report-agent" && args.includes("idle"))).toBe(true);
       expect(commandNamed(sentCommands, "notification", "show")).toHaveLength(0);
@@ -59,7 +59,7 @@ describe("installSessions agent state", () => {
       state.idle = true;
       await handlerNamed(events, "agent_settled")({}, ctx);
       expect(lastReportState(sentCommands)).toBe("idle");
-      const completionName = lastCommandArgument(sentCommands, "pane", "rename", 3);
+      const completionName = lastCommandArgument(sentCommands, { command: "pane", subcommand: "rename", position: 3 });
       expect(commandNamed(sentCommands, "notification", "show")).toEqual([
         ["notification", "show", "Pi finished", "--body", completionName, "--sound", "done"],
       ]);

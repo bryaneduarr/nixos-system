@@ -15,3 +15,5 @@ export const MENU_LINES_PER_ROW = 2;
 export const MENU_FOOTER = "N New   i Filter   Esc Close";
 
 export const MENU_FILTER_PROMPT = "Filter: ";
+
+export const MENU_FILTER_RENDER_MARGIN = 4;

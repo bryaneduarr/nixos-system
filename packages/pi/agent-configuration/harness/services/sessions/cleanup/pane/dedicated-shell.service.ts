@@ -1,9 +1,11 @@
-import { SHELL_NAME_PATTERN } from "../../../../constants/sessions/cleanup-payload.constant.ts";
+import { SHELL_NAME_PATTERN } from "../../../../constants/sessions/cleanup/cleanup-target.constant.ts";
 import type { PaneCloseTarget } from "../../../../types/sessions/cleanup/pane/pane-close-target.interface.ts";
+import type { PaneInspection } from "../../../../types/sessions/cleanup/pane/pane-inspection.interface.ts";
 import { isUnknownArray } from "../../../values/is-unknown-array.service.ts";
 import { isObjectRecord } from "../../herdr/response/is-object-record.service.ts";
 
-export function dedicatedShell(target: PaneCloseTarget, tab: unknown, pane: unknown, processInfo: unknown): boolean {
+export function dedicatedShell(target: PaneCloseTarget, inspection: PaneInspection): boolean {
+  const { tab, pane, processInfo } = inspection;
   if (!isObjectRecord(tab) || !isObjectRecord(pane) || !isObjectRecord(processInfo)) return false;
   const isTabOfTarget = tab.tab_id === target.tab && tab.workspace_id === target.workspace;
   const isPaneOfTarget =

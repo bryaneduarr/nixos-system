@@ -9,9 +9,14 @@ export function createProjectSession(
   ctx: ExtensionContext,
   dependencies: SessionDependencies,
 ): Promise<void> {
-  return switchSession(state, ctx, dependencies, async (session) => {
-    const project = await canonicalDirectory(ctx.cwd, ctx.cwd);
-    await session.herdr.create(project, session.pane);
-    return true;
+  return switchSession({
+    state,
+    ctx,
+    dependencies,
+    select: async (session) => {
+      const project = await canonicalDirectory(ctx.cwd, ctx.cwd);
+      await session.herdr.create(project, session.pane);
+      return true;
+    },
   });
 }

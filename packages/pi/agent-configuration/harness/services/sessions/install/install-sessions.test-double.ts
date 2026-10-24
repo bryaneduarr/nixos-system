@@ -3,22 +3,42 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import type { KeybindingDefinitions } from "@earendil-works/pi-tui";
 
 type EventHandler = (event: unknown, ctx: ExtensionContext) => unknown;
+
 type ShortcutHandler = (ctx: ExtensionContext) => Promise<void>;
+
 type CommandHandler = (args: string, ctx: ExtensionContext) => Promise<void>;
 
-export type InstallFlags = { notificationFails: boolean; pendingRenames: number; createFails: boolean };
+/** Switches that make the fake Herdr fail or delay specific commands. */
+export interface InstallFlags {
+  /** Whether completion notifications fail. */
+  notificationFails: boolean;
+  /** Number of agent renames that report a pending launch before succeeding. */
+  pendingRenames: number;
+  /** Whether creating a sibling session fails. */
+  createFails: boolean;
+}
 
-export type InstallState = {
+/** Observable state of the fake Pi context and session dependencies. */
+export interface InstallState {
+  /** Whether the fake agent is idle. */
   idle: boolean;
+  /** Text of the fake editor draft. */
   editor: string;
+  /** Number of shutdown requests. */
   shutdowns: number;
+  /** Number of scheduled cleanups. */
   cleanups: number;
+  /** Entries of the fake session manager. */
   entries: unknown[];
+  /** Latest terminal input listener that the installer registered. */
   terminalInput: (data: string) => void;
+  /** Choice the fake session menu returns. */
   selection: "self" | "new" | "cancel";
+  /** Number of times the session menu was shown. */
   menuSelections: number;
+  /** Number of times the project picker was shown. */
   projectSelections: number;
-};
+}
 
 export const ENVIRONMENT_KEYS = [
   "HERDR_ENV",
@@ -31,17 +51,10 @@ export function createPasteImageDefinitions(): KeybindingDefinitions {
   return { "app.clipboard.pasteImage": { description: "Paste", defaultKeys: "ctrl+v" } };
 }
 
-export function handlerNamed<T>(handlers: Map<string, T>, name: string): T {
-  const handler = handlers.get(name);
-  if (handler === undefined) throw new Error(`Missing handler ${name}`);
-  return handler;
-}
-
 export function registerFakeApi() {
   const events = new Map<string, EventHandler>();
   const shortcuts = new Map<string, ShortcutHandler>();
   const commands = new Map<string, CommandHandler>();
-  // Test double implements only the registration methods the installer calls.
   const api = {
     on: (name: string, handler: EventHandler) => events.set(name, handler),
     registerShortcut: (name: string, spec: { handler: ShortcutHandler }) => shortcuts.set(name, spec.handler),
@@ -69,7 +82,6 @@ export function createInstallState(): InstallState {
 }
 
 export function createInstallContext(root: string, state: InstallState, notifications: string[]): ExtensionContext {
-  // Test double implements only the context members the installer reads.
   return asExtensionContext({
     mode: "tui",
     cwd: root,
@@ -98,7 +110,6 @@ export function createInstallContext(root: string, state: InstallState, notifica
 }
 
 export function createRenumberingContext(root: string): ExtensionContext {
-  // Test double implements only the context members the installer reads.
   return asExtensionContext({
     mode: "tui",
     cwd: root,

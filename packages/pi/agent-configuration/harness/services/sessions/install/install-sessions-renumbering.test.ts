@@ -8,17 +8,17 @@ import type { LiveSession } from "../../../types/sessions/registry/row/live-sess
 import type { SessionRegistry } from "../../../types/sessions/registry/row/session-registry.interface.ts";
 import { createHerdrSessions } from "../herdr/create-herdr-sessions.service.ts";
 import { createDefaultSessionDependencies } from "./create-default-session-dependencies.service.ts";
+import { handlerNamed } from "./handler-named.test-double.ts";
 import { installSessions } from "./install-sessions.service.ts";
 import {
   applyEnvironment,
   createRenumberingContext,
   ENVIRONMENT_KEYS,
   environmentFor,
-  handlerNamed,
   registerFakeApi,
   restoreEnvironment,
 } from "./install-sessions.test-double.ts";
-import { createRenumberCommand } from "./install-sessions-herdr.test-double.ts";
+import { createRenumberCommand } from "./install-sessions-renumbering.test-double.ts";
 
 function presentRegistry(store: ValueState<SessionRegistry>): SessionRegistry {
   if (store.state === "absent") throw new Error("Registry was not created");

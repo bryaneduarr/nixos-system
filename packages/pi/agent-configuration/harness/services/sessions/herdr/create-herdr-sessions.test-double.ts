@@ -1,34 +1,17 @@
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import type { LiveSession } from "../../../types/sessions/registry/row/live-session.interface.ts";
+import { PI_MANAGED_SESSION_VARIABLE } from "../../../constants/sessions/install/environment.constant.ts";
 import type { SessionRegistry } from "../../../types/sessions/registry/row/session-registry.interface.ts";
-import { processStartIdentity } from "../registry/identity/process-start-identity.service.ts";
 import { createSessionRegistry } from "../registry/row/create-session-registry.service.ts";
 
-const CURRENT_PROCESS_START = await processStartIdentity(process.pid);
-
-export function createSessionRow(cwd: string, overrides: Partial<LiveSession> = {}): LiveSession {
-  return {
-    identity: randomUUID(),
-    pid: process.pid,
-    processStart: CURRENT_PROCESS_START,
-    updatedAt: Date.now(),
-    cwd,
-    pane: "w2:p3",
-    tab: "w2:t2",
-    workspace: "w2",
-    sessionId: "session-a",
-    name: "test",
-    branch: "main",
-    context: { usageState: "unavailable" },
-    status: "idle",
-    owned: false,
-    historyEver: false,
-    cleanupSafe: false,
-    ...overrides,
-  };
-}
+const MANAGED_SESSION_ARGUMENT_PREFIX = `${PI_MANAGED_SESSION_VARIABLE}=`;
 
 export function createRegistryIn(root: string): SessionRegistry {
   return createSessionRegistry(join(root, randomUUID()));
+}
+
+export function managedSessionToken(args: readonly string[]): string {
+  const argument = args.find((candidate) => candidate.startsWith(MANAGED_SESSION_ARGUMENT_PREFIX));
+  if (argument === undefined) throw new Error("Missing managed session environment argument");
+  return argument.slice(MANAGED_SESSION_ARGUMENT_PREFIX.length);
 }
