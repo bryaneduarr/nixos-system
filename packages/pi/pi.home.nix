@@ -12,7 +12,14 @@
     ./home-manager/session-environment.nix
   ];
 
-  options.custom.pi.enable = lib.mkEnableOption "the Pi coding agent with its harness, extensions, and settings";
+  options.custom.pi = {
+    enable = lib.mkEnableOption "the Pi coding agent with its harness, extensions, and settings";
 
-  config._module.args.piTools = pkgs.callPackage ./pi-tools/pi-tools.nix { };
+    tools = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.callPackage ./pi-tools/pi-tools.nix { };
+      readOnly = true;
+      description = "Pinned npm packages with patched Pi sources that the Pi modules install and link.";
+    };
+  };
 }

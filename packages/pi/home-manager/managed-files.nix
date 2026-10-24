@@ -1,11 +1,11 @@
 {
   config,
   lib,
-  piTools,
   pkgs,
   ...
 }:
 let
+  cfg = config.custom.pi;
   agentConfiguration = ../agent-configuration;
 
   mkJsonFile = source: {
@@ -27,7 +27,7 @@ let
       ) directory;
     };
 in
-lib.mkIf config.custom.pi.enable {
+lib.mkIf cfg.enable {
   home.file = {
     ".pi/agent/keybindings.json" = {
       text = builtins.toJSON {
@@ -57,7 +57,7 @@ lib.mkIf config.custom.pi.enable {
       source = pkgs.runCommand "pi-codex-fast-mode" { } ''
         cp -r ${withoutTests (agentConfiguration + "/extensions/codex-fast-mode")} "$out"
         chmod u+w "$out"
-        ln -s ${piTools}/lib/pi-packages/node_modules "$out/node_modules"
+        ln -s ${cfg.tools}/lib/pi-packages/node_modules "$out/node_modules"
       '';
       force = true;
     };
@@ -83,7 +83,7 @@ lib.mkIf config.custom.pi.enable {
     );
     ".pi/agent/AGENTS.md" = mkSourceFile (agentConfiguration + "/harness/instructions.md");
     ".pi/agent/npm" = {
-      source = "${piTools}/lib/pi-packages";
+      source = "${cfg.tools}/lib/pi-packages";
       force = true;
     };
   };
