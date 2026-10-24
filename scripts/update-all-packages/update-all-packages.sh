@@ -4,6 +4,8 @@ set -euo pipefail
 script_directory="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 source "$script_directory/modules/repository-context.sh"
+source "$script_directory/modules/run-with-status.sh"
+source "$script_directory/modules/run-quietly.sh"
 source "$script_directory/modules/normalize-pi-npm-lock.sh"
 source "$script_directory/modules/update-pi-dependencies.sh"
 source "$script_directory/modules/refresh-pi-npm-hash.sh"
