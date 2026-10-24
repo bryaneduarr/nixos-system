@@ -3,7 +3,7 @@ import {
   APPROVED_COMMAND_MAX_OUTPUT_LINES,
   APPROVED_COMMAND_REFUSED_EXIT_CODE,
   APPROVED_COMMAND_TIMEOUT_MS,
-} from "../../../constants/subagents/approved-command.constant.ts";
+} from "../../../constants/subagents/approved-command/approved-command.constant.ts";
 import type { ApprovedCommandOutcome } from "../../../types/subagents/approved-command/approved-command-outcome.interface.ts";
 import type { RunApprovedCommandInput } from "../../../types/subagents/approved-command/run-approved-command-input.interface.ts";
 import { runCommand } from "../../tools/process/run-command.service.ts";

@@ -1,5 +1,5 @@
 import type { AgentSession } from "@earendil-works/pi-coding-agent";
-import { USAGE_FIELDS } from "../../../../constants/subagents/usage.constant.ts";
+import { USAGE_FIELDS } from "../../../../constants/subagents/tasks/messages/usage.constant.ts";
 import type { SubagentUsage } from "../../../../types/activity/parsing/subagent/subagent-usage.interface.ts";
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";
 import { isRecord } from "../../../values/is-record.service.ts";

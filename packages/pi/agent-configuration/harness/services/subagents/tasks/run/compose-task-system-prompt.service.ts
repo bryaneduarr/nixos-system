@@ -1,7 +1,7 @@
 import {
   PARENT_PROMPT_PROVIDERS,
   SUBAGENT_PROMPT_HEADING,
-} from "../../../../constants/subagents/prompt-inheritance.constant.ts";
+} from "../../../../constants/subagents/roles/prompt-inheritance.constant.ts";
 import type { ComposeTaskSystemPromptInput } from "../../../../types/subagents/tasks/run/compose-task-system-prompt-input.interface.ts";
 
 export function composeTaskSystemPrompt(input: ComposeTaskSystemPromptInput): string {

@@ -1,6 +1,6 @@
 import { StringEnum } from "@earendil-works/pi-ai";
 import { type TSchema, Type } from "typebox";
-import { TASK_ROLES } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_ROLES } from "../../../../constants/subagents/roles/roles.constant.ts";
 
 function valueStateSchema<T extends TSchema>(valueSchema: T) {
   return Type.Union([

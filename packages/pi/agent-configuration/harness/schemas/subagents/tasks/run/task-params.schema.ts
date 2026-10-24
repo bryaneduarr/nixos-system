@@ -1,12 +1,12 @@
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
-import { REASONING_LEVELS } from "../../../../constants/subagents/reasoning.constant.ts";
-import { SUBAGENT_TOOLS, TASK_ROLES } from "../../../../constants/subagents/roles.constant.ts";
+import { SUBAGENT_TOOLS, TASK_ROLES } from "../../../../constants/subagents/roles/roles.constant.ts";
+import { REASONING_LEVELS } from "../../../../constants/subagents/tasks/model/reasoning.constant.ts";
 import {
   TASK_TIMEOUT_MAX_MS,
   TASK_TIMEOUT_MIN_MS,
   TASK_TITLE_MAX_LENGTH,
-} from "../../../../constants/subagents/task-limit.constant.ts";
+} from "../../../../constants/subagents/tasks/run/task-limit.constant.ts";
 
 export const TaskParams = Type.Object({
   /** Label shown for the worker in the conversation and status list. */

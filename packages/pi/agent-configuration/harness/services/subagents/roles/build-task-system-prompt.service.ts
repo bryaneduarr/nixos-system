@@ -4,8 +4,8 @@ import {
   RESULT_FORMAT_INSTRUCTION,
   ROLE_SYSTEM_PROMPT_PREFIX,
   ROLE_TOOL_INSTRUCTION,
-} from "../../../constants/subagents/prompt.constant.ts";
-import { APPROVED_COMMAND_TOOL, TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
+} from "../../../constants/subagents/roles/prompt.constant.ts";
+import { APPROVED_COMMAND_TOOL, TASK_TOOL_NAME } from "../../../constants/subagents/roles/roles.constant.ts";
 import type { ResolvedTaskRole } from "../../../types/subagents/roles/resolved-task-role.interface.ts";
 
 function approvedCommandInstructions(commands: readonly string[]): string {

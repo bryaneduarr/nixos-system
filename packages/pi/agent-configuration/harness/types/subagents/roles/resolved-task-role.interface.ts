@@ -6,9 +6,9 @@ export interface ResolvedTaskRole {
   /** Role the worker runs with. */
   readonly role: TaskRole;
   /** Tools the worker may call. */
-  readonly tools: SubagentTool[];
+  readonly tools: readonly SubagentTool[];
   /** Commands the worker may run through the approved command tool. */
-  readonly verificationCommands: string[];
+  readonly verificationCommands: readonly string[];
   /** Role-specific instruction added to the worker's system prompt. */
   readonly instruction: string;
 }

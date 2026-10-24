@@ -1,4 +1,4 @@
-import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles/roles.constant.ts";
 import { toolTarget } from "../../../tool-rendering/labels/tool-target.service.ts";
 import { isHarnessTool } from "../../../tools/active-tools/is-harness-tool.service.ts";
 import { formatValue } from "../../detail/content/format-value.service.ts";

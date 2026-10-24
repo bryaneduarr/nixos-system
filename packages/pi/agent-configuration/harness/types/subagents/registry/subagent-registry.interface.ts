@@ -12,7 +12,7 @@ export interface SubagentRegistry {
   /** Looks up the progress of a run by its identifier. */
   status(id: string): TaskProgressLookup;
   /** Lists the progress of every known run. */
-  list(): TaskProgress[];
+  list(): readonly TaskProgress[];
   /** Requests cancellation of a running run; reports whether one was running. */
   cancel(id: string): boolean;
   /** Requests cancellation of every running run. */

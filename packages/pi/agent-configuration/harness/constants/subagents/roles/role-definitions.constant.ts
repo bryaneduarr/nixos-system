@@ -1,5 +1,5 @@
-import type { TaskRole } from "../../types/subagents/roles/task-role.interface.ts";
-import type { TaskRoleDefinition } from "../../types/subagents/roles/task-role-definition.interface.ts";
+import type { TaskRole } from "../../../types/subagents/roles/task-role.interface.ts";
+import type { TaskRoleDefinition } from "../../../types/subagents/roles/task-role-definition.interface.ts";
 import {
   APPROVED_COMMAND_TOOL,
   EDITING_SUBAGENT_TOOLS,

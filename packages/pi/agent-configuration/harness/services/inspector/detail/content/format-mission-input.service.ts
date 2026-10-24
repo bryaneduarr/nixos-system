@@ -3,7 +3,7 @@ import {
   NONE_LABEL,
   TITLE_LINE_LABEL,
 } from "../../../../constants/inspector/detail/label.constant.ts";
-import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles/roles.constant.ts";
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";
 import { toValueState } from "../../../activity/value/to-value-state.service.ts";
 import { resolveTaskRole } from "../../../subagents/roles/resolve-task-role.service.ts";

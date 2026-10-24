@@ -1,17 +1,19 @@
-import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { APPROVED_COMMAND_TOOL } from "../../../../constants/subagents/roles/roles.constant.ts";
+import {
+  ABORTED_STOP_REASON,
+  ERROR_STOP_REASON,
+} from "../../../../constants/subagents/tasks/messages/stop-reason.constant.ts";
+import { DEFAULT_TASK_REASONING_LEVEL } from "../../../../constants/subagents/tasks/model/reasoning.constant.ts";
 import {
   COMPLETED_TASK_LABEL,
   STOPPED_TASK_LABEL,
   TIMED_OUT_ERROR_MESSAGE,
-} from "../../../../constants/subagents/progress.constant.ts";
-import { DEFAULT_TASK_REASONING_LEVEL } from "../../../../constants/subagents/reasoning.constant.ts";
-import { APPROVED_COMMAND_TOOL } from "../../../../constants/subagents/roles.constant.ts";
-import { ABORTED_STOP_REASON, ERROR_STOP_REASON } from "../../../../constants/subagents/stop-reason.constant.ts";
+} from "../../../../constants/subagents/tasks/progress/progress.constant.ts";
 import { createApprovedCommandTool } from "../../../../tools/approved-command/approved-command.tool.ts";
-import type { SubagentProgressListener } from "../../../../types/subagents/registry/subagent-progress-listener.interface.ts";
 import type { TaskResult } from "../../../../types/subagents/result/task-result.interface.ts";
 import type { TaskProgress } from "../../../../types/subagents/tasks/progress/task-progress.interface.ts";
 import type { TaskStatus } from "../../../../types/subagents/tasks/progress/task-status.interface.ts";
+import type { RunTaskInput } from "../../../../types/subagents/tasks/run/run-task-input.interface.ts";
 import type { TaskRequest } from "../../../../types/subagents/tasks/run/task-request.interface.ts";
 import { toValueState } from "../../../activity/value/to-value-state.service.ts";
 import { parseTaskOutput } from "../../result/parse-task-output.service.ts";
@@ -43,13 +45,8 @@ function taskStatusOf(wasCancelled: boolean, failed: boolean): TaskStatus {
   return failed ? "error" : "success";
 }
 
-export async function runTask(
-  id: string,
-  request: TaskRequest,
-  ctx: ExtensionContext,
-  signal: AbortSignal,
-  onProgress: SubagentProgressListener,
-): Promise<TaskResult> {
+export async function runTask(input: RunTaskInput): Promise<TaskResult> {
+  const { id, request, ctx, signal, onProgress } = input;
   const resolvedRole = resolveTaskRole(request);
   const runtime = await createTaskModelRuntime(ctx);
   const model = resolveTaskModel({
@@ -106,10 +103,8 @@ export async function runTask(
     const output = finalAssistantText(session.messages);
     const parsedOutput = parseTaskOutput(output);
     const assistant = readAssistantOutcome(session.messages);
-    const promptErrors =
-      promptOutcome.promptError.state === "present" && promptOutcome.promptError.value
-        ? [promptOutcome.promptError.value]
-        : [];
+    const { promptError } = promptOutcome;
+    const promptErrors = promptError.state === "present" && promptError.value !== "" ? [promptError.value] : [];
 
     const isAbortRequested = signal.aborted;
     const isStoppedByAbort =

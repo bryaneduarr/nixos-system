@@ -1,4 +1,4 @@
-import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../constants/subagents/roles/roles.constant.ts";
 import type { InspectorNavigation } from "../../../types/inspector/navigation/inspector-navigation.interface.ts";
 import type { SubagentSelection } from "../../../types/inspector/subagents/subagent-selection.interface.ts";
 

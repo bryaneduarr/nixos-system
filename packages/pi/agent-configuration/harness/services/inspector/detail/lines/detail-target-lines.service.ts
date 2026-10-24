@@ -1,4 +1,4 @@
-import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles/roles.constant.ts";
 import type { DetailLine } from "../../../../types/inspector/detail/detail-line.interface.ts";
 import type { DetailTargetOptions } from "../../../../types/inspector/detail/detail-target-options.interface.ts";
 import { toolTarget } from "../../../tool-rendering/labels/tool-target.service.ts";

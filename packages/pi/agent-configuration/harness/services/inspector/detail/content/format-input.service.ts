@@ -1,4 +1,4 @@
-import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles/roles.constant.ts";
 import { formatLegacyTaskInput } from "./format-legacy-task-input.service.ts";
 import { formatMissionInput } from "./format-mission-input.service.ts";
 import { formatValue } from "./format-value.service.ts";

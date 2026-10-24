@@ -1,5 +1,5 @@
-import { STOPPED_TASK_LABEL } from "../../../../constants/subagents/progress.constant.ts";
-import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles/roles.constant.ts";
+import { STOPPED_TASK_LABEL } from "../../../../constants/subagents/tasks/progress/progress.constant.ts";
 import type { TaskProgress } from "../../../../types/subagents/tasks/progress/task-progress.interface.ts";
 import type { TaskProgressLookup } from "../../../../types/subagents/tasks/progress/task-progress-lookup.interface.ts";
 import type { TaskRequest } from "../../../../types/subagents/tasks/run/task-request.interface.ts";

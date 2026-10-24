@@ -1,7 +1,7 @@
 import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/record/activity-entry.constant.ts";
 import { NO_TEXT_LABEL } from "../../../constants/inspector/detail/label.constant.ts";
 import { THEME_ACCENT, THEME_TEXT } from "../../../constants/split-view/theme-color.constant.ts";
-import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../constants/subagents/roles/roles.constant.ts";
 import { ACTIVE_MARKER } from "../../../constants/text/glyph.constant.ts";
 import type { ToolRowTextOptions } from "../../../types/inspector/lists/tool-row-text-options.interface.ts";
 import { toolLabel } from "../../tool-rendering/labels/tool-label.service.ts";

@@ -6,12 +6,12 @@ import { formatTokens } from "../../format/format-tokens.service.ts";
 import { contextPercentLabel } from "./context-percent-label.service.ts";
 import { readContextLimit } from "./read-context-limit.service.ts";
 
-function readContextTokens(usage: ToolActivityUsage): ValueState<number> {
+function readUsageContextTokens(usage: ToolActivityUsage): ValueState<number> {
   return usage.usageState === "reported" ? usage.usage.contextTokens : { state: "absent" };
 }
 
 export function contextUsageLabel(usage: ToolActivityUsage, model: ValueState<SubagentModel>): string {
-  const used = readContextTokens(usage);
+  const used = readUsageContextTokens(usage);
   const limit = readContextLimit(model);
   const usedLabel = used.state === "present" ? formatTokens(used.value) : EMPTY_VALUE_LABEL;
   const limitLabel = limit.state === "present" ? formatTokens(limit.value) : EMPTY_VALUE_LABEL;

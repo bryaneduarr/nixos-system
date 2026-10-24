@@ -1,38 +1,21 @@
 import type { Component } from "@earendil-works/pi-tui";
 import { THEME_ACCENT, THEME_TEXT } from "../../constants/split-view/theme-color.constant.ts";
-import { CARD_BOX_TITLE } from "../../constants/subagents/card.constant.ts";
+import { CARD_BOX_TITLE } from "../../constants/subagents/card/card.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
 import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
+import { readRunningCallStart } from "../../services/subagents/card/read-running-call-start.service.ts";
 import { renderCallLines } from "../../services/subagents/card/render-call-lines.service.ts";
 import { renderFinalStatusLine } from "../../services/subagents/card/render-final-status-line.service.ts";
 import { renderIdleLines } from "../../services/subagents/card/render-idle-lines.service.ts";
 import { resolveCardCalls } from "../../services/subagents/card/resolve-card-calls.service.ts";
 import { resolveCardProgress } from "../../services/subagents/card/resolve-card-progress.service.ts";
+import { resolveCardStatus } from "../../services/subagents/card/resolve-card-status.service.ts";
 import { resolveCardTitle } from "../../services/subagents/card/resolve-card-title.service.ts";
 import { oneLine } from "../../services/tool-rendering/text/one-line.service.ts";
-import type { SubToolActivity } from "../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
-import type { ToolActivityLookup } from "../../types/activity/store/tool-activity-lookup.interface.ts";
 import type { ValueState } from "../../types/activity/value/value-state.interface.ts";
+import type { RenderSubagentCardInput } from "../../types/subagents/card/render-subagent-card-input.interface.ts";
 import type { SubagentCardTheme } from "../../types/subagents/card/subagent-card-theme.interface.ts";
-import type { TaskProgress } from "../../types/subagents/tasks/progress/task-progress.interface.ts";
-import type { TaskProgressLookup } from "../../types/subagents/tasks/progress/task-progress-lookup.interface.ts";
-import type { TaskStatus } from "../../types/subagents/tasks/progress/task-status.interface.ts";
-import { EMPTY } from "../tool-rendering/empty.component.ts";
 import { ToolBox } from "../tool-rendering/tool-box.component.ts";
-
-function cardStatus(current: ValueState<TaskProgress>, activityLookup: ToolActivityLookup): TaskStatus {
-  if (current.state === "present") return current.value.status;
-  if (activityLookup.found) return activityLookup.entry.status;
-
-  return "running";
-}
-
-function runningCallStart(calls: readonly SubToolActivity[]): ValueState<number> {
-  const runningCall = calls.findLast((toolCall) => toolCall.status === "running");
-  if (runningCall === undefined) return { state: "absent" };
-
-  return { state: "present", value: runningCall.startedAt };
-}
 
 function reusableBox(theme: SubagentCardTheme, lastComponent: ValueState<Component>): ToolBox {
   if (lastComponent.state === "present" && lastComponent.value instanceof ToolBox) return lastComponent.value;
@@ -40,16 +23,11 @@ function reusableBox(theme: SubagentCardTheme, lastComponent: ValueState<Compone
   return new ToolBox(theme, "", [], THEME_ACCENT, false);
 }
 
-export function renderSubagentCard(
-  theme: SubagentCardTheme,
-  toolCallId: string,
-  title: string,
-  progressLookup: TaskProgressLookup,
-  lastComponent: ValueState<Component>,
-): Component {
+export function renderSubagentCard(input: RenderSubagentCardInput): Component {
+  const { theme, toolCallId, title, progressLookup, lastComponent } = input;
   const activityLookup = readToolActivity({ state: "present", value: toolCallId });
   const current = resolveCardProgress(progressLookup, activityLookup);
-  const status = cardStatus(current, activityLookup);
+  const status = resolveCardStatus(current, activityLookup);
   const label = resolveCardTitle(current, title, activityLookup);
   const calls = resolveCardCalls(progressLookup, activityLookup);
   const call = calls.findLast((toolCall) => toolCall.status === "running") ?? calls.at(-1);
@@ -70,11 +48,7 @@ export function renderSubagentCard(
     lines,
     toolCall: toValueState(toolCallId),
     color,
-    elapsedStartedAt: runningCallStart(calls),
+    elapsedStartedAt: readRunningCallStart(calls),
   });
   return box;
-}
-
-export function hiddenSubagentCall(): Component {
-  return EMPTY;
 }

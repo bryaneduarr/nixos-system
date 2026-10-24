@@ -1,4 +1,4 @@
-import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles/roles.constant.ts";
 import type { ToolResultStatusInput } from "../../../../types/activity/parsing/tool-result/tool-result-status-input.interface.ts";
 import type { ActivityStatus } from "../../../../types/activity/store/activity-status.interface.ts";
 import { resultFailed } from "../../../tool-rendering/presentation/result-failed.service.ts";

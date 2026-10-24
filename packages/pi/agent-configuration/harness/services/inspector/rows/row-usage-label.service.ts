@@ -1,4 +1,4 @@
-import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../constants/subagents/roles/roles.constant.ts";
 import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
 import { usageLabel } from "../labels/usage/usage-label.service.ts";
 

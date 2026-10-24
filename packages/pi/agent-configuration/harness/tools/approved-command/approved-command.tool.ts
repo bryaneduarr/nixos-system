@@ -1,5 +1,5 @@
 import { defineTool } from "@earendil-works/pi-coding-agent";
-import { APPROVED_COMMAND_TOOL } from "../../constants/subagents/roles.constant.ts";
+import { APPROVED_COMMAND_TOOL } from "../../constants/subagents/roles/roles.constant.ts";
 import { ApprovedCommandParams } from "../../schemas/subagents/approved-command/approved-command-params.schema.ts";
 import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
 import { runApprovedCommand } from "../../services/subagents/approved-command/run-approved-command.service.ts";

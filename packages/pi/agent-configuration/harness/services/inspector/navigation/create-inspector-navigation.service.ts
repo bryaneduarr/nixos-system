@@ -1,5 +1,5 @@
 import { DEFAULT_ARTIFACT } from "../../../constants/inspector/detail/default-artifact.constant.ts";
-import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../constants/subagents/roles/roles.constant.ts";
 import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { InspectorNavigation } from "../../../types/inspector/navigation/inspector-navigation.interface.ts";
 import type { InspectorNavigationOptions } from "../../../types/inspector/navigation/inspector-navigation-options.interface.ts";

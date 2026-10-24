@@ -1,117 +1,65 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { hiddenSubagentCall, renderSubagentCard } from "../../components/subagents/subagent-card.component.ts";
-import { TASK_TOOL_NAME } from "../../constants/subagents/roles.constant.ts";
-import { TASK_PROMPT_GUIDELINES, TASK_TOOL_DESCRIPTION } from "../../constants/subagents/tool-description.constant.ts";
+import { renderSubagentCard } from "../../components/subagents/subagent-card.component.ts";
+import { EMPTY } from "../../components/tool-rendering/empty.component.ts";
+import { TASK_TOOL_NAME } from "../../constants/subagents/roles/roles.constant.ts";
+import {
+  TASK_PROMPT_GUIDELINES,
+  TASK_PROMPT_SNIPPET,
+  TASK_TOOL_DESCRIPTION,
+  TASK_TOOL_LABEL,
+} from "../../constants/subagents/tasks/run/tool-description.constant.ts";
 import { TaskParams } from "../../schemas/subagents/tasks/run/task-params.schema.ts";
 import { toValueState } from "../../services/activity/value/to-value-state.service.ts";
-import { createFailedTaskProgress } from "../../services/subagents/tasks/progress/create-failed-task-progress.service.ts";
 import { readTaskProgress } from "../../services/subagents/tasks/progress/read-task-progress.service.ts";
+import { executeTaskCall } from "../../services/subagents/tasks/run/execute-task-call.service.ts";
 import { toTaskRequest } from "../../services/subagents/tasks/run/to-task-request.service.ts";
+import { toToolCancellation } from "../../services/tools/process/tool-cancellation.service.ts";
 import { subagentRegistry } from "../../stores/subagents/subagent-registry.store.ts";
-import type { TaskResult } from "../../types/subagents/result/task-result.interface.ts";
-import type { TaskProgress } from "../../types/subagents/tasks/progress/task-progress.interface.ts";
-import type { TaskProgressLookup } from "../../types/subagents/tasks/progress/task-progress-lookup.interface.ts";
-
-function resultContent(taskResult: TaskResult): string {
-  const content = {
-    id: taskResult.id,
-    title: taskResult.title,
-    role: taskResult.role,
-    tools: taskResult.tools,
-    verification_commands: taskResult.verificationCommands,
-    status: taskResult.status,
-    summary: taskResult.summary,
-    findings: taskResult.findings,
-    unresolved_questions: taskResult.unresolvedQuestions,
-    checks: taskResult.checks,
-    files_changed: taskResult.filesChanged,
-    risks: taskResult.risks,
-    errors: taskResult.errors,
-  };
-
-  return JSON.stringify(content);
-}
-
-function errorResultContent(id: string, title: string, message: string): string {
-  const content = {
-    id,
-    title,
-    status: "error",
-    summary: "",
-    findings: [],
-    files_changed: [],
-    errors: [message],
-  };
-
-  return JSON.stringify(content);
-}
 
 export function registerTaskTool(pi: ExtensionAPI): void {
   pi.registerTool({
     name: TASK_TOOL_NAME,
-    label: "Subagent",
+    label: TASK_TOOL_LABEL,
     description: TASK_TOOL_DESCRIPTION,
-    promptSnippet: "Delegate a bounded mission to a subagent with a selected role",
+    promptSnippet: TASK_PROMPT_SNIPPET,
     promptGuidelines: TASK_PROMPT_GUIDELINES,
     parameters: TaskParams,
     executionMode: "parallel",
     renderShell: "self",
     renderCall(args, theme, context) {
       const isPreparingCall = context.isPartial && !context.executionStarted;
-      if (!isPreparingCall) return hiddenSubagentCall();
+      if (!isPreparingCall) return EMPTY;
 
-      return renderSubagentCard(
+      return renderSubagentCard({
         theme,
-        context.toolCallId,
-        args.title,
-        { found: false },
-        toValueState(context.lastComponent),
-      );
+        toolCallId: context.toolCallId,
+        title: args.title,
+        progressLookup: { found: false },
+        lastComponent: toValueState(context.lastComponent),
+      });
     },
     renderResult(toolResult, _options, theme, context) {
-      return renderSubagentCard(
+      return renderSubagentCard({
         theme,
-        context.toolCallId,
-        context.args.title,
-        readTaskProgress(toolResult.details),
-        toValueState(context.lastComponent),
-      );
+        toolCallId: context.toolCallId,
+        title: context.args.title,
+        progressLookup: readTaskProgress(toolResult.details),
+        lastComponent: toValueState(context.lastComponent),
+      });
     },
     async execute(_toolCallId, params, signal, onUpdate, ctx) {
-      const request = toTaskRequest(params);
-      let latest: TaskProgressLookup = { found: false };
-      const publish = (progress: TaskProgress) => {
-        latest = { found: true, progress };
-        if (onUpdate === undefined) return;
-        onUpdate({
-          content: [{ type: "text", text: progress.currentTask }],
-          details: progress,
-        });
-      };
-      const handle = subagentRegistry.create(request, ctx, publish);
-      const abort = () => {
-        subagentRegistry.cancel(handle.id);
-      };
-      if (signal !== undefined) signal.addEventListener("abort", abort, { once: true });
+      const outcome = await executeTaskCall({
+        registry: subagentRegistry,
+        request: toTaskRequest(params),
+        ctx,
+        cancellation: toToolCancellation(signal),
+        onProgress: (progress) => {
+          if (onUpdate === undefined) return;
+          onUpdate({ content: [{ type: "text", text: progress.currentTask }], details: progress });
+        },
+      });
 
-      try {
-        if (signal !== undefined && signal.aborted) abort();
-
-        const taskResult = await handle.result;
-        return {
-          content: [{ type: "text", text: resultContent(taskResult) }],
-          details: taskResult,
-        };
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        const failedProgress = createFailedTaskProgress(latest, handle.id, request);
-        return {
-          content: [{ type: "text", text: errorResultContent(failedProgress.id, request.title, message) }],
-          details: failedProgress,
-        };
-      } finally {
-        if (signal !== undefined) signal.removeEventListener("abort", abort);
-      }
+      return { content: [{ type: "text", text: outcome.text }], details: outcome.details };
     },
   });
 }

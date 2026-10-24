@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { STOPPED_TASK_LABEL } from "../../../constants/subagents/progress.constant.ts";
-import { IMPLEMENT_TASK_ROLE } from "../../../constants/subagents/roles.constant.ts";
+import { IMPLEMENT_TASK_ROLE } from "../../../constants/subagents/roles/roles.constant.ts";
+import { STOPPED_TASK_LABEL } from "../../../constants/subagents/tasks/progress/progress.constant.ts";
 import type { SubagentRegistry } from "../../../types/subagents/registry/subagent-registry.interface.ts";
 import type { SubagentRun } from "../../../types/subagents/registry/subagent-run.interface.ts";
 import { resolveTaskRole } from "../roles/resolve-task-role.service.ts";
@@ -28,12 +28,18 @@ export function createSubagentRegistry(): SubagentRegistry {
       const resolvedRole = resolveTaskRole(request);
       const progress = createTaskProgress(id, request.title, resolvedRole);
       const execute = () =>
-        runTask(id, request, ctx, controller.signal, (nextProgress) => {
-          const run = runsById.get(id);
-          if (!run) return;
+        runTask({
+          id,
+          request,
+          ctx,
+          signal: controller.signal,
+          onProgress: (nextProgress) => {
+            const run = runsById.get(id);
+            if (!run) return;
 
-          run.progress = nextProgress;
-          onProgress(nextProgress);
+            run.progress = nextProgress;
+            onProgress(nextProgress);
+          },
         });
       const result =
         resolvedRole.role === IMPLEMENT_TASK_ROLE ? implementationQueue.run(execute) : Promise.resolve().then(execute);

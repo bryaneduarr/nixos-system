@@ -1,4 +1,4 @@
-import { STARTING_TASK_LABEL } from "../../../../constants/subagents/progress.constant.ts";
+import { STARTING_TASK_LABEL } from "../../../../constants/subagents/tasks/progress/progress.constant.ts";
 import type { ResolvedTaskRole } from "../../../../types/subagents/roles/resolved-task-role.interface.ts";
 import type { TaskProgress } from "../../../../types/subagents/tasks/progress/task-progress.interface.ts";
 

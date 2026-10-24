@@ -1,5 +1,5 @@
 import { BLANK_DETAIL_LINE } from "../../../../constants/inspector/detail/detail-line.constant.ts";
-import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_TOOL_NAME } from "../../../../constants/subagents/roles/roles.constant.ts";
 import type { DetailLine } from "../../../../types/inspector/detail/detail-line.interface.ts";
 import type { DetailOptions } from "../../../../types/inspector/detail/detail-options.interface.ts";
 import { isPseudoEntryTool } from "../../entries/is-pseudo-entry-tool.service.ts";

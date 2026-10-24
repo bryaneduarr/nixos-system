@@ -1,5 +1,5 @@
 import type { ToolExecutionEndEvent, ToolExecutionStartEvent } from "@earendil-works/pi-coding-agent";
-import { WRITING_RESULT_TASK_LABEL } from "../../../../constants/subagents/progress.constant.ts";
+import { WRITING_RESULT_TASK_LABEL } from "../../../../constants/subagents/tasks/progress/progress.constant.ts";
 import type { TrackTaskProgressInput } from "../../../../types/subagents/tasks/progress/track-task-progress-input.interface.ts";
 import { isRecord } from "../../../values/is-record.service.ts";
 import { textContent } from "../messages/text-content.service.ts";
@@ -11,15 +11,18 @@ function startToolCall(input: TrackTaskProgressInput, event: ToolExecutionStartE
   const { progress, publish } = input;
   const args = isRecord(event.args) ? event.args : {};
   progress.currentTask = describeToolActivity(event.toolName, args);
-  progress.activity.push({
-    id: event.toolCallId,
-    toolName: event.toolName,
-    args,
-    status: "running",
-    text: "",
-    startedAt: Date.now(),
-    endedAt: { state: "absent" },
-  });
+  progress.activity = [
+    ...progress.activity,
+    {
+      id: event.toolCallId,
+      toolName: event.toolName,
+      args,
+      status: "running",
+      text: "",
+      startedAt: Date.now(),
+      endedAt: { state: "absent" },
+    },
+  ];
   publish();
 }
 

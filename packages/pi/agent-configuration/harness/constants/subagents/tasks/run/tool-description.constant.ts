@@ -11,3 +11,6 @@ export const TASK_PROMPT_GUIDELINES = [
   "List exact verificationCommands for implement or verify workers that need to run checks.",
   "Call task multiple times in one response for independent work. Implement workers share one slot.",
 ];
+
+export const TASK_TOOL_LABEL = "Subagent";
+export const TASK_PROMPT_SNIPPET = "Delegate a bounded mission to a subagent with a selected role";
