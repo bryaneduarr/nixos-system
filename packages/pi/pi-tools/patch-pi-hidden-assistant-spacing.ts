@@ -1,8 +1,7 @@
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { findBundledChunkContaining, readPackagePath, replaceOnce } from "./pi-source-patch.ts";
 
-const packagePath = process.argv[2];
-if (!packagePath) throw new Error("Pi package path is required");
+const packagePath = readPackagePath();
 
 const ASSISTANT_RENDER_BEFORE = [
   "const lines = super.render(width);",
@@ -33,25 +32,16 @@ const BUNDLED_DEFAULT_THINKING_STATUS = [
   "this.updateEditorBorderColor(),",
   `this.showStatus(persist?\`Default thinking level: \${level}\`:\`Thinking level: \${level}\`)`,
 ].join("");
-
-function replaceOnce(path: string, before: string, after: string): void {
-  const source = readFileSync(path, "utf8");
-  const first = source.indexOf(before);
-  const duplicate = source.indexOf(before, first + before.length);
-  if (first < 0 || duplicate >= 0) {
-    throw new Error(`Expected exactly one match for the patch target in ${path}`);
-  }
-  writeFileSync(path, source.replace(before, after));
-}
-
-function findSingleChunkContaining(chunkPaths: readonly string[], needle: string): string {
-  const matches = chunkPaths.filter((path) => readFileSync(path, "utf8").includes(needle));
-  const [match] = matches;
-  if (matches.length !== 1 || match === undefined) {
-    throw new Error(`Expected one bundled assistant component, found ${matches.length}`);
-  }
-  return match;
-}
+const MODULAR_MODEL_STATUSES = [
+  `                this.showStatus(\`Switched to \${result.model.name || result.model.id}\${thinkingStr}\`);\n`,
+  `                this.showStatus(\`Model: \${model.id}\`);\n`,
+  `                    this.showStatus(persist ? \`Default model: \${model.provider}/\${model.id}\` : \`Model: \${model.id}\`);\n`,
+];
+const BUNDLED_MODEL_STATUSES = [
+  `this.showStatus(\`Switched to \${result.model.name||result.model.id}\${thinkingStr}\`),`,
+  `this.showStatus(\`Model: \${model.id}\`),`,
+  `this.showStatus(persist?\`Default model: \${model.provider}/\${model.id}\`:\`Model: \${model.id}\`),`,
+];
 
 const modularFilter = `class HarnessFilteredChatContainer extends Container {
     render(width) {
@@ -59,6 +49,7 @@ const modularFilter = `class HarnessFilteredChatContainer extends Container {
             return super.render(width);
         const children = this.children;
         this.children = children.filter((child) => !(child instanceof ToolExecutionComponent) &&
+            child.harnessHistoryEntry !== true &&
             !(child instanceof AssistantMessageComponent && (child.isStreaming || child.hasToolCalls)));
         try {
             return super.render(width);
@@ -82,12 +73,9 @@ replaceOnce(
 );
 replaceOnce(interactivePath, MODULAR_THINKING_STATUS, "");
 replaceOnce(interactivePath, MODULAR_DEFAULT_THINKING_STATUS, "");
+for (const status of MODULAR_MODEL_STATUSES) replaceOnce(interactivePath, status, "");
 
-const chunksPath = join(packagePath, "dist/bundle/chunks");
-const chunkPaths = readdirSync(chunksPath)
-  .filter((name) => name.endsWith(".js"))
-  .map((name) => join(chunksPath, name));
-const bundledChunkPath = findSingleChunkContaining(chunkPaths, BUNDLED_RENDER_BEFORE);
+const bundledChunkPath = findBundledChunkContaining(packagePath, BUNDLED_RENDER_BEFORE);
 replaceOnce(bundledChunkPath, BUNDLED_RENDER_BEFORE, BUNDLED_RENDER_AFTER);
 
 const bundledFilter = [
@@ -95,6 +83,7 @@ const bundledFilter = [
   'if(Reflect.get(globalThis,"pi.harness.toolHistoryVisible")!==false)return super.render(width);',
   "let children=this.children;",
   "this.children=children.filter(child=>!(child instanceof ToolExecutionComponent)&&",
+  "child.harnessHistoryEntry!==!0&&",
   "!(child instanceof AssistantMessageComponent&&(child.isStreaming||child.hasToolCalls)));",
   "try{return super.render(width)}finally{this.children=children}}};",
 ].join("");
@@ -106,3 +95,4 @@ replaceOnce(
 );
 replaceOnce(bundledChunkPath, BUNDLED_THINKING_STATUS, "this.updateEditorBorderColor()");
 replaceOnce(bundledChunkPath, BUNDLED_DEFAULT_THINKING_STATUS, "this.updateEditorBorderColor()");
+for (const status of BUNDLED_MODEL_STATUSES) replaceOnce(bundledChunkPath, status, "");
