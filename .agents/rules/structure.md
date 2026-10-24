@@ -41,16 +41,16 @@ nvim/                        Neovim Lua configuration, linked as-is by packages/
 ## Files
 
 - Keep each file focused on one responsibility. Target roughly 150 lines; a small overrun is fine when splitting would reduce clarity.
-- Prefer one main function per file.
+- One main function per file. Each `.service.ts` exports exactly one function, each `.interface.ts` declares one interface (types derived from it may share the file), and each `.constant.ts` holds the constants of one responsibility.
 - Split substantially larger implementation files by responsibility into descriptive subfolders.
 - Use operation-specific folders and dedicated domain type locations when appropriate. Do not merge unrelated responsibilities into one type catalog or aggregate interface.
 - Name files and folders for their actual responsibility, in kebab-case.
 - Nix: never create `default.nix` files. A feature folder's entrypoints are named after the folder with their role, `<name>.system.nix` or `<name>.home.nix`, such as `web-research/web-research.system.nix`; a host's are `hosts/<target>/<target>.nix` and `<target>.home.nix`. Other files must not use those suffixes. An entrypoint declares the feature's options and composes its parts through `imports`; it is a real module, not a barrel. Other files are `<responsibility>.nix`, such as `keybindings.nix`.
 - Import and package Nix files by their full file path, never by folder path, such as `./packages/niri/config.nix` or `callPackage ./pi-tools/pi-tools.nix { }`. Existing `default.nix` files are renamed when their feature is touched.
-- TypeScript: name files `<specific-responsibility>.<singular-role>.ts`, such as `read-session-registry.service.ts` or `exit.command.ts`, and place them in the role roots below. See [typescript.md](typescript.md).
+- TypeScript: name files `<specific-responsibility>.<singular-role>.ts`, such as `read-session-registry.service.ts` or `exit.command.ts`, and place them in the role roots below. See [typescript.md](typescript.md). A build-time script that patches an upstream package is `<target>.patch.ts`; a standalone tool's entry file at its project root is `<tool>.ts`.
 - Shell: name files `<action-or-responsibility>.sh`, such as `select-target.sh`.
 - Lua: follow the existing `nvim/lua/config/` and `nvim/lua/plugins/<plugin>.lua` layout.
-- Put each test file next to the file it tests, named after the file or behavior it checks: `<subject>.test.ts` or `<subject>.test.nix`. Test files follow the same comment rules as other code; their names state what they check. Never create a central `tests/` folder or a per-feature `tests/` subfolder; existing ones migrate when their subject is touched. Typed fakes shared by several tests of one subject go in `<subject>.test-double.ts` beside them. Split test files over about 150 lines by the behavior they check.
+- Put each test file next to the file it tests, named after the file or behavior it checks: `<subject>.test.ts` or `<subject>.test.nix`. Test files follow the same comment rules as other code; their names state what they check. Never create a central `tests/` folder or a per-feature `tests/` subfolder; existing ones migrate when their subject is touched. Typed fakes and setup that several tests of one subject repeat go in `<subject>.test-double.ts` beside them. Split test files over about 150 lines by the behavior they check.
 - Preserve filenames required by tools: `flake.nix`, `init.lua`, `package.json`, `stylua.toml`, and similar.
 - Apply naming rules to new files and files moved for the task. Do not rename unrelated files during another task.
 
@@ -63,6 +63,7 @@ types/<domain>/<operation>/        <responsibility>.interface.ts   Documented co
 schemas/<domain>/<operation>/      <responsibility>.schema.ts      Runtime validation at boundaries.
 constants/<domain>/                <responsibility>.constant.ts    Repeated literals and limits.
 services/<domain>/<operation>/     <verb-object>.service.ts        One exported function each.
+stores/<domain>/                   <noun>.store.ts                 One process-wide instance of a factory-made object.
 tools/<tool>/                      <tool>.tool.ts                  Tools registered with Pi.
 commands/<command>/                <command>.command.ts            Commands registered with Pi.
 components/<domain>/               <responsibility>.component.ts   Terminal UI components.
@@ -70,7 +71,10 @@ components/<domain>/               <responsibility>.component.ts   Terminal UI c
 
 - Role roots give an overview of code roles; domain and operation folders inside them follow the deepest-owner rules above. Use the same domain and operation names across role roots, such as `types/sessions/registry/` and `services/sessions/registry/`.
 - Create a role root or folder only when it holds a file. A root that is one small file stays one file.
-- A service file exports one main function named after the file, such as `readSessionRegistry` in `read-session-registry.service.ts`. Private helpers it alone uses may stay in the file.
+- A service file exports one main function named after the file, such as `readSessionRegistry` in `read-session-registry.service.ts`. Private helpers it alone uses may stay in the file; a helper a second file needs, or a second behavior, becomes its own service.
+- `.tool.ts`, `.command.ts`, and `.component.ts` files only wire Pi: registration, parameter schemas, and layout. Decisions, parsing, and result building live in services; key names, shortcuts, and descriptions live in constants.
+- A constants domain folder holds at most 8 files. Past that, group them in operation folders named like the matching `services/<domain>/<operation>/`, such as `constants/tools/search/`.
+- A constant, type, or helper several domains need lives in the domain that owns the concept and is imported from there, never copied per consumer. Pi's owners are listed in [pi-rule-audit.md](pi-rule-audit.md).
 - Tests sit next to their subject inside these folders.
 
 ## Dependencies

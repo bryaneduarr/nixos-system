@@ -11,7 +11,7 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 
 - Do not introduce explicit or implicit `any`, `z.any()`, or `Type.Any()`. Every value has a declared or inferred concrete type.
 - `unknown` is allowed in two places only: the raw value passed directly into a schema parse at a trust boundary (parsed JSON, process output, files, environment variables, Pi or Herdr messages), and a `catch` variable narrowed in the same block. Never store, return, or pass `unknown` further; use the parsed result afterward.
-- Never use `as`, `?.`, `!`, `@ts-ignore`, or `@ts-expect-error` to suppress a type error. Correct the source type, signature, or schema. An assertion is allowed only for a genuine runtime guarantee TypeScript cannot represent, with a comment naming that guarantee.
+- Never use `as`, `?.`, `!` (including `let value!: T`), `@ts-ignore`, or `@ts-expect-error` to suppress a type error. Correct the source type, signature, or schema. An assertion is allowed only for a genuine runtime guarantee TypeScript cannot represent, with a comment naming that guarantee.
 - Prefer `satisfies` over an assertion when checking a value against a type.
 - Narrow with discriminants, `in`, `typeof`, or `instanceof`. A custom type guard must actually verify its claim.
 
@@ -25,12 +25,12 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 ## Required values and explicit absence
 
 - Contracts the project owns never use optional properties (`usage?: SubagentUsage`), `| undefined`, or `| null`, in interfaces, parameters, or return types. Every value is present and typed end to end.
-- Model real absence or alternative states with literal-discriminated unions whose variants have only required fields, such as `{ usageState: "reported"; usage: SubagentUsage } | { usageState: "unreported" }`. A lookup that can fail returns such a union too. Handle every variant; use an exhaustive `never` check in `switch` defaults.
+- Model real absence or alternative states with literal-discriminated unions whose variants have only required fields, such as `{ usageState: "reported"; usage: SubagentUsage } | { usageState: "unreported" }`. A lookup that can fail returns such a union too. Handle every variant. Every `switch` over a union ends in `default: return value satisfies never;`; a switch over `string` becomes a lookup table or an `if` chain.
 - Library types keep their own optional fields, and input schemas for external callers (tool parameters, settings files) may declare optional input fields. Convert them once at the boundary into the project's required values or unions, then use only the converted value.
 - List every file that performs such a conversion in the exceptions table of the project's rule audit file, `.agents/rules/<project>-rule-audit.md` (such as [pi-rule-audit.md](pi-rule-audit.md)), with the rule it needs and a one-line reason. Any other file must pass the rule audit without exceptions.
 - Tests do not cast fakes. When a function needs only part of a library object, type its parameter as a small interface of what it uses, so tests pass plain objects.
 - Exception: a `<subject>.test-double.ts` may cast a fake to a library type that cannot be constructed, such as an API with per-event overloads or classes with private members. Keep the cast in the test double, never in a test, and list the file in the project's rule audit exceptions table with the reason.
-- Never fill absence with fabricated defaults such as empty strings, zero, or empty objects.
+- Never fill absence with a fabricated default: `?? ""`, `|| ""`, `?? 0`, `x === undefined ? "" : x.text`, `x !== undefined ? x.start : 0`, `.pop() ?? ""`, `[first = ""] = parts`. Return a union variant such as `{ state: "absent" }`, branch deliberately on the empty case and return what that case means, or fix the type so absence cannot occur. A real empty collection for an API that returns `null` for none, such as `text.match(pattern) ?? []`, is allowed.
 - Do not use optional chaining to work around contracts the project owns. Fix the contract or narrow explicitly.
 - Handle empty strings, empty collections, failed lookups, missing processes, and closed sockets deliberately.
 
@@ -38,12 +38,18 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 
 - Use interfaces, plain objects, and functions. Do not write classes unless a library contract requires one, such as a class implementing a pi-tui `Component` or extending `Error`.
 - Replace stateful classes with a factory function that returns a plain object typed by an interface. Keep its state in local `const` bindings inside the factory.
-- Mark interface members `readonly` and use `readonly T[]` unless the code must mutate them.
+- Mark interface members `readonly`. Array-typed members are always `readonly T[]`; a collection that changes is private state inside a factory.
+
+## State and singletons
+
+- State lives in a factory (`create-<noun>.service.ts`) that returns a plain object typed by an interface. Prefer creating the instance in the entry file and passing it to its consumers.
+- Pi creates renderers, components, and event handlers without a context argument. When many of them need one process-wide instance, create it once in `stores/<domain>/<noun>.store.ts`: a single `export const <noun>: <Interface> = create<Noun>();` (or a `Map` or `Set` constructor for plain collections) and nothing else. Consumers import it; tests build fresh instances from the factory and pass them in.
+- Never name a file, folder, or identifier `shared`, `common`, `utils`, `helpers`, or `misc`.
 
 ## Contracts and documentation
 
 - Put contracts in the TypeScript root's `types/` folder, in `<responsibility>.interface.ts` files organized by domain and operation as described in [structure.md](structure.md). Put runtime schemas in `schemas/` and derive their types in the matching interface file. No global type catalog, aggregate interface, `shared/` folder, or barrel file.
-- Write every contract as an `interface`. Use a type alias only for unions, primitives, or schema-derived types an interface cannot represent.
+- Write every contract as an `interface`. Use a type alias only for unions, primitives, schema-derived types, and function types (Biome's `useShorthandFunctionType` rewrites call-signature interfaces into aliases).
 - Document every exported interface, type alias, and its members with a brief JSDoc `/** ... */` comment that states purpose and meaning, not the primitive type. Never use a plain `/* */` comment. Functions are not commented; see [code-quality.md](code-quality.md).
 - Document schema fields the same way. Contract comments explain purpose without file paths.
 - Names describe the actual responsibility. Avoid `Data`, `Payload`, `value`, and `item` when a specific name exists.
@@ -61,7 +67,7 @@ These rules are mandatory for the Pi harness and for standalone TypeScript tools
 - Import directly from the module that owns the code. No `index.ts` files: no barrels and no entry files named `index`.
 - Pi loads harness source files without a bundler, so harness imports stay relative and keep the `.ts` extension. Revisit this only together with a build step.
 - Use `node:` prefixes for Node built-ins.
-- Use typed parameter objects when several related parameters represent one input.
+- A function takes at most three positional parameters. With more, take one typed parameter object. A signature fixed by a library keeps its shape and is listed in the rule audit exceptions.
 
 ## Checks
 
@@ -71,6 +77,6 @@ Before completion, run for the affected TypeScript project:
 - `biome ci` once a Biome configuration exists.
 - `knip` once a knip configuration exists.
 - `bun test` for the affected tests.
-- The rule audit, through `check-code`. It reports `| undefined` and `| null` unions, `?.`, casts other than `as const`, plain `/* */` comments, files over 150 lines, and comments above functions. Exceptions live only in `.agents/rules/<project>-rule-audit.md`.
+- The rule audit, through `check-code`. Its findings are listed in [pi-rule-audit.md](pi-rule-audit.md). Exceptions live only in `.agents/rules/<project>-rule-audit.md`.
 
 Every Biome configuration sets `noExplicitAny`, `noNonNullAssertion`, `noDeprecatedImports`, `noExcessiveCognitiveComplexity`, and `useConst` to error.

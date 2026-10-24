@@ -12,6 +12,7 @@ Hosts configure features only through typed options. This replaces untyped flags
 - Use the narrowest type: `types.enum` over `types.str` for fixed choices, `types.port`, `types.path`, `types.package`, `types.submodule` for structured values, `types.listOf`/`types.attrsOf` with an element type. Never use `types.anything`, `types.unspecified`, or `types.attrs` for project-owned values.
 - Express relationships between options with `assertions` and clear messages, not silent fallbacks.
 - Bind `cfg = config.custom.<feature>;` once in `let` and read options only through it.
+- Share a package or value between a feature's modules through a `readOnly` `custom.<feature>.<name>` option, never through `_module.args` or `specialArgs`.
 - A target-specific difference (desktop versus WSL) is an option set by the host, not a separate copy of the module and not a `specialArgs` flag.
 - Option `description` fields are required documentation: one sentence stating what the option controls. They follow the comment rules in [code-quality.md](code-quality.md).
 
