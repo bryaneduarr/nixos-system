@@ -11,7 +11,7 @@ in
 buildNpmPackage (
   packageDefinition
   // {
-    npmDepsHash = "sha256-Fs/I54b9VVqZXay20lZhlEM6B0hjBnrExmSDUIuJ/ho=";
+    npmDepsHash = "sha256-MHDTY4/bNA5wCnzEnN/wIUt9gIV9YE6kbEaB4/kIcxk=";
     npmDepsFetcherVersion = 2;
 
     installPhase = builtins.readFile ./install-pinned-npm-packages.sh;
