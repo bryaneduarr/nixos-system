@@ -14,5 +14,5 @@ return {
     error = "#ffb4ab",
     background = "#111318",
     on_background = "#e2e2e9",
-  },
+  }
 }
