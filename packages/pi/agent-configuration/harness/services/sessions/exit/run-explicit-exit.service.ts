@@ -1,7 +1,11 @@
-import { HERDR_ENVIRONMENT_VARIABLE, PI_INTERACTIVE_MODE } from "../../../constants/sessions/environment.constant.ts";
+import {
+  HERDR_ENVIRONMENT_VARIABLE,
+  PI_INTERACTIVE_MODE,
+} from "../../../constants/sessions/install/environment.constant.ts";
+import type { ExitCancellation } from "../../../types/sessions/exit/exit-cancellation.interface.ts";
 import type { ExitContext } from "../../../types/sessions/exit/exit-context.interface.ts";
 import type { ExitDependencies } from "../../../types/sessions/exit/exit-dependencies.interface.ts";
-import type { ExitCancellation, UnscheduledCleanup } from "../../../types/sessions/exit/exit-state.interface.ts";
+import type { UnscheduledCleanup } from "../../../types/sessions/exit/unscheduled-cleanup.interface.ts";
 import { confirmAdditionalDiscard } from "./confirm-additional-discard.service.ts";
 import { confirmExit } from "./confirm-exit.service.ts";
 import { listDiscardReasons } from "./list-discard-reasons.service.ts";

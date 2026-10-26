@@ -5,12 +5,12 @@ import {
   PROMPT_BROWSER_NO_PROMPTS_MESSAGE,
   PROMPT_BROWSER_SHORTCUT,
 } from "../../../constants/prompts/registration.constant.ts";
-import { TURN_MENU_DESCRIPTION, TURN_MENU_SHORTCUT } from "../../../constants/transcript/turn-view.constant.ts";
+import { TURN_MENU_DESCRIPTION, TURN_MENU_SHORTCUT } from "../../../constants/transcript/turn/turn-view.constant.ts";
+import { turnView } from "../../../stores/transcript/turn-view.store.ts";
 import type { PromptSelection } from "../../../types/prompts/collection/prompt-selection.interface.ts";
 import type { PromptContext } from "../../../types/prompts/install/prompt-context.interface.ts";
 import type { PromptExtensionApi } from "../../../types/prompts/install/prompt-extension-api.interface.ts";
 import { refreshTranscript } from "../../transcript/turn/refresh-transcript.service.ts";
-import { turnView } from "../../transcript/turn/shared-turn-view.service.ts";
 import { collectAgentOutputs } from "../collection/collect-agent-outputs.service.ts";
 import { collectPrompts } from "../collection/collect-prompts.service.ts";
 import { viewPrompt } from "../view/view-prompt.service.ts";
@@ -31,7 +31,7 @@ export function installPromptPreviews(pi: PromptExtensionApi): void {
     }
     browserOpen = true;
     try {
-      await viewPrompt(ctx.ui, collections, copyToClipboard, selection);
+      await viewPrompt({ ui: ctx.ui, collections, clipboard: copyToClipboard, selection });
     } finally {
       browserOpen = false;
     }

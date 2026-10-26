@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { exitHarness, handlerNamed, installExit } from "./exit.command.test-double.ts";
+import { handlerNamed } from "../../services/sessions/install/handler-named.test-double.ts";
+import { exitHarness, installExit } from "./exit.command.test-double.ts";
 
 describe("explicit exit command", () => {
   test("explicit exit confirms busy work, pending messages and drafts, cancellation has no effects", async () => {

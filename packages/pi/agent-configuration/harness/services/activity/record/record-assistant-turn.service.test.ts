@@ -1,7 +1,8 @@
 import { beforeEach, expect, test } from "bun:test";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { ToolActivityUsage } from "../../../types/activity/parsing/subagent/tool-activity-usage.interface.ts";
-import type { AssistantActivitySnapshot } from "../../../types/activity/store/agent-activity.interface.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
+import type { AssistantActivitySnapshot } from "../../../types/activity/store/assistant-activity-snapshot.interface.ts";
+import { recordedNames } from "../store/read-recorded-names.test-double.ts";
 import { recordAssistantTurn } from "./record-assistant-turn.service.ts";
 
 const TIMING = { cwd: "/tmp", startedAt: 1000, endedAt: 3500 };
@@ -23,10 +24,6 @@ const unreportedUsage: ToolActivityUsage = { usageState: "unreported" };
 
 function snapshot(response: string, hasToolCall: boolean): AssistantActivitySnapshot {
   return { thinking: "", thinkingRedacted: false, response, hasToolCall };
-}
-
-function recordedNames(): string[] {
-  return activityStore.all().map((entry) => entry.toolName);
 }
 
 beforeEach(() => {

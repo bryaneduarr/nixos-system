@@ -5,6 +5,3 @@ export interface TranscriptRefreshUi {
   /** Sets or removes a widget, which makes Pi redraw its screen and hands the widget the screen. */
   setWidget(key: string, content: ((tui: TUI) => Component) | undefined): void;
 }
-
-/** Where the transcript stays after it is redrawn. */
-export type TranscriptRefreshPosition = "keep-position" | "turn-start";

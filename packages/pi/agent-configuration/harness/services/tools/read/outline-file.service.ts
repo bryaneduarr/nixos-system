@@ -1,5 +1,5 @@
 import { dirname } from "node:path";
-import { OUTLINE_MAX_LINES } from "../../../constants/tools/read-limits.constant.ts";
+import { OUTLINE_MAX_LINES } from "../../../constants/tools/read/read-limits.constant.ts";
 import type { BackendToolResult } from "../../../types/tools/backends/backend-tool-result.interface.ts";
 import { runArgv } from "../process/run-argv.service.ts";
 

@@ -4,8 +4,9 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { HerdrCommand } from "../../../../types/sessions/herdr/command/herdr-command.interface.ts";
+import { createLiveSession } from "../../registry/row/live-session.test-double.ts";
 import { createHerdrSessions } from "../create-herdr-sessions.service.ts";
-import { createRegistryIn, createSessionRow } from "../create-herdr-sessions.test-double.ts";
+import { createRegistryIn, managedSessionToken } from "../create-herdr-sessions.test-double.ts";
 
 const temporary = await mkdtemp(join(tmpdir(), "pi-herdr-split-test-"));
 afterAll(() => rm(temporary, { recursive: true, force: true }));
@@ -18,19 +19,18 @@ describe("split session pane", () => {
     const source = { pane: "w2:p1", tab: "w2:t2", workspace: "w2" };
     let token = "";
     const command: HerdrCommand = async (args) => {
-      commands.push(args);
+      commands.push([...args]);
       if (args[1] === "layout")
         return { layout: { panes: [{ pane_id: source.pane, rect: { width: 160, height: 40 } }] } };
       if (args[1] === "split") {
-        const env = args.find((arg) => arg.startsWith("PI_MANAGED_SESSION=")) ?? "";
-        token = env.slice("PI_MANAGED_SESSION=".length);
+        token = managedSessionToken(args);
         return { pane: { pane_id: "w2:p3", tab_id: source.tab, workspace_id: source.workspace } };
       }
       if (args[1] === "start") {
         const name = await store.instanceName(cwd, token);
         expect(args[2]).toBe(name);
         expect(await store.list()).toEqual([]);
-        await store.publish(createSessionRow(cwd, { identity: token, cwd, name, owned: true }));
+        await store.publish(createLiveSession({ identity: token, cwd, name, owned: true }));
       }
       return {
         pane: { pane_id: "w2:p3", tab_id: source.tab, workspace_id: source.workspace, agent: "pi" },
@@ -56,18 +56,18 @@ describe("split session pane", () => {
 
   test("narrow panes split down even when another workspace hosts the project", async () => {
     const store = createRegistryIn(temporary);
-    await store.publish(createSessionRow(temporary, { owned: true }));
+    await store.publish(createLiveSession({ cwd: temporary, owned: true }));
     const source = { pane: "w1:p1", tab: "w1:t1", workspace: "w1" };
     const commands: string[][] = [];
     const command: HerdrCommand = async (args) => {
-      commands.push(args);
+      commands.push([...args]);
       if (args[1] === "layout")
         return { layout: { panes: [{ pane_id: source.pane, rect: { width: 60, height: 40 } }] } };
       if (args[1] === "split") {
-        const token = (args.find((arg) => arg.startsWith("PI_MANAGED_SESSION=")) ?? "").split("=")[1] ?? "";
         await store.publish(
-          createSessionRow(temporary, {
-            identity: token,
+          createLiveSession({
+            identity: managedSessionToken(args),
+            cwd: temporary,
             pane: "w1:p2",
             tab: source.tab,
             workspace: source.workspace,
@@ -92,7 +92,7 @@ describe("split session pane", () => {
     const source = { pane: "w2:p1", tab: "w2:t2", workspace: "w2" };
     const commands: string[][] = [];
     const herdr = createHerdrSessions(store, async (args) => {
-      commands.push(args);
+      commands.push([...args]);
       if (args[1] === "layout")
         return { layout: { panes: [{ pane_id: source.pane, rect: { width: 160, height: 40 } }] } };
       if (args[1] === "start") throw new Error("Not ready");
@@ -118,7 +118,7 @@ describe("split session pane", () => {
     for (const destination of destinations) {
       const commands: string[][] = [];
       const herdr = createHerdrSessions(createRegistryIn(temporary), async (args) => {
-        commands.push(args);
+        commands.push([...args]);
         if (args[1] === "layout")
           return { layout: { panes: [{ pane_id: source.pane, rect: { width: 160, height: 40 } }] } };
         return { pane: destination };

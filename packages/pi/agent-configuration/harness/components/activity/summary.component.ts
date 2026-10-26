@@ -1,22 +1,18 @@
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
-import {
-  ACCENT_COLOR,
-  DETAILS_LABEL,
-  ELLIPSIS,
-  JUMP_TO_LATEST_COLOR,
-  LATEST_ACTIVITY_COLOR,
-  MUTED_COLOR,
-  SUMMARY_SEPARATOR,
-  TOOL_TARGET_SEPARATOR,
-} from "../../constants/activity/summary-label.constant.ts";
+import { LATEST_ACTIVITY_COLOR } from "../../constants/activity/summary/summary-color.constant.ts";
+import { DETAILS_LABEL } from "../../constants/activity/summary/summary-label.constant.ts";
 import {
   FOOTER_END_PREFIX,
   FOOTER_PREFIX,
   FOOTER_RESERVED_WIDTH,
   HEADER_PREFIX,
+  SUMMARY_SEPARATOR,
   TWO_LINE_HEADER_PREFIX,
-} from "../../constants/activity/summary-layout.constant.ts";
+} from "../../constants/activity/summary/summary-layout.constant.ts";
+import { THEME_ACCENT, THEME_MUTED, THEME_WARNING } from "../../constants/split-view/theme-color.constant.ts";
+import { ELLIPSIS } from "../../constants/text/ellipsis.constant.ts";
+import { DOT_SEPARATOR } from "../../constants/text/separator.constant.ts";
 import { readMessageEntries } from "../../services/activity/messages/read-message-entries.service.ts";
 import { readMessageStartedAt } from "../../services/activity/messages/read-message-started-at.service.ts";
 import { formatDivider } from "../../services/activity/summary/format-divider.service.ts";
@@ -26,22 +22,22 @@ import { readActivityMark } from "../../services/activity/summary/read-activity-
 import { readJumpToLatestHint } from "../../services/activity/summary/read-jump-to-latest-hint.service.ts";
 import { readLatestActivityText } from "../../services/activity/summary/read-latest-activity-text.service.ts";
 import { readSpinnerFrame } from "../../services/activity/summary/read-spinner-frame.service.ts";
-import { activitySummaryState } from "../../services/activity/summary/state/shared-activity-summary-state.service.ts";
 import { wrapFooterParts } from "../../services/activity/summary/wrap-footer-parts.service.ts";
-import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
+import { harnessToolTarget } from "../../services/tool-rendering/labels/harness-tool-target.service.ts";
 import { toolLabel } from "../../services/tool-rendering/labels/tool-label.service.ts";
-import { toolTarget } from "../../services/tool-rendering/labels/tool-target.service.ts";
 import { isHarnessTool } from "../../services/tools/active-tools/is-harness-tool.service.ts";
+import { activitySummaryState } from "../../stores/activity/activity-summary-state.store.ts";
+import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
 import type { ToolActivity } from "../../types/activity/store/tool-activity.interface.ts";
 import type { ActivitySummaryTarget } from "../../types/activity/summary/activity-summary-target.interface.ts";
 import type { SummaryHeaderParts } from "../../types/activity/summary/summary-header-parts.interface.ts";
-import type { SummaryTheme } from "../../types/activity/summary/summary-theme.interface.ts";
 import type { TranscriptScroll } from "../../types/activity/summary/transcript-scroll.interface.ts";
+import type { SplitViewTheme } from "../../types/split-view/split-view-theme.interface.ts";
 
 class ActivitySummaryComponent implements Component {
   constructor(
     private readonly target: ActivitySummaryTarget,
-    private readonly theme: SummaryTheme,
+    private readonly theme: Pick<SplitViewTheme, "fg">,
     private readonly scroll: TranscriptScroll,
   ) {}
 
@@ -58,7 +54,7 @@ class ActivitySummaryComponent implements Component {
     const summaryParts = [countLabel, ...(duration ? [duration] : []), DETAILS_LABEL];
     const trailing = summaryParts.join(SUMMARY_SEPARATOR);
     const latestText = readLatestActivityText(this.target.messageNumber, entries, working);
-    const activity = `${readActivityMark(working, expanded, runningTools.length, frame)} ${latestText}`;
+    const activity = `${readActivityMark({ working, expanded, runningCount: runningTools.length, frame })} ${latestText}`;
     const toolLines = expanded && working ? this.runningToolLines(runningTools, frame, width) : [];
     const isAwayFromLatest = this.scroll.isAwayFromLatest();
     const twoLines =
@@ -101,35 +97,40 @@ class ActivitySummaryComponent implements Component {
       titleWidth > 0
         ? `${SUMMARY_SEPARATOR}${this.theme.fg(LATEST_ACTIVITY_COLOR, truncateToWidth(activity, titleWidth, ELLIPSIS, true))}`
         : "";
-    const trailingText = twoLines ? "" : this.theme.fg(MUTED_COLOR, `${SUMMARY_SEPARATOR}${trailing}`);
-    const label = `${this.theme.fg(MUTED_COLOR, leading)}${title}${trailingText}`;
-    return formatDivider(this.theme, label, width, twoLines ? TWO_LINE_HEADER_PREFIX : HEADER_PREFIX);
+    const trailingText = twoLines ? "" : this.theme.fg(THEME_MUTED, `${SUMMARY_SEPARATOR}${trailing}`);
+    const label = `${this.theme.fg(THEME_MUTED, leading)}${title}${trailingText}`;
+    return formatDivider({
+      theme: this.theme,
+      label,
+      width,
+      prefix: twoLines ? TWO_LINE_HEADER_PREFIX : HEADER_PREFIX,
+    });
   }
 
   private jumpToLatestHint(): string {
-    return this.theme.fg(JUMP_TO_LATEST_COLOR, readJumpToLatestHint());
+    return this.theme.fg(THEME_WARNING, readJumpToLatestHint());
   }
 
   private footer(parts: readonly string[], width: number): string[] {
     const lines = wrapFooterParts(parts, Math.max(1, width - FOOTER_RESERVED_WIDTH));
     return lines.map((text, index) =>
-      formatDivider(
-        this.theme,
-        this.theme.fg(MUTED_COLOR, text),
+      formatDivider({
+        theme: this.theme,
+        label: this.theme.fg(THEME_MUTED, text),
         width,
-        index === lines.length - 1 ? FOOTER_END_PREFIX : FOOTER_PREFIX,
-      ),
+        prefix: index === lines.length - 1 ? FOOTER_END_PREFIX : FOOTER_PREFIX,
+      }),
     );
   }
 
   private runningToolLines(runningTools: readonly ToolActivity[], frame: number, width: number): string[] {
     const labelWidth = Math.max(1, width - FOOTER_RESERVED_WIDTH);
     return runningTools.map((tool) => {
-      const target = isHarnessTool(tool.toolName) ? toolTarget(tool.toolName, tool.args) : "";
-      const targetSuffix = target ? `${TOOL_TARGET_SEPARATOR}${target}` : "";
+      const target = isHarnessTool(tool.toolName) ? harnessToolTarget(tool.toolName, tool.args) : "";
+      const targetSuffix = target ? `${DOT_SEPARATOR}${target}` : "";
       const label = `${readSpinnerFrame(frame)} ${toolLabel(tool.toolName)}${targetSuffix}`;
-      const coloredLabel = this.theme.fg(ACCENT_COLOR, truncateToWidth(label, labelWidth, ELLIPSIS, true));
-      return formatDivider(this.theme, coloredLabel, width, FOOTER_PREFIX);
+      const coloredLabel = this.theme.fg(THEME_ACCENT, truncateToWidth(label, labelWidth, ELLIPSIS, true));
+      return formatDivider({ theme: this.theme, label: coloredLabel, width, prefix: FOOTER_PREFIX });
     });
   }
 }
@@ -140,7 +141,7 @@ function singleLineTitleWidth(width: number, leading: string, trailing: string):
 
 export function renderActivitySummary(
   target: ActivitySummaryTarget,
-  theme: SummaryTheme,
+  theme: Pick<SplitViewTheme, "fg">,
   scroll: TranscriptScroll,
 ): Component {
   return new ActivitySummaryComponent(target, theme, scroll);

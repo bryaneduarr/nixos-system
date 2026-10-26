@@ -1,30 +1,25 @@
 import { expect, test } from "bun:test";
 import { createImplementationQueue } from "./create-implementation-queue.service.ts";
+import { createGate } from "./create-implementation-queue.test-double.ts";
 
 test("implementation tasks run one at a time", async () => {
   const queue = createImplementationQueue();
   let active = 0;
   let peak = 0;
-  let releaseFirst!: () => void;
-  let markFirstStarted!: () => void;
-  const firstStarted = new Promise<void>((resolve) => {
-    markFirstStarted = resolve;
-  });
-  const firstGate = new Promise<void>((resolve) => {
-    releaseFirst = resolve;
-  });
+  const firstStarted = createGate();
+  const firstGate = createGate();
   const events: string[] = [];
 
   const first = queue.run(async () => {
     active += 1;
     peak = Math.max(peak, active);
     events.push("first started");
-    markFirstStarted();
-    await firstGate;
+    firstStarted.open();
+    await firstGate.opened;
     events.push("first finished");
     active -= 1;
   });
-  await firstStarted;
+  await firstStarted.opened;
 
   const second = queue.run(async () => {
     active += 1;
@@ -35,7 +30,7 @@ test("implementation tasks run one at a time", async () => {
   await Promise.resolve();
 
   expect(events).toEqual(["first started"]);
-  releaseFirst();
+  firstGate.open();
   await Promise.all([first, second]);
 
   expect(peak).toBe(1);

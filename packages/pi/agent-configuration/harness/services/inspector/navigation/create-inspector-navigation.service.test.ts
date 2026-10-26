@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
-import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/record/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { createInspectorNavigation } from "./create-inspector-navigation.service.ts";
 
 beforeEach(() => activityStore.clear());

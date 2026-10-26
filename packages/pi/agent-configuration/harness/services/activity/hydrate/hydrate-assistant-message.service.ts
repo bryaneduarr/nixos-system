@@ -1,6 +1,8 @@
-import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/no-tool-result-fields.constant.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../../constants/activity/record/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { HydrateAssistantInput } from "../../../types/activity/hydrate/hydrate-assistant-input.interface.ts";
-import type { AssistantActivitySnapshot } from "../../../types/activity/store/agent-activity.interface.ts";
+import type { AssistantActivitySnapshot } from "../../../types/activity/store/assistant-activity-snapshot.interface.ts";
+import { isRecord } from "../../values/is-record.service.ts";
 import { readApiError } from "../parsing/assistant/read-api-error.service.ts";
 import { readAssistantActivity } from "../parsing/assistant/read-assistant-activity.service.ts";
 import { readSubagentUsage } from "../parsing/subagent/read-subagent-usage.service.ts";
@@ -8,15 +10,13 @@ import { recordApiError } from "../record/record-api-error.service.ts";
 import { recordAssistantTurn } from "../record/record-assistant-turn.service.ts";
 import { recordThinking } from "../record/record-thinking.service.ts";
 import { recordUpdate } from "../record/record-update.service.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
-import { isRecord } from "../value/is-record.service.ts";
 
 export function hydrateAssistantMessage(input: HydrateAssistantInput): void {
   const { entryId, message, cwd, startedAt } = input;
   const assistantActivity = readAssistantActivity(message);
   const apiError = readApiError(message);
   if (assistantActivity.found) {
-    hydrateAssistantText(entryId, assistantActivity.snapshot, cwd, startedAt);
+    hydrateAssistantText(input, assistantActivity.snapshot);
     recordAssistantTurn({
       idSuffix: entryId,
       snapshot: assistantActivity.snapshot,
@@ -30,20 +30,17 @@ export function hydrateAssistantMessage(input: HydrateAssistantInput): void {
   if (Array.isArray(message.content)) {
     hydrateToolCalls(message.content, cwd, startedAt);
   }
-  if (apiError.state === "present") recordApiError(`api-error-${entryId}`, apiError.value, cwd, startedAt);
+  if (apiError.state === "present")
+    recordApiError({ id: `api-error-${entryId}`, message: apiError.value, cwd, occurredAt: startedAt });
 }
 
-function hydrateAssistantText(
-  entryId: string,
-  snapshot: AssistantActivitySnapshot,
-  cwd: string,
-  startedAt: number,
-): void {
+function hydrateAssistantText(input: HydrateAssistantInput, snapshot: AssistantActivitySnapshot): void {
+  const { entryId, cwd, startedAt } = input;
   const { thinking, thinkingRedacted, response, hasToolCall } = snapshot;
-  recordThinking(`thinking-${entryId}`, thinking, cwd, startedAt);
+  recordThinking({ id: `thinking-${entryId}`, text: thinking, cwd, startedAt });
   if (hasToolCall && response.trim()) {
     const id = `update-${entryId}`;
-    recordUpdate(id, response, cwd, startedAt);
+    recordUpdate({ id, text: response, cwd, startedAt });
     activityStore.finish(id, { ...NO_TOOL_RESULT_FIELDS, text: response, status: "success", endedAt: startedAt });
   }
   if (thinking) {

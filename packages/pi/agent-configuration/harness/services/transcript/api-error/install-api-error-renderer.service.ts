@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { TUI_MODE } from "../../../constants/tool-rendering/tui-mode.constant.ts";
 import { API_ERROR_RENDERER_KEY } from "../../../constants/transcript/api-error-renderer.constant.ts";
 import { API_ERROR_PREVIEW_TITLE } from "../../../constants/transcript/transcript-preview.constant.ts";
+import { TUI_MODE } from "../../../constants/ui-mode/tui-mode.constant.ts";
 import { previewLines } from "../preview/preview-lines.service.ts";
 
 export function installApiErrorRenderer(pi: ExtensionAPI): void {

@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { GIT_COMMAND_TIMEOUT_MS } from "../../../../constants/sessions/monitor.constant.ts";
-import { NO_GIT_BRANCH } from "../../../../constants/sessions/registry.constant.ts";
+import { GIT_COMMAND_TIMEOUT_MS } from "../../../../constants/sessions/monitor/monitor.constant.ts";
+import { NO_GIT_BRANCH } from "../../../../constants/sessions/registry/registry.constant.ts";
 
 const execute = promisify(execFile);
 

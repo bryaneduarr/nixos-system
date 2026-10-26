@@ -1,18 +1,9 @@
 import { beforeEach, expect, test } from "bun:test";
-import { NO_TOOL_RESULT_FIELDS } from "../../constants/activity/no-tool-result-fields.constant.ts";
-import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
-import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
-import { noLiveProgress, noPreviousComponent, plainSubagentCardTheme } from "./subagent-card.test-double.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../constants/activity/record/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../stores/activity/activity.store.ts";
+import { renderPlainCard, resetCardStores, TEST_CWD } from "./subagent-card.test-double.ts";
 
-const TEST_CWD = "/tmp";
-
-const { renderSubagentCard } = await import("./subagent-card.component.ts");
-
-beforeEach(() => {
-  activityStore.clear();
-  activityVisibility.reset();
-  activityVisibility.setAgentWorking(true);
-});
+beforeEach(resetCardStores);
 
 test("a completed card shows the last tool's duration without earlier calls or total time", () => {
   activityStore.begin({
@@ -51,13 +42,7 @@ test("a completed card shows the last tool's duration without earlier calls or t
     endedAt: 35400,
   });
 
-  const card = renderSubagentCard(
-    plainSubagentCardTheme,
-    "done-call",
-    "Locate pi harness",
-    noLiveProgress,
-    noPreviousComponent,
-  );
+  const card = renderPlainCard("done-call", "Locate pi harness");
   const lines = card.render(80).join("\n");
 
   expect(lines).toContain("+-- SUBAGENT ");

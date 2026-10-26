@@ -1,4 +1,4 @@
-import { CARD_TITLE_FALLBACK } from "../../../constants/subagents/card.constant.ts";
+import { CARD_TITLE_FALLBACK } from "../../../constants/subagents/card/card.constant.ts";
 import type { ToolActivityLookup } from "../../../types/activity/store/tool-activity-lookup.interface.ts";
 import type { ValueState } from "../../../types/activity/value/value-state.interface.ts";
 import type { TaskProgress } from "../../../types/subagents/tasks/progress/task-progress.interface.ts";

@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
+import { handlerNamed } from "../../services/sessions/install/handler-named.test-double.ts";
 import type { ExitTarget } from "../../types/sessions/exit/exit-target.interface.ts";
 import type { HerdrCommand } from "../../types/sessions/herdr/command/herdr-command.interface.ts";
-import { exitHarness, handlerNamed, installExit } from "./exit.command.test-double.ts";
+import { exitHarness, installExit } from "./exit.command.test-double.ts";
 
 describe("explicit exit schedules Herdr cleanup", () => {
   test("Herdr explicit exit schedules once, survives quit, and cancels on reload", async () => {

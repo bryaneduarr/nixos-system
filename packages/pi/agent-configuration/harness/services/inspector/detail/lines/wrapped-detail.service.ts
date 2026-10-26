@@ -1,15 +1,8 @@
-import type { Theme } from "@earendil-works/pi-coding-agent";
 import { wrapTextWithAnsi } from "@earendil-works/pi-tui";
-import type { DetailArtifact } from "../../../../types/inspector/detail/detail-artifact.interface.ts";
-import type { InspectorRowLookup } from "../../../../types/inspector/detail/inspector-row-lookup.interface.ts";
+import type { WrappedDetailOptions } from "../../../../types/inspector/detail/wrapped-detail-options.interface.ts";
 import { buildDetail } from "./build-detail.service.ts";
 
-export function wrappedDetail(
-  lookup: InspectorRowLookup,
-  width: number,
-  theme: Theme,
-  artifact: DetailArtifact,
-): string[] {
+export function wrappedDetail({ lookup, width, theme, artifact }: WrappedDetailOptions): string[] {
   if (!lookup.found) return [];
 
   const lines: string[] = [];

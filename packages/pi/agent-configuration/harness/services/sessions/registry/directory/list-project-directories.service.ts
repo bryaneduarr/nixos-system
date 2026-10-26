@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { PROJECT_MARKER_FILE_PATTERN } from "../../../../constants/sessions/registry-files.constant.ts";
+import { PROJECT_MARKER_FILE_PATTERN } from "../../../../constants/sessions/registry/registry-files.constant.ts";
 import { canonicalDirectory } from "./canonical-directory.service.ts";
 import { prepareRegistryDirectory } from "./prepare-registry-directory.service.ts";
 

@@ -38,6 +38,31 @@ describe("line pattern rules", () => {
   });
 });
 
+describe("fabricated defaults", () => {
+  test("report empty strings and zero used as absence", () => {
+    expect(rulesFound('const text = lines[index] ?? "";')).toEqual(["fabricated-default"]);
+    expect(rulesFound("const code = character.codePointAt(0) ?? 0;")).toEqual(["fabricated-default"]);
+    expect(rulesFound('const home = process.env.HOME || "";')).toEqual(["fabricated-default"]);
+    expect(rulesFound('return unit === undefined ? "" : unit.text;')).toEqual(["fabricated-default"]);
+    expect(rulesFound("return unit !== undefined ? unit.start : 0;")).toEqual(["fabricated-default"]);
+    expect(rulesFound('const [first = ""] = parts;')).toEqual(["fabricated-default"]);
+  });
+
+  test("allow real empty collections, other fallbacks, and ordinary ternaries", () => {
+    expect(rulesFound("const runs = text.match(pattern) ?? [];")).toEqual([]);
+    expect(rulesFound("const label = names.at(0) ?? fallbackLabel;")).toEqual([]);
+    expect(rulesFound("const half = ratio > 0.5 ? 0 : 1;")).toEqual([]);
+    expect(rulesFound("const scale = value || 0.5;")).toEqual([]);
+  });
+});
+
+describe("definite assignment", () => {
+  test("report a binding declared with an exclamation mark", () => {
+    expect(rulesFound("let release!: () => void;")).toEqual(["definite-assignment"]);
+    expect(rulesFound("const ready = value !== other;")).toEqual([]);
+  });
+});
+
 describe("function comments", () => {
   test("report a comment directly above a function", () => {
     const lines = readSourceLines("/** Reads things. */\nexport function readThings(): void {}\n");

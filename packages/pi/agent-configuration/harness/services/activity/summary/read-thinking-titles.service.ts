@@ -1,4 +1,4 @@
-import { THINKING_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
+import { THINKING_ACTIVITY_NAME } from "../../../constants/activity/record/activity-entry.constant.ts";
 import { oneLine } from "../../tool-rendering/text/one-line.service.ts";
 import { readMessageEntries } from "../messages/read-message-entries.service.ts";
 

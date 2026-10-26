@@ -2,7 +2,7 @@ import {
   DECLARATION_KEYWORDS,
   DECLARATION_MODIFIERS,
   METHOD_MODIFIERS,
-} from "../../../constants/tools/read-patterns.constant.ts";
+} from "../../../constants/tools/read/read-patterns.constant.ts";
 import type { SymbolRangeLookup } from "../../../types/tools/read/symbol-range-lookup.interface.ts";
 import { escapeRegExp } from "../text/escape-reg-exp.service.ts";
 import { findSymbolEnd } from "./find-symbol-end.service.ts";

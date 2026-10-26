@@ -1,14 +1,10 @@
-import type { HerdrCommand } from "../../../../types/sessions/herdr/command/herdr-command.interface.ts";
-import { processStartIdentity } from "../../registry/identity/process-start-identity.service.ts";
+import type { PaneCloseDependencies } from "../../../../types/sessions/cleanup/pane/pane-close-dependencies.interface.ts";
 import { closeAfterExit } from "../pane/close-after-exit.service.ts";
-import { sleep } from "../pane/sleep.service.ts";
 import { isExplicitExitTarget } from "../target/is-explicit-exit-target.service.ts";
 
 export async function explicitExitAfterExit(
   explicitExitRow: unknown,
-  command: HerdrCommand,
-  identity: (pid: number) => Promise<string> = processStartIdentity,
-  wait: (milliseconds: number) => Promise<void> = sleep,
+  dependencies: PaneCloseDependencies,
 ): Promise<boolean> {
   if (!isExplicitExitTarget(explicitExitRow)) return false;
   return closeAfterExit(
@@ -20,8 +16,6 @@ export async function explicitExitAfterExit(
       workspace: explicitExitRow.workspace,
       shell: { required: true, pid: explicitExitRow.shellPid, start: explicitExitRow.shellStart },
     },
-    command,
-    identity,
-    wait,
+    dependencies,
   );
 }

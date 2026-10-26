@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { CreateChange } from "../../../../types/tools/edit/edit-request.interface.ts";
+import type { CreateChange } from "../../../../types/tools/edit/create-change.interface.ts";
 import type { EditResult } from "../../../../types/tools/edit/edit-result.interface.ts";
 import { countLines } from "../../diff/count-lines.service.ts";
 import { formatDiffStats } from "../../diff/format-diff-stats.service.ts";

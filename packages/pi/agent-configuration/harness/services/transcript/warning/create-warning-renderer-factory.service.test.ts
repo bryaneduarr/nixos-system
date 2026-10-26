@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { stripTerminalSequences } from "@earendil-works/pi-tui";
-import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { createWarningRendererFactory } from "./create-warning-renderer-factory.service.ts";
 
 const plainTheme = { fg: (_color: string, text: string): string => text };

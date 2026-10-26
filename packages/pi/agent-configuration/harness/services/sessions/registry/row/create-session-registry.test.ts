@@ -14,7 +14,7 @@ const temporary = await mkdtemp(join(tmpdir(), "pi-sessions-test-"));
 afterAll(() => rm(temporary, { recursive: true, force: true }));
 const processStart = await processStartIdentity(process.pid);
 
-function session(overrides: Partial<LiveSession> = {}): LiveSession {
+function temporarySession(overrides: Partial<LiveSession> = {}): LiveSession {
   return {
     identity: randomUUID(),
     pid: process.pid,
@@ -43,7 +43,7 @@ function registry(): SessionRegistry {
 describe("createSessionRegistry", () => {
   test("history-ever survives removing the live record", async () => {
     const store = registry();
-    const row = session({ historyEver: true });
+    const row = temporarySession({ historyEver: true });
     await store.publish(row);
     await store.remove(row.identity, false);
     expect(await store.hasHistory(row.identity)).toBe(true);
@@ -72,7 +72,7 @@ describe("createSessionRegistry", () => {
     const cwd = "/tmp/sample-project";
     const rows: LiveSession[] = [];
     for (let index = 0; index < 5; index++) {
-      const row = session({ cwd });
+      const row = temporarySession({ cwd });
       row.name = await store.instanceName(cwd, row.identity);
       await store.publish(row);
       rows.push(row);
@@ -102,8 +102,8 @@ describe("createSessionRegistry", () => {
 
   test("existing live records with historical numbers migrate to a dense sequence", async () => {
     const store = registry();
-    const first = session({ cwd: "/tmp/sample-project", name: "sample-project-pi-4" });
-    const second = session({ cwd: first.cwd, name: "sample-project-pi-5" });
+    const first = temporarySession({ cwd: "/tmp/sample-project", name: "sample-project-pi-4" });
+    const second = temporarySession({ cwd: first.cwd, name: "sample-project-pi-5" });
     await store.publish(first);
     await store.publish(second);
     expect(await store.instanceName(first.cwd, first.identity)).toBe("sample-project-pi-1");
@@ -113,7 +113,7 @@ describe("createSessionRegistry", () => {
   test("stale and PID-reused sessions release their name reservations", async () => {
     for (const override of [{ updatedAt: Date.now() - 30_000 }, { processStart: "previous-process" }]) {
       const store = registry();
-      const row = session({ cwd: "/tmp/sample-project", ...override });
+      const row = temporarySession({ cwd: "/tmp/sample-project", ...override });
       row.name = await store.instanceName(row.cwd, row.identity);
       await store.publish(row);
       expect(await store.instanceName(row.cwd, randomUUID())).toBe("sample-project-pi-1");
@@ -122,8 +122,8 @@ describe("createSessionRegistry", () => {
 
   test("registry publishes private atomic records, preserves project paths and removes stale rows", async () => {
     const store = registry();
-    const live = session();
-    const stale = session({ updatedAt: Date.now() - 30_000 });
+    const live = temporarySession();
+    const stale = temporarySession({ updatedAt: Date.now() - 30_000 });
     await store.publish(live);
     await store.publish(stale);
     expect((await stat(store.directory)).mode & 0o777).toBe(0o700);
@@ -136,7 +136,7 @@ describe("createSessionRegistry", () => {
 
   test("registry rejects reused PID process identities", async () => {
     const store = registry();
-    await store.publish(session({ processStart: "old-boot:old-start" }));
+    await store.publish(temporarySession({ processStart: "old-boot:old-start" }));
     expect(await store.list()).toEqual([]);
   });
 });

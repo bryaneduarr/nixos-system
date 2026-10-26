@@ -8,4 +8,6 @@ export interface LinePatternRule {
   readonly pattern: RegExp;
   /** Whether the rule also applies inside import and export clauses. */
   readonly appliesInModuleClause: boolean;
+  /** Pattern a file path must match for the rule to apply. */
+  readonly filePattern: RegExp;
 }

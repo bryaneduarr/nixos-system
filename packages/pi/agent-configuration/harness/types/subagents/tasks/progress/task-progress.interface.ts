@@ -26,7 +26,7 @@ export interface TaskProgress {
   /** Reasoning level the worker runs with, once it has been resolved. */
   readonly thinkingLevel: ValueState<string>;
   /** Tool calls the worker has made. */
-  readonly activity: SubToolActivity[];
+  activity: readonly SubToolActivity[];
   /** Token usage of the worker, present once it has produced a response. */
   usage: ToolActivityUsage;
 }

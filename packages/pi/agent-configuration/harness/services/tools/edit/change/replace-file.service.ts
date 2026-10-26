@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
-import type { ReplaceChange } from "../../../../types/tools/edit/edit-request.interface.ts";
 import type { EditResult } from "../../../../types/tools/edit/edit-result.interface.ts";
+import type { ReplaceChange } from "../../../../types/tools/edit/replace-change.interface.ts";
 import { addDiff } from "../../diff/add-diff.service.ts";
 import { emptyDiff } from "../../diff/empty-diff.service.ts";
 import { formatDiffStats } from "../../diff/format-diff-stats.service.ts";

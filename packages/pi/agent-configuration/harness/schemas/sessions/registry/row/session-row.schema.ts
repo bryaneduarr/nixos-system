@@ -3,8 +3,11 @@ import {
   PANE_ID_PATTERN,
   TAB_ID_PATTERN,
   WORKSPACE_ID_PATTERN,
-} from "../../../../constants/sessions/herdr.constant.ts";
-import { ABSOLUTE_PATH_PATTERN, SESSION_IDENTITY_PATTERN } from "../../../../constants/sessions/registry.constant.ts";
+} from "../../../../constants/sessions/herdr/herdr.constant.ts";
+import {
+  ABSOLUTE_PATH_PATTERN,
+  SESSION_IDENTITY_PATTERN,
+} from "../../../../constants/sessions/registry/registry.constant.ts";
 import { SessionContextSchema } from "./session-context.schema.ts";
 
 export const SessionStatusSchema = Type.Union([Type.Literal("working"), Type.Literal("draft"), Type.Literal("idle")]);

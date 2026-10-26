@@ -6,14 +6,16 @@ import {
   MENU_FOOTER,
   MENU_HEIGHT_RATIO,
   MENU_LINES_PER_ROW,
-} from "../../../../constants/sessions/menu.constant.ts";
+} from "../../../../constants/sessions/menu/menu.constant.ts";
+import { USAGE_STATE_MEASURED } from "../../../../constants/sessions/registry/usage-state.constant.ts";
+import { THEME_ACCENT, THEME_MUTED } from "../../../../constants/split-view/theme-color.constant.ts";
 import type { SessionMenuView } from "../../../../types/sessions/menu/session/session-menu-view.interface.ts";
 import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
 import { terminalLabel } from "./terminal-label.service.ts";
 
 export function renderSessionMenu(view: SessionMenuView): string[] {
   const selected = view.rows.findIndex((row) => isHighlighted(view, row));
-  const lines = [view.theme.bold(view.theme.fg("accent", "Pi sessions")), ...view.filterLines, ""];
+  const lines = [view.theme.bold(view.theme.fg(THEME_ACCENT, "Pi sessions")), ...view.filterLines, ""];
   const count = Math.max(
     1,
     Math.floor((view.terminalRows * MENU_HEIGHT_RATIO - MENU_CHROME_LINES) / MENU_LINES_PER_ROW),
@@ -32,12 +34,12 @@ function renderRows(view: SessionMenuView, rows: readonly LiveSession[]): string
   for (const row of rows) {
     if (row.cwd !== cwd) {
       cwd = row.cwd;
-      lines.push(view.theme.fg("muted", terminalLabel(basename(cwd) || cwd)));
+      lines.push(view.theme.fg(THEME_MUTED, terminalLabel(basename(cwd) || cwd)));
     }
     const prefix = isHighlighted(view, row) ? "> " : "  ";
     const status =
       row.status === "draft" ? view.theme.style("draft", { fg: rgbColor(...DRAFT_STATUS_RGB) }) : row.status;
-    const context = row.context.usageState === "measured" ? `${row.context.percent.toFixed(0)}%` : "unknown";
+    const context = row.context.usageState === USAGE_STATE_MEASURED ? `${row.context.percent.toFixed(0)}%` : "unknown";
     const currentMarker = row.pid === view.pid ? " *" : "";
     lines.push(
       `${prefix}${terminalLabel(row.name)}${currentMarker}  ${status}  ${terminalLabel(row.branch)}  ${context}`,

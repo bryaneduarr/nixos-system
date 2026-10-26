@@ -1,4 +1,4 @@
-import { PI_MANAGED_SESSION_VARIABLE } from "../../../../constants/sessions/environment.constant.ts";
+import { PI_MANAGED_SESSION_VARIABLE } from "../../../../constants/sessions/install/environment.constant.ts";
 import type { CleanupCancellation } from "../../../../types/sessions/cleanup/worker/cleanup-cancellation.interface.ts";
 import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
 import { processStartIdentity } from "../../registry/identity/process-start-identity.service.ts";

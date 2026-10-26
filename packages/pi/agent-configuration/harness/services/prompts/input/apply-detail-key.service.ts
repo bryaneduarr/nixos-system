@@ -1,5 +1,13 @@
 import { matchesKey } from "@earendil-works/pi-tui";
-import { KEY_DOWN, KEY_G, KEY_J, KEY_K, KEY_SHIFT_G, KEY_UP, KEY_Y } from "../../../constants/prompts/keys.constant.ts";
+import {
+  KEY_DOWN,
+  KEY_G,
+  KEY_J,
+  KEY_K,
+  KEY_SHIFT_G,
+  KEY_UP,
+  KEY_Y,
+} from "../../../constants/keys/key-name.constant.ts";
 import type { DetailKeyContext } from "../../../types/prompts/input/detail-key-context.interface.ts";
 import type { DetailMotion } from "../../../types/prompts/input/detail-motion.interface.ts";
 import { moveVertical } from "../display/move-vertical.service.ts";

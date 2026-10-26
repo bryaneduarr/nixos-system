@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { exitHarness, handlerNamed, installExit } from "./exit.command.test-double.ts";
+import { handlerNamed } from "../../services/sessions/install/handler-named.test-double.ts";
+import { exitHarness, installExit } from "./exit.command.test-double.ts";
 
 describe("explicit exit with Herdr", () => {
   test("Herdr preflight failure leaves Pi running and reports an actionable error", async () => {

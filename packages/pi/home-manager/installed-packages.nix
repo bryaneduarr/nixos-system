@@ -1,11 +1,13 @@
 {
   config,
   lib,
-  piTools,
   pkgs,
   ...
 }:
-lib.mkIf config.custom.pi.enable {
+let
+  cfg = config.custom.pi;
+in
+lib.mkIf cfg.enable {
   home.packages = with pkgs; [
     ast-grep
     brotli
@@ -13,7 +15,7 @@ lib.mkIf config.custom.pi.enable {
     fd
     jq
     lsof
-    piTools
+    cfg.tools
     psmisc
     ripgrep
     typescript

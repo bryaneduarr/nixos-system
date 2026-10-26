@@ -5,9 +5,9 @@ import {
   PREVIEW_LINES,
   PREVIEW_RESERVED_COLUMNS,
   PREVIEW_SOURCE_LIMIT,
-  PREVIEW_TRUNCATION_MARKER,
 } from "../../../constants/prompts/preview.constant.ts";
 import { NEWLINE_CHARACTER } from "../../../constants/prompts/text.constant.ts";
+import { ELLIPSIS } from "../../../constants/text/ellipsis.constant.ts";
 
 export function previewPrompt(text: string, width: number): string {
   const contentWidth = Math.max(1, width - PREVIEW_RESERVED_COLUMNS);
@@ -18,11 +18,12 @@ export function previewPrompt(text: string, width: number): string {
   if (!isTruncated) return text;
 
   const shownLines = lines.slice(0, PREVIEW_LINES);
-  const lastLine = shownLines.pop() ?? "";
-  const markerWidth = visibleWidth(PREVIEW_TRUNCATION_MARKER);
-  const truncatedLastLine = `${truncateToWidth(lastLine, Math.max(0, contentWidth - markerWidth), "")}${PREVIEW_TRUNCATION_MARKER}`;
+  const lastLine = shownLines.at(-1);
+  if (lastLine === undefined) return text;
+  const markerWidth = visibleWidth(ELLIPSIS);
+  const truncatedLastLine = `${truncateToWidth(lastLine, Math.max(0, contentWidth - markerWidth), "")}${ELLIPSIS}`;
 
-  return showAsTyped([...shownLines, truncatedLastLine]);
+  return showAsTyped([...shownLines.slice(0, -1), truncatedLastLine]);
 }
 
 function showAsTyped(lines: readonly string[]): string {

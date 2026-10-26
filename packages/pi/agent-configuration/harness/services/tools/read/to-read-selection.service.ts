@@ -1,4 +1,4 @@
-import { DEFAULT_READ_LINES } from "../../../constants/tools/read-limits.constant.ts";
+import { DEFAULT_READ_LINES } from "../../../constants/tools/read/read-limits.constant.ts";
 import type { ReadParameters } from "../../../types/tools/read/read-parameters.interface.ts";
 import type { ReadSelection } from "../../../types/tools/read/read-request.interface.ts";
 

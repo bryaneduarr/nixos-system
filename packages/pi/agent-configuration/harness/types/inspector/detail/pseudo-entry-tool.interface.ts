@@ -4,7 +4,7 @@ import type {
   THINKING_ACTIVITY_NAME,
   TOKENS_ACTIVITY_NAME,
   UPDATE_ACTIVITY_NAME,
-} from "../../../constants/activity/activity-entry.constant.ts";
+} from "../../../constants/activity/record/activity-entry.constant.ts";
 
 /** Tool name of an entry that is not a tool call: a user message, an agent update or reply, thinking, or token usage. */
 export type PseudoEntryTool =

@@ -23,7 +23,12 @@ export default function codexFastMode(pi: ExtensionAPI): void {
   pi.registerProvider("harness-codex-fast", {
     api: CODEX_RESPONSES_API,
     streamSimple: (model, context, options) =>
-      streamWithFastMode(model, context, options, enabled && supportsFastMode(model, fastModels)),
+      streamWithFastMode({
+        model,
+        context,
+        options,
+        isFastModeActive: enabled && supportsFastMode(model, fastModels),
+      }),
   });
 
   function restore(ctx: ExtensionContext): void {

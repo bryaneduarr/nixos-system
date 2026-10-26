@@ -1,6 +1,6 @@
 import type { SubagentUsage } from "../../../../types/activity/parsing/subagent/subagent-usage.interface.ts";
 import type { ToolActivityUsage } from "../../../../types/activity/parsing/subagent/tool-activity-usage.interface.ts";
-import { isRecord } from "../../value/is-record.service.ts";
+import { isRecord } from "../../../values/is-record.service.ts";
 import { readNonNegativeNumber } from "../../value/read-non-negative-number.service.ts";
 import { readNonNegativeNumberState } from "../../value/read-non-negative-number-state.service.ts";
 

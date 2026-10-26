@@ -1,16 +1,13 @@
-import { SUBAGENT_PAGE_HEADER_ROWS } from "../../constants/inspector/layout.constant.ts";
+import { SUBAGENT_PAGE_HEADER_ROWS } from "../../constants/inspector/layout/page-layout.constant.ts";
+import { SUBAGENTS_PAGE_TEXT } from "../../constants/inspector/lists/list-page-text.constant.ts";
+import { THEME_DIM } from "../../constants/split-view/theme-color.constant.ts";
+import { clampSubagentSelection } from "../../services/inspector/subagents/clamp-subagent-selection.service.ts";
 import { isSubagentSelected } from "../../services/inspector/subagents/is-subagent-selected.service.ts";
-import type { ToolActivity } from "../../types/activity/store/tool-activity.interface.ts";
-import type { SubagentSelection } from "../../types/inspector/subagents/subagent-selection.interface.ts";
-import type { SubagentsPageOptions, SubagentsPageResult } from "../../types/inspector/view/subagents-page.interface.ts";
+import { computeListScroll } from "../../services/split-view/layout/compute-list-scroll.service.ts";
+import type { SubagentsPageOptions } from "../../types/inspector/view/subagents-page-options.interface.ts";
+import type { SubagentsPageResult } from "../../types/inspector/view/subagents-page-result.interface.ts";
 import { pageTitle } from "../split-view/page-title.component.ts";
 import { renderSubagentList } from "./lists/subagent-list.component.ts";
-
-function clampSubagentSelection(subagents: readonly ToolActivity[], selection: SubagentSelection): SubagentSelection {
-  if (subagents.some((row) => isSubagentSelected(row, selection))) return selection;
-  const lastSubagent = subagents.at(-1);
-  return lastSubagent ? { kind: "selected", id: lastSubagent.id } : { kind: "none" };
-}
 
 export function renderSubagentsPage({
   subagents,
@@ -20,21 +17,21 @@ export function renderSubagentsPage({
   height,
   theme,
 }: SubagentsPageOptions): SubagentsPageResult {
-  const lines = [pageTitle("Subagents", theme)];
+  const lines = [pageTitle(SUBAGENTS_PAGE_TEXT.title, theme)];
   if (subagents.length === 0) {
-    lines.push(theme.fg("dim", "  No subagents have been spawned yet."));
+    lines.push(theme.fg(THEME_DIM, SUBAGENTS_PAGE_TEXT.empty));
     return { lines, selection, scroll };
   }
 
   const clampedSelection = clampSubagentSelection(subagents, selection);
   const selectedIndex = subagents.findIndex((row) => isSubagentSelected(row, clampedSelection));
   const availableRows = Math.max(1, height - SUBAGENT_PAGE_HEADER_ROWS);
-  const maxScroll = Math.max(0, subagents.length - availableRows);
-  const preferredScroll = Math.min(scroll, Math.max(0, selectedIndex));
-  let clampedScroll = Math.max(0, Math.min(maxScroll, preferredScroll));
-  if (selectedIndex >= clampedScroll + availableRows) {
-    clampedScroll = selectedIndex - availableRows + 1;
-  }
+  const clampedScroll = computeListScroll({
+    previous: scroll,
+    length: subagents.length,
+    height: availableRows,
+    selected: selectedIndex,
+  });
 
   lines.push(
     ...renderSubagentList({

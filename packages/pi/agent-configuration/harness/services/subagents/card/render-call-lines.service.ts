@@ -1,12 +1,15 @@
 import type { ThemeColor } from "@earendil-works/pi-coding-agent";
+import { THEME_MUTED, THEME_TEXT } from "../../../constants/split-view/theme-color.constant.ts";
 import {
   CARD_DONE_LABEL,
-  CARD_FAILED_LABEL,
-  CARD_RUNNING_LABEL,
   CARD_TIME_LABEL,
   CARD_TOOL_TARGET_FIELDS,
-  MILLISECONDS_PER_SECOND,
-} from "../../../constants/subagents/card.constant.ts";
+} from "../../../constants/subagents/card/card.constant.ts";
+import { MILLISECONDS_PER_SECOND } from "../../../constants/time/time-unit.constant.ts";
+import {
+  FAILED_LABEL,
+  PRESENTATION_RUNNING_LABEL,
+} from "../../../constants/tool-rendering/presentation/presentation-label.constant.ts";
 import type { SubToolActivity } from "../../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
 import type { SubagentCardTheme } from "../../../types/subagents/card/subagent-card-theme.interface.ts";
 import type { TaskStatus } from "../../../types/subagents/tasks/progress/task-status.interface.ts";
@@ -30,8 +33,8 @@ function toolTarget(call: SubToolActivity): string {
 }
 
 function toolStatusLabel(status: SubToolActivity["status"]): string {
-  if (status === "running") return CARD_RUNNING_LABEL;
-  if (status === "error") return CARD_FAILED_LABEL;
+  if (status === "running") return PRESENTATION_RUNNING_LABEL;
+  if (status === "error") return FAILED_LABEL;
 
   return CARD_DONE_LABEL;
 }
@@ -49,10 +52,10 @@ export function renderCallLines(theme: SubagentCardTheme, call: SubToolActivity,
   const toolLabel = target ? `${toolName} ${target}` : toolName;
   // A finished call of a running subagent must not read as Done; the subagent is still working.
   const shownStatus = taskStatus === "running" ? "running" : call.status;
-  const lines = [theme.fg("text", toolLabel), theme.fg(toolStatusColor(shownStatus), toolStatusLabel(shownStatus))];
+  const lines = [theme.fg(THEME_TEXT, toolLabel), theme.fg(toolStatusColor(shownStatus), toolStatusLabel(shownStatus))];
 
   if (call.endedAt.state === "present") {
-    lines.push(theme.fg("muted", `${CARD_TIME_LABEL} ${duration(call.startedAt, call.endedAt.value)}`));
+    lines.push(theme.fg(THEME_MUTED, `${CARD_TIME_LABEL} ${duration(call.startedAt, call.endedAt.value)}`));
   }
 
   return lines;

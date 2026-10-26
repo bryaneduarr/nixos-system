@@ -1,4 +1,4 @@
-import { EMPTY_TEXT_LABEL } from "../../../../constants/inspector/label.constant.ts";
+import { EMPTY_TEXT_LABEL } from "../../../../constants/inspector/detail/label.constant.ts";
 
 export function formatOutput(text: string): string {
   if (!text) return EMPTY_TEXT_LABEL;

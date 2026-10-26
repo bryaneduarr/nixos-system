@@ -1,6 +1,9 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { PRIVATE_FILE_MODE } from "../../../../constants/sessions/registry-files.constant.ts";
+import {
+  PRIVATE_FILE_MODE,
+  RESERVATION_SUFFIX,
+} from "../../../../constants/sessions/registry/registry-files.constant.ts";
 import type { NameReservation } from "../../../../types/sessions/registry/name/name-reservation.interface.ts";
 import { processStartIdentity } from "../identity/process-start-identity.service.ts";
 import { listLiveSessions } from "../row/list-live-sessions.service.ts";
@@ -23,7 +26,7 @@ export async function allocateSessionName(directory: string, cwd: string, identi
       processStart: row.processStart,
     };
     reservations.push(reservation);
-    await writeFile(join(directory, `${row.identity}.reservation`), JSON.stringify(reservation), {
+    await writeFile(join(directory, `${row.identity}${RESERVATION_SUFFIX}`), JSON.stringify(reservation), {
       mode: PRIVATE_FILE_MODE,
     });
   }
@@ -33,7 +36,9 @@ export async function allocateSessionName(directory: string, cwd: string, identi
   const current: NameReservation = existing
     ? { ...existing, updatedAt: now, pid: process.pid, processStart }
     : { identity, project: deriveProjectName(cwd), order: ++order, updatedAt: now, pid: process.pid, processStart };
-  await writeFile(join(directory, `${identity}.reservation`), JSON.stringify(current), { mode: PRIVATE_FILE_MODE });
+  await writeFile(join(directory, `${identity}${RESERVATION_SUFFIX}`), JSON.stringify(current), {
+    mode: PRIVATE_FILE_MODE,
+  });
   const group = [...others, current].filter((row) => row.project === current.project).sort((a, b) => a.order - b.order);
   const position = group.findIndex((row) => row.identity === identity) + 1;
   return `${current.project}-pi-${position}`;

@@ -1,4 +1,4 @@
-import { DEFINITION_KEYWORDS } from "../../../constants/tools/search-patterns.constant.ts";
+import { DEFINITION_KEYWORDS } from "../../../constants/tools/search/search-patterns.constant.ts";
 import { escapeRegExp } from "../text/escape-reg-exp.service.ts";
 
 function isBareIdentifier(query: string): boolean {

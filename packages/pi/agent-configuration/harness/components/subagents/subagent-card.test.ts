@@ -1,18 +1,10 @@
 import { beforeEach, expect, test } from "bun:test";
-import { NO_TOOL_RESULT_FIELDS } from "../../constants/activity/no-tool-result-fields.constant.ts";
-import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
-import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
-import { noLiveProgress, noPreviousComponent, plainSubagentCardTheme } from "./subagent-card.test-double.ts";
+import { NO_TOOL_RESULT_FIELDS } from "../../constants/activity/record/no-tool-result-fields.constant.ts";
+import { activityStore } from "../../stores/activity/activity.store.ts";
+import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
+import { renderPlainCard, renderPlainCardAgain, resetCardStores, TEST_CWD } from "./subagent-card.test-double.ts";
 
-const TEST_CWD = "/tmp";
-
-const { renderSubagentCard } = await import("./subagent-card.component.ts");
-
-beforeEach(() => {
-  activityStore.clear();
-  activityVisibility.reset();
-  activityVisibility.setAgentWorking(true);
-});
+beforeEach(resetCardStores);
 
 test("the card shows only the active tool, its target, and its state", () => {
   const startedAt = Date.now();
@@ -51,13 +43,7 @@ test("the card shows only the active tool, its target, and its state", () => {
     sub: activity,
   });
 
-  const card = renderSubagentCard(
-    plainSubagentCardTheme,
-    "call-1",
-    "Inspect parser",
-    noLiveProgress,
-    noPreviousComponent,
-  );
+  const card = renderPlainCard("call-1", "Inspect parser");
   const lines = card.render(80).join("\n");
 
   expect(lines).toContain("+-- / SUBAGENT ");
@@ -74,7 +60,7 @@ test("the card shows only the active tool, its target, and its state", () => {
 });
 
 test("the card renders while Pi streams an incomplete tool call", () => {
-  const card = renderSubagentCard(plainSubagentCardTheme, "partial-call", "", noLiveProgress, noPreviousComponent);
+  const card = renderPlainCard("partial-call", "");
   const lines = card.render(80).join("\n");
 
   expect(lines).toContain("+-- / SUBAGENT ");
@@ -90,22 +76,13 @@ test("Alt+V hides the subagent box and the renderer reuses its component", () =>
     cwd: TEST_CWD,
     startedAt: Date.now(),
   });
-  const card = renderSubagentCard(
-    plainSubagentCardTheme,
-    "call-1",
-    "Inspect parser",
-    noLiveProgress,
-    noPreviousComponent,
-  );
+  const card = renderPlainCard("call-1", "Inspect parser");
 
   expect(card.render(80).length).toBeGreaterThan(0);
   activityVisibility.toggle();
   expect(card.render(80)).toEqual([]);
   activityVisibility.toggle();
 
-  const reusedCard = renderSubagentCard(plainSubagentCardTheme, "call-1", "Inspect parser", noLiveProgress, {
-    state: "present",
-    value: card,
-  });
+  const reusedCard = renderPlainCardAgain("call-1", "Inspect parser", card);
   expect(reusedCard).toBe(card);
 });

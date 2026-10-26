@@ -6,3 +6,4 @@ export const UNSAFE_DISPLAY_CODE_RANGES: readonly (readonly [number, number])[] 
   [0x202a, 0x202e],
   [0x2066, 0x2069],
 ];
+export const LINE_START_COLUMN = 0;

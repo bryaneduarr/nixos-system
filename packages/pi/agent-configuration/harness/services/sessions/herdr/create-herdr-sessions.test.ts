@@ -2,8 +2,9 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createLiveSession } from "../registry/row/live-session.test-double.ts";
 import { createHerdrSessions } from "./create-herdr-sessions.service.ts";
-import { createRegistryIn, createSessionRow } from "./create-herdr-sessions.test-double.ts";
+import { createRegistryIn } from "./create-herdr-sessions.test-double.ts";
 
 const temporary = await mkdtemp(join(tmpdir(), "pi-herdr-sessions-test-"));
 afterAll(() => rm(temporary, { recursive: true, force: true }));
@@ -30,10 +31,10 @@ describe("createHerdrSessions", () => {
   test("lifecycle reports use the harness source and increasing sequences", async () => {
     const commands: string[][] = [];
     const herdr = createHerdrSessions(createRegistryIn(temporary), async (args) => {
-      commands.push(args);
+      commands.push([...args]);
       return {};
     });
-    const row = createSessionRow(temporary, { status: "working" });
+    const row = createLiveSession({ cwd: temporary, status: "working" });
     const path = join(temporary, "session.jsonl");
 
     await herdr.report(row, { kind: "file", path });
@@ -50,21 +51,21 @@ describe("createHerdrSessions", () => {
     expect(commands.map((args) => args[1]).at(-1)).toBe("release-agent");
 
     const sequences = commands.map((args) => Number(args[args.indexOf("--seq") + 1]));
-    for (const [index, args] of commands.entries()) {
+    for (const args of commands) {
       expect(args[args.indexOf("--source") + 1]).toBe("pi:harness");
       expect(args).not.toContain("herdr:pi");
       expect(args[2]).toBe(row.pane);
-      if (index > 0) expect(sequences[index] ?? 0).toBeGreaterThan(sequences[index - 1] ?? 0);
     }
+    expect(sequences).toEqual([...new Set(sequences)].sort((left, right) => left - right));
   });
 
   test("switching only focuses a registered destination and never closes or signals a process", async () => {
     const store = createRegistryIn(temporary);
-    const row = createSessionRow(temporary, { status: "working", historyEver: true });
+    const row = createLiveSession({ cwd: temporary, status: "working", historyEver: true });
     await store.publish(row);
     const commands: string[][] = [];
     const herdr = createHerdrSessions(store, async (args) => {
-      commands.push(args);
+      commands.push([...args]);
       return {
         pane: { pane_id: row.pane, tab_id: row.tab, workspace_id: row.workspace, agent: "pi" },
         process_info: { foreground_processes: [{ pid: row.pid }] },
@@ -83,11 +84,11 @@ describe("createHerdrSessions", () => {
 
   test("focus refuses a replacement process in an otherwise valid Pi pane", async () => {
     const store = createRegistryIn(temporary);
-    const row = createSessionRow(temporary);
+    const row = createLiveSession({ cwd: temporary });
     await store.publish(row);
     const commands: string[][] = [];
     const herdr = createHerdrSessions(store, async (args) => {
-      commands.push(args);
+      commands.push([...args]);
       return {
         pane: { pane_id: row.pane, tab_id: row.tab, workspace_id: row.workspace, agent: "pi" },
         process_info: { foreground_processes: [{ pid: row.pid + 1 }] },

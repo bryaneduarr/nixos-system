@@ -1,5 +1,5 @@
 import { visibleWidth } from "@earendil-works/pi-tui";
-import { SUMMARY_SEPARATOR } from "../../../constants/activity/summary-label.constant.ts";
+import { SUMMARY_SEPARATOR } from "../../../constants/activity/summary/summary-layout.constant.ts";
 
 export function wrapFooterParts(parts: readonly string[], availableWidth: number): string[] {
   const lines: string[] = [];

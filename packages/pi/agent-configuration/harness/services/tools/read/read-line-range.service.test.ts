@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MAX_READ_CHARS } from "../../../constants/tools/read-limits.constant.ts";
+import { MAX_READ_CHARS } from "../../../constants/tools/read/read-limits.constant.ts";
 import { readLineRange } from "./read-line-range.service.ts";
 
 const LONG_LINE_LENGTH = 1_000;

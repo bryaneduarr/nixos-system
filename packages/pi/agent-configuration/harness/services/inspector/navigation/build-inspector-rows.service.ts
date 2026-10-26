@@ -1,10 +1,10 @@
-import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
+import { MESSAGE_ACTIVITY_NAME } from "../../../constants/activity/record/activity-entry.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import type { ToolActivity } from "../../../types/activity/store/tool-activity.interface.ts";
 import type { InspectorRow } from "../../../types/inspector/detail/inspector-row.interface.ts";
 import type { InspectorPage } from "../../../types/inspector/navigation/inspector-page.interface.ts";
 import type { InspectorRowsOptions } from "../../../types/inspector/navigation/inspector-rows-options.interface.ts";
 import type { SubagentSelection } from "../../../types/inspector/subagents/subagent-selection.interface.ts";
-import { activityStore } from "../../activity/store/shared-activity-store.service.ts";
 import { isToolCallEntry } from "../entries/is-tool-call-entry.service.ts";
 import { isSubagentSelected } from "../subagents/is-subagent-selected.service.ts";
 

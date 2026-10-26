@@ -1,4 +1,4 @@
-import { TOOL_TITLES } from "../../../constants/tool-rendering/tool-title.constant.ts";
+import { TOOL_TITLES } from "../../../constants/tool-rendering/labels/tool-title.constant.ts";
 import { isHarnessTool } from "../../tools/active-tools/is-harness-tool.service.ts";
 
 export function toolLabel(name: string): string {

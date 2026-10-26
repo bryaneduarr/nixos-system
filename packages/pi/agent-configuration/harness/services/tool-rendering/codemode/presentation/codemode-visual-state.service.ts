@@ -1,4 +1,4 @@
-import { SCRIPT_FAILED_PATTERN } from "../../../../constants/tool-rendering/codemode-display.constant.ts";
+import { SCRIPT_FAILED_PATTERN } from "../../../../constants/tool-rendering/codemode/codemode-display.constant.ts";
 import type { HarnessVisualState } from "../../../../types/tool-rendering/presentation/harness-presentation.interface.ts";
 
 export function codemodeVisualState(text: string, isPartial: boolean, isError: boolean): HarnessVisualState {

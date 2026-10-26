@@ -1,15 +1,7 @@
 import { constants } from "node:fs";
 import { access, realpath, stat } from "node:fs/promises";
-import { homedir } from "node:os";
-import { join, resolve } from "node:path";
-
-const HOME_SHORTHAND = "~/";
-
-function expandHome(path: string): string {
-  if (path === "~") return homedir();
-  if (path.startsWith(HOME_SHORTHAND)) return join(homedir(), path.slice(HOME_SHORTHAND.length));
-  return path;
-}
+import { resolve } from "node:path";
+import { expandHome } from "../../../tools/path/expand-home.service.ts";
 
 export async function canonicalDirectory(path: string, cwd: string): Promise<string> {
   const canonical = await realpath(resolve(cwd, expandHome(path)));

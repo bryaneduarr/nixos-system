@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { TASK_TOOL_NAME } from "../../../constants/subagents/roles.constant.ts";
-import { BACKEND_TOOLS } from "../../../constants/tools/backend-tools.constant.ts";
-import { HARNESS_TOOLS, WEB_TOOLS } from "../../../constants/tools/harness-tools.constant.ts";
+import { TASK_TOOL_NAME } from "../../../constants/subagents/roles/roles.constant.ts";
+import { HARNESS_TOOLS, WEB_TOOLS } from "../../../constants/tools/active-tools/harness-tools.constant.ts";
+import { BACKEND_TOOLS } from "../../../constants/tools/backends/backend-tools.constant.ts";
 import { isMcpTool } from "./is-mcp-tool.service.ts";
 
 export function enforceActiveTools(pi: ExtensionAPI): void {

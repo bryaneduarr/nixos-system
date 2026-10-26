@@ -1,10 +1,10 @@
-import { ROLE_DEFINITIONS } from "../../../constants/subagents/role-definitions.constant.ts";
+import { ROLE_DEFINITIONS } from "../../../constants/subagents/roles/role-definitions.constant.ts";
 import {
   APPROVED_COMMAND_TOOL,
   SUBAGENT_TOOLS,
   TASK_ROLES,
   TASK_TOOL_NAME,
-} from "../../../constants/subagents/roles.constant.ts";
+} from "../../../constants/subagents/roles/roles.constant.ts";
 import type { ResolvedTaskRole } from "../../../types/subagents/roles/resolved-task-role.interface.ts";
 import type { SubagentTool } from "../../../types/subagents/roles/subagent-tool.interface.ts";
 import type { TaskRole } from "../../../types/subagents/roles/task-role.interface.ts";

@@ -1,6 +1,6 @@
 import { basename } from "node:path";
-import { PROJECT_NAME_MAX_LENGTH } from "../../../../constants/sessions/registry.constant.ts";
-import { PROJECT_FALLBACK_PREFIX } from "../../../../constants/sessions/registry-files.constant.ts";
+import { PROJECT_NAME_MAX_LENGTH } from "../../../../constants/sessions/registry/registry.constant.ts";
+import { PROJECT_FALLBACK_PREFIX } from "../../../../constants/sessions/registry/registry-files.constant.ts";
 
 export function deriveProjectName(cwd: string): string {
   let project = basename(cwd)

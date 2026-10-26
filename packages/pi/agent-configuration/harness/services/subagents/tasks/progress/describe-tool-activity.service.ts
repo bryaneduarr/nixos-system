@@ -1,5 +1,5 @@
 export function describeToolActivity(toolName: string, args: Record<string, unknown>): string {
-  const targetLabel = Object.values(args).find((argument): argument is string => typeof argument === "string") ?? "";
+  const stringArguments = Object.values(args).filter((argument): argument is string => typeof argument === "string");
 
-  return `${toolName} ${targetLabel}`.trim();
+  return [toolName, ...stringArguments.slice(0, 1)].join(" ").trim();
 }

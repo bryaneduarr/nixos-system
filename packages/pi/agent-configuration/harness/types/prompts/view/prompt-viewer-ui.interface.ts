@@ -1,28 +1,12 @@
-import type { PromptTheme } from "../render/prompt-theme.interface.ts";
+import type { SplitViewTheme } from "../../split-view/split-view-theme.interface.ts";
 import type { PromptBrowserHost } from "./prompt-browser-host.interface.ts";
+import type { PromptOverlayOptions } from "./prompt-overlay-options.interface.ts";
 import type { PromptPanel } from "./prompt-panel.interface.ts";
-
-/** Overlay placement and size of the prompt browser. */
-export interface PromptOverlayOptions {
-  /** Marks that the browser is shown as an overlay. */
-  readonly overlay: true;
-  /** Placement and size of the overlay. */
-  readonly overlayOptions: {
-    /** Anchor position of the overlay. */
-    readonly anchor: "center";
-    /** Width of the overlay as a share of the terminal. */
-    readonly width: `${number}%`;
-    /** Maximum height of the overlay as a share of the terminal. */
-    readonly maxHeight: `${number}%`;
-    /** Margin around the overlay in cells. */
-    readonly margin: number;
-  };
-}
 
 /** Creates the panel shown in a custom overlay. Pi passes keybindings as the third argument. */
 export type PromptBrowserFactory<T> = (
   host: PromptBrowserHost,
-  theme: PromptTheme,
+  theme: SplitViewTheme,
   keybindings: object,
   done: (result: T) => void,
 ) => PromptPanel;

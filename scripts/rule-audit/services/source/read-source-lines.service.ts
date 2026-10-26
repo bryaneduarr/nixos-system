@@ -10,12 +10,14 @@ export function readSourceLines(sourceText: string): readonly SourceLine[] {
   const sourceLines: SourceLine[] = [];
   let continuesModuleClause = false;
 
-  codeLines.forEach((code, index) => {
+  originalLines.forEach((original, index) => {
+    const code = codeLines[index];
+    if (code === undefined) throw new Error("Stripping strings and comments changed the number of lines");
     const inModuleClause = continuesModuleClause || MODULE_CLAUSE_START.test(code);
     continuesModuleClause = inModuleClause && !MODULE_CLAUSE_END.test(code);
     sourceLines.push({
       lineNumber: index + 1,
-      original: originalLines.at(index) ?? "",
+      original,
       code,
       inModuleClause,
     });

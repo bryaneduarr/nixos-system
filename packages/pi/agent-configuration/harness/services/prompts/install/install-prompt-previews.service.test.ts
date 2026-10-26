@@ -2,27 +2,20 @@ import { expect, test } from "bun:test";
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import type { PromptContext } from "../../../types/prompts/install/prompt-context.interface.ts";
 import type { PromptExtensionApi } from "../../../types/prompts/install/prompt-extension-api.interface.ts";
-import type { PromptTheme } from "../../../types/prompts/render/prompt-theme.interface.ts";
+import type { PromptOverlayOptions } from "../../../types/prompts/view/prompt-overlay-options.interface.ts";
 import type { PromptPanel } from "../../../types/prompts/view/prompt-panel.interface.ts";
-import type {
-  PromptBrowserFactory,
-  PromptOverlayOptions,
-} from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
+import type { PromptBrowserFactory } from "../../../types/prompts/view/prompt-viewer-ui.interface.ts";
+import type { SplitViewTheme } from "../../../types/split-view/split-view-theme.interface.ts";
 import { installPromptPreviews } from "./install-prompt-previews.service.ts";
+import { requireElement } from "./require-element.test-double.ts";
 
-const plainTheme: PromptTheme = {
+const plainTheme: SplitViewTheme = {
   fg: (_color, text) => text,
   bg: (_color, text) => text,
   bold: (text) => text,
 };
 
 const timestamp = "2026-01-01T00:00:00.000Z";
-
-function requireElement<T>(elements: readonly T[], index: number, message: string): T {
-  const element = elements.at(index);
-  if (element === undefined) throw new Error(message);
-  return element;
-}
 
 test("installation opens the prompt viewer and browser with original branch text", async () => {
   const shortcuts: ((ctx: PromptContext) => Promise<void>)[] = [];

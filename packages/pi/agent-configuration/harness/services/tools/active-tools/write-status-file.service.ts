@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { HARNESS_TOOLS } from "../../../constants/tools/harness-tools.constant.ts";
+import { HARNESS_TOOLS } from "../../../constants/tools/active-tools/harness-tools.constant.ts";
 
 export async function writeStatusFile(pi: ExtensionAPI): Promise<void> {
   const target = process.env.PI_HARNESS_STATUS_FILE;

@@ -1,4 +1,6 @@
-export function computeListScroll(previous: number, length: number, height: number, selected: number): number {
+import type { ListScrollRequest } from "../../../types/split-view/list-scroll-request.interface.ts";
+
+export function computeListScroll({ previous, length, height, selected }: ListScrollRequest): number {
   const maxScroll = Math.max(0, length - height);
   let scroll = Math.min(previous, maxScroll);
 

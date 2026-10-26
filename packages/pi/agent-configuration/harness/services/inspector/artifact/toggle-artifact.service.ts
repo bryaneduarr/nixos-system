@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute, resolve } from "node:path";
+import { DEFAULT_ARTIFACT } from "../../../constants/inspector/detail/default-artifact.constant.ts";
 import type { InspectorNavigation } from "../../../types/inspector/navigation/inspector-navigation.interface.ts";
 
 export async function toggleArtifact(navigation: InspectorNavigation): Promise<string> {
   if (navigation.artifact.kind === "loaded") {
-    navigation.artifact = { kind: "tool-result" };
+    navigation.artifact = DEFAULT_ARTIFACT;
     navigation.detailScroll = 0;
     return "showing tool result";
   }

@@ -3,7 +3,7 @@ import {
   PANE_ID_PATTERN,
   TAB_ID_PATTERN,
   WORKSPACE_ID_PATTERN,
-} from "../../../../constants/sessions/herdr.constant.ts";
+} from "../../../../constants/sessions/herdr/herdr.constant.ts";
 
 export const HerdrPaneSchema = Type.Object({
   /** Pane identifier reported by Herdr. */

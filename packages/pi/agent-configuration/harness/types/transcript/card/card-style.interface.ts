@@ -1,27 +1,5 @@
-/** Card that the transcript or the prompt area draws around its content. */
-export type CardKind = "user" | "agent" | "input" | "thinking";
-
-/** Card around a message that the transcript renders. */
-export type MessageCardKind = Exclude<CardKind, "input">;
-
-/** Background behind a whole card: a faint fill, or the terminal's own background. */
-export type CardTint = { readonly tintState: "tinted"; readonly color: string } | { readonly tintState: "plain" };
-
-/** Characters that draw a card border. */
-export interface CardFrame {
-  /** Start of the top border: the corner and the rule characters before the title. */
-  readonly topLeft: string;
-  /** End of the top border. */
-  readonly topRight: string;
-  /** Start of the bottom border. */
-  readonly bottomLeft: string;
-  /** End of the bottom border. */
-  readonly bottomRight: string;
-  /** Character repeated along the top and bottom borders. */
-  readonly horizontal: string;
-  /** Character repeated along the left and right borders. */
-  readonly vertical: string;
-}
+import type { CardFrame } from "./card-frame.interface.ts";
+import type { CardTint } from "./card-tint.interface.ts";
 
 /** Colors and title that make one card recognizable. */
 export interface CardStyle {

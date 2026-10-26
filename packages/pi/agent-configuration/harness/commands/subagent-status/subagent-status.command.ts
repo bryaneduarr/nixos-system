@@ -1,23 +1,18 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { subagentRegistry } from "../../services/subagents/registry/shared-subagent-registry.service.ts";
-import type { TaskProgress } from "../../types/subagents/tasks/progress/task-progress.interface.ts";
-
-function runsMatching(requestedId: string): TaskProgress[] {
-  const lookup = subagentRegistry.status(requestedId);
-  return lookup.found ? [lookup.progress] : [];
-}
+import {
+  SUBAGENT_STATUS_COMMAND_NAME,
+  SUBAGENT_STATUS_DESCRIPTION,
+} from "../../constants/subagents/registry/subagent-command.constant.ts";
+import { formatSubagentRuns } from "../../services/subagents/registry/format-subagent-runs.service.ts";
+import { selectSubagentRuns } from "../../services/subagents/registry/select-subagent-runs.service.ts";
+import { subagentRegistry } from "../../stores/subagents/subagent-registry.store.ts";
 
 export function registerSubagentStatusCommand(pi: ExtensionAPI): void {
-  pi.registerCommand("subagent-status", {
-    description: "Show the status of active subagents",
+  pi.registerCommand(SUBAGENT_STATUS_COMMAND_NAME, {
+    description: SUBAGENT_STATUS_DESCRIPTION,
     handler: async (args, ctx) => {
-      const requestedId = args.trim();
-      const runs = requestedId ? runsMatching(requestedId) : subagentRegistry.list();
-      const status = runs.length
-        ? runs.map((run) => `${run.id} · ${run.title} · ${run.status} · ${run.currentTask}`).join("\n")
-        : "No matching subagents.";
-
-      ctx.ui.notify(status, "info");
+      const runs = selectSubagentRuns(subagentRegistry, args.trim());
+      ctx.ui.notify(formatSubagentRuns(runs), "info");
     },
   });
 }

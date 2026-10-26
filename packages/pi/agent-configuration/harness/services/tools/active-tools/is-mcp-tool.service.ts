@@ -1,4 +1,4 @@
-import { BUILTIN_MCP_TOOLS, MCP_TOOL_PREFIX } from "../../../constants/tools/backend-tools.constant.ts";
+import { BUILTIN_MCP_TOOLS, MCP_TOOL_PREFIX } from "../../../constants/tools/active-tools/mcp-tools.constant.ts";
 
 const BUILTIN_MCP_TOOL_NAMES: ReadonlySet<string> = new Set<string>(BUILTIN_MCP_TOOLS);
 

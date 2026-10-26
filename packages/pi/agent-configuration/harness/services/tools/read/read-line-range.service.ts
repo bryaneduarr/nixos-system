@@ -1,4 +1,4 @@
-import { MAX_READ_CHARS } from "../../../constants/tools/read-limits.constant.ts";
+import { MAX_READ_CHARS } from "../../../constants/tools/read/read-limits.constant.ts";
 import type { LoadedFile } from "../../../types/tools/read/loaded-file.interface.ts";
 import { takeLinesWithinBudget } from "../text/take-lines-within-budget.service.ts";
 import { withLineNumbers } from "../text/with-line-numbers.service.ts";

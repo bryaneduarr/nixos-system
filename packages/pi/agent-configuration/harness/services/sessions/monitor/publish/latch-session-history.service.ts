@@ -1,5 +1,5 @@
+import { usedSessionIdentities } from "../../../../stores/sessions/used-session-identities.store.ts";
 import type { SessionMonitorState } from "../../../../types/sessions/monitor/session-monitor-state.interface.ts";
-import { usedSessionIdentities } from "./shared-used-session-identities.service.ts";
 
 export function latchSessionHistory(state: SessionMonitorState): void {
   state.historyEver = true;

@@ -1,7 +1,11 @@
 import { Type } from "typebox";
-import { EXPLICIT_EXIT_MODE } from "../../../constants/sessions/exit.constant.ts";
-import { PANE_ID_PATTERN, TAB_ID_PATTERN, WORKSPACE_ID_PATTERN } from "../../../constants/sessions/herdr.constant.ts";
-import { ABSOLUTE_PATH_PATTERN } from "../../../constants/sessions/registry.constant.ts";
+import { EXPLICIT_EXIT_MODE } from "../../../constants/sessions/exit/exit.constant.ts";
+import {
+  PANE_ID_PATTERN,
+  TAB_ID_PATTERN,
+  WORKSPACE_ID_PATTERN,
+} from "../../../constants/sessions/herdr/herdr.constant.ts";
+import { ABSOLUTE_PATH_PATTERN } from "../../../constants/sessions/registry/registry.constant.ts";
 
 export const ExitTargetSchema = Type.Object({
   /** Marks that the target was requested by an explicit exit. */

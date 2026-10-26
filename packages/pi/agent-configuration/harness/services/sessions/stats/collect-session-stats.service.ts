@@ -2,13 +2,15 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { Static } from "typebox";
 import { Value } from "typebox/value";
+import { RUN_TOOL_NAME } from "../../../constants/tools/active-tools/harness-tools.constant.ts";
 import {
   AssistantEntrySchema,
   CompactionEntrySchema,
   ToolCallBlockSchema,
   ToolResultEntrySchema,
 } from "../../../schemas/sessions/stats/session-entry.schema.ts";
-import type { ModelStats, SessionStats } from "../../../types/sessions/stats/session-stats.interface.ts";
+import type { ModelStats } from "../../../types/sessions/stats/model-stats.interface.ts";
+import type { SessionStats } from "../../../types/sessions/stats/session-stats.interface.ts";
 import { splitLeadingCd } from "../../tools/run/split-leading-cd.service.ts";
 
 const SESSION_FILE_EXTENSION = ".jsonl";
@@ -42,7 +44,7 @@ function parseLine(line: string): unknown {
 }
 
 function isCdPrefixedRun(block: unknown): boolean {
-  if (!Value.Check(ToolCallBlockSchema, block) || block.name !== "run") return false;
+  if (!Value.Check(ToolCallBlockSchema, block) || block.name !== RUN_TOOL_NAME) return false;
   const command = block.arguments.command;
   return typeof command === "string" && splitLeadingCd(command).kind === "split";
 }
@@ -62,7 +64,8 @@ function addAssistantTurn(entry: Static<typeof AssistantEntrySchema>, stats: Sta
     if (!Value.Check(ToolCallBlockSchema, block)) continue;
     currentModel.toolCalls += 1;
     if (isCdPrefixedRun(block)) currentModel.cdPrefixedRuns += 1;
-    stats.tools.set(block.name, (stats.tools.get(block.name) ?? 0) + 1);
+    const toolCount = stats.tools.get(block.name);
+    stats.tools.set(block.name, toolCount === undefined ? 1 : toolCount + 1);
   }
   return currentModel;
 }

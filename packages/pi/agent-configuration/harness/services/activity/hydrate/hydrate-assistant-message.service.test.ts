@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from "bun:test";
-import { activityStore } from "../store/shared-activity-store.service.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 import { hydrateAssistantMessage } from "./hydrate-assistant-message.service.ts";
 
 beforeEach(() => {

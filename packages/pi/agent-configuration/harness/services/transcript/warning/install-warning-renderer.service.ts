@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { TUI_MODE } from "../../../constants/tool-rendering/tui-mode.constant.ts";
 import { WARNING_RENDERER_KEY } from "../../../constants/transcript/warning-renderer.constant.ts";
+import { TUI_MODE } from "../../../constants/ui-mode/tui-mode.constant.ts";
 import { createWarningRendererFactory } from "./create-warning-renderer-factory.service.ts";
 
 export function installWarningRenderer(pi: ExtensionAPI): void {

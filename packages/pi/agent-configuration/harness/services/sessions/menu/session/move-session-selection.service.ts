@@ -1,4 +1,5 @@
 import { matchesKey } from "@earendil-works/pi-tui";
+import { KEY_DOWN, KEY_J, KEY_K, KEY_UP } from "../../../../constants/keys/key-name.constant.ts";
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";
 import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
 
@@ -13,7 +14,7 @@ export function moveSessionSelection(
 }
 
 function nextSelectionIndex(index: number, length: number, key: string): number {
-  if (matchesKey(key, "k") || matchesKey(key, "up")) return Math.max(0, index - 1);
-  if (matchesKey(key, "j") || matchesKey(key, "down")) return Math.min(length - 1, index + 1);
+  if (matchesKey(key, KEY_K) || matchesKey(key, KEY_UP)) return Math.max(0, index - 1);
+  if (matchesKey(key, KEY_J) || matchesKey(key, KEY_DOWN)) return Math.min(length - 1, index + 1);
   return index;
 }

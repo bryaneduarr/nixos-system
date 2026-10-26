@@ -1,18 +1,22 @@
-import { PI_AGENT_NAME, PI_HARNESS_SOURCE } from "../../../../constants/sessions/herdr.constant.ts";
-import type { HerdrCommand } from "../../../../types/sessions/herdr/command/herdr-command.interface.ts";
-import type { SessionReportSource } from "../../../../types/sessions/herdr/pane/session-report-source.interface.ts";
-import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
+import { PI_AGENT_NAME, PI_HARNESS_SOURCE } from "../../../../constants/sessions/herdr/herdr.constant.ts";
+import {
+  HERDR_AGENT_FLAG,
+  HERDR_PANE_REPORT_AGENT,
+  HERDR_PANE_REPORT_AGENT_SESSION,
+  HERDR_SEQUENCE_FLAG,
+  HERDR_SESSION_ID_FLAG,
+  HERDR_SESSION_PATH_FLAG,
+  HERDR_SOURCE_FLAG,
+  HERDR_STATE_FLAG,
+} from "../../../../constants/sessions/herdr/herdr-command.constant.ts";
+import type { SessionStateReport } from "../../../../types/sessions/herdr/pane/session-state-report.interface.ts";
 
-export async function reportSessionState(
-  command: HerdrCommand,
-  nextSequence: () => string,
-  row: LiveSession,
-  source: SessionReportSource,
-): Promise<void> {
+export async function reportSessionState(report: SessionStateReport): Promise<void> {
+  const { command, nextSequence, row, source } = report;
   const reference =
-    source.kind === "file" ? ["--agent-session-path", source.path] : ["--agent-session-id", row.sessionId];
-  const common = [row.pane, "--source", PI_HARNESS_SOURCE, "--agent", PI_AGENT_NAME, ...reference];
-  await command(["pane", "report-agent-session", ...common, "--seq", nextSequence()]);
+    source.kind === "file" ? [HERDR_SESSION_PATH_FLAG, source.path] : [HERDR_SESSION_ID_FLAG, row.sessionId];
+  const common = [row.pane, HERDR_SOURCE_FLAG, PI_HARNESS_SOURCE, HERDR_AGENT_FLAG, PI_AGENT_NAME, ...reference];
+  await command([...HERDR_PANE_REPORT_AGENT_SESSION, ...common, HERDR_SEQUENCE_FLAG, nextSequence()]);
   const state = row.status === "working" ? "working" : "idle";
-  await command(["pane", "report-agent", ...common, "--seq", nextSequence(), "--state", state]);
+  await command([...HERDR_PANE_REPORT_AGENT, ...common, HERDR_SEQUENCE_FLAG, nextSequence(), HERDR_STATE_FLAG, state]);
 }

@@ -1,22 +1,15 @@
 import { installExitEvents } from "../../services/sessions/events/install-exit-events.service.ts";
-import type {
-  ExitCommandApi,
-  ExitCommandSpec,
-  ExitShortcutSpec,
-} from "../../types/sessions/exit/exit-command-api.interface.ts";
+import { handlerNamed } from "../../services/sessions/install/handler-named.test-double.ts";
+import type { ExitCommandApi } from "../../types/sessions/exit/exit-command-api.interface.ts";
+import type { ExitCommandSpec } from "../../types/sessions/exit/exit-command-spec.interface.ts";
 import type { ExitContext } from "../../types/sessions/exit/exit-context.interface.ts";
 import type { ExitDependencies } from "../../types/sessions/exit/exit-dependencies.interface.ts";
 import type { ExitEventsApi } from "../../types/sessions/exit/exit-events-api.interface.ts";
+import type { ExitShortcutSpec } from "../../types/sessions/exit/exit-shortcut-spec.interface.ts";
 import type { ExitShutdownEvent } from "../../types/sessions/exit/exit-shutdown-event.interface.ts";
 import { installExitCommand } from "./exit.command.ts";
 
 type ShutdownHandler = (event: ExitShutdownEvent) => void;
-
-export function handlerNamed<T>(handlers: Map<string, T>, name: string): T {
-  const handler = handlers.get(name);
-  if (handler === undefined) throw new Error(`Missing handler ${name}`);
-  return handler;
-}
 
 export function installExit(api: ExitCommandApi & ExitEventsApi, dependencies: ExitDependencies): void {
   installExitEvents(api);

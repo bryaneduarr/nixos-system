@@ -1,10 +1,10 @@
 import { Value } from "typebox/value";
-import { EDIT_OPERATIONS } from "../../../../constants/tools/edit-operations.constant.ts";
+import { EDIT_OPERATIONS } from "../../../../constants/tools/edit/edit-operations.constant.ts";
 import { RawEditArgumentsSchema } from "../../../../schemas/tools/edit/raw-edit-arguments.schema.ts";
 import type { EditOperation } from "../../../../types/tools/edit/edit-operation.interface.ts";
 import type { EditParameters } from "../../../../types/tools/edit/edit-parameters.interface.ts";
 
-const OPERATION_WORD_PATTERN = /\b(replace|create|delete|move)\b/;
+const OPERATION_WORD_PATTERN = new RegExp(`\\b(${EDIT_OPERATIONS.join("|")})\\b`);
 
 function isEditOperation(text: string): text is EditOperation {
   return EDIT_OPERATIONS.some((operation) => operation === text);

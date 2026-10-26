@@ -1,5 +1,6 @@
 import type { ToolActivity } from "../../activity/store/tool-activity.interface.ts";
-import type { InspectorFocus, InspectorPage } from "../navigation/inspector-page.interface.ts";
+import type { SplitViewFocus } from "../../split-view/split-view-focus.interface.ts";
+import type { InspectorPage } from "../navigation/inspector-page.interface.ts";
 import type { InspectorLayoutState } from "../view/inspector-layout.interface.ts";
 
 /** State and actions the inspector exposes to keyboard and mouse handlers. */
@@ -7,7 +8,7 @@ export interface InspectorInput {
   /** Page currently shown. */
   readonly page: InspectorPage;
   /** Pane that has keyboard focus. */
-  readonly focus: InspectorFocus;
+  readonly focus: SplitViewFocus;
   /** Terminal row of the footer, used for mouse hit tests. */
   readonly footerY: number;
   /** Layout of the last rendered frame. */

@@ -1,4 +1,5 @@
 import { Type } from "typebox";
+import { DEFAULT_RUN_TIMEOUT_MS } from "../../../constants/tools/run/run-limits.constant.ts";
 
 export const RunParamsSchema = Type.Object({
   /** Shell command to execute. */
@@ -14,7 +15,7 @@ export const RunParamsSchema = Type.Object({
   timeoutMs: Type.Optional(
     Type.Integer({
       minimum: 1,
-      description: "Timeout in milliseconds. Defaults to 120000.",
+      description: `Timeout in milliseconds. Defaults to ${DEFAULT_RUN_TIMEOUT_MS}.`,
     }),
   ),
 });

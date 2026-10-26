@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { tmpdir } from "node:os";
-import { DEFAULT_RUN_TIMEOUT_MS } from "../../../constants/tools/run-limits.constant.ts";
+import { DEFAULT_RUN_TIMEOUT_MS } from "../../../constants/tools/run/run-limits.constant.ts";
 import { runShell } from "../../tools/run/run-shell.service.ts";
 import { resultFailed } from "./result-failed.service.ts";
 

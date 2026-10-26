@@ -1,4 +1,4 @@
-import { DONE_DETAIL_LABEL } from "../../../constants/tool-rendering/done-detail-label.constant.ts";
+import { DONE_DETAIL_LABEL } from "../../../constants/tool-rendering/details/done-detail-label.constant.ts";
 
 export function runDetail(text: string): string {
   const exit = /^exit:\s*(-?\d+)/.exec(text);

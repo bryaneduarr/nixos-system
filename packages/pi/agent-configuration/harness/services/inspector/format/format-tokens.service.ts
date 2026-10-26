@@ -2,7 +2,7 @@ import {
   DECIMAL_KILO_TOKENS_LIMIT,
   TOKENS_PER_MILLION,
   TOKENS_PER_THOUSAND,
-} from "../../../constants/inspector/format.constant.ts";
+} from "../../../constants/inspector/format/format.constant.ts";
 
 export function formatTokens(tokens: number): string {
   if (tokens < TOKENS_PER_THOUSAND) return `${tokens}`;

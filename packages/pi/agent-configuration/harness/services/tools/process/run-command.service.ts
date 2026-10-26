@@ -1,13 +1,13 @@
 import { spawn } from "node:child_process";
 import {
   CHILD_STDIO,
+  COMMAND_NOT_FOUND_EXIT_CODE,
   EXIT_CODE_KILLED,
-  EXIT_CODE_SPAWN_FAILED,
   EXIT_CODE_UNKNOWN,
   KILL_SIGNAL,
   MAX_CAPTURE_BYTES,
   NO_TIMEOUT_MS,
-} from "../../../constants/tools/process.constant.ts";
+} from "../../../constants/tools/process/process.constant.ts";
 import type { ExecRequest } from "../../../types/tools/process/exec-request.interface.ts";
 import type { ExecResult } from "../../../types/tools/process/exec-result.interface.ts";
 
@@ -81,7 +81,7 @@ export async function runCommand(request: ExecRequest): Promise<ExecResult> {
       finish({
         stdout,
         stderr: `${stderr}${stderr ? "\n" : ""}${error.message}`,
-        code: EXIT_CODE_SPAWN_FAILED,
+        code: COMMAND_NOT_FOUND_EXIT_CODE,
         killed,
         timedOut,
       });

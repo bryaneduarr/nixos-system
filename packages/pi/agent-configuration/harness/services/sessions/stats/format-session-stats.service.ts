@@ -1,4 +1,5 @@
-import type { ModelStats, SessionStats } from "../../../types/sessions/stats/session-stats.interface.ts";
+import type { ModelStats } from "../../../types/sessions/stats/model-stats.interface.ts";
+import type { SessionStats } from "../../../types/sessions/stats/session-stats.interface.ts";
 
 const TOKENS_PER_THOUSAND = 1000;
 const TOP_TOOL_COUNT = 10;

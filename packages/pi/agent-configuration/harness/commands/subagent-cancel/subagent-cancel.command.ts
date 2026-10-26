@@ -1,13 +1,16 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { subagentRegistry } from "../../services/subagents/registry/shared-subagent-registry.service.ts";
+import {
+  SUBAGENT_CANCEL_COMMAND_NAME,
+  SUBAGENT_CANCEL_DESCRIPTION,
+} from "../../constants/subagents/registry/subagent-command.constant.ts";
+import { cancelSubagent } from "../../services/subagents/registry/cancel-subagent.service.ts";
+import { subagentRegistry } from "../../stores/subagents/subagent-registry.store.ts";
 
 export function registerSubagentCancelCommand(pi: ExtensionAPI): void {
-  pi.registerCommand("subagent-cancel", {
-    description: "Cancel an active subagent by ID",
+  pi.registerCommand(SUBAGENT_CANCEL_COMMAND_NAME, {
+    description: SUBAGENT_CANCEL_DESCRIPTION,
     handler: async (args, ctx) => {
-      const cancelled = subagentRegistry.cancel(args.trim());
-      const status = cancelled ? "Subagent cancellation requested." : "No running subagent with that ID.";
-      ctx.ui.notify(status, "info");
+      ctx.ui.notify(cancelSubagent(subagentRegistry, args.trim()), "info");
     },
   });
 }

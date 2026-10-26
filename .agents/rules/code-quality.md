@@ -21,13 +21,19 @@ These rules are mandatory for every language in this repository: Nix, shell, Typ
 - Reuse code when it genuinely reduces duplication, not merely to add layers.
 - Do not sacrifice clarity to abstraction or correctness to file-size targets.
 
+## One owner for each definition
+
+- Every constant, type, function, and test setup has exactly one definition. Search for an existing one before writing it, and import it instead of copying it.
+- Two declarations with the same shape are one contract. Keep the better-owned one and delete the other.
+- An expression repeated in three places, such as a key format, a result shape, or a clamp, becomes one named function in the narrowest owner.
+
 ## Self-explanatory code
 
 Code is written for the next reader, not its author. These rules apply to every language.
 
 - Names state exactly what a function, variable, constant, or file does or holds, such as `isPaneInWorkspace` or `readSessionRegistry`. A reader must understand the code from names and flow without comments.
 - Do not write long conditions that combine several unrelated checks inline. Give each check a named boolean or a validation function that names the rule it enforces, then combine the names. Prefer schema validation for checking the shape of external data.
-- Store repeated literals (strings, numbers, patterns, paths) in named constants. Inline a literal only when it is used once and its meaning is obvious.
+- Store every literal used more than once (strings, numbers, patterns, paths, glyphs, separators, key names, shortcuts) in one named constant. Inline a literal only when it is used once and its meaning is obvious. Text that mentions a constant's value, such as a description, interpolates the constant instead of repeating the value.
 - Declare values once and keep them immutable: `const`, `readonly`, Nix `let`, `local` (and `readonly` in shell when the value never changes). Reassign or mutate only when the algorithm requires it. Leave no unused variables, parameters, or imports.
 
 ## Examples and placeholders

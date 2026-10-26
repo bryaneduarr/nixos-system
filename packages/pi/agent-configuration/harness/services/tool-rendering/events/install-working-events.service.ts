@@ -1,5 +1,5 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { TUI_MODE } from "../../../constants/tool-rendering/tui-mode.constant.ts";
+import { TUI_MODE } from "../../../constants/ui-mode/tui-mode.constant.ts";
 
 export function installWorkingEvents(pi: ExtensionAPI): void {
   pi.on("session_start", (_event, ctx) => {

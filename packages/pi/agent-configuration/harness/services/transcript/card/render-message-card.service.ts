@@ -1,10 +1,7 @@
 import { stripTerminalSequences } from "@earendil-works/pi-tui";
-import {
-  CARD_SIDE_CHROME_WIDTH,
-  CARD_STYLES,
-  MIN_CARD_WIDTH,
-} from "../../../constants/transcript/message-card.constant.ts";
-import type { MessageCardKind } from "../../../types/transcript/card/card-style.interface.ts";
+import { CARD_SIDE_CHROME_WIDTH, MIN_CARD_WIDTH } from "../../../constants/transcript/card/card-layout.constant.ts";
+import { CARD_STYLES } from "../../../constants/transcript/card/card-style.constant.ts";
+import type { MessageCardKind } from "../../../types/transcript/card/card-kind.interface.ts";
 import { cardFrameLines } from "./card-frame-lines.service.ts";
 
 export function renderMessageCard(

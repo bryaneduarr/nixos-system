@@ -1,8 +1,8 @@
 import type { Theme, ToolRenderers } from "@earendil-works/pi-coding-agent";
 import type { Component } from "@earendil-works/pi-tui";
 import { EMPTY } from "../../../../components/tool-rendering/empty.component.ts";
-import { CODEMODE_BOX_COLOR } from "../../../../constants/tool-rendering/codemode-display.constant.ts";
-import { CODEMODE_BOX_TITLE } from "../../../../constants/tools/codemode.constant.ts";
+import { THEME_ACCENT } from "../../../../constants/split-view/theme-color.constant.ts";
+import { CODEMODE_BOX_TITLE } from "../../../../constants/tools/active-tools/codemode.constant.ts";
 import { readToolActivity } from "../../../activity/store/read-tool-activity.service.ts";
 import { toValueState } from "../../../activity/value/to-value-state.service.ts";
 import { extractText } from "../../../tools/result/extract-text.service.ts";
@@ -16,7 +16,7 @@ import { readScriptCode } from "../script/read-script-code.service.ts";
 
 function titleFor(theme: Theme, isRunning: boolean): string {
   const title = theme.fg("toolTitle", theme.bold(CODEMODE_BOX_TITLE));
-  return isRunning ? `${theme.fg("accent", "/")} ${title}` : title;
+  return isRunning ? `${theme.fg(THEME_ACCENT, "/")} ${title}` : title;
 }
 
 export function createCodemodeRenderers(): ToolRenderers {
@@ -25,12 +25,12 @@ export function createCodemodeRenderers(): ToolRenderers {
     renderCall(args, theme, context): Component {
       if (context.isPartial === false) return EMPTY;
       const presentation = codemodePresentation({ code: readScriptCode(args), calls: [], text: "", state: "running" });
-      const box = reuseOrCreateToolBox(toValueState(context.lastComponent), theme, CODEMODE_BOX_COLOR);
+      const box = reuseOrCreateToolBox(toValueState(context.lastComponent), theme, THEME_ACCENT);
       box.setContent({
         title: titleFor(theme, true),
         lines: presentationLines(presentation, theme),
         toolCall: { state: "present", value: context.toolCallId },
-        color: CODEMODE_BOX_COLOR,
+        color: THEME_ACCENT,
         elapsedStartedAt: { state: "absent" },
       });
       return box;
@@ -46,12 +46,12 @@ export function createCodemodeRenderers(): ToolRenderers {
       const lookup = readToolActivity({ state: "present", value: context.toolCallId });
       if (lookup.found) lines.push(elapsedLine(lookup.entry, theme));
 
-      const box = reuseOrCreateToolBox(toValueState(context.lastComponent), theme, CODEMODE_BOX_COLOR);
+      const box = reuseOrCreateToolBox(toValueState(context.lastComponent), theme, THEME_ACCENT);
       box.setContent({
         title: titleFor(theme, state === "running"),
         lines,
         toolCall: { state: "present", value: context.toolCallId },
-        color: CODEMODE_BOX_COLOR,
+        color: THEME_ACCENT,
         elapsedStartedAt: { state: "absent" },
       });
       return box;

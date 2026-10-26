@@ -8,9 +8,10 @@ import {
   HERDR_ENVIRONMENT_VARIABLE,
   HERDR_SOCKET_PATH_VARIABLE,
   PI_MANAGED_SESSION_VARIABLE,
-} from "../../../../constants/sessions/environment.constant.ts";
-import { SESSION_REFRESH_INTERVAL_MS } from "../../../../constants/sessions/monitor.constant.ts";
-import { PASTE_IMAGE_KEYBINDING } from "../../../../constants/sessions/monitor-events.constant.ts";
+} from "../../../../constants/sessions/install/environment.constant.ts";
+import { SESSION_REFRESH_INTERVAL_MS } from "../../../../constants/sessions/monitor/monitor.constant.ts";
+import { PASTE_IMAGE_KEYBINDING } from "../../../../constants/sessions/monitor/monitor-events.constant.ts";
+import { usedSessionIdentities } from "../../../../stores/sessions/used-session-identities.store.ts";
 import type { SessionDependencies } from "../../../../types/sessions/install/session-dependencies.interface.ts";
 import type { MonitoredSession } from "../../../../types/sessions/monitor/monitored-session.interface.ts";
 import type { SessionMonitorState } from "../../../../types/sessions/monitor/session-monitor-state.interface.ts";
@@ -21,7 +22,6 @@ import { processSessionIdentity } from "../../registry/identity/process-session-
 import { createSessionRegistry } from "../../registry/row/create-session-registry.service.ts";
 import { latchSessionHistory } from "../publish/latch-session-history.service.ts";
 import { publishSessionMonitor } from "../publish/publish-session-monitor.service.ts";
-import { usedSessionIdentities } from "../publish/shared-used-session-identities.service.ts";
 import { canReportSession } from "./can-report-session.service.ts";
 import { stopSessionMonitor } from "./stop-session-monitor.service.ts";
 
@@ -31,7 +31,8 @@ export async function startSessionMonitor(
   dependencies: SessionDependencies,
 ): Promise<void> {
   await stopSessionMonitor(state, true);
-  if (!canReportSession(ctx.mode, process.env[HERDR_ENVIRONMENT_VARIABLE] === HERDR_ENVIRONMENT_ENABLED)) return;
+  const isHerdrEnvironment = process.env[HERDR_ENVIRONMENT_VARIABLE] === HERDR_ENVIRONMENT_ENABLED;
+  if (!canReportSession(ctx.mode, isHerdrEnvironment)) return;
   try {
     const socket = await readSessionSocket();
     const registry = createSessionRegistry(resolveSessionRegistryDirectory(socket));
@@ -80,7 +81,7 @@ export async function startSessionMonitor(
 }
 
 async function readSessionSocket(): Promise<string> {
-  const configured = process.env[HERDR_SOCKET_PATH_VARIABLE] || process.env[HERDR_API_SOCKET_VARIABLE] || "";
+  const configured = process.env[HERDR_SOCKET_PATH_VARIABLE] || process.env[HERDR_API_SOCKET_VARIABLE];
   if (!configured) throw new Error("Herdr did not provide a session socket");
   return realpath(resolve(configured)).catch(() => resolve(configured));
 }

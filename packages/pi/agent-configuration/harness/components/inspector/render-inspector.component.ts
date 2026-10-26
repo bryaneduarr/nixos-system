@@ -1,8 +1,10 @@
-import { activityStore } from "../../services/activity/store/shared-activity-store.service.ts";
-import { isToolCallEntry } from "../../services/inspector/entries/is-tool-call-entry.service.ts";
+import { countToolCalls } from "../../services/inspector/entries/count-tool-calls.service.ts";
+import { isAgentWorking } from "../../services/inspector/entries/is-agent-working.service.ts";
 import { readSplitViewGeometry } from "../../services/split-view/layout/read-split-view-geometry.service.ts";
+import { activityStore } from "../../stores/activity/activity.store.ts";
 import type { InspectorLayoutState } from "../../types/inspector/view/inspector-layout.interface.ts";
-import type { InspectorViewResult, InspectorViewState } from "../../types/inspector/view/inspector-view.interface.ts";
+import type { InspectorViewResult } from "../../types/inspector/view/inspector-view-result.interface.ts";
+import type { InspectorViewState } from "../../types/inspector/view/inspector-view-state.interface.ts";
 import { frameModal } from "../split-view/frame-modal.component.ts";
 import { activityHeader } from "./activity-header.component.ts";
 import { idlePrompt } from "./idle-prompt.component.ts";
@@ -14,10 +16,13 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
   const { width, theme, page, focus, rows } = state;
   const geometry = readSplitViewGeometry(width, state.terminalRows);
   const activityEntries = activityStore.all();
-  const totalCalls = activityEntries.filter((entry) => isToolCallEntry(entry.toolName)).length;
   const phase = activityStore.currentAgent().phase;
-  const isAgentWorking = phase === "thinking" || phase === "working" || phase === "responding";
-  const lines = activityHeader(theme, geometry.contentWidth, totalCalls, isAgentWorking);
+  const lines = activityHeader({
+    theme,
+    width: geometry.contentWidth,
+    totalCalls: countToolCalls(activityEntries),
+    active: isAgentWorking(phase),
+  });
 
   let layout: InspectorLayoutState = { kind: "none" };
   let { detailScroll, subagentScroll, subagentSelection, listScroll } = state;
@@ -57,7 +62,7 @@ export function renderInspector(state: InspectorViewState): InspectorViewResult 
   }
 
   const footerY = lines.length + 1;
-  lines.push(inspectorFooter(page, state.status, geometry.contentWidth, theme));
+  lines.push(inspectorFooter({ page, status: state.status, width: geometry.contentWidth, theme }));
 
   return {
     lines: frameModal(lines, width, theme),

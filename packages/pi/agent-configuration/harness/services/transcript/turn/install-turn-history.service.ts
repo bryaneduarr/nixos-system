@@ -1,14 +1,14 @@
-import { TUI_MODE } from "../../../constants/tool-rendering/tui-mode.constant.ts";
 import {
   TURN_DIVIDER_RENDERER_KEY,
   TURN_HISTORY_TOGGLE_DESCRIPTION,
   TURN_HISTORY_TOGGLE_SHORTCUT,
-} from "../../../constants/transcript/turn-view.constant.ts";
+} from "../../../constants/transcript/turn/turn-view.constant.ts";
+import { TUI_MODE } from "../../../constants/ui-mode/tui-mode.constant.ts";
+import { turnView } from "../../../stores/transcript/turn-view.store.ts";
 import type { TurnDividerRequest } from "../../../types/transcript/turn/turn-divider.interface.ts";
 import type { TurnHistoryApi } from "../../../types/transcript/turn/turn-history-api.interface.ts";
 import { refreshTranscript } from "./refresh-transcript.service.ts";
 import { renderTurnDivider } from "./render-turn-divider.service.ts";
-import { turnView } from "./shared-turn-view.service.ts";
 
 export function installTurnHistory(pi: TurnHistoryApi): void {
   pi.on("session_start", (_event, ctx) => {

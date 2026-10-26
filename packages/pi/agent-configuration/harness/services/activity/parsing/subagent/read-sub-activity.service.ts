@@ -2,7 +2,7 @@ import { Value } from "typebox/value";
 import { SubToolActivityRecordSchema } from "../../../../schemas/activity/parsing/subagent/sub-tool-activity.schema.ts";
 import type { SubToolActivity } from "../../../../types/activity/parsing/subagent/sub-tool-activity.interface.ts";
 import type { SubToolActivityRecord } from "../../../../types/activity/parsing/subagent/sub-tool-activity-record.interface.ts";
-import { isRecord } from "../../value/is-record.service.ts";
+import { isRecord } from "../../../values/is-record.service.ts";
 
 export function readSubActivity(details: unknown): SubToolActivity[] {
   if (!isRecord(details) || !Array.isArray(details.activity)) return [];

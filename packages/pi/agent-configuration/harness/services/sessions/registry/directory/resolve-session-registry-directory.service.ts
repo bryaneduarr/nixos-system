@@ -1,5 +1,5 @@
 import { basename, join } from "node:path";
-import { PI_SESSION_REGISTRY_VARIABLE } from "../../../../constants/sessions/environment.constant.ts";
+import { PI_SESSION_REGISTRY_VARIABLE } from "../../../../constants/sessions/install/environment.constant.ts";
 import { registryDirectory } from "./registry-directory.service.ts";
 
 export function resolveSessionRegistryDirectory(socket: string): string {

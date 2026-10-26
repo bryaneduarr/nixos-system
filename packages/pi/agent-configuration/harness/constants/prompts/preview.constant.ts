@@ -4,8 +4,6 @@ export const PREVIEW_LINES = 3;
 export const PREVIEW_SOURCE_LIMIT = 2000;
 /** Columns the transcript keeps free beside a prompt preview. */
 export const PREVIEW_RESERVED_COLUMNS = 4;
-/** Marker that ends the last preview line when the prompt has more text. */
-export const PREVIEW_TRUNCATION_MARKER = "...";
 /** Fewest backticks in the fence that keeps a preview containing Markdown syntax from being formatted. */
 export const MIN_FENCE_LENGTH = 3;
 /** Preview line content that Markdown would format instead of showing as typed. */

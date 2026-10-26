@@ -1,5 +1,5 @@
-import { API_ERROR_ACTIVITY_NAME } from "../../../constants/activity/activity-entry.constant.ts";
-import { activityStore } from "../store/shared-activity-store.service.ts";
+import { API_ERROR_ACTIVITY_NAME } from "../../../constants/activity/record/activity-entry.constant.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
 
 export function isRecordedApiErrorText(markdown: string): boolean {
   const text = markdown.trim();

@@ -1,4 +1,5 @@
 import type { BackendToolExecutor } from "../../../types/tools/backends/backend-tool-executor.interface.ts";
+import { toTextToolResult } from "../result/to-text-tool-result.service.ts";
 
 /** A backend tool call the fake executor received. */
 export interface RecordedBackendCall {
@@ -18,7 +19,7 @@ export function createBackendExecutor(
       const answer = answers[toolName];
       return {
         toolCall: { type: "toolCall", id: "nested", name: toolName, arguments: {} },
-        result: { content: [{ type: "text", text: answer ?? `Tool ${toolName} not found` }], details: {} },
+        result: toTextToolResult(answer ?? `Tool ${toolName} not found`),
         isError: answer === undefined,
       };
     },

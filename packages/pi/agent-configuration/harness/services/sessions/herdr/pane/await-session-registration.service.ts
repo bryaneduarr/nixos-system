@@ -1,16 +1,12 @@
 import {
   SESSION_REGISTRATION_POLL_MS,
   SESSION_REGISTRATION_TIMEOUT_MS,
-} from "../../../../constants/sessions/herdr-timing.constant.ts";
+} from "../../../../constants/sessions/herdr/herdr-timing.constant.ts";
+import type { SessionRegistrationWait } from "../../../../types/sessions/herdr/pane/session-registration-wait.interface.ts";
 import type { LiveSession } from "../../../../types/sessions/registry/row/live-session.interface.ts";
-import type { SessionRegistry } from "../../../../types/sessions/registry/row/session-registry.interface.ts";
 
-export async function awaitSessionRegistration(
-  registry: SessionRegistry,
-  token: string,
-  pane: string,
-  cwd: string,
-): Promise<LiveSession> {
+export async function awaitSessionRegistration(wait: SessionRegistrationWait): Promise<LiveSession> {
+  const { registry, token, pane, cwd } = wait;
   const deadline = Date.now() + SESSION_REGISTRATION_TIMEOUT_MS;
   while (Date.now() < deadline) {
     const ready = (await registry.list()).find((row) => row.identity === token && row.pane === pane && row.cwd === cwd);

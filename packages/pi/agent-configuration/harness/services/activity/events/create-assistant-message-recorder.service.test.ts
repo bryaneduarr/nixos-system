@@ -1,6 +1,7 @@
 import { beforeEach, expect, test } from "bun:test";
 import type { AssistantMessage } from "@earendil-works/pi-ai";
-import { activityStore } from "../store/shared-activity-store.service.ts";
+import { activityStore } from "../../../stores/activity/activity.store.ts";
+import { recordedNames } from "../store/read-recorded-names.test-double.ts";
 import { createAssistantMessageRecorder } from "./create-assistant-message-recorder.service.ts";
 
 const assistantMessage: AssistantMessage = {
@@ -23,10 +24,6 @@ const assistantMessage: AssistantMessage = {
   stopReason: "stop",
   timestamp: 0,
 };
-
-function recordedNames(): string[] {
-  return activityStore.all().map((entry) => entry.toolName);
-}
 
 beforeEach(() => {
   activityStore.clear();

@@ -1,6 +1,6 @@
 import type { SubagentModel } from "../../../../types/activity/parsing/subagent/subagent-model.interface.ts";
 import type { ValueState } from "../../../../types/activity/value/value-state.interface.ts";
-import { isRecord } from "../../value/is-record.service.ts";
+import { isRecord } from "../../../values/is-record.service.ts";
 import { readBooleanState } from "../../value/read-boolean-state.service.ts";
 import { readNonNegativeNumberState } from "../../value/read-non-negative-number-state.service.ts";
 import { readStringState } from "../../value/read-string-state.service.ts";

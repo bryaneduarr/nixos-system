@@ -1,10 +1,11 @@
 import type { Theme, ThemeColor } from "@earendil-works/pi-coding-agent";
 import type { Component, TuiMouseEvent, TuiMouseEventResult } from "@earendil-works/pi-tui";
-import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/elapsed-label.constant.ts";
+import { THEME_MUTED } from "../../constants/split-view/theme-color.constant.ts";
+import { ELAPSED_TIME_LABEL } from "../../constants/tool-rendering/details/elapsed-label.constant.ts";
 import { readToolActivity } from "../../services/activity/store/read-tool-activity.service.ts";
-import { activityVisibility } from "../../services/activity/visibility/shared-activity-visibility.service.ts";
-import { inspectRequestStore } from "../../services/inspector/request/shared-inspect-request-store.service.ts";
 import { boxLines } from "../../services/tool-rendering/box/box-lines.service.ts";
+import { activityVisibility } from "../../stores/activity/activity-visibility.store.ts";
+import { inspectRequestStore } from "../../stores/inspector/inspect-request.store.ts";
 import type { ToolActivityLookup } from "../../types/activity/store/tool-activity-lookup.interface.ts";
 import type { ValueState } from "../../types/activity/value/value-state.interface.ts";
 import type { ToolBoxCache } from "../../types/tool-rendering/box/tool-box-cache.interface.ts";
@@ -52,7 +53,7 @@ export class ToolBox implements Component {
 
     const lookup = readToolActivity(this.content.toolCall);
     const isRunning = lookup.found && lookup.entry.status === "running";
-    if (this.cache.state === "rendered" && this.cache.width === width && !isRunning) return this.cache.lines;
+    if (this.cache.state === "rendered" && this.cache.width === width && !isRunning) return [...this.cache.lines];
 
     const rendered = boxLines(width, this.content.title, this.linesWithElapsed(lookup, isRunning)).map((line) =>
       this.theme.fg(this.content.color, line),
@@ -67,7 +68,7 @@ export class ToolBox implements Component {
 
     const displayLines = this.content.lines.filter((line) => !line.includes(ELAPSED_TIME_LABEL));
     const elapsedSeconds = ((Date.now() - timerStart.value) / 1000).toFixed(1);
-    const timeLine = this.theme.fg("muted", `${ELAPSED_TIME_LABEL}${elapsedSeconds} s`);
+    const timeLine = this.theme.fg(THEME_MUTED, `${ELAPSED_TIME_LABEL}${elapsedSeconds} s`);
     return [...displayLines, timeLine];
   }
 

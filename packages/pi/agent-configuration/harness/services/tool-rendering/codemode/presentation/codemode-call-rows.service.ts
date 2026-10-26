@@ -1,7 +1,7 @@
 import {
   CODEMODE_CALL_ICONS,
   MAX_CODEMODE_CALL_ROWS,
-} from "../../../../constants/tool-rendering/codemode-display.constant.ts";
+} from "../../../../constants/tool-rendering/codemode/codemode-display.constant.ts";
 import type { CodemodeCall } from "../../../../types/tool-rendering/codemode/codemode-call.interface.ts";
 import { displayToolName } from "./display-tool-name.service.ts";
 

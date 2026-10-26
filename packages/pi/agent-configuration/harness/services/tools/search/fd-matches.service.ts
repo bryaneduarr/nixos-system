@@ -1,13 +1,8 @@
-import type { ToolCancellation } from "../../../types/tools/process/tool-cancellation.interface.ts";
-import type { SearchScope } from "../../../types/tools/search/search-request.interface.ts";
+import type { SearchCommandRequest } from "../../../types/tools/search/search-command-request.interface.ts";
 import { runArgv } from "../process/run-argv.service.ts";
 
-export async function fdMatches(
-  cwd: string,
-  query: string,
-  scope: SearchScope,
-  cancellation: ToolCancellation,
-): Promise<string[]> {
+export async function fdMatches(request: SearchCommandRequest): Promise<string[]> {
+  const { cwd, query, scope, cancellation } = request;
   const isPathQuery = query.includes("/");
   const argv: readonly [string, ...string[]] = [
     "fd",

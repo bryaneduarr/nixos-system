@@ -1,6 +1,6 @@
 import { StringEnum } from "@earendil-works/pi-ai";
 import { Type } from "typebox";
-import { TASK_ROLES } from "../../../../constants/subagents/roles.constant.ts";
+import { TASK_ROLES } from "../../../../constants/subagents/roles/roles.constant.ts";
 
 export const LegacyTaskProgressSchema = Type.Object({
   /** Identifier of the subagent run. */

@@ -1,56 +1,31 @@
 import { expect } from "bun:test";
-import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import type { HerdrCommand } from "../../../types/sessions/herdr/command/herdr-command.interface.ts";
 import type { SessionDependencies } from "../../../types/sessions/install/session-dependencies.interface.ts";
-import type { LiveSession } from "../../../types/sessions/registry/row/live-session.interface.ts";
-import type { SessionRegistry } from "../../../types/sessions/registry/row/session-registry.interface.ts";
 import { createHerdrSessions } from "../herdr/create-herdr-sessions.service.ts";
-import { processStartIdentity } from "../registry/identity/process-start-identity.service.ts";
 import { createDefaultSessionDependencies } from "./create-default-session-dependencies.service.ts";
 import type { InstallFlags, InstallState } from "./install-sessions.test-double.ts";
 
-const SAMPLE_ACTIVE_SESSIONS = 3;
+const RENAME_NAME_POSITION = 3;
 
-export function createRenumberCommand(registry: SessionRegistry, root: string, sessions: LiveSession[]): HerdrCommand {
-  return async (args) => {
-    if (args[1] !== "current") return {};
-    if (sessions.length === 0) {
-      for (let index = 0; index < SAMPLE_ACTIVE_SESSIONS; index++) {
-        const row = await createOtherSession(registry, root, index);
-        sessions.push(row);
-        await registry.publish(row);
-      }
-    }
-    return { pane: { pane_id: "w1:p1", tab_id: "w1:t1", workspace_id: "w1" } };
-  };
+interface CommandArgumentQuery {
+  readonly command: string;
+  readonly subcommand: string;
+  readonly position: number;
 }
 
-async function createOtherSession(registry: SessionRegistry, root: string, index: number): Promise<LiveSession> {
-  const identity = randomUUID();
-  return {
-    identity,
-    name: await registry.instanceName(root, identity),
-    cwd: root,
-    pid: process.pid,
-    updatedAt: Date.now(),
-    pane: `w1:p${index + 2}`,
-    tab: "w1:t1",
-    workspace: "w1",
-    sessionId: `other-${index}`,
-    branch: "no git",
-    processStart: await processStartIdentity(process.pid),
-    context: { usageState: "unavailable" },
-    status: "idle",
-    owned: true,
-    historyEver: false,
-    cleanupSafe: false,
-  };
+export interface InstallDependenciesSetup {
+  readonly root: string;
+  readonly token: string;
+  readonly sentCommands: string[][];
+  readonly flags: InstallFlags;
+  readonly state: InstallState;
+  readonly created: { cwd: string; pane: string }[];
 }
 
 function createInstallCommand(token: string, sentCommands: string[][], flags: InstallFlags): HerdrCommand {
   return async (args) => {
-    sentCommands.push(args);
+    sentCommands.push([...args]);
     if (args[0] === "notification" && flags.notificationFails) throw new Error("Herdr notification unavailable");
     if (args[0] === "agent" && args[1] === "rename" && flags.pendingRenames > 0) {
       flags.pendingRenames--;
@@ -70,17 +45,21 @@ export function commandNamed(sentCommands: string[][], command: string, subcomma
   return sentCommands.filter((args) => args[0] === command && args[1] === subcommand);
 }
 
-export function lastCommandArgument(
-  sentCommands: string[][],
-  command: string,
-  subcommand: string,
-  position: number,
-): string {
+function argumentAt(args: readonly string[], position: number): string {
+  const argument = args[position];
+  if (argument === undefined) throw new Error(`Missing argument ${position}`);
+  return argument;
+}
+
+export function lastCommandArgument(sentCommands: string[][], query: CommandArgumentQuery): string {
+  const { command, subcommand, position } = query;
   const args = sentCommands.findLast((entry) => entry[0] === command && entry[1] === subcommand);
   if (args === undefined) throw new Error(`Missing command ${command} ${subcommand}`);
-  const argument = args[position];
-  if (argument === undefined) throw new Error(`Missing argument ${position} of ${command} ${subcommand}`);
-  return argument;
+  return argumentAt(args, position);
+}
+
+export function renameTargets(sentCommands: string[][], command: string): string[] {
+  return commandNamed(sentCommands, command, "rename").map((args) => argumentAt(args, RENAME_NAME_POSITION));
 }
 
 export function stateFlagOf(args: string[], flag: string): string {
@@ -98,14 +77,8 @@ export function lastReportState(sentCommands: string[][]): string {
   return stateFlagOf(lastReport(sentCommands), "--state");
 }
 
-export function createInstallDependencies(
-  root: string,
-  token: string,
-  sentCommands: string[][],
-  flags: InstallFlags,
-  state: InstallState,
-  created: { cwd: string; pane: string }[] = [],
-): SessionDependencies {
+export function createInstallDependencies(setup: InstallDependenciesSetup): SessionDependencies {
+  const { root, token, sentCommands, flags, state, created } = setup;
   return {
     ...createDefaultSessionDependencies(),
     herdr: (registry) => ({

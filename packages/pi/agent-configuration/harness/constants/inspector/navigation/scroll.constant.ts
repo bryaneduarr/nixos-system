@@ -1,0 +1,4 @@
+export const DETAIL_SCROLL_TO_END = Number.MAX_SAFE_INTEGER;
+export const PAGE_STEP_CHROME_ROWS = 2;
+export const SUBAGENT_STEP_CHROME_ROWS = 3;
+export const SUBAGENT_JUMP_CHROME_ROWS = 2;

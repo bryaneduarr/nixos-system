@@ -1,4 +1,4 @@
-import { RESULT_SECTION_NAMES } from "../../../constants/subagents/result-section.constant.ts";
+import { RESULT_SECTION_NAMES } from "../../../constants/subagents/result/result-section.constant.ts";
 import type { ParsedTaskOutput } from "../../../types/subagents/result/parsed-task-output.interface.ts";
 
 const SECTION_NAME_ALTERNATION = RESULT_SECTION_NAMES.join("|");

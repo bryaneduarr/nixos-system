@@ -1,16 +1,4 @@
-import type { TranscriptRefreshUi } from "./transcript-refresh-ui.interface.ts";
-import type { TurnDividerTheme } from "./turn-divider.interface.ts";
-
-/** Session state the turn history reads from an event or shortcut. */
-export interface TurnHistoryContext {
-  /** Current run mode such as tui or rpc. */
-  readonly mode: string;
-  /** Interface operations and colors. */
-  readonly ui: TranscriptRefreshUi & {
-    /** Colors of the current theme. */
-    readonly theme: TurnDividerTheme;
-  };
-}
+import type { TurnHistoryContext } from "./turn-history-context.interface.ts";
 
 /** Extension registration operations the turn history installs. */
 export interface TurnHistoryApi {

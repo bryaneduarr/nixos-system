@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { TURN_VIEW_KEY } from "../../../constants/transcript/turn-view.constant.ts";
+import { TURN_VIEW_KEY } from "../../../constants/transcript/turn/turn-view.constant.ts";
 import { createTurnView } from "./create-turn-view.service.ts";
 
 test("a new view shows only the latest turn", () => {

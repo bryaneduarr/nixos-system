@@ -1,0 +1,14 @@
+export const KEY_ESCAPE = "escape";
+export const KEY_CTRL_C = "ctrl+c";
+export const KEY_TAB = "tab";
+export const KEY_J = "j";
+export const KEY_K = "k";
+export const KEY_UP = "up";
+export const KEY_DOWN = "down";
+export const KEY_G = "g";
+export const KEY_Y = "y";
+export const KEY_SHIFT_G = "shift+g";
+export const KEY_ENTER = "enter";
+export const KEY_LEFT = "left";
+export const KEY_RIGHT = "right";
+export const KEY_H = "h";

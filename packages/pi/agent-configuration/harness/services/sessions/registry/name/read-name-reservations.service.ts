@@ -1,8 +1,11 @@
 import { readdir, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { Value } from "typebox/value";
-import { RESERVATION_STALE_MS } from "../../../../constants/sessions/registry.constant.ts";
-import { RESERVATION_FILE_PATTERN } from "../../../../constants/sessions/registry-files.constant.ts";
+import { RESERVATION_STALE_MS } from "../../../../constants/sessions/registry/registry.constant.ts";
+import {
+  RESERVATION_FILE_PATTERN,
+  RESERVATION_SUFFIX,
+} from "../../../../constants/sessions/registry/registry-files.constant.ts";
 import { NameReservationSchema } from "../../../../schemas/sessions/registry/name/name-reservation.schema.ts";
 import type { NameReservation } from "../../../../types/sessions/registry/name/name-reservation.interface.ts";
 import { processStartIdentity } from "../identity/process-start-identity.service.ts";
@@ -18,7 +21,7 @@ export async function readNameReservations(
     const path = join(directory, file);
     try {
       const parsed: unknown = JSON.parse(await readFile(path, "utf8"));
-      if (!Value.Check(NameReservationSchema, parsed) || `${parsed.identity}.reservation` !== file) {
+      if (!Value.Check(NameReservationSchema, parsed) || `${parsed.identity}${RESERVATION_SUFFIX}` !== file) {
         await rm(path, { force: true });
         continue;
       }
