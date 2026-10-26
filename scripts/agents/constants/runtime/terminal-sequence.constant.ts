@@ -1,0 +1,15 @@
+import { ANSI_ESCAPE } from "../render/card-color.constant.ts";
+
+export const CONTROL_SEQUENCE_INTRODUCER = `${ANSI_ESCAPE}[`;
+
+export const CURSOR_UP_FINAL_BYTE = "A";
+
+export const HIDE_CURSOR_SEQUENCE = `${CONTROL_SEQUENCE_INTRODUCER}?25l`;
+
+export const SHOW_CURSOR_SEQUENCE = `${CONTROL_SEQUENCE_INTRODUCER}?25h`;
+
+export const ERASE_BELOW_SEQUENCE = `${CONTROL_SEQUENCE_INTRODUCER}0J`;
+
+export const ERASE_LINE_SEQUENCE = `${CONTROL_SEQUENCE_INTRODUCER}2K`;
+
+export const CARRIAGE_RETURN = "\r";

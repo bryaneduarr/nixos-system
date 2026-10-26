@@ -1,0 +1,9 @@
+export const LONG_OPTION_PREFIX = "--";
+export const HELP_FLAG = "--help";
+export const SHORT_HELP_FLAG = "-h";
+export const USAGE_FLAG = "--usage";
+export const JSON_FLAG = "--json";
+export const WATCH_FLAG = "--watch";
+export const PROVIDER_FLAG = "--provider";
+export const PROVIDER_FLAG_PREFIX = `${PROVIDER_FLAG}=`;
+export const PROVIDER_LIST_SEPARATOR = ",";

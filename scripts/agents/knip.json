@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["agents.ts", "**/*.test.ts"],
+  "project": ["**/*.ts"],
+  "ignoreBinaries": ["tsc", "biome"]
+}

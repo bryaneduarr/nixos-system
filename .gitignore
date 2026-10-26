@@ -45,5 +45,6 @@ packages/pi/node_modules/
 # Worktrees that coding agents create for parallel work.
 .claude/worktrees/
 
-# Local rule-audit dependencies for editor types and checks; Nix installs its own copy.
+# Local TypeScript tool dependencies for editor types and checks; Nix installs its own copy.
 scripts/rule-audit/node_modules/
+scripts/agents/node_modules/
