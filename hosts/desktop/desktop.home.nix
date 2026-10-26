@@ -3,6 +3,7 @@ _: {
 
   custom = {
     agent-chrome.enable = true;
+    agents.enable = true;
     antigravity-cli.enable = true;
     btop.enable = true;
 

@@ -2,6 +2,7 @@ _: {
   home.stateVersion = "25.05";
 
   custom = {
+    agents.enable = true;
     antigravity-cli.enable = true;
     btop.enable = true;
 
